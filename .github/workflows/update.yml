@@ -26,6 +26,8 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global pull.rebase false
+          git config --global merge.ff only
           git add port-washington/data/
           git add port-washington/*.html
           git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
