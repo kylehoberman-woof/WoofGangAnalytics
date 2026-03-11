@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price Increase Impact Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #FDF0F5;
+    color: #333;
+    line-height: 1.6;
+}
+.header {
+    background: linear-gradient(135deg, #1B6B6B 0%, #6B3520 100%);
+    color: white;
+    padding: 40px 0 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(196,39,110,0.15) 0%, transparent 50%);
+}
+.header h1 {
+    font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;
+    position: relative; margin-bottom: 4px;
+}
+.header .subtitle { font-size: 1rem; font-weight: 400; opacity: 0.9; position: relative; }
+.header .brand-tag {
+    display: inline-block; background: #C4276E; color: white;
+    padding: 4px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase; margin-top: 12px; position: relative;
+}
+.container { max-width: 1440px; margin: 0 auto; padding: 30px 24px; }
+.kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px; margin-bottom: 28px;
+}
+.kpi-card {
+    background: white; border-radius: 12px; padding: 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid #1B6B6B;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.kpi-card.accent { border-left-color: #C4276E; }
+.kpi-card.green { border-left-color: #2E7D32; }
+.kpi-card.brown { border-left-color: #6B3520; }
+.kpi-card.amber { border-left-color: #F9A825; }
+.kpi-label {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #888; margin-bottom: 4px;
+}
+.kpi-value {
+    font-size: 1.65rem; font-weight: 800; color: #1B6B6B; letter-spacing: -0.02em;
+}
+.kpi-card.accent .kpi-value { color: #C4276E; }
+.kpi-card.green .kpi-value { color: #2E7D32; }
+.kpi-card.brown .kpi-value { color: #6B3520; }
+.kpi-card.amber .kpi-value { color: #F9A825; }
+.kpi-sub { font-size: 0.78rem; color: #999; margin-top: 3px; }
+.section {
+    background: white; border-radius: 12px; padding: 26px;
+    margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.section h2 {
+    font-size: 1.2rem; font-weight: 700; color: #6B3520;
+    margin-bottom: 3px; display: flex; align-items: center; gap: 8px;
+}
+.section h2 .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #C4276E; display: inline-block;
+}
+.section .desc { font-size: 0.82rem; color: #888; margin-bottom: 18px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+thead th {
+    background: #1B6B6B; color: white; padding: 9px 11px;
+    text-align: left; font-weight: 600; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+}
+thead th:first-child { border-radius: 8px 0 0 0; }
+thead th:last-child { border-radius: 0 8px 0 0; }
+tbody tr { border-bottom: 1px solid #f0f0f0; }
+tbody tr:nth-child(even) { background: #FDF0F5; }
+tbody tr:hover { background: #fce4ec; }
+tbody td { padding: 8px 11px; white-space: nowrap; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.green { color: #2E7D32; font-weight: 600; }
+td.red { color: #C62828; font-weight: 600; }
+td.magenta { color: #C4276E; font-weight: 600; }
+.chart-container { position: relative; width: 100%; max-height: 380px; }
+.insight-box {
+    background: #FDF0F5; border-left: 4px solid #C4276E;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.insight-box strong { color: #C4276E; }
+.alert-box {
+    background: #FFF3E0; border-left: 4px solid #FF9800;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.alert-box strong { color: #E65100; }
+.opp-box {
+    background: #E8F5E9; border-left: 4px solid #2E7D32;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.opp-box strong { color: #2E7D32; }
+.badge {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+}
+.badge-green { background: #C8E6C9; color: #2E7D32; }
+.badge-yellow { background: #FFF9C4; color: #F57F17; }
+.badge-red { background: #FFCDD2; color: #C62828; }
+.badge-teal { background: #B2DFDB; color: #00695C; }
+.footer { text-align: center; padding: 30px; color: #999; font-size: 0.75rem; }
+.footer span { color: #C4276E; }
+.heatmap-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+}
+.heatmap-cell {
+    text-align: center; padding: 10px 4px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 600;
+}
+.heatmap-label { font-size: 0.65rem; color: #888; margin-bottom: 2px; }
+.talking-point {
+    background: #FDF0F5; border-radius: 8px; padding: 12px 16px 12px 34px;
+    margin-bottom: 8px; font-size: 0.88rem; position: relative;
+}
+.talking-point::before { content: '\1F43E'; position: absolute; left: 10px; top: 12px; font-size: 0.95rem; }
+.objection { border-left: 3px solid #6B3520; padding: 10px 14px; margin-bottom: 10px; border-radius: 0 8px 8px 0; }
+.objection .q { font-weight: 700; color: #6B3520; margin-bottom: 3px; }
+.objection .a { font-size: 0.82rem; color: #555; font-style: italic; }
+.scenario-card {
+    background: white; border: 2px solid #e0e0e0; border-radius: 10px;
+    padding: 18px; text-align: center; transition: border-color 0.2s;
+}
+.scenario-card.recommended { border-color: #2E7D32; background: #f1f8e9; }
+.scenario-card h4 { font-size: 1.3rem; margin-bottom: 4px; }
+.scenario-card .metric { font-size: 0.8rem; color: #666; margin: 2px 0; }
+.scenario-card .metric strong { color: #333; }
+.progress-bar-bg {
+    background: #e0e0e0; border-radius: 6px; height: 10px; overflow: hidden; margin: 4px 0;
+}
+.progress-bar-fill { height: 100%; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>Price Increase Impact Analysis</h1>
+    <div class="subtitle">Woof Gang Bakery &amp; Grooming -- Port Washington, NY (#264) — $5 Groom/Bath Increase Effective May 1</div>
+    <div class="brand-tag">Woof Gang Bakery & Grooming</div>
+</div>
+<div class="container">
+<div class="kpi-grid">
+<div class="kpi-card "><div class="kpi-label">Incremental Revenue (Gross)</div><div class="kpi-value">$43,875.00</div><div class="kpi-sub">+$5 × 8,775 appointments</div></div>
+<div class="kpi-card green"><div class="kpi-label">Store Net Uplift (50%)</div><div class="kpi-value">$21,937.50</div><div class="kpi-sub">+$2.50/appt after commission</div></div>
+<div class="kpi-card green"><div class="kpi-label">Groomer Commission Uplift (50%)</div><div class="kpi-value">$21,937.50</div><div class="kpi-sub">+$2.50/appt to groomers</div></div>
+<div class="kpi-card accent"><div class="kpi-label">May-Dec Store Net</div><div class="kpi-value">$17,332.50</div><div class="kpi-sub">8-month implementation</div></div>
+<div class="kpi-card "><div class="kpi-label">Revenue Lift</div><div class="kpi-value">5.7%</div><div class="kpi-sub">On $764,263.94 base</div></div>
+<div class="kpi-card "><div class="kpi-label">Break-Even Churn Tolerance</div><div class="kpi-value">5.7%</div><div class="kpi-sub">Can lose 106 of 1,856 customers</div></div>
+<div class="kpi-card "><div class="kpi-label">Low-Risk Revenue</div><div class="kpi-value">87.7%</div><div class="kpi-sub">From loyal customers (3+ visits)</div></div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Revenue Impact by Service Type</h2>
+<p class="desc">$5 increase applied to all core groom and bath services</p>
+<div class="grid-2"><div>
+<table><thead><tr><th>Service</th><th>Appts</th><th>Current Avg</th><th>New Avg</th><th>% Inc</th><th>Gross Incr.</th><th>Commission (50%)</th><th>Store Net (50%)</th></tr></thead><tbody>
+<tr><td>Full Groom</td><td class="num">5,079</td><td class="num">$103.70</td><td class="num green">$108.70</td><td class="num">4.8%</td><td class="num">+$25,395.00</td><td class="num">$12,697.50</td><td class="num green">+$12,697.50</td></tr>
+<tr><td>Luxury Bath</td><td class="num">1,867</td><td class="num">$62.05</td><td class="num green">$67.05</td><td class="num">8.1%</td><td class="num">+$9,335.00</td><td class="num">$4,667.50</td><td class="num green">+$4,667.50</td></tr>
+<tr><td>Mini Groom</td><td class="num">1,173</td><td class="num">$81.94</td><td class="num green">$86.94</td><td class="num">6.1%</td><td class="num">+$5,865.00</td><td class="num">$2,932.50</td><td class="num green">+$2,932.50</td></tr>
+<tr><td>Classic Bath</td><td class="num">364</td><td class="num">$53.40</td><td class="num green">$58.40</td><td class="num">9.4%</td><td class="num">+$1,820.00</td><td class="num">$910.00</td><td class="num green">+$910.00</td></tr>
+<tr><td>Other Groom</td><td class="num">292</td><td class="num">$65.00</td><td class="num green">$70.00</td><td class="num">7.7%</td><td class="num">+$1,460.00</td><td class="num">$730.00</td><td class="num green">+$730.00</td></tr>
+<tr style="font-weight:700;border-top:2px solid #1B6B6B"><td>TOTAL</td><td class="num">8,775</td><td class="num">$88.58</td><td class="num green">$93.58</td><td></td><td class="num">+$43,875.00</td><td class="num">$21,937.50</td><td class="num green">+$21,937.50</td></tr>
+</tbody></table></div>
+<div><div class="chart-container"><canvas id="impactChart"></canvas></div></div></div></div>
+<div class="section">
+<h2><span class="dot"></span>Current Pricing Matrix</h2>
+<p class="desc">Average prices by service type and dog size, with post-increase projection</p>
+<table><thead><tr><th>Service</th><th>Size</th><th>Current Avg</th><th>After +$5</th><th>Appts</th><th>Revenue</th></tr></thead><tbody>
+<tr><td>Classic Bath</td><td>0-20 lbs</td><td class="num">$45.96</td><td class="num green">$50.96</td><td class="num">57</td><td class="num">$2,564.00</td></tr>
+<tr><td>Classic Bath</td><td>21-40 lbs</td><td class="num">$59.21</td><td class="num green">$64.21</td><td class="num">89</td><td class="num">$5,198.00</td></tr>
+<tr><td>Classic Bath</td><td>41-75 lbs</td><td class="num">$62.47</td><td class="num green">$67.47</td><td class="num">91</td><td class="num">$5,579.00</td></tr>
+<tr><td>Classic Bath</td><td>76-100 lbs</td><td class="num">$70.50</td><td class="num green">$75.50</td><td class="num">38</td><td class="num">$2,564.50</td></tr>
+<tr><td>Classic Bath</td><td>Over 100 lbs</td><td class="num">$80.00</td><td class="num green">$85.00</td><td class="num">1</td><td class="num">$80.00</td></tr>
+<tr><td>Full Groom</td><td>0-20 lbs</td><td class="num">$91.56</td><td class="num green">$96.56</td><td class="num">2,607</td><td class="num">$235,176.99</td></tr>
+<tr><td>Full Groom</td><td>21-40 lbs</td><td class="num">$108.91</td><td class="num green">$113.91</td><td class="num">1,423</td><td class="num">$151,208.17</td></tr>
+<tr><td>Full Groom</td><td>41-75 lbs</td><td class="num">$125.17</td><td class="num green">$130.17</td><td class="num">880</td><td class="num">$108,983.00</td></tr>
+<tr><td>Full Groom</td><td>76-100 lbs</td><td class="num">$133.78</td><td class="num green">$138.78</td><td class="num">156</td><td class="num">$20,724.00</td></tr>
+<tr><td>Full Groom</td><td>Over 100 lbs</td><td class="num">$143.08</td><td class="num green">$148.08</td><td class="num">13</td><td class="num">$1,804.00</td></tr>
+<tr><td>Luxury Bath</td><td>0-20 lbs</td><td class="num">$48.90</td><td class="num green">$53.90</td><td class="num">422</td><td class="num">$20,269.75</td></tr>
+<tr><td>Luxury Bath</td><td>21-40 lbs</td><td class="num">$59.67</td><td class="num green">$64.67</td><td class="num">546</td><td class="num">$31,754.50</td></tr>
+<tr><td>Luxury Bath</td><td>41-75 lbs</td><td class="num">$67.48</td><td class="num green">$72.48</td><td class="num">670</td><td class="num">$44,029.50</td></tr>
+<tr><td>Luxury Bath</td><td>76-100 lbs</td><td class="num">$75.36</td><td class="num green">$80.36</td><td class="num">211</td><td class="num">$15,720.00</td></tr>
+<tr><td>Luxury Bath</td><td>Over 100 lbs</td><td class="num">$84.72</td><td class="num green">$89.72</td><td class="num">18</td><td class="num">$1,491.00</td></tr>
+<tr><td>Mini Groom</td><td>0-20 lbs</td><td class="num">$70.84</td><td class="num green">$75.84</td><td class="num">584</td><td class="num">$40,901.53</td></tr>
+<tr><td>Mini Groom</td><td>21-40 lbs</td><td class="num">$87.54</td><td class="num green">$92.54</td><td class="num">295</td><td class="num">$25,542.00</td></tr>
+<tr><td>Mini Groom</td><td>41-75 lbs</td><td class="num">$101.17</td><td class="num green">$106.17</td><td class="num">213</td><td class="num">$21,324.00</td></tr>
+<tr><td>Mini Groom</td><td>76-100 lbs</td><td class="num">$113.16</td><td class="num green">$118.16</td><td class="num">49</td><td class="num">$5,453.00</td></tr>
+<tr><td>Mini Groom</td><td>Over 100 lbs</td><td class="num">$120.00</td><td class="num green">$125.00</td><td class="num">1</td><td class="num">$120.00</td></tr>
+</tbody></table></div>
+<div class="grid-2">
+<div class="section"><h2><span class="dot"></span>Per-Groomer Commission Impact</h2><p class="desc">$5 increase splits 50/50 — groomer gets +$2.50, store keeps +$2.50 per appt</p>
+<table><thead><tr><th>Groomer</th><th>Appts</th><th>Gross Incr.</th><th>Groomer Gets (50%)</th><th>Store Keeps (50%)</th><th>Groomer +/mo</th></tr></thead><tbody>
+<tr><td>Sue M</td><td class="num">1,510</td><td class="num">$7,550.00</td><td class="num green">+$3,775.00</td><td class="num green">+$3,775.00</td><td class="num green">+$314.58/mo</td></tr>
+<tr><td>Joyce P</td><td class="num">1,240</td><td class="num">$6,200.00</td><td class="num green">+$3,100.00</td><td class="num green">+$3,100.00</td><td class="num green">+$258.33/mo</td></tr>
+<tr><td>Olivia M</td><td class="num">775</td><td class="num">$3,875.00</td><td class="num green">+$1,937.50</td><td class="num green">+$1,937.50</td><td class="num green">+$161.46/mo</td></tr>
+<tr><td>Danielle L</td><td class="num">682</td><td class="num">$3,410.00</td><td class="num green">+$1,705.00</td><td class="num green">+$1,705.00</td><td class="num green">+$142.08/mo</td></tr>
+<tr><td>Jackie G. </td><td class="num">555</td><td class="num">$2,775.00</td><td class="num green">+$1,387.50</td><td class="num green">+$1,387.50</td><td class="num green">+$115.62/mo</td></tr>
+<tr><td>Maria C</td><td class="num">610</td><td class="num">$3,050.00</td><td class="num green">+$1,525.00</td><td class="num green">+$1,525.00</td><td class="num green">+$127.08/mo</td></tr>
+<tr><td>Joant C</td><td class="num">442</td><td class="num">$2,210.00</td><td class="num green">+$1,105.00</td><td class="num green">+$1,105.00</td><td class="num green">+$92.08/mo</td></tr>
+<tr><td>Ingrid R</td><td class="num">416</td><td class="num">$2,080.00</td><td class="num green">+$1,040.00</td><td class="num green">+$1,040.00</td><td class="num green">+$86.67/mo</td></tr>
+<tr><td>Marie D.</td><td class="num">381</td><td class="num">$1,905.00</td><td class="num green">+$952.50</td><td class="num green">+$952.50</td><td class="num green">+$79.38/mo</td></tr>
+<tr><td>Stacey W</td><td class="num">469</td><td class="num">$2,345.00</td><td class="num green">+$1,172.50</td><td class="num green">+$1,172.50</td><td class="num green">+$97.71/mo</td></tr>
+<tr><td>Angela R</td><td class="num">574</td><td class="num">$2,870.00</td><td class="num green">+$1,435.00</td><td class="num green">+$1,435.00</td><td class="num green">+$119.58/mo</td></tr>
+<tr><td>Isabelle O</td><td class="num">539</td><td class="num">$2,695.00</td><td class="num green">+$1,347.50</td><td class="num green">+$1,347.50</td><td class="num green">+$112.29/mo</td></tr>
+<tr><td>Jessica G</td><td class="num">447</td><td class="num">$2,235.00</td><td class="num green">+$1,117.50</td><td class="num green">+$1,117.50</td><td class="num green">+$93.12/mo</td></tr>
+<tr><td>Ashley Fribbley</td><td class="num">48</td><td class="num">$240.00</td><td class="num green">+$120.00</td><td class="num green">+$120.00</td><td class="num green">+$10.00/mo</td></tr>
+<tr><td>Joi Ockimey</td><td class="num">38</td><td class="num">$190.00</td><td class="num green">+$95.00</td><td class="num green">+$95.00</td><td class="num green">+$7.92/mo</td></tr>
+<tr><td>Wgb Port Washington</td><td class="num">34</td><td class="num">$170.00</td><td class="num green">+$85.00</td><td class="num green">+$85.00</td><td class="num green">+$7.08/mo</td></tr>
+<tr><td>Kimberly S</td><td class="num">12</td><td class="num">$60.00</td><td class="num green">+$30.00</td><td class="num green">+$30.00</td><td class="num green">+$2.50/mo</td></tr>
+<tr><td>Kyle Hoberman</td><td class="num">2</td><td class="num">$10.00</td><td class="num green">+$5.00</td><td class="num green">+$5.00</td><td class="num green">+$0.42/mo</td></tr>
+<tr style="font-weight:700;border-top:2px solid #1B6B6B"><td>TOTAL</td><td class="num">8,774</td><td class="num">$43,870.00</td><td class="num green">+$21,935.00</td><td class="num green">+$21,935.00</td><td></td></tr>
+</tbody></table>
+<div class="insight-box"><strong>Talking point:</strong> "This means an extra <strong>$101.55/month</strong> per groomer on average — we're investing in you."</div></div>
+<div class="section"><h2><span class="dot"></span>Customer Retention Risk</h2><p class="desc">Churn probability from a $5 increase</p>
+<div class="chart-container"><canvas id="riskChart"></canvas></div>
+<table style="margin-top:14px"><thead><tr><th>Risk</th><th>Customers</th><th>% Cust</th><th>Revenue</th><th>% Rev</th></tr></thead><tbody>
+<tr><td><span class="badge badge-green">Very Low</span></td><td class="num">563</td><td class="num">30.3%</td><td class="num">$762,524.27</td><td class="num">70.2%</td></tr>
+<tr><td><span class="badge badge-teal">Low</span></td><td class="num">429</td><td class="num">23.1%</td><td class="num">$190,250.00</td><td class="num">17.5%</td></tr>
+<tr><td><span class="badge badge-yellow">Moderate</span></td><td class="num">383</td><td class="num">20.6%</td><td class="num">$88,167.56</td><td class="num">8.1%</td></tr>
+<tr><td><span class="badge badge-red">Higher</span></td><td class="num">481</td><td class="num">25.9%</td><td class="num">$45,059.16</td><td class="num">4.1%</td></tr>
+</tbody></table>
+<div class="insight-box"><strong>87.7%</strong> of revenue from low-risk customers. A 5.6% price change is well within normal annual adjustments.</div></div>
+</div>
+<div class="section"><h2><span class="dot"></span>Average Core Groom Ticket — Monthly Trend</h2><p class="desc">Natural ticket growth before any formal increase</p>
+<div class="chart-container"><canvas id="trendChart"></canvas></div>
+<div class="insight-box"><strong>First half:</strong> $84.77 → <strong>Second half:</strong> $90.74 — Natural trend: <strong>+7.0%</strong></div></div>
+<div class="section"><h2><span class="dot"></span>Upsell Companion Strategy</h2><p class="desc">Pair the price increase with stronger SPA/add-on upselling</p>
+<div class="kpi-grid" style="margin-bottom:14px">
+<div class="kpi-card"><div class="kpi-label">SPA Attach Rate</div><div class="kpi-value">12.4%</div></div>
+<div class="kpi-card"><div class="kpi-label">Add-On Attach Rate</div><div class="kpi-value">37.4%</div></div>
+<div class="kpi-card accent"><div class="kpi-label">Overall Upsell Rate</div><div class="kpi-value">45.4%</div></div>
+<div class="kpi-card green"><div class="kpi-label">Combined Annual Uplift</div><div class="kpi-value">$50,846.44</div><div class="kpi-sub">$5 increase + 5pt upsell improvement</div></div>
+</div></div>
+<div class="section"><h2><span class="dot"></span>Rollout Talking Points</h2><p class="desc">Data-backed scripts for Kyle's team meeting and client conversations</p>
+<h3 style="color:#6B3520;margin:14px 0 8px;font-size:1.05rem">For the Team Meeting (Week 6)</h3>
+<div class="talking-point">This $5 increase generates <strong>$43,875.00</strong> gross — the store nets <strong>$21,937.50</strong> after your 50% commission.</div>
+<div class="talking-point">At 50% commission, that's <strong>$2.50 per appointment</strong> more in your pocket.</div>
+<div class="talking-point">For a groomer doing 50 dogs/week: ~$125/week or ~$500/month more in commission.</div>
+<div class="talking-point">Our avg core groom is <strong>$88.58</strong> — this is just a 5.6% adjustment.</div>
+<div class="talking-point">We serve <strong>1,856</strong> grooming customers. 87.7% of revenue is from loyal, low-risk clients.</div>
+<div class="talking-point">Even if we lost 5.7% of customers (106 people), we'd still break even. Actual churn will be far below this.</div>
+<div class="talking-point">This keeps us competitive as a premium grooming destination in the NY metro area.</div>
+<h3 style="color:#6B3520;margin:20px 0 8px;font-size:1.05rem">For Client Conversations (Weeks 4-2)</h3>
+<div class="talking-point" style="font-style:italic">&quot;We&#39;re adjusting grooming prices by $5 starting May 1 — reflecting our investment in training, safety, and quality of care.&quot;</div>
+<div class="talking-point" style="font-style:italic">&quot;This adjustment helps us retain our best groomers and maintain the experience you expect.&quot;</div>
+<div class="talking-point" style="font-style:italic">&quot;We wanted to give you plenty of notice — no surprises. We value having you in the Woof Gang family.&quot;</div>
+<div class="talking-point" style="font-style:italic">&quot;Want to lock in current pricing? Pre-book your next few appointments before May 1.&quot;</div>
+<h3 style="color:#6B3520;margin:20px 0 8px;font-size:1.05rem">Objection Handling</h3>
+<div class="objection"><div class="q">&quot;That&#39;s too expensive.&quot;</div><div class="a">&quot;Our average groom is $88.58 — this is less than 5.6%. The quality and safety your dog receives is worth it.&quot;</div></div>
+<div class="objection"><div class="q">&quot;I can find cheaper.&quot;</div><div class="a">&quot;You can. What sets us apart is certified groomers, premium products, and the trust with your groomer. We&#39;d love to keep caring for [dog&#39;s name].&quot;</div></div>
+<div class="objection"><div class="q">&quot;Why now?&quot;</div><div class="a">&quot;Operating costs — especially retaining great staff — have increased. This helps us keep the team you know and love.&quot;</div></div>
+</div>
+
+<div class="section reveal-section" id="gradeSection" style="text-align:center;padding:40px 30px 50px">
+  <h2 style="font-size:1.4rem;margin-bottom:6px"><span class="dot"></span>Move Assessment</h2>
+  <p class="desc" style="margin-bottom:30px">Data-driven grade for the $5 price increase based on four risk factors</p>
+
+  <!-- Grade circle — starts hidden, reveals on scroll -->
+  <div id="gradeReveal" style="opacity:0;transform:scale(0.3);transition:none">
+    <div style="width:160px;height:160px;border-radius:50%;background:#2E7D32;display:inline-flex;align-items:center;justify-content:center;
+         box-shadow:0 0 0 0 #2E7D3244;margin-bottom:18px" id="gradeCircle">
+      <span style="font-size:4rem;font-weight:900;color:white;letter-spacing:-2px">A</span>
+    </div>
+    <div style="font-size:1.5rem;font-weight:800;color:#6B3520;margin-bottom:4px">90 <span style="font-size:1rem;font-weight:400;color:#888">/ 100</span></div>
+    <div style="font-size:1.05rem;color:#555;margin-bottom:30px">This is a strong, well-supported move.</div>
+  </div>
+
+  <!-- Scoring breakdown — cascades in -->
+  <div id="scoreRows" style="max-width:640px;margin:0 auto;text-align:left">
+    <table><thead><tr><th>Factor</th><th>Score</th><th>Assessment</th></tr></thead><tbody>
+    <tr class="score-row" style="opacity:0;transform:translateY(12px)"><td>Price Change Magnitude</td><td class="num" style="font-weight:700">20/25</td><td>5.6% increase — moderate to customers</td></tr>
+    <tr class="score-row" style="opacity:0;transform:translateY(12px)"><td>Churn Buffer (Break-Even)</td><td class="num" style="font-weight:700">20/25</td><td>Can absorb 5.7% churn before revenue-negative</td></tr>
+    <tr class="score-row" style="opacity:0;transform:translateY(12px)"><td>Customer Loyalty Mix</td><td class="num" style="font-weight:700">25/25</td><td>87.7% of revenue from low-risk repeat customers</td></tr>
+    <tr class="score-row" style="opacity:0;transform:translateY(12px)"><td>Revenue Trajectory</td><td class="num" style="font-weight:700">25/25</td><td>Store is growing strongly — momentum absorbs friction</td></tr>
+    <tr class="score-row" style="opacity:0;transform:translateY(12px);font-weight:700;border-top:2px solid #1B6B6B"><td>TOTAL</td><td class="num">90/100</td><td>Grade: A</td></tr>
+    </tbody></table>
+  </div>
+
+  <!-- Summary + Guidance — fades in last -->
+  <div id="guidanceReveal" style="opacity:0;transform:translateY(16px);max-width:720px;margin:24px auto 0;text-align:left">
+    <div style="font-size:0.88rem;color:#555;line-height:1.7;margin-bottom:20px">
+      A $89 &rarr; $94 adjustment is a <strong>5.6%</strong> change &mdash; comfortably within the 5-8% annual adjustment range that premium service businesses absorb without meaningful churn.
+      The store can lose up to <strong>106</strong> customers (5.7% of the base) and still break even on revenue.
+      With <strong>87.7%</strong> of grooming revenue coming from loyal, low-risk clients who won't leave over $5, actual churn will be a fraction of that threshold.
+    </div>
+    <h3 style="color:#6B3520;margin:0 0 10px;font-size:1rem">Guidance</h3>
+    <div style="font-size:0.88rem;color:#444;line-height:1.8">
+    <ul style="padding-left:20px">
+      <li><strong>Timing is right.</strong> The store is on an upward revenue trajectory (Jan&rarr;Dec nearly tripled). Price adjustments during growth periods are absorbed far more easily than during flat or declining phases.</li>
+      <li><strong>Commission framing matters.</strong> Lead the team meeting with the groomer win: +$2.50/appointment = ~$102/month per groomer. When groomers see personal upside, they become advocates instead of resistors.</li>
+      <li><strong>Pre-book strategy.</strong> Offering existing clients the chance to &ldquo;lock in current pricing&rdquo; by pre-booking 2-3 appointments before May 1 accelerates near-term revenue and deepens commitment.</li>
+      <li><strong>Monitor, don't fear.</strong> Track weekly appointment volume for 8 weeks post-implementation. If bookings drop more than 5% from the trailing 4-week average, consider a targeted loyalty offer for at-risk segments &mdash; but don't preemptively discount.</li>
+      <li><strong>Pair with value.</strong> Announce the increase alongside a tangible quality improvement: new products, extended appointment slots, complimentary teeth check, or a loyalty perk. The narrative is &ldquo;more value&rdquo; not &ldquo;higher price.&rdquo;</li>
+    </ul></div>
+  </div>
+</div>
+
+<script>
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#666';
+const mg='#C4276E', tl='#1B6B6B', gn='#2E7D32';
+
+new Chart(document.getElementById('impactChart'), {
+    type: 'bar',
+    data: { labels: ['Full Groom', 'Luxury Bath', 'Mini Groom', 'Classic Bath', 'Other Groom'],
+        datasets: [
+            { label: 'Current Revenue', data: [517896.16, 113264.75, 95045.53, 19090.5, 18967.0], backgroundColor: tl, borderRadius: 4 },
+            { label: 'Incremental (+$5)', data: [25395.0, 9335.0, 5865.0, 1820.0, 1460.0], backgroundColor: gn, borderRadius: 4 }
+        ] },
+    options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => '$'+v.toLocaleString() } } },
+        plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('riskChart'), {
+    type: 'doughnut',
+    data: { labels: ['Very Low', 'Low', 'Moderate', 'Higher'], datasets: [{ data: [563, 429, 383, 481], backgroundColor: ['#4CAF50', '#26A69A', '#FFC107', '#EF5350'], borderWidth: 0 }] },
+    options: { responsive: true, cutout: '60%', plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: { labels: ["Sep '24", "Oct '24", "Nov '24", "Dec '24", "Jan '25", "Feb '25", "Mar '25", "Apr '25", "May '25", "Jun '25", "Jul '25", "Aug '25", "Sep '25", "Oct '25", "Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26"],
+        datasets: [
+            { label: 'Avg Ticket', data: [60.0, 57.16, 77.3, 88.13, 88.13, 88.91, 90.99, 89.07, 90.69, 92.0, 92.15, 89.82, 90.86, 89.73, 88.64, 89.71, 92.37, 91.04, 92.93], borderColor: mg, backgroundColor: mg+'22', fill: true, tension: 0.3, pointRadius: 5, pointBackgroundColor: mg },
+            { label: 'Median', data: [65.0, 65.0, 65.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 85.0, 87.5], borderColor: tl, borderDash: [5,5], tension: 0.3, pointRadius: 4, pointBackgroundColor: tl }
+        ] },
+    options: { responsive: true, scales: { y: { ticks: { callback: v => '$'+v } } },
+        plugins: { legend: { position: 'bottom' } } }
+});
+
+// ── Grade Reveal Animation ──
+(function() {
+  const section = document.getElementById('gradeSection');
+  const circle  = document.getElementById('gradeReveal');
+  const rows    = document.querySelectorAll('.score-row');
+  const guide   = document.getElementById('guidanceReveal');
+  const ring    = document.getElementById('gradeCircle');
+  let fired = false;
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !fired) {
+        fired = true;
+        // 1. Grade circle — scale + fade in with overshoot
+        circle.style.transition = 'opacity 0.6s ease, transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        circle.style.opacity = '1';
+        circle.style.transform = 'scale(1)';
+        // pulse ring
+        setTimeout(() => {
+          ring.style.transition = 'box-shadow 0.8s ease';
+          ring.style.boxShadow = '0 0 0 18px #2E7D3222';
+        }, 600);
+        setTimeout(() => {
+          ring.style.boxShadow = '0 0 0 0 #2E7D3200';
+        }, 1400);
+        // 2. Score rows — cascade in
+        rows.forEach((row, i) => {
+          setTimeout(() => {
+            row.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+          }, 800 + i * 120);
+        });
+        // 3. Guidance — fade in last
+        setTimeout(() => {
+          guide.style.transition = 'opacity 0.6s ease, transform 0.5s ease';
+          guide.style.opacity = '1';
+          guide.style.transform = 'translateY(0)';
+        }, 800 + rows.length * 120 + 200);
+      }
+    });
+  }, { threshold: 0.15 });
+  observer.observe(section);
+})();
+</script>
+
+</div>
+<div class="footer">
+    Generated March 10, 2026 &mdash; <span>Woof Gang Bakery & Grooming</span> &mdash; Operations Intelligence Dashboard
+</div>
+</body>
+</html>

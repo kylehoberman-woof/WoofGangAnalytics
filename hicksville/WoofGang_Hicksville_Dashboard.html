@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang Hicksville, NY (#265)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #FDF0F5;
+    color: #333;
+    line-height: 1.6;
+}
+.header {
+    background: linear-gradient(135deg, #1B6B6B 0%, #6B3520 100%);
+    color: white;
+    padding: 40px 0 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(196,39,110,0.15) 0%, transparent 50%);
+}
+.header h1 {
+    font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;
+    position: relative; margin-bottom: 4px;
+}
+.header .subtitle { font-size: 1rem; font-weight: 400; opacity: 0.9; position: relative; }
+.header .brand-tag {
+    display: inline-block; background: #C4276E; color: white;
+    padding: 4px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase; margin-top: 12px; position: relative;
+}
+.container { max-width: 1440px; margin: 0 auto; padding: 30px 24px; }
+.kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px; margin-bottom: 28px;
+}
+.kpi-card {
+    background: white; border-radius: 12px; padding: 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid #1B6B6B;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.kpi-card.accent { border-left-color: #C4276E; }
+.kpi-card.green { border-left-color: #2E7D32; }
+.kpi-card.brown { border-left-color: #6B3520; }
+.kpi-card.amber { border-left-color: #F9A825; }
+.kpi-label {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #888; margin-bottom: 4px;
+}
+.kpi-value {
+    font-size: 1.65rem; font-weight: 800; color: #1B6B6B; letter-spacing: -0.02em;
+}
+.kpi-card.accent .kpi-value { color: #C4276E; }
+.kpi-card.green .kpi-value { color: #2E7D32; }
+.kpi-card.brown .kpi-value { color: #6B3520; }
+.kpi-card.amber .kpi-value { color: #F9A825; }
+.kpi-sub { font-size: 0.78rem; color: #999; margin-top: 3px; }
+.section {
+    background: white; border-radius: 12px; padding: 26px;
+    margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.section h2 {
+    font-size: 1.2rem; font-weight: 700; color: #6B3520;
+    margin-bottom: 3px; display: flex; align-items: center; gap: 8px;
+}
+.section h2 .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #C4276E; display: inline-block;
+}
+.section .desc { font-size: 0.82rem; color: #888; margin-bottom: 18px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+thead th {
+    background: #1B6B6B; color: white; padding: 9px 11px;
+    text-align: left; font-weight: 600; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+}
+thead th:first-child { border-radius: 8px 0 0 0; }
+thead th:last-child { border-radius: 0 8px 0 0; }
+tbody tr { border-bottom: 1px solid #f0f0f0; }
+tbody tr:nth-child(even) { background: #FDF0F5; }
+tbody tr:hover { background: #fce4ec; }
+tbody td { padding: 8px 11px; white-space: nowrap; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.green { color: #2E7D32; font-weight: 600; }
+td.red { color: #C62828; font-weight: 600; }
+td.magenta { color: #C4276E; font-weight: 600; }
+.chart-container { position: relative; width: 100%; max-height: 380px; }
+.insight-box {
+    background: #FDF0F5; border-left: 4px solid #C4276E;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.insight-box strong { color: #C4276E; }
+.alert-box {
+    background: #FFF3E0; border-left: 4px solid #FF9800;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.alert-box strong { color: #E65100; }
+.opp-box {
+    background: #E8F5E9; border-left: 4px solid #2E7D32;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.opp-box strong { color: #2E7D32; }
+.badge {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+}
+.badge-green { background: #C8E6C9; color: #2E7D32; }
+.badge-yellow { background: #FFF9C4; color: #F57F17; }
+.badge-red { background: #FFCDD2; color: #C62828; }
+.badge-teal { background: #B2DFDB; color: #00695C; }
+.footer { text-align: center; padding: 30px; color: #999; font-size: 0.75rem; }
+.footer span { color: #C4276E; }
+.heatmap-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+}
+.heatmap-cell {
+    text-align: center; padding: 10px 4px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 600;
+}
+.heatmap-label { font-size: 0.65rem; color: #888; margin-bottom: 2px; }
+.talking-point {
+    background: #FDF0F5; border-radius: 8px; padding: 12px 16px 12px 34px;
+    margin-bottom: 8px; font-size: 0.88rem; position: relative;
+}
+.talking-point::before { content: '\1F43E'; position: absolute; left: 10px; top: 12px; font-size: 0.95rem; }
+.objection { border-left: 3px solid #6B3520; padding: 10px 14px; margin-bottom: 10px; border-radius: 0 8px 8px 0; }
+.objection .q { font-weight: 700; color: #6B3520; margin-bottom: 3px; }
+.objection .a { font-size: 0.82rem; color: #555; font-style: italic; }
+.scenario-card {
+    background: white; border: 2px solid #e0e0e0; border-radius: 10px;
+    padding: 18px; text-align: center; transition: border-color 0.2s;
+}
+.scenario-card.recommended { border-color: #2E7D32; background: #f1f8e9; }
+.scenario-card h4 { font-size: 1.3rem; margin-bottom: 4px; }
+.scenario-card .metric { font-size: 0.8rem; color: #666; margin: 2px 0; }
+.scenario-card .metric strong { color: #333; }
+.progress-bar-bg {
+    background: #e0e0e0; border-radius: 6px; height: 10px; overflow: hidden; margin: 4px 0;
+}
+.progress-bar-fill { height: 100%; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>Woof Gang Hicksville, NY (#265)</h1>
+    <div class="subtitle">Store Performance Analysis — 2025-12-01 to 2026-03-06</div>
+    <div class="brand-tag">Woof Gang Bakery & Grooming</div>
+</div>
+<div class="container">
+<div class="kpi-grid">
+<div class="kpi-card "><div class="kpi-label">2025-2026 Net Sales</div><div class="kpi-value">$46,828.90</div><div class="kpi-sub">4 months of data</div></div>
+<div class="kpi-card green"><div class="kpi-label">Annual Forecast (Conservative)</div><div class="kpi-value">$11,224.21</div><div class="kpi-sub">Trend: -$116,573.99</div></div>
+<div class="kpi-card accent"><div class="kpi-label">Recent Run Rate (Annualized)</div><div class="kpi-value">$139,022.41</div><div class="kpi-sub">Last 3mo avg: $11,585.20</div></div>
+<div class="kpi-card green"><div class="kpi-label">Monthly Growth Rate</div><div class="kpi-value">+-$2,677.72/mo</div><div class="kpi-sub">Trajectory: -22.2%/mo from baseline</div></div>
+</div>
+<div class="kpi-grid">
+<div class="kpi-card accent"><div class="kpi-label">Grooming Revenue</div><div class="kpi-value">$31,243.00</div><div class="kpi-sub">66.7% of total</div></div>
+<div class="kpi-card "><div class="kpi-label">Groomer Commission (50%)</div><div class="kpi-value">$15,621.50</div><div class="kpi-sub">Paid to groomers</div></div>
+<div class="kpi-card "><div class="kpi-label">Store Net (Groom)</div><div class="kpi-value">$15,621.50</div><div class="kpi-sub">After 50% commission</div></div>
+<div class="kpi-card brown"><div class="kpi-label">Retail Revenue</div><div class="kpi-value">$15,315.90</div><div class="kpi-sub">32.7% of total</div></div>
+<div class="kpi-card green"><div class="kpi-label">Est. Gross Profit</div><div class="kpi-value">$23,310.54</div><div class="kpi-sub">49.8% margin (FDD standards)</div></div>
+<div class="kpi-card "><div class="kpi-label">Transactions</div><div class="kpi-value">934</div><div class="kpi-sub">Avg ticket: $50.14</div></div>
+<div class="kpi-card "><div class="kpi-label">Unique Customers</div><div class="kpi-value">307</div><div class="kpi-sub">Active in period</div></div>
+<div class="kpi-card "><div class="kpi-label">Tips Collected</div><div class="kpi-value">$2,888.25</div><div class="kpi-sub">Avg when tipped: $20.06</div></div>
+<div class="kpi-card amber"><div class="kpi-label">Discounts Given</div><div class="kpi-value">$6,664.01</div><div class="kpi-sub">14.2% of net sales</div></div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Revenue Trajectory & Forecast</h2>
+<p class="desc">Monthly actual vs trend line — 4 months of data</p>
+<div class="chart-container"><canvas id="trajectoryChart" style="max-height:340px"></canvas></div>
+<div class="opp-box"><strong>-84% Dec '25→Mar '26 growth.</strong> Revenue went from $12,073.30 to $1,989.32. At this trajectory, annual forecast is <strong>$11,224.21</strong>.</div>
+</div>
+<div class="grid-2">
+<div class="section"><h2><span class="dot"></span>Revenue Mix</h2><p class="desc">Grooming vs Retail vs Gift Cards</p><div class="chart-container"><canvas id="revMixChart"></canvas></div></div>
+<div class="section"><h2><span class="dot"></span>Monthly Revenue (Stacked)</h2><p class="desc">Grooming and retail by month</p><div class="chart-container"><canvas id="monthlyChart"></canvas></div></div>
+</div>
+<div class="grid-2">
+<div class="section">
+<h2><span class="dot"></span>Day-of-Week Revenue</h2>
+<p class="desc">Staffing optimization — where to allocate hours</p>
+<div class="heatmap-grid">
+<div class="heatmap-cell" style="background:rgb(238,189,210);color:#333"><div class="heatmap-label">Mon</div>$2,935.78<br><span style="font-size:0.6rem">69 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(218,117,162);color:white"><div class="heatmap-label">Tue</div>$7,113.57<br><span style="font-size:0.6rem">119 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(196,39,110);color:white"><div class="heatmap-label">Wed</div>$11,654.31<br><span style="font-size:0.6rem">181 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(216,110,158);color:white"><div class="heatmap-label">Thu</div>$7,506.99<br><span style="font-size:0.6rem">136 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(214,103,153);color:white"><div class="heatmap-label">Fri</div>$7,920.97<br><span style="font-size:0.6rem">158 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(213,101,152);color:white"><div class="heatmap-label">Sat</div>$8,003.90<br><span style="font-size:0.6rem">193 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(244,210,225);color:#333"><div class="heatmap-label">Sun</div>$1,693.38<br><span style="font-size:0.6rem">78 txns</span></div>
+</div>
+<div class="insight-box"><strong>Wednesday</strong> is the peak day ($11,654.31). <strong>Sunday</strong> is slowest ($1,693.38). Consider promotions or reduced staffing on Sundays.</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Peak Hours</h2>
+<p class="desc">Transaction volume by hour — optimize scheduling</p>
+<div class="chart-container"><canvas id="hoursChart"></canvas></div>
+</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Grooming Service Mix</h2>
+<p class="desc">Revenue and volume by service type</p>
+<div class="grid-2">
+<div>
+<table><thead><tr><th>Service Type</th><th>Units</th><th>Revenue</th><th>% Rev</th><th>Avg Ticket</th></tr></thead><tbody>
+<tr><td>Full Groom</td><td class="num">316</td><td class="num">$24,508.00</td><td class="num">78.4%</td><td class="num">$77.56</td></tr>
+<tr><td>Mini Groom</td><td class="num">36</td><td class="num">$2,640.00</td><td class="num">8.4%</td><td class="num">$73.33</td></tr>
+<tr><td>Luxury Bath</td><td class="num">28</td><td class="num">$1,625.00</td><td class="num">5.2%</td><td class="num">$58.04</td></tr>
+<tr><td>Teeth Brushing</td><td class="num">107</td><td class="num">$1,070.00</td><td class="num">3.4%</td><td class="num">$10.00</td></tr>
+<tr><td>Classic Bath</td><td class="num">8</td><td class="num">$400.00</td><td class="num">1.3%</td><td class="num">$50.00</td></tr>
+<tr><td>Hairy Beast (Deshedding)</td><td class="num">12</td><td class="num">$330.00</td><td class="num">1.1%</td><td class="num">$27.50</td></tr>
+<tr><td>Nail Trim / Grind</td><td class="num">13</td><td class="num">$195.00</td><td class="num">0.6%</td><td class="num">$15.00</td></tr>
+<tr><td>Medicated / Hypo Shampoo</td><td class="num">18</td><td class="num">$180.00</td><td class="num">0.6%</td><td class="num">$10.00</td></tr>
+<tr><td>Diamond DG (Spotless and Bright)</td><td class="num">6</td><td class="num">$120.00</td><td class="num">0.4%</td><td class="num">$20.00</td></tr>
+<tr><td>Blueberry Pie Facial</td><td class="num">7</td><td class="num">$105.00</td><td class="num">0.3%</td><td class="num">$15.00</td></tr>
+<tr><td>Sanitary Trim</td><td class="num">2</td><td class="num">$20.00</td><td class="num">0.1%</td><td class="num">$10.00</td></tr>
+<tr><td>Shave Down Fee</td><td class="num">1</td><td class="num">$20.00</td><td class="num">0.1%</td><td class="num">$20.00</td></tr>
+<tr><td>Anal Glands</td><td class="num">1</td><td class="num">$10.00</td><td class="num">0.0%</td><td class="num">$10.00</td></tr>
+<tr><td>De-Matting</td><td class="num">1</td><td class="num">$10.00</td><td class="num">0.0%</td><td class="num">$10.00</td></tr>
+<tr><td>Paw Pads &amp; Scissor Feet</td><td class="num">1</td><td class="num">$10.00</td><td class="num">0.0%</td><td class="num">$10.00</td></tr>
+</tbody></table>
+</div>
+<div><div class="chart-container"><canvas id="svcMixChart"></canvas></div></div>
+</div></div>
+<div class="section">
+<h2><span class="dot"></span>Retail Attachment to Grooming</h2>
+<p class="desc">What percentage of grooming visits include a retail purchase?</p>
+<div class="kpi-grid" style="margin-bottom:14px">
+<div class="kpi-card amber"><div class="kpi-label">Current Attach Rate</div><div class="kpi-value">18.5%</div><div class="kpi-sub">66 of 356 groom orders</div></div>
+<div class="kpi-card"><div class="kpi-label">Groom-Only Orders</div><div class="kpi-value">290</div><div class="kpi-sub">81.5% leave with zero retail</div></div>
+<div class="kpi-card"><div class="kpi-label">Avg Retail on Attached</div><div class="kpi-value">$18.73</div><div class="kpi-sub">Per groom order with retail</div></div>
+<div class="kpi-card green"><div class="kpi-label">+10pt Attach Opportunity</div><div class="kpi-value">$666.95</div><div class="kpi-sub">35 more orders × $18.73 avg</div></div>
+</div>
+<div class="alert-box"><strong>81.5% of groom clients leave empty-handed.</strong> Every grooming checkout is a retail opportunity. A treat display at the grooming pickup counter, or a "Pick a treat for your pup on us" with $5 minimum purchase, could capture <strong>$666.95</strong> in additional annual revenue.</div>
+</div>
+<div class="grid-2">
+<div class="section"><h2><span class="dot"></span>Dog Size Distribution</h2><p class="desc">Core groom appointments by weight class</p><div class="chart-container"><canvas id="dogSizeChart"></canvas></div></div>
+<div class="section"><h2><span class="dot"></span>Standard vs Doodle Premium</h2><p class="desc">Doodle breeds command a price premium</p>
+<table><thead><tr><th>Size</th><th>Standard Avg</th><th>Doodle Avg</th><th>Premium</th><th>Doodle %</th></tr></thead><tbody>
+<tr><td>0-20 lbs</td><td class="num">$80.63</td><td class="num">$100.12</td><td class="num green">+$19.49</td><td class="num">33.6%</td></tr>
+<tr><td>21-40 lbs</td><td class="num">$86.30</td><td class="num">$111.84</td><td class="num green">+$25.54</td><td class="num">45.2%</td></tr>
+<tr><td>41-75 lbs</td><td class="num">$101.36</td><td class="num">$126.15</td><td class="num green">+$24.79</td><td class="num">54.2%</td></tr>
+<tr><td>76-100 lbs</td><td class="num">$95.28</td><td class="num">$132.50</td><td class="num green">+$37.22</td><td class="num">18.2%</td></tr>
+<tr><td>Over 100 lbs</td><td class="num">$140.00</td><td class="num">$160.00</td><td class="num green">+$20.00</td><td class="num">33.3%</td></tr>
+</tbody></table></div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Dog Size vs. Retail & Add-On Attachment</h2>
+<p class="desc">Do bigger dogs mean bigger baskets? Attachment rates by weight class</p>
+<table><thead><tr><th>Dog Size</th><th>Groom Orders</th><th>Unique Clients</th><th>Retail Attach %</th><th>Add-On Attach %</th><th>SPA Attach %</th><th>Avg Retail Spend</th><th>Avg Total Ticket</th></tr></thead><tbody>
+<tr><td>0-20 lbs</td><td class="num">212</td><td class="num">173</td><td class="num green">21.7%</td><td class="num">34.0%</td><td class="num">4.7%</td><td class="num">$21.80</td><td class="num">$114.56</td></tr>
+<tr><td>21-40 lbs</td><td class="num">77</td><td class="num">60</td><td class="num ">15.6%</td><td class="num">29.9%</td><td class="num">3.9%</td><td class="num">$13.77</td><td class="num">$126.44</td></tr>
+<tr><td>41-75 lbs</td><td class="num">47</td><td class="num">42</td><td class="num ">12.8%</td><td class="num">25.5%</td><td class="num">10.6%</td><td class="num">$12.14</td><td class="num">$144.95</td></tr>
+<tr><td>76-100 lbs</td><td class="num">22</td><td class="num">17</td><td class="num ">13.6%</td><td class="num">22.7%</td><td class="num">31.8%</td><td class="num">$16.31</td><td class="num">$142.12</td></tr>
+<tr><td>Over 100 lbs</td><td class="num">2</td><td class="num">2</td><td class="num red">0.0%</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$220.00</td></tr>
+</tbody></table>
+<div class="insight-box"><strong>Insight:</strong> Larger dogs correlate with higher total tickets ($114.56 for 0-20 lbs vs $220.00 for Over 100 lbs). <strong>0-20 lbs</strong> dogs have the highest retail attach rate at 21.7%, while <strong>Over 100 lbs</strong> dogs are lowest at 0.0%. Target retail upsell efforts on Over 100 lbs dog parents at checkout.</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Rotational Customer Base</h2>
+<p class="desc">How many unique grooming customers are actively returning? Split by groom vs. bath, with 10-week and full-year retention windows.</p>
+<div class="kpi-grid" style="margin-bottom:14px">
+<div class="kpi-card green"><div class="kpi-label">Rotational Base (2+ visits)</div><div class="kpi-value">47</div><div class="kpi-sub">of 260 total customers</div></div>
+<div class="kpi-card accent"><div class="kpi-label">Groom Retention (Overall)</div><div class="kpi-value">18.4%</div><div class="kpi-sub">43 of 234</div></div>
+<div class="kpi-card"><div class="kpi-label">Bath Retention (Overall)</div><div class="kpi-value">31.0%</div><div class="kpi-sub">9 of 29</div></div>
+<div class="kpi-card amber"><div class="kpi-label">One-and-Done</div><div class="kpi-value">213</div><div class="kpi-sub">81.9% never returned</div></div>
+<div class="kpi-card brown"><div class="kpi-label">Avg Tenure (Rotational)</div><div class="kpi-value">1.3 mo</div></div>
+</div>
+<div style="background:#FDF0F5;border-left:4px solid #C4276E;padding:12px 16px;border-radius:6px;margin-bottom:18px;font-size:0.85rem;color:#444;line-height:1.7">
+<strong>Retention Formula:</strong> <code style="background:#fff;padding:2px 6px;border-radius:3px;font-size:0.82rem">Retention Rate = Customers with 2+ visits &divide; Total unique customers (within window)</code><br>
+<strong>10-Week Window:</strong> Only customers whose first visit was &ge;70 days before the data end date are eligible &mdash; gives them enough time to return.<br>
+<strong>Full-Year Window:</strong> Only customers whose first visit was &ge;365 days ago are eligible &mdash; true annual retention.<br>
+<strong>Overall:</strong> All customers in the dataset regardless of when they first appeared.
+</div>
+<div class="grid-2">
+<div><h3 style="color:#6B3520;margin:14px 0 8px;font-size:1rem">Groom Customers</h3>
+<table><thead><tr><th>Window</th><th>Eligible</th><th>Retained</th><th>Rate</th></tr></thead><tbody>
+<tr><td>10-Week</td><td class="num">56</td><td class="num">25</td><td class="num" style="font-weight:700">44.6%</td></tr>
+<tr><td>Full Year</td><td class="num">0</td><td class="num">0</td><td class="num" style="font-weight:700">0.0%</td></tr>
+<tr style="border-top:2px solid #1B6B6B"><td>Overall</td><td class="num">234</td><td class="num">43</td><td class="num" style="font-weight:700">18.4%</td></tr>
+</tbody></table>
+<div style="font-size:0.82rem;color:#666;margin-top:8px">Active last 30d: <strong>35</strong> &bull; Last 70d: <strong>42</strong> &bull; Last 90d: <strong>43</strong></div>
+</div>
+<div><h3 style="color:#6B3520;margin:14px 0 8px;font-size:1rem">Bath Customers</h3>
+<table><thead><tr><th>Window</th><th>Eligible</th><th>Retained</th><th>Rate</th></tr></thead><tbody>
+<tr><td>10-Week</td><td class="num">5</td><td class="num">2</td><td class="num" style="font-weight:700">40.0%</td></tr>
+<tr><td>Full Year</td><td class="num">0</td><td class="num">0</td><td class="num" style="font-weight:700">0.0%</td></tr>
+<tr style="border-top:2px solid #1B6B6B"><td>Overall</td><td class="num">29</td><td class="num">9</td><td class="num" style="font-weight:700">31.0%</td></tr>
+</tbody></table>
+<div style="font-size:0.82rem;color:#666;margin-top:8px">Active last 30d: <strong>8</strong> &bull; Last 70d: <strong>8</strong> &bull; Last 90d: <strong>9</strong></div>
+</div>
+</div>
+<div class="grid-2">
+<div><h3 style="color:#6B3520;margin:14px 0 8px;font-size:1rem">Rotational Groom Customers by Dog Size</h3>
+<table><thead><tr><th>Dog Size</th><th>Customers</th><th>% of Base</th><th>Avg Visits</th><th>Avg Spend</th><th>Avg Tenure (mo)</th></tr></thead><tbody>
+<tr><td>0-20 lbs</td><td class="num">29</td><td class="num">67.4%</td><td class="num">2.2</td><td class="num">$266.38</td><td class="num">1.4</td></tr>
+<tr><td>21-40 lbs</td><td class="num">9</td><td class="num">20.9%</td><td class="num">2.1</td><td class="num">$263.77</td><td class="num">1.1</td></tr>
+<tr><td>41-75 lbs</td><td class="num">4</td><td class="num">9.3%</td><td class="num">2.0</td><td class="num">$278.99</td><td class="num">0.7</td></tr>
+<tr><td>76-100 lbs</td><td class="num">1</td><td class="num">2.3%</td><td class="num">2.0</td><td class="num">$240.97</td><td class="num">1.2</td></tr>
+</tbody></table>
+</div>
+<div><h3 style="color:#6B3520;margin:14px 0 8px;font-size:1rem">Rotational Bath Customers by Dog Size</h3>
+<table><thead><tr><th>Dog Size</th><th>Customers</th><th>% of Base</th><th>Avg Visits</th><th>Avg Spend</th><th>Avg Tenure (mo)</th></tr></thead><tbody>
+<tr><td>0-20 lbs</td><td class="num">2</td><td class="num">22.2%</td><td class="num">2.0</td><td class="num">$129.99</td><td class="num">1.1</td></tr>
+<tr><td>21-40 lbs</td><td class="num">3</td><td class="num">33.3%</td><td class="num">2.0</td><td class="num">$257.50</td><td class="num">0.4</td></tr>
+<tr><td>41-75 lbs</td><td class="num">1</td><td class="num">11.1%</td><td class="num">2.0</td><td class="num">$185.00</td><td class="num">0.8</td></tr>
+<tr><td>76-100 lbs</td><td class="num">3</td><td class="num">33.3%</td><td class="num">22.7</td><td class="num">$4,162.39</td><td class="num">1.3</td></tr>
+</tbody></table>
+</div>
+</div>
+<div class="insight-box"><strong>18.1% overall retention rate.</strong> Groom clients retain at <strong>18.4%</strong> vs. bath clients at <strong>31.0%</strong>. The rotational base of <strong>47</strong> customers is the recurring revenue engine. 213 customers (81.9%) came once and never returned — first-visit conversion opportunity.</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Groomer Productivity Scorecard</h2>
+<p class="desc">Active groomers only (worked within last 60 days). Includes retention rate and performance grade.</p>
+<table><thead><tr><th>Groomer</th><th>Grade</th><th>Started</th><th>Tenure</th><th>Appts</th><th>Revenue</th><th>Avg Ticket</th><th>Appts/Mo</th><th>Upsell</th><th>Retention</th><th>Tips</th></tr></thead><tbody>
+<tr><td>Carol W</td><td><span class="badge badge-teal">B</span></td><td>Dec '25</td><td>3mo</td><td class="num">205</td><td class="num">$15,815.00</td><td class="num">$95.77</td><td class="num">68</td><td class="num green">31.4%</td><td class="num red">21.8%</td><td class="num">$1,469.70</td></tr>
+<tr><td>Maria V</td><td><span class="badge badge-yellow">C</span></td><td>Dec '25</td><td>3mo</td><td class="num">91</td><td class="num">$6,713.00</td><td class="num">$90.59</td><td class="num">30</td><td class="num green">36.0%</td><td class="num red">31.2%</td><td class="num">$778.65</td></tr>
+<tr><td>Julia B</td><td><span class="badge badge-teal">B</span></td><td>Feb '26</td><td>1mo</td><td class="num">75</td><td class="num">$5,505.00</td><td class="num">$94.03</td><td class="num">75</td><td class="num green">54.9%</td><td class="num red">14.8%</td><td class="num">$603.15</td></tr>
+<tr><td>Alex  I</td><td><span class="badge badge-red">D</span></td><td>Jan '26</td><td>1mo</td><td class="num">9</td><td class="num">$650.00</td><td class="num">$92.22</td><td class="num">9</td><td class="num green">25.0%</td><td class="num red">12.5%</td><td class="num">$116.60</td></tr>
+<tr><td>Naomi Dutes</td><td><span class="badge badge-red">D</span></td><td>Jan '26</td><td>1mo</td><td class="num">1</td><td class="num">$0.00</td><td class="num">$0.00</td><td class="num">1</td><td class="num red">0.0%</td><td class="num green">100.0%</td><td class="num">$0.00</td></tr>
+</tbody></table>
+<div style="font-size:0.82rem;color:#666;margin-top:8px;line-height:1.6"><strong>Grade formula:</strong> 30% volume (appts/mo) + 25% upsell rate + 25% customer retention + 20% avg ticket — percentile-ranked against active peers.<br><strong>Retention:</strong> % of unique customers served by this groomer who returned 2+ times to the store.</div>
+<div class="opp-box"><strong>Coaching opportunity:</strong> Julia B leads upselling at 54.9% while Naomi Dutes is at 0.0%. Closing this gap across all groomers would significantly boost ticket values.</div>
+</div>
+<div class="grid-2">
+<div class="section">
+<h2><span class="dot"></span>Revenue Concentration</h2>
+<p class="desc">Pareto analysis — customer dependency risk</p>
+<div style="margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px"><span>Top 10% (30 customers)</span><span><strong>46.1%</strong> of revenue</span></div>
+<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:46.1105079733256%;background:#C4276E"></div></div>
+</div>
+<div style="margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px"><span>Top 20% (61 customers)</span><span><strong>58.2%</strong> of revenue</span></div>
+<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:58.15760763398193%;background:#1B6B6B"></div></div>
+</div>
+<div style="margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px"><span>Bottom 80% (246 customers)</span><span><strong>41.8%</strong> of revenue</span></div>
+<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:41.84239236601807%;background:#6B3520"></div></div>
+</div>
+<div class="alert-box"><strong>Concentration risk:</strong> Your top 10% of customers drive 46.1% of revenue. Losing even a few high-value clients would materially impact the business. Prioritize retention programs for VIP customers.</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Customer Intelligence</h2>
+<p class="desc">Visit frequency and lifetime value distribution</p>
+<div class="grid-2"><div>
+<table><thead><tr><th>Segment</th><th>Customers</th><th>%</th><th>Revenue</th><th>Avg Spend</th></tr></thead><tbody>
+<tr><td>1 visit</td><td class="num">213</td><td class="num">81.9%</td><td class="num">$24,039.31</td><td class="num">$112.86</td></tr>
+<tr><td>2 visits</td><td class="num">39</td><td class="num">15.0%</td><td class="num">$9,330.55</td><td class="num">$239.24</td></tr>
+<tr><td>3-4 visits</td><td class="num">7</td><td class="num">2.7%</td><td class="num">$2,346.87</td><td class="num">$335.27</td></tr>
+<tr><td>5-8 visits</td><td class="num">0</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$0.00</td></tr>
+<tr><td>9-12 visits</td><td class="num">0</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$0.00</td></tr>
+<tr><td>13+ visits</td><td class="num">1</td><td class="num">0.4%</td><td class="num">$11,871.21</td><td class="num">$11,871.21</td></tr>
+</tbody></table></div>
+<div><div class="chart-container"><canvas id="custSegChart"></canvas></div></div></div>
+<div class="alert-box"><strong>0 loyal customers (3+ visits) haven't returned in 90+ days.</strong> They represent $0.00 in historical spend. A re-engagement campaign (text/email with a small incentive) could recapture this segment.</div>
+</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Monthly Performance Detail</h2>
+<p class="desc">Revenue, margins, transactions, and tips by month</p>
+<table><thead><tr><th>Month</th><th>Net Revenue</th><th>Grooming</th><th>Commission (50%)</th><th>Retail</th><th>Gross Margin</th><th>Txns</th><th>Avg Ticket</th><th>Tips</th><th>MoM</th></tr></thead><tbody>
+<tr><td>Dec '25</td><td class="num">$12,053.29</td><td class="num">$6,163.00</td><td class="num">$3,081.50</td><td class="num">$5,890.29</td><td class="num">50.0%</td><td class="num">298</td><td class="num">$40.45</td><td class="num">$603.30</td><td class="num ">—</td></tr>
+<tr><td>Jan '26</td><td class="num">$14,545.76</td><td class="num">$9,335.00</td><td class="num">$4,667.50</td><td class="num">$5,210.76</td><td class="num">49.6%</td><td class="num">296</td><td class="num">$49.14</td><td class="num">$796.90</td><td class="num green">+20.7%</td></tr>
+<tr><td>Feb '26</td><td class="num">$17,970.52</td><td class="num">$14,055.00</td><td class="num">$7,027.50</td><td class="num">$3,915.52</td><td class="num">49.2%</td><td class="num">331</td><td class="num">$54.29</td><td class="num">$1,488.05</td><td class="num green">+23.5%</td></tr>
+<tr><td>Mar '26</td><td class="num">$1,989.32</td><td class="num">$1,690.00</td><td class="num">$845.00</td><td class="num">$299.32</td><td class="num">49.0%</td><td class="num">9</td><td class="num">$221.04</td><td class="num">$0.00</td><td class="num red">-88.9%</td></tr>
+</tbody></table></div>
+<div class="grid-2">
+<div class="section"><h2><span class="dot"></span>Top 20 Retail Products</h2><p class="desc">Ranked by net revenue</p>
+<table><thead><tr><th>#</th><th>Product</th><th>Category</th><th>Units</th><th>Revenue</th><th>Avg Price</th></tr></thead><tbody>
+<tr><td>1</td><td>Medium Treat Table</td><td>Treats &amp; Chews</td><td class="num">189</td><td class="num">$1,130.91</td><td class="num">$5.98</td></tr>
+<tr><td>2</td><td>WGB Chips - Chicken Chips (4 oz)</td><td>Treats &amp; Chews</td><td class="num">58</td><td class="num">$797.43</td><td class="num">$13.75</td></tr>
+<tr><td>3</td><td>Large Treat Table</td><td>Treats &amp; Chews</td><td class="num">101</td><td class="num">$756.49</td><td class="num">$7.49</td></tr>
+<tr><td>4</td><td>Small Treat Table</td><td>Treats &amp; Chews</td><td class="num">132</td><td class="num">$589.98</td><td class="num">$4.47</td></tr>
+<tr><td>5</td><td>X-Small Treat Table</td><td>Treats &amp; Chews</td><td class="num">150</td><td class="num">$447.30</td><td class="num">$2.98</td></tr>
+<tr><td>6</td><td>WGB Chips - Beef Chips (4 oz)</td><td>Treats &amp; Chews</td><td class="num">25</td><td class="num">$359.76</td><td class="num">$14.39</td></tr>
+<tr><td>7</td><td>Bakery Bulk Treats</td><td>Treats &amp; Chews</td><td class="num">238</td><td class="num">$355.72</td><td class="num">$1.49</td></tr>
+<tr><td>8</td><td>Farmers Market Bulk Treats</td><td>Treats &amp; Chews</td><td class="num">126</td><td class="num">$313.68</td><td class="num">$2.47</td></tr>
+<tr><td>9</td><td>WGB Chips - Sweet Potato Chips (4 oz)</td><td>Treats &amp; Chews</td><td class="num">24</td><td class="num">$311.76</td><td class="num">$12.99</td></tr>
+<tr><td>10</td><td>WGB Chips - Turkey Chips (4 oz)</td><td>Treats &amp; Chews</td><td class="num">19</td><td class="num">$284.81</td><td class="num">$14.99</td></tr>
+<tr><td>11</td><td>WGB Chips - Chicken Chips (8 oz)</td><td>Treats &amp; Chews</td><td class="num">11</td><td class="num">$275.29</td><td class="num">$25.03</td></tr>
+<tr><td>12</td><td>WGB Straws Chicken (4 oz)</td><td>Other</td><td class="num">16</td><td class="num">$224.85</td><td class="num">$14.05</td></tr>
+<tr><td>13</td><td>WGB Chips - Chicken Chips (16 oz)</td><td>Treats &amp; Chews</td><td class="num">4</td><td class="num">$183.96</td><td class="num">$45.99</td></tr>
+<tr><td>14</td><td>WGB Bully Stick Jumbo 6&quot;</td><td>Natural Chews</td><td class="num">16</td><td class="num">$175.84</td><td class="num">$10.99</td></tr>
+<tr><td>15</td><td>WGB Bully Stick Braided 6&quot;</td><td>Natural Chews</td><td class="num">15</td><td class="num">$149.85</td><td class="num">$9.99</td></tr>
+<tr><td>16</td><td>WGB Bully Springs</td><td>Natural Chews</td><td class="num">18</td><td class="num">$143.82</td><td class="num">$7.99</td></tr>
+<tr><td>17</td><td>WGB Bully Stick Jumbo12&quot;</td><td>Natural Chews</td><td class="num">8</td><td class="num">$127.92</td><td class="num">$15.99</td></tr>
+<tr><td>18</td><td>Pupsicle Pops Chicken S</td><td>Other</td><td class="num">7</td><td class="num">$108.93</td><td class="num">$15.56</td></tr>
+<tr><td>19</td><td> PB Cupcake</td><td>Bakery &amp; Birthday</td><td class="num">12</td><td class="num">$107.88</td><td class="num">$8.99</td></tr>
+<tr><td>20</td><td>Miscellaneous</td><td>Other</td><td class="num">9</td><td class="num">$105.91</td><td class="num">$11.77</td></tr>
+</tbody></table></div>
+<div class="section"><h2><span class="dot"></span>Retail Categories</h2><p class="desc">Revenue and margin by category</p><div class="chart-container"><canvas id="catChart"></canvas></div></div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Cancellations, No-Shows & Returns</h2>
+<p class="desc">Multi-view analysis of all refund activity, grooming cancellations, no-shows, and retail returns. Data derived from POS transaction voids, negative-quantity line items, and zero-total orders.</p>
+<div style="background:#FDF0F5;border-left:4px solid #C4276E;padding:12px 16px;border-radius:6px;margin-bottom:18px;font-size:0.85rem;color:#444;line-height:1.7">
+<strong>How We Identify Cancellations:</strong><br>
+<code style="background:#fff;padding:2px 6px;border-radius:3px;font-size:0.82rem">Service Voids</code> &mdash; Groom line items with negative quantity = service was rung up then refunded (cancelled, redo, or pricing adjustment).<br>
+<code style="background:#fff;padding:2px 6px;border-radius:3px;font-size:0.82rem">Zero-Total Groom Orders</code> &mdash; Orders containing groom services that closed at $0 = likely no-shows or walk-aways.<br>
+<code style="background:#fff;padding:2px 6px;border-radius:3px;font-size:0.82rem">Retail Returns</code> &mdash; Product return line items with return reason &amp; disposition recorded in POS.<br>
+<strong>Note:</strong> FranPOS booking API does not expose historical cancellation logs. This analysis uses POS transaction data as the source of truth.
+</div>
+<h3 style="color:#6B3520;margin:18px 0 10px">Overview</h3>
+<div class="kpi-grid" style="margin-bottom:14px">
+<div class="kpi-card"><div class="kpi-label">Total Refund Value</div><div class="kpi-value">$503.95</div><div class="kpi-sub">12 line items across 8 orders</div></div>
+<div class="kpi-card green"><div class="kpi-label">Refund % of Revenue</div><div class="kpi-value">1.1%</div><div class="kpi-sub">Industry avg: 1&ndash;3%</div></div>
+<div class="kpi-card green"><div class="kpi-label">Groom Cancel Rate</div><div class="kpi-value">1.6%</div><div class="kpi-sub">5 of 314 groom orders</div></div>
+<div class="kpi-card"><div class="kpi-label">Revenue Lost to Cancels</div><div class="kpi-value">$405.00</div><div class="kpi-sub">Voids + no-show orders</div></div>
+</div>
+<div class="kpi-grid" style="margin-bottom:18px">
+<div class="kpi-card"><div class="kpi-label">Order Refund Rate</div><div class="kpi-value">0.9%</div><div class="kpi-sub">8 of 934 total orders</div></div>
+<div class="kpi-card"><div class="kpi-label">Avg Refund Value</div><div class="kpi-value">$42.00</div><div class="kpi-sub">Per line item</div></div>
+<div class="kpi-card"><div class="kpi-label">Grooming Voided</div><div class="kpi-value">$405.00</div><div class="kpi-sub">6 service line items</div></div>
+<div class="kpi-card"><div class="kpi-label">Retail Returned</div><div class="kpi-value">$98.95</div><div class="kpi-sub">6 product line items</div></div>
+</div>
+<h3 style="color:#6B3520;margin:22px 0 10px">Grooming Cancellations & No-Shows</h3>
+<p class="desc">Isolating grooming-specific cancellation events — the most operationally impactful category.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px">
+<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid #C62828"><div style="font-size:0.8rem;color:#888">Service Voids</div><div style="font-size:1.6rem;font-weight:700;color:#6B3520">4</div><div style="font-size:0.78rem;color:#666">6 line items &bull; $405.00</div></div>
+<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid #F9A825"><div style="font-size:0.8rem;color:#888">Zero-Total / No-Shows</div><div style="font-size:1.6rem;font-weight:700;color:#6B3520">1</div><div style="font-size:0.78rem;color:#666">$0.00 in unpaid services</div></div>
+<div style="background:#fff;border-radius:10px;padding:16px;border-left:4px solid #2E7D32"><div style="font-size:0.8rem;color:#888">Industry Benchmark</div><div style="font-size:1.6rem;font-weight:700;color:#2E7D32">5&ndash;15%</div><div style="font-size:0.78rem;color:#666">Typical grooming cancel rate</div></div>
+</div>
+<div style="background:#FDF0F5;border-left:4px solid #1B6B6B;padding:12px 16px;border-radius:6px;margin-bottom:16px;font-size:0.85rem;color:#444;line-height:1.7">
+<strong>Add-On vs. Core Service Voids:</strong> Of the 6 grooming void line items, <strong>1</strong> are Teeth Brushing add-on removals ($10 each) &mdash; these are typically customers declining at checkout, not true cancellations. Excluding add-on removals, <strong>4 orders</strong> had a core groom service voided.</div>
+<h4 style="margin:16px 0 8px">Monthly Cancellation Trend</h4>
+<div class="chart-wrap"><canvas id="cancelTrendChart"></canvas></div>
+<table><thead><tr><th>Month</th><th>Groom Orders</th><th>Service Voids</th><th>No-Shows</th><th>Total Cancels</th><th>Cancel Rate</th></tr></thead><tbody>
+<tr><td>Dec '25</td><td class="num">69</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num" style="color:#2E7D32;font-weight:700">0.0%</td></tr>
+<tr><td>Jan '26</td><td class="num">101</td><td class="num">2</td><td class="num">1</td><td class="num">3</td><td class="num">3.0%</td></tr>
+<tr><td>Feb '26</td><td class="num">142</td><td class="num">2</td><td class="num">0</td><td class="num">2</td><td class="num">1.4%</td></tr>
+<tr><td>Mar '26</td><td class="num">2</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num" style="color:#2E7D32;font-weight:700">0.0%</td></tr>
+<tr style="border-top:2px solid #1B6B6B;font-weight:700"><td>Total</td><td class="num">314</td><td class="num">4</td><td class="num">1</td><td class="num">5</td><td class="num">1.6%</td></tr>
+</tbody></table>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0">
+<div><h4>Services Voided</h4>
+<table><thead><tr><th>Service</th><th>Voids</th><th>Value Lost</th></tr></thead><tbody>
+<tr><td>FG / Poodle-Doodle / MD</td><td class="num">1</td><td class="num">$115.00</td></tr>
+<tr><td>FG / General / MD</td><td class="num">1</td><td class="num">$95.00</td></tr>
+<tr><td>FG / General / SM</td><td class="num">1</td><td class="num">$85.00</td></tr>
+<tr><td>Lux Bath / General / XLG</td><td class="num">1</td><td class="num">$75.00</td></tr>
+<tr><td>SPA UPGRADE / S Hairy Beast (Deshedding)</td><td class="num">1</td><td class="num">$25.00</td></tr>
+<tr><td>ADD-ON / Teeth Brushing</td><td class="num">1</td><td class="num">$10.00</td></tr>
+</tbody></table></div>
+<div><h4>No-Show / Zero-Total Orders</h4>
+<table><thead><tr><th>Date</th><th>Service</th><th>Value</th><th>Employee</th></tr></thead><tbody>
+<tr><td>Jan 21</td><td>ONLINE SERVICE (#3) - DOG - Luxury Bath</td><td class="num">$0.00</td><td>Naomi Dutes</td></tr>
+</tbody></table></div>
+</div>
+<h3 style="color:#6B3520;margin:22px 0 10px">Retail Product Returns</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+<div><h4>Return Reasons</h4>
+<table><thead><tr><th>Reason</th><th>Count</th><th>Value</th><th>%</th></tr></thead><tbody>
+<tr><td>Pet didn’t like it</td><td class="num">3</td><td class="num">$44.97</td><td class="num">50.0%</td></tr>
+<tr><td>Bought wrong product</td><td class="num">1</td><td class="num">$15.99</td><td class="num">16.7%</td></tr>
+<tr><td>N/A</td><td class="num">1</td><td class="num">$8.99</td><td class="num">16.7%</td></tr>
+<tr><td>Wrong Size</td><td class="num">1</td><td class="num">$29.00</td><td class="num">16.7%</td></tr>
+</tbody></table></div>
+<div><h4>Return Dispositions</h4>
+<table><thead><tr><th>Disposition</th><th>Count</th><th>Value</th><th>%</th></tr></thead><tbody>
+<tr><td>Return to Stock (add to inventory)</td><td class="num">3</td><td class="num">$44.97</td><td class="num">50.0%</td></tr>
+<tr><td>Waste (dumpster)</td><td class="num">2</td><td class="num">$24.98</td><td class="num">33.3%</td></tr>
+<tr><td>N/A</td><td class="num">1</td><td class="num">$29.00</td><td class="num">16.7%</td></tr>
+</tbody></table></div>
+</div>
+<h4>Top Returned Products (by Value)</h4>
+<table><thead><tr><th>#</th><th>Product</th><th>Type</th><th>Returns</th><th>Value</th></tr></thead><tbody>
+<tr><td>1</td><td>FG / Poodle-Doodle / MD</td><td><span class="badge badge-yellow">Groom</span></td><td class="num">1</td><td class="num">$115.00</td></tr>
+<tr><td>2</td><td>FG / General / MD</td><td><span class="badge badge-yellow">Groom</span></td><td class="num">1</td><td class="num">$95.00</td></tr>
+<tr><td>3</td><td>FG / General / SM</td><td><span class="badge badge-yellow">Groom</span></td><td class="num">1</td><td class="num">$85.00</td></tr>
+<tr><td>4</td><td>Lux Bath / General / XLG</td><td><span class="badge badge-yellow">Groom</span></td><td class="num">1</td><td class="num">$75.00</td></tr>
+<tr><td>5</td><td>UCTRY - Best Dog Ever Lead Wide 5&#39;</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$29.00</td></tr>
+<tr><td>6</td><td>SPA UPGRADE / S Hairy Beast (Deshedding)</td><td><span class="badge badge-yellow">Groom</span></td><td class="num">1</td><td class="num">$25.00</td></tr>
+<tr><td>7</td><td>Miscellaneous</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$19.99</td></tr>
+<tr><td>8</td><td>Pupsicle Pops Chicken S</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$15.99</td></tr>
+<tr><td>9</td><td>WGB Chips - Beef Chips (4 oz)</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$14.99</td></tr>
+<tr><td>10</td><td>ADD-ON / Teeth Brushing</td><td><span class="badge badge-yellow">Groom</span></td><td class="num">1</td><td class="num">$10.00</td></tr>
+<tr><td>11</td><td>WGB Jerky Bites Salmon Recipe (4 oz)</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$9.99</td></tr>
+<tr><td>12</td><td>H&amp;K Party Hat Party Time Blue Large</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$8.99</td></tr>
+</tbody></table>
+<h3 style="color:#6B3520;margin:22px 0 10px">Monthly Refund Trend</h3>
+<div class="chart-wrap"><canvas id="refundTrendChart"></canvas></div>
+<table><thead><tr><th>Month</th><th>Items</th><th>Refund Value</th><th>Revenue</th><th>Refund % Rev</th><th>Avg/Item</th></tr></thead><tbody>
+<tr><td>Dec '25</td><td class="num">1</td><td class="num">$29.00</td><td class="num">$12,102.30</td><td class="num">0.2%</td><td class="num">$29.00</td></tr>
+<tr><td>Jan '26</td><td class="num">8</td><td class="num">$255.96</td><td class="num">$14,886.72</td><td class="num" style="color:#C62828;font-weight:700">1.7%</td><td class="num">$32.00</td></tr>
+<tr><td>Feb '26</td><td class="num">3</td><td class="num">$218.99</td><td class="num">$18,339.51</td><td class="num">1.2%</td><td class="num">$73.00</td></tr>
+<tr><td>Mar '26</td><td class="num">0</td><td class="num">$0.00</td><td class="num">$1,989.32</td><td class="num">0.0%</td><td class="num">$0.00</td></tr>
+<tr style="border-top:2px solid #1B6B6B;font-weight:700"><td>Total</td><td class="num">12</td><td class="num">$503.95</td><td class="num">$47,317.85</td><td class="num">1.1%</td><td class="num">$42.00</td></tr>
+</tbody></table>
+<h3 style="color:#6B3520;margin:22px 0 10px">Seasonality & Patterns</h3>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+<div><h4>First Half vs. Second Half</h4>
+<table><thead><tr><th>Period</th><th>Items</th><th>Value</th><th>Avg/Item</th></tr></thead><tbody>
+<tr><td>First 2mo</td><td class="num">9</td><td class="num">$284.96</td><td class="num">$31.66</td></tr>
+<tr><td>Last 2mo</td><td class="num">3</td><td class="num">$218.99</td><td class="num">$73.00</td></tr>
+<tr style="border-top:2px solid #1B6B6B"><td colspan="2"><em>H2 vs H1 difference</em></td><td class="num">$65.97 lower</td><td></td></tr>
+</tbody></table></div>
+<div><h4>Returns by Day of Week</h4>
+<table><thead><tr><th>Day</th><th>Returns</th><th>Value</th><th>Refund Rate</th></tr></thead><tbody>
+<tr><td>Monday</td><td class="num">0</td><td class="num">$0.00</td><td class="num">0.0%</td></tr>
+<tr><td>Tuesday</td><td class="num">0</td><td class="num">$0.00</td><td class="num">0.0%</td></tr>
+<tr><td>Wednesday</td><td class="num">4</td><td class="num">$130.98</td><td class="num">2.2%</td></tr>
+<tr><td>Thursday</td><td class="num">2</td><td class="num">$210.00</td><td class="num">1.5%</td></tr>
+<tr><td>Friday</td><td class="num">1</td><td class="num">$8.99</td><td class="num">0.6%</td></tr>
+<tr><td>Saturday</td><td class="num">4</td><td class="num">$124.98</td><td class="num">2.1%</td></tr>
+<tr><td>Sunday</td><td class="num">1</td><td class="num">$29.00</td><td class="num">1.3%</td></tr>
+</tbody></table></div>
+</div>
+<h3 style="color:#6B3520;margin:22px 0 10px">Refunds by Employee</h3>
+<p class="desc">Refund volume relative to each employee's total transaction count — identifies potential process or training gaps.</p>
+<table><thead><tr><th>Employee</th><th>Refund Items</th><th>Refund Value</th><th>Total Items Sold</th><th>Refund Rate</th><th>Avg Refund</th></tr></thead><tbody>
+<tr><td>Carol W</td><td class="num">3</td><td class="num">$210.00</td><td class="num">278</td><td class="num">1.1%</td><td class="num">$70.00</td></tr>
+<tr><td>Naomi Dutes</td><td class="num">3</td><td class="num">$53.98</td><td class="num">214</td><td class="num">1.4%</td><td class="num">$17.99</td></tr>
+<tr><td>Cindy Szczudlo</td><td class="num">2</td><td class="num">$35.98</td><td class="num">285</td><td class="num">0.7%</td><td class="num">$17.99</td></tr>
+<tr><td>Maria V</td><td class="num">2</td><td class="num">$100.00</td><td class="num">131</td><td class="num">1.5%</td><td class="num">$50.00</td></tr>
+<tr><td>Christina Ramkissoon</td><td class="num">1</td><td class="num">$8.99</td><td class="num">55</td><td class="num">1.8%</td><td class="num">$8.99</td></tr>
+<tr><td>Julia B</td><td class="num">1</td><td class="num">$95.00</td><td class="num">132</td><td class="num">0.8%</td><td class="num">$95.00</td></tr>
+</tbody></table>
+<h3 style="color:#6B3520;margin:22px 0 10px">Grooming Void Log</h3>
+<p class="desc">Every voided grooming service — review for patterns in employee, service type, timing, or customer.</p>
+<table><thead><tr><th>Date</th><th>Service</th><th>SKU</th><th>Value</th><th>Employee</th><th>Order Total</th></tr></thead><tbody>
+<tr><td>Feb 19, 2026</td><td>FG / General / MD</td><td>98700141</td><td class="num">$95.00</td><td>Julia B</td><td class="num">-$103.19</td></tr>
+<tr><td>Feb 12, 2026</td><td>FG / Poodle-Doodle / MD</td><td>98700325</td><td class="num">$115.00</td><td>Carol W</td><td class="num">-$124.92</td></tr>
+<tr><td>Jan 07, 2026</td><td>ADD-ON / Teeth Brushing</td><td>54300026</td><td class="num">$10.00</td><td>Carol W</td><td class="num">-$86.90</td></tr>
+<tr><td>Jan 07, 2026</td><td>FG / General / SM</td><td>98700134</td><td class="num">$85.00</td><td>Carol W</td><td class="num">-$86.90</td></tr>
+<tr><td>Jan 03, 2026</td><td>SPA UPGRADE / S Hairy Beast (Deshedding)</td><td>76500053</td><td class="num">$25.00</td><td>Maria V</td><td class="num">$0.00</td></tr>
+<tr><td>Jan 03, 2026</td><td>Lux Bath / General / XLG</td><td>98700042</td><td class="num">$75.00</td><td>Maria V</td><td class="num">$0.00</td></tr>
+</tbody></table>
+<div class="insight-box"><strong>Elite Analyst Assessment:</strong><br><br><span style="display:inline-block;background:#F9A825;color:#fff;padding:3px 12px;border-radius:12px;font-size:0.82rem;margin-bottom:8px">Normal</span><br><strong>Refund/Revenue ratio: 1.1%</strong> &mdash; within the 1&ndash;3% industry average. Manageable but worth monitoring for trends.<br><br><strong>Grooming cancellation rate: 1.6%</strong> vs. 5&ndash;15% industry norm &mdash; outstanding. Appointment management and client communication are working extremely well. Only <strong>5 groom orders</strong> out of 314 resulted in a void or no-show for the entire year.<br><br><strong>Key Findings:</strong><br>&bull; <strong>Teeth Brushing add-on</strong> accounts for 1 of 6 grooming voids &mdash; these are checkout declines, not cancellations. Consider not pre-loading this add-on to reduce unnecessary processing.<br>&bull; <strong>&ldquo;Wrong Size&rdquo;</strong> is the #1 retail return reason (1 items). Staff-assisted sizing at point of sale &mdash; especially for collars, harnesses, and apparel &mdash; would reduce these.<br>&bull; <strong>&ldquo;Bought wrong product&rdquo;</strong> (1 items) suggests customers need better guidance. Shelf signage and staff recommendations can help.<br><br><strong>Recommendations:</strong><br>&bull; <strong>Teeth Brushing workflow:</strong> Only add the Teeth Brushing add-on after confirming with the customer. This alone eliminates ~38% of grooming voids.<br>&bull; <strong>No-show policy:</strong> At this volume a formal deposit/late-cancel policy is not urgent, but consider implementing one as the business grows to protect groomer schedules.<br>&bull; <strong>Track in POS:</strong> Start using the FranPOS booking &ldquo;Cancel&rdquo; workflow so cancellation data flows to the appointment record. Currently voids/zero-orders are the only signal.<br></div>
+</div>
+
+<script>
+const cc = ["#C4276E", "#1B6B6B", "#6B3520", "#E91E63", "#26A69A", "#8D6E63", "#F06292", "#4DB6AC", "#A1887F", "#CE93D8", "#80CBC4", "#FFAB91"];
+const mg = '#C4276E', tl = '#1B6B6B', br = '#6B3520', gn = '#2E7D32';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#666';
+
+new Chart(document.getElementById('trajectoryChart'), {
+    type: 'bar',
+    data: {
+        labels: ["Dec '25", "Jan '26", "Feb '26", "Mar '26"],
+        datasets: [
+            { label: 'Actual Revenue', data: [12073.3, 14645.76, 18120.52, 1989.32], backgroundColor: mg+'cc', borderRadius: 6 },
+            { label: 'Trend Line', data: [15723.8, 13046.08, 10368.37, 7690.65], type: 'line', borderColor: tl, borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false }
+        ]
+    },
+    options: { responsive: true, maintainAspectRatio: true,
+        scales: { y: { ticks: { callback: v => '$'+v.toLocaleString() } } },
+        plugins: { legend: { position: 'bottom' },
+            tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits:0}) } } } }
+});
+
+new Chart(document.getElementById('revMixChart'), {
+    type: 'doughnut',
+    data: { labels: ['Grooming','Retail','Gift Cards'],
+        datasets: [{ data: [31243.00,15315.90,270.00], backgroundColor: [mg,tl,br], borderWidth: 0, hoverOffset: 8 }] },
+    options: { responsive: true, cutout: '65%',
+        plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ctx => ctx.label+': $'+ctx.parsed.toLocaleString() } } } }
+});
+
+new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: { labels: ["Dec '25", "Jan '26", "Feb '26", "Mar '26"],
+        datasets: [
+            { label: 'Grooming', data: [6163.0, 9335.0, 14055.0, 1690.0], backgroundColor: mg, borderRadius: 4 },
+            { label: 'Retail', data: [5890.29, 5210.76, 3915.52, 299.32], backgroundColor: tl, borderRadius: 4 }
+        ] },
+    options: { responsive: true, interaction: { mode: 'index' },
+        scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => '$'+v.toLocaleString() } } },
+        plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('hoursChart'), {
+    type: 'bar',
+    data: { labels: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'],
+        datasets: [{ data: [8, 18, 92, 105, 127, 126, 138, 133, 113, 69, 5, 0], backgroundColor: cc.slice(0,12).map((c,i) => {
+            const max = Math.max(...[8, 18, 92, 105, 127, 126, 138, 133, 113, 69, 5, 0]);
+            const ratio = [8, 18, 92, 105, 127, 126, 138, 133, 113, 69, 5, 0][i] / max;
+            return ratio > 0.8 ? mg : ratio > 0.5 ? tl : br+'88';
+        }), borderRadius: 6 }] },
+    options: { responsive: true, plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: v => v.toLocaleString() } } } }
+});
+
+new Chart(document.getElementById('svcMixChart'), {
+    type: 'bar',
+    data: { labels: ['Full Groom', 'Mini Groom', 'Luxury Bath', 'Teeth Brushing', 'Classic Bath', 'Hairy Beast (Deshedding)', 'Nail Trim / Grind', 'Medicated / Hypo Shampoo'], datasets: [{ data: [24508.0, 2640.0, 1625.0, 1070.0, 400.0, 330.0, 195.0, 180.0], backgroundColor: cc.slice(0,8), borderRadius: 6 }] },
+    options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } },
+        scales: { x: { ticks: { callback: v => '$'+v.toLocaleString() } } } }
+});
+
+new Chart(document.getElementById('dogSizeChart'), {
+    type: 'bar',
+    data: { labels: ['0-20 lbs', '21-40 lbs', '41-75 lbs', '76-100 lbs', 'Over 100 lbs'], datasets: [{ data: [236.0, 80.0, 48.0, 20.0, 3.0], backgroundColor: cc.slice(0,5), borderRadius: 6 }] },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+});
+
+new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: { labels: ['Treats & Chews', 'Other', 'Toys', 'Natural Chews', 'Bakery & Birthday', 'Grooming Supplies', 'Apparel & Lifestyle', 'Supplements & Health', 'Accessories'], datasets: [{ data: [6998.11, 3599.55, 1681.64, 1626.03, 809.55, 305.27, 138.99, 137.81, 18.95], backgroundColor: cc.slice(0,9), borderWidth: 0 }] },
+    options: { responsive: true, cutout: '55%', plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('custSegChart'), {
+    type: 'bar',
+    data: { labels: ['1 visit', '2 visits', '3-4 visits', '5-8 visits', '9-12 visits', '13+ visits'], datasets: [{ data: [213, 39, 7, 0, 0, 1], backgroundColor: cc.slice(0,6), borderRadius: 6 }] },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+});
+
+if (document.getElementById('refundTrendChart')) {
+    new Chart(document.getElementById('refundTrendChart'), {
+        type: 'bar',
+        data: {
+            labels: ["Dec '25", "Jan '26", "Feb '26", "Mar '26"],
+            datasets: [
+                { label: 'Refund Value', data: [29.0, 255.96, 218.99, 0], backgroundColor: '#C6282888', borderRadius: 4, yAxisID: 'y' },
+                { label: 'Items Returned', data: [1, 8, 3, 0], type: 'line', borderColor: '#1B6B6B', borderWidth: 2, pointBackgroundColor: '#1B6B6B', fill: false, yAxisID: 'y1' }
+            ]
+        },
+        options: { responsive: true, interaction: { mode: 'index' },
+            scales: {
+                y: { position: 'left', ticks: { callback: v => '$'+v.toLocaleString() } },
+                y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Items' } }
+            },
+            plugins: { legend: { position: 'bottom' },
+                tooltip: { callbacks: { label: ctx => {
+                    if (ctx.dataset.yAxisID === 'y') return 'Refund Value: $' + ctx.parsed.y.toLocaleString();
+                    return 'Items: ' + ctx.parsed.y;
+                } } }
+            }
+        }
+    });
+}
+
+if (document.getElementById('cancelTrendChart')) {
+    new Chart(document.getElementById('cancelTrendChart'), {
+        type: 'bar',
+        data: {
+            labels: ["Dec '25", "Jan '26", "Feb '26", "Mar '26"],
+            datasets: [
+                { label: 'Cancel Events', data: [0, 3, 2, 0], backgroundColor: '#C6282899', borderRadius: 4, yAxisID: 'y' },
+                { label: 'Cancel Rate %', data: [0.0, 2.97, 1.41, 0.0], type: 'line', borderColor: '#C4276E', borderWidth: 2, pointBackgroundColor: '#C4276E', fill: false, yAxisID: 'y1' }
+            ]
+        },
+        options: { responsive: true, interaction: { mode: 'index' },
+            scales: {
+                y: { position: 'left', title: { display: true, text: 'Events' }, beginAtZero: true },
+                y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Rate %' }, beginAtZero: true }
+            },
+            plugins: { legend: { position: 'bottom' },
+                tooltip: { callbacks: { label: ctx => {
+                    if (ctx.dataset.yAxisID === 'y1') return 'Cancel Rate: ' + ctx.parsed.y.toFixed(1) + '%';
+                    return 'Events: ' + ctx.parsed.y;
+                } } }
+            }
+        }
+    });
+}
+</script>
+
+</div>
+<div class="footer">
+    Generated March 06, 2026 &mdash; <span>Woof Gang Bakery & Grooming</span> &mdash; Operations Intelligence Dashboard
+</div>
+</body>
+</html>

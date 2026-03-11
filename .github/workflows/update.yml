@@ -1,0 +1,33 @@
+name: Nightly Update
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - run: pip install httpx pandas openpyxl
+      - name: Run dashboard script
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: cd scripts && python run.py
+      - name: Commit and push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git reset --hard origin/main
+          git add port-washington/data/
+          git add port-washington/*.html
+          git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
+          git push origin main
