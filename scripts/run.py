@@ -171,12 +171,9 @@ def extract_all_data():
         with open(cache_file) as f:
             cached = json.load(f)
 
-        # Only skip fetch if running locally AND cache is very fresh
+        # Never skip fetch - always do incremental update
         age_hours = (time.time() - cache_file.stat().st_mtime) / 3600
-        is_github_actions = os.environ.get("GITHUB_ACTIONS") == "true"
-        if not is_github_actions and age_hours < 2 and len(cached.get("order_items", [])) > 1000:
-            print(f"Cache is only {age_hours:.1f}h old - skipping fetch")
-            return cached
+        print(f"Cache is {age_hours:.1f}h old - running incremental fetch...")
 
         inc_start = (datetime.today() - timedelta(days=INCREMENTAL_DAYS)).strftime("%Y-%m-%d")
 
