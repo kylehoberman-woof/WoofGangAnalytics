@@ -25,6 +25,32 @@ jobs:
           find . -name "*.pyc" -delete
           find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
           cd scripts && python run.py
+      - name: Fetch stock levels
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: |
+          python3 -c "
+import httpx, json, time, os
+from pathlib import Path
+TOKEN = os.environ['FRANPOS_TOKEN']
+BASE_URL = 'https://publicapi.franpos.com'
+LOCATION_ID = 203698
+data_dir = Path('port-washington/data')
+all_data = json.load(open(data_dir / 'all_data.json'))
+skus = set(i.get('Sku','').strip() for i in all_data['order_items'] if len(i.get('Sku','').strip()) > 2)
+stock = {}
+for sku in sorted(skus):
+    try:
+        r = httpx.get(f'{BASE_URL}/api/getStockByProductSKU/{sku}/{LOCATION_ID}', params={'Token': TOKEN}, timeout=10)
+        if r.status_code == 200:
+            stock[sku] = float(r.text.strip())
+        time.sleep(0.05)
+    except: pass
+json.dump(stock, open(data_dir / 'stock_levels.json', 'w'))
+print(f'Fetched {len(stock)} stock levels')
+"
+      - name: Generate inventory dashboard
+        run: cd scripts && python generate_inventory_dashboard.py
       - name: Commit and push
         run: |
           git config --global user.name "github-actions[bot]"
