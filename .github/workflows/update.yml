@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v4
         with:
@@ -25,9 +25,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git reset --hard origin/main
           git add port-washington/data/
           git add port-washington/*.html
           git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
-          git push origin main
+          git push --force origin main
