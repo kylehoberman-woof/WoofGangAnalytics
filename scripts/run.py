@@ -1923,7 +1923,9 @@ def generate_workbook(transformed):
 
     _store_short = STORE_NAME.split("--")[-1].strip().split("(")[0].strip().replace(", ", "_").replace(" ", "")
     _year_range = f"{START_DATE[:4]}" if START_DATE[:4] == END_DATE[:4] else f"{START_DATE[:4]}-{END_DATE[:4]}"
-    output_file = Path.home() / "Desktop" / f"WoofGang_{_store_short}_{_year_range}_Analysis.xlsx"
+    desktop = Path.home() / "Desktop"
+    desktop.mkdir(exist_ok=True)
+    output_file = desktop / f"WoofGang_{_store_short}_{_year_range}_Analysis.xlsx"
     wb.save(output_file)
     print(f"\n{'=' * 60}")
     print(f"REPORT SAVED: {output_file}")
