@@ -13,7 +13,7 @@ jobs:
         with:
           fetch-depth: 1
           fetch-tags: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
