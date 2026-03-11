@@ -21,13 +21,14 @@ jobs:
       - name: Run dashboard script
         env:
           FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
-        run: cd scripts && python run.py
+        run: |
+          find . -name "*.pyc" -delete
+          find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+          cd scripts && python run.py
       - name: Commit and push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global pull.rebase false
-          git config --global merge.ff only
           git add port-washington/data/
           git add port-washington/*.html
           git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
