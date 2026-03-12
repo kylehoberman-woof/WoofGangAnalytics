@@ -12,22 +12,35 @@ GUARANTEES = {"Maria C": 200.0, "Sue M": 300.0}
 COMMISSION_RATE = 0.50
 EXCLUDE = {"Unknown", "Wgb Port Washington", "Kyle Hoberman", "Jessica G", "Angela R"}
 BATHER_RATE = 17.0  # $/hr
-# Manual hours per pay period (period_start_str -> {name: hours})
-# Update each pay period with actual hours from time clock
-BATHER_HOURS = {
-    "2026-02-23": {"Jessica G": 58.36, "Angela R": 7.25},
-}
 
 # Retail staff hourly rates
 RETAIL_RATES = {
     "Chris": 20.0,
     "Casey": 19.0,
 }
-# Manual hours per pay period for retail staff (period_start_str -> {name: hours})
-# Pay period ending 3/8 starts on 2/23
-RETAIL_HOURS = {
-    "2026-02-23": {"Chris": 70.36, "Casey": 72.46},
+
+# Name mapping from time clock full names to short names
+RETAIL_NAME_MAP = {
+    "Christine Brower": "Chris",
+    "Casey Makowski": "Casey",
 }
+BATHER_NAME_MAP = {
+    "Jessica G": "Jessica G",
+    "Angela R": "Angela R",
+}
+
+def get_hours_from_clocks(clocks, name_map, period_start, period_end):
+    """Calculate hours worked from time clock records for a pay period."""
+    hours = {}
+    for c in clocks:
+        full_name = c.get("EmployeeName", "")
+        short_name = name_map.get(full_name)
+        if not short_name: continue
+        time_in = (c.get("TimeIn") or "")[:10]
+        if period_start <= time_in <= period_end:
+            hrs = c.get("TotalTimeClockHoursDecimal") or 0
+            hours[short_name] = hours.get(short_name, 0) + hrs
+    return {k: round(v, 2) for k, v in hours.items()}
 
 MANAGER_SALARY_OLD    = 65000.0   # Mar 1 2025 – Feb 28 2026
 MANAGER_SALARY_NEW    = 67000.0   # Mar 1 2026 onward
@@ -42,6 +55,7 @@ groom_by_day  = defaultdict(lambda: defaultdict(float))
 order_groomer = {}
 order_date    = {}
 tips_by_order = {}
+order_groomer_rev = {}
 
 with open(DATA_DIR / "all_data.json") as f:
     data = json.load(f)
@@ -66,7 +80,10 @@ if True:
         if is_groom_sku:
             if person not in EXCLUDE:
                 groom_by_day[person][day] += price * qty
-                if oid: order_groomer[oid] = person
+                if oid:
+                    order_groomer[oid] = person  # fallback
+                    if oid not in order_groomer_rev: order_groomer_rev[oid] = {}
+                    order_groomer_rev[oid][person] = order_groomer_rev[oid].get(person, 0) + price * qty
             elif person in {"Jessica G", "Angela R"}:
                 # Bather revenue counts toward total but no commission
                 groom_by_day["_bather_revenue"][day] += price * qty
@@ -86,13 +103,22 @@ for oid in tips_by_order:
                 order_date[oid] = (item.get("CreatedOn") or "")[:10]
                 break
 
-# Tips → groomer by day
+# Tips → groomer by day (split proportionally for multi-groomer orders)
 tips_by_day = defaultdict(lambda: defaultdict(float))
 for oid, tip in tips_by_order.items():
-    groomer = order_groomer.get(oid)
     day = order_date.get(oid, "")
-    if groomer and day:
-        tips_by_day[groomer][day] += tip
+    if not day: continue
+    rev_map = order_groomer_rev.get(oid, {})
+    if not rev_map:
+        groomer = order_groomer.get(oid)
+        if groomer: tips_by_day[groomer][day] += tip
+    elif len(rev_map) == 1:
+        tips_by_day[list(rev_map.keys())[0]][day] += tip
+    else:
+        total_rev = sum(rev_map.values())
+        if total_rev > 0:
+            for groomer, rev in rev_map.items():
+                tips_by_day[groomer][day] += round(tip * rev / total_rev, 2)
 
 groomers = sorted(g for g in groom_by_day.keys() if not g.startswith("_"))
 
@@ -204,6 +230,49 @@ def manager_salary_for_range(start, end):
 
 ytd_manager, ytd_mgr_old_days, ytd_mgr_new_days, ytd_mgr_daily, ytd_mgr_bonus = manager_salary_for_range(ytd_start, TODAY)
 
+# Monthly breakdown for exec dashboard
+import calendar as _cal
+monthly_data = []
+m_start = date(2024, 9, 1)
+while m_start <= TODAY:
+    m_end = date(m_start.year, m_start.month, _cal.monthrange(m_start.year, m_start.month)[1])
+    m_end = min(m_end, TODAY)
+    # simpler: use period_summary
+    m_groomer_data = {g: period_summary(g, m_start, m_end) for g in groomers}
+    m_rev = sum(d["rev"] for d in m_groomer_data.values())
+    m_bather = sum(v for day, v in groom_by_day.get("_bather_revenue", {}).items()
+                   if m_start.isoformat() <= day <= m_end.isoformat())
+    m_rev += m_bather
+    m_paid = sum(d["paid"] for d in m_groomer_data.values())
+    m_tips = sum(d["tips"] for d in m_groomer_data.values())
+    m_mgr, _, _, _, _ = manager_salary_for_range(m_start, m_end)
+    m_payroll = m_paid + m_tips + m_mgr
+    m_days = sum(1 for n in range((m_end - m_start).days + 1)
+                 if (m_start + timedelta(days=n)).weekday() < 5)
+    m_rent = round(DAILY_RENT * (m_end - m_start).days, 2)
+    monthly_data.append({
+        "month": m_start.strftime("%b %Y"),
+        "rev": round(m_rev, 2),
+        "paid": round(m_paid, 2),
+        "tips": round(m_tips, 2),
+        "mgr": round(m_mgr, 2),
+        "payroll": round(m_payroll, 2),
+        "margin": round(m_rev - m_payroll, 2),
+        "margin_pct": round((m_rev - m_payroll) / m_rev * 100, 1) if m_rev else 0,
+        "payroll_pct": round(m_payroll / m_rev * 100, 1) if m_rev else 0,
+        "rent": m_rent,
+        "working_days": m_days,
+        "rev_per_day": round(m_rev / m_days, 2) if m_days else 0,
+    })
+    # next month
+    if m_start.month == 12:
+        m_start = date(m_start.year + 1, 1, 1)
+    else:
+        m_start = date(m_start.year, m_start.month + 1, 1)
+
+import json as _json2
+monthly_json = _json2.dumps(monthly_data)
+
 # Last 30 days
 l30_start = TODAY - timedelta(days=29)
 l30_data = {g: period_summary(g, l30_start, TODAY) for g in groomers}
@@ -237,17 +306,18 @@ def daily_detail_rows(data_dict):
     for g in sorted(groomers, key=lambda x: -data_dict[x]["total"]):
         d = data_dict[g]
         if not d["daily"]: continue
-        rows += f'<tr style="background:#f8f7f4"><td colspan="7" style="padding:10px 14px;font-weight:700">{groomer_badge(g)}</td></tr>'
+        rows += f'<tr style="background:#f8f7f4"><td colspan="8" style="padding:10px 14px;font-weight:700">{groomer_badge(g)}</td></tr>'
         for day in d["daily"]:
             gflag = '<span style="background:#e3f2fd;color:#1565c0;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px">guarantee</span>' if day["guar_applied"] else ""
+            wflag = '<span style="background:#fce4ec;color:#c62828;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:4px">waive</span>' if day["guar_applied"] else ""
             rows += f'''<tr>
-              <td style="padding-left:24px;color:#888;font-size:0.82rem">{day["date"]}</td>
+              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">{day["date"]}</td>
               <td style="text-align:right">{fc(day["rev"])}</td>
               <td style="text-align:right;color:#888">{fc(day["comm"])}</td>
-              <td style="text-align:right;color:#1565c0">{fc(day["paid"])}{gflag}</td>
+              <td style="text-align:right;color:#1565c0">{fc(day["paid"])}{gflag}{wflag}</td>
               <td style="text-align:right;color:#f57c00">{fc(day["tips"])}</td>
               <td style="text-align:right;font-weight:600;color:#C4276E">{fc(day["total"])}</td>
-              <td></td><td></td>
+              <td></td>
             </tr>'''
     return rows
 
@@ -269,9 +339,9 @@ for i, (s, e) in enumerate(pay_periods):
     pp_data[f"pp_{i}"]["_manager_new_days"] = mgr_new
     pp_data[f"pp_{i}"]["_manager_daily"] = mgr_daily
     pp_data[f"pp_{i}"]["_manager_bonus"] = mgr_bonus
-    # Bather hours for this period
+    # Bather hours for this period from time clocks
     s_str = s.strftime("%Y-%m-%d")
-    bather_hours = BATHER_HOURS.get(s_str, {})
+    bather_hours = get_hours_from_clocks(data.get("time_clocks", []), BATHER_NAME_MAP, s_str, e.strftime("%Y-%m-%d"))
     # Bather revenue for this period
     pp_bather_rev = sum(v for d, v in groom_by_day.get("_bather_revenue", {}).items()
                         if s.isoformat() <= d <= e.isoformat())
@@ -282,7 +352,7 @@ for i, (s, e) in enumerate(pay_periods):
     }
     pp_data[f"pp_{i}"]["_bather_hours"] = bather_hours
     # Retail staff hours/pay
-    retail_hours = RETAIL_HOURS.get(s_str, {})
+    retail_hours = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s_str, e.strftime("%Y-%m-%d"))
     pp_data[f"pp_{i}"]["_retail_pay"] = {
         name: round(hrs * RETAIL_RATES.get(name, 0), 2)
         for name, hrs in retail_hours.items()
@@ -323,6 +393,10 @@ TABLE_HEADER = '''<thead><tr>
   <th style="text-align:right">Avg/Day</th>
 </tr></thead>'''
 
+from datetime import timezone, timedelta
+et_tz = timezone(timedelta(hours=-5))
+now_et = datetime.now(et_tz).strftime("%B %d, %Y at %I:%M %p ET")
+
 html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -362,18 +436,21 @@ tr:hover td{{background:#fafaf8!important}}
 .detail-section{{display:none;margin-top:16px;border-top:1px solid #eee;padding-top:16px}}
 .info-box{{background:#f0f7ff;border-left:4px solid #1976D2;border-radius:8px;padding:12px 16px;margin-bottom:18px;font-size:0.85rem;line-height:1.6}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="topbar">
   <div><div class="topbar-title">💅 Woof Gang Port Washington — Groomer Commission</div>
   <div class="topbar-sub">50% commission · Guarantees: Maria C $200/day · Sue M $300/day</div></div>
-  <div class="topbar-date">Through Mar 8, 2026</div>
+  <div class="topbar-date">Updated {now_et}</div>
 </div>
 
 <div class="tab-bar">
   <button class="tab active" onclick="showTab('ytd',this)">2026 YTD</button>
   <button class="tab" onclick="showTab('l30',this)">Last 30 Days</button>
   <button class="tab" onclick="showTab('pp',this)">Pay Period</button>
+  <button class="tab" onclick="showTab('exec',this)">&#128200; Executive</button>
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
@@ -480,9 +557,42 @@ tr:hover td{{background:#fafaf8!important}}
 
 </div>
 
+<div class="panel" id="panel-exec">
+  <div style="padding:32px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px" id="exec-kpis"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+      <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <h3 style="margin:0 0 16px;font-size:0.95rem;color:#444">Monthly Grooming Revenue</h3>
+        <canvas id="chart-rev" height="220"></canvas>
+      </div>
+      <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <h3 style="margin:0 0 16px;font-size:0.95rem;color:#444">Payroll % of Revenue</h3>
+        <canvas id="chart-payroll-pct" height="220"></canvas>
+      </div>
+    </div>
+    <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:24px">
+      <h3 style="margin:0 0 16px;font-size:0.95rem;color:#444">Monthly Breakdown</h3>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.84rem">
+        <thead><tr style="border-bottom:2px solid #eee">
+          <th style="text-align:left;padding:8px 12px;color:#888;font-weight:600">Month</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Revenue</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Groomer Pay</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Manager</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Total Payroll</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Payroll %</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Margin</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Rev/Day</th>
+        </tr></thead>
+        <tbody id="exec-monthly-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
 <script>
 var PP_DATA = {pp_json};
 var GROOMERS = {groomers_json};
+var MONTHLY_DATA = {monthly_json};
 var COLORS = {groomer_colors_json};
 var GUARANTEES = {guarantees_json};
 
@@ -496,6 +606,7 @@ function showTab(id, btn) {{
   var sel = document.getElementById('pp-select');
   sel.style.display = id === 'pp' ? 'block' : 'none';
   if (id === 'pp') renderPayPeriod(sel.value);
+  if (id === 'exec') renderExec();
 }}
 
 function toggleDetail(id, btn) {{
@@ -618,13 +729,13 @@ function renderPayPeriod(ppId) {{
         }}
       }}
       detailRows += '<tr>'+
-        '<td style="padding-left:24px;color:#888;font-size:0.82rem">'+day.date+'</td>'+
+        '<td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">'+day.date+'</td>'+
         '<td style="text-align:right">'+fc(day.rev)+'</td>'+
         '<td style="text-align:right;color:#888">'+fc(day.comm)+'</td>'+
         '<td style="text-align:right;color:#1565c0">'+fc(actualPaid)+gflag+'</td>'+
         '<td style="text-align:right;color:#f57c00">'+fc(day.tips)+'</td>'+
         '<td style="text-align:right;font-weight:600;color:#C4276E">'+fc(actualTotal)+'</td>'+
-        '<td></td><td></td></tr>';
+        '<td></td></tr>';
     }});
   }});
   document.getElementById('pp-detail-tbody').innerHTML = detailRows;
@@ -702,6 +813,86 @@ function renderPayPeriod(ppId) {{
 
 // Init pay period on load
 renderPayPeriod(document.getElementById('pp-select').value);
+
+// ── Executive Dashboard ───────────────────────────────────────────────────
+function renderExec() {{
+  var ytd = MONTHLY_DATA.filter(function(m) {{ return m.month.includes('2026'); }});
+  var all = MONTHLY_DATA;
+
+  // KPIs - YTD 2026
+  var ytdRev = ytd.reduce(function(a,m){{return a+m.rev;}},0);
+  var ytdPayroll = ytd.reduce(function(a,m){{return a+m.payroll;}},0);
+  var ytdMargin = ytd.reduce(function(a,m){{return a+m.margin;}},0);
+  var ytdPayrollPct = ytdRev ? (ytdPayroll/ytdRev*100).toFixed(1) : 0;
+  var ytdMarginPct = ytdRev ? (ytdMargin/ytdRev*100).toFixed(1) : 0;
+  var ytdRevDay = ytd.reduce(function(a,m){{return a+m.working_days;}},0);
+  ytdRevDay = ytdRevDay ? (ytdRev/ytdRevDay).toFixed(0) : 0;
+
+  document.getElementById('exec-kpis').innerHTML =
+    kpiCard('2026 YTD Revenue', fc(ytdRev), '#C4276E') +
+    kpiCard('2026 YTD Payroll', fc(ytdPayroll), '#1565c0') +
+    kpiCard('Payroll % of Rev', ytdPayrollPct+'%', ytdPayrollPct > 55 ? '#e53935' : '#558B2F') +
+    kpiCard('Gross Margin', fc(ytdMargin) + ' ('+ytdMarginPct+'%)', '#558B2F');
+
+  // Monthly table
+  var tbody = '';
+  all.forEach(function(m) {{
+    var pctColor = m.payroll_pct > 55 ? '#e53935' : m.payroll_pct > 50 ? '#f57c00' : '#558B2F';
+    var marginColor = m.margin < 0 ? '#e53935' : '#558B2F';
+    tbody += '<tr style="border-bottom:1px solid #f5f5f5">'+
+      '<td style="padding:8px 12px;font-weight:600">'+m.month+'</td>'+
+      '<td style="text-align:right;padding:8px 12px">'+fc(m.rev)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#888">'+fc(m.paid+m.tips)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#888">'+fc(m.mgr)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;font-weight:600;color:#1565c0">'+fc(m.payroll)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;font-weight:700;color:'+pctColor+'">'+m.payroll_pct+'%</td>'+
+      '<td style="text-align:right;padding:8px 12px;font-weight:700;color:'+marginColor+'">'+fc(m.margin)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#888">'+fc(m.rev_per_day)+'</td>'+
+      '</tr>';
+  }});
+  document.getElementById('exec-monthly-tbody').innerHTML = tbody;
+
+  // Revenue chart
+  var months = all.map(function(m){{return m.month;}});
+  var revs = all.map(function(m){{return m.rev;}});
+  var payrolls = all.map(function(m){{return m.payroll;}});
+  var margins = all.map(function(m){{return m.margin;}});
+
+  new Chart(document.getElementById('chart-rev'), {{
+    type: 'bar',
+    data: {{
+      labels: months,
+      datasets: [
+        {{label:'Payroll', data:payrolls, backgroundColor:'rgba(21,101,192,0.7)', stack:'a'}},
+        {{label:'Margin', data:margins, backgroundColor:'rgba(196,39,110,0.7)', stack:'a'}}
+      ]
+    }},
+    options: {{responsive:true, plugins:{{legend:{{position:'bottom'}},
+      scales:{{x:{{stacked:true}},y:{{stacked:true}}}}
+  }});
+
+  // Payroll % chart
+  var pcts = all.map(function(m){{return m.payroll_pct;}});
+  new Chart(document.getElementById('chart-payroll-pct'), {{
+    type: 'line',
+    data: {{
+      labels: months,
+      datasets: [{{
+        label:'Payroll %', data:pcts, borderColor:'#C4276E', backgroundColor:'rgba(196,39,110,0.1)',
+        fill:true, tension:0.3, pointRadius:4
+      }}]
+    }},
+    options: {{responsive:true, plugins:{{legend:{{display:false}},
+      scales:{{y:{{min:0, max:100}}}}
+  }});
+}}
+
+function kpiCard(label, val, color) {{
+  return '<div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:3px solid '+color+'">'+
+    '<div style="font-size:1.4rem;font-weight:800;color:'+color+'">'+val+'</div>'+
+    '<div style="font-size:0.82rem;color:#888;margin-top:4px">'+label+'</div>'+
+    '</div>';
+}}
 </script>
 </body></html>'''
 
