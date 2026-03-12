@@ -1,7 +1,7 @@
 name: Nightly Update
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch:
 permissions:
   contents: write
@@ -16,7 +16,7 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - run: pip install httpx pandas openpyxl
       - name: Run dashboard script
         env:
