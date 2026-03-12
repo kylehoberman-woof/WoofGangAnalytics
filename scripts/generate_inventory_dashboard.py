@@ -180,6 +180,41 @@ now = datetime.now().strftime("%B %d, %Y at %I:%M %p")
 top50_rows = make_rows(top50)
 all_rows = make_rows(results)
 
+# Reorder recommendations (8-week supply)
+REORDER_WEEKS = 8
+reorder_by_vendor = defaultdict(list)
+for r in results:
+    if r["status"] not in ("out","critical","low"): continue
+    if r["velocity_monthly"] <= 0: continue
+    needed = max(0, (r["velocity_monthly"] / 4.33) * REORDER_WEEKS - max(0, r.get("stock",0)))
+    if needed <= 0: continue
+    est_cost = round(needed * r["cost"], 2) if r["cost"] else 0
+    reorder_by_vendor[r["vendor"]].append({**r, "needed": round(needed,1), "est_cost": est_cost})
+
+reorder_rows = ""
+reorder_total = 0
+for v in ["Woof Gang","PFX","Fauna","K9 Cuisine","Other"]:
+    items = reorder_by_vendor.get(v, [])
+    if not items: continue
+    vtotal = sum(i["est_cost"] for i in items)
+    reorder_total += vtotal
+    reorder_rows += f'<tr style="background:#f0f0f0;font-weight:bold"><td colspan="8">{v} — {len(items)} items · Est. ${vtotal:,.0f}</td></tr>'
+    for i in sorted(items, key=lambda x: -x["velocity_monthly"]):
+        reorder_rows += (f'<tr><td>{i["sku"]}</td><td>{i["name"][:45]}</td>'
+            f'<td class="num">{i.get("stock",0):.1f}</td><td class="num">{i["velocity_monthly"]}</td>'
+            f'<td class="num">{i["needed"]}</td><td class="num">${i["cost"]:.2f}</td>'
+            f'<td class="num">${i["est_cost"]:,.2f}</td><td>{i["status"]}</td></tr>')
+
+neg_rows = ""
+for r in sorted(results, key=lambda x: x.get("stock") or 0):
+    if (r.get("stock") or 0) >= 0: continue
+    neg_rows += (f'<tr><td>{r["sku"]}</td><td>{r["name"][:45]}</td>'
+        f'<td class="num" style="color:red">{r.get("stock",0):.1f}</td>'
+        f'<td>{r["vendor"]}</td><td class="num">{r["velocity_monthly"]}</td></tr>')
+
+TH_REORDER = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th class="num">Vel/Mo</th><th class="num">Need</th><th class="num">Cost</th><th class="num">Est.$</th><th>Status</th>'
+TH_NEG = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th>Vendor</th><th class="num">Vel/Mo</th>'
+
 CSS = """
 :root{--m:#C4276E;--ml:#FDF0F5;--t:#1B6B6B;--br:#6B3520;--dk:#1a1a2e;--md:#2d2d44;--tx:#1f2937;--mu:#6b7280;--bd:#e5e7eb;--bg:#f8f9fb;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -261,6 +296,8 @@ html = f"""<!DOCTYPE html>
   <button class=\"tb active\" onclick=\"switchTab('top50',this)\">Top 50 Items</button>
   <button class=\"tb\" onclick=\"switchTab('all',this)\">All Retail Items</button>
   <button class=\"tb\" onclick=\"switchTab('nocost',this)\">Missing Cost</button>
+  <button class=\"tb\" onclick=\"switchTab('reorder',this)\">Reorder</button>
+  <button class=\"tb\" onclick=\"switchTab('negative',this)\">Negative Stock</button>
 </div>
 <div class=\"filters\">
   <button class=\"fb active\" onclick=\"setFilter('all',this)\">All</button>
@@ -277,6 +314,8 @@ html = f"""<!DOCTYPE html>
   <div id=\"p-top50\" class=\"panel active\"><table><thead><tr>{TH}</tr></thead><tbody id=\"b-top50\">{top50_rows}</tbody></table></div>
   <div id=\"p-all\" class=\"panel\"><table><thead><tr>{TH}</tr></thead><tbody id=\"b-all\">{all_rows}</tbody></table></div>
   <div id=\"p-nocost\" class=\"panel\"><table><thead><tr>{TH2}</tr></thead><tbody id=\"b-nocost\">{nocost_rows}</tbody></table></div>
+  <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px\">Reorder Recommendations (8-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3><table><thead><tr>{TH_REORDER}</tr></thead><tbody>{reorder_rows}</tbody></table></div>
+  <div id=\"p-negative\" class=\"panel\"><table><thead><tr>{TH_NEG}</tr></thead><tbody>{neg_rows}</tbody></table></div>
 </div>
 <script>{JS}</script></body></html>"""
 
