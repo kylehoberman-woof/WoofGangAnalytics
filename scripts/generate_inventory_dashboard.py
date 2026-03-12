@@ -3,8 +3,8 @@ from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 
-DATA_DIR = Path("/Users/julieschorr/Desktop/store-analysis/port-washington/data")
-OUTPUT_DIR = Path("/Users/julieschorr/Desktop/store-analysis/port-washington")
+DATA_DIR = Path(__file__).parent.parent / "port-washington" / "data"
+OUTPUT_DIR = Path(__file__).parent.parent / "port-washington"
 
 with open(DATA_DIR / "all_data.json") as f:
     all_data = json.load(f)
