@@ -34,8 +34,12 @@ def detect_vendor(sku, name):
     name = str(name).lower()
     if sku.startswith("810153") or "wgb" in name:
         return "Woof Gang"
+    if any(b in name for b in ["stella", "open farm", "earth animal", "earth rated"]):
+        return "PFX"
     if "pfx" in name or "performatrin" in name or sku.startswith("PFX"):
         return "PFX"
+    if any(b in name for b in ["fromm", "benebone", "primal"]):
+        return "Fauna"
     if "fauna" in name or sku.startswith("FAU"):
         return "Fauna"
     if "k9d" in sku.lower():
