@@ -180,7 +180,9 @@ nocost_rows = "\n".join(
     for r in results if not r["has_cost"]
 )
 
-now = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+from datetime import timezone, timedelta
+et = timezone(timedelta(hours=-5))
+now = datetime.now(et).strftime("%B %d, %Y at %I:%M %p ET")
 top50_rows = make_rows(top50)
 all_rows = make_rows(results)
 
