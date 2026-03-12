@@ -142,7 +142,7 @@ html += '</div>\n'
 import re as _re
 for yr in ["2024", "2025", "2026"]:
     display = "block" if yr == "2025" else "none"
-    html += f'<div class="yr-panel" id="panel-{yr}" style="display:{display}>\n'
+    html += f'<div class="yr-panel" id="panel-{yr}" style="display:{display}">\n'
     body = bodies[yr]
     def _wrap(m, _yr=yr):
         inner = m.group(0)[len("<script>\n"):-len("</script>")]
