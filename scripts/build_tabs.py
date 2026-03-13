@@ -3,21 +3,24 @@
 import sys, types, json
 from pathlib import Path
 
-# ── Inline the classify_item stub (copied from runner.py) ───────────────────
-exec(open("/home/claude/runner.py").read().split("# ── Merge all three")[0].split("sys.modules")[0])
+SCRIPTS_DIR = Path(__file__).parent
+BASE_DIR    = SCRIPTS_DIR.parent
+out_dir     = BASE_DIR / "port-washington"
+data_dir    = BASE_DIR / "port-washington" / "data"
+
+# ── Inline the classify_item stub (copied from run.py) ───────────────────
+sys.path.insert(0, str(SCRIPTS_DIR))
+exec(open(SCRIPTS_DIR / "run.py").read().split("# ── Merge all three")[0].split("sys.modules")[0])
 
 fake_run = types.ModuleType('run')
 fake_run.STORE_NAME = "Woof Gang Bakery & Grooming -- Port Washington, NY (#264)"
 fake_run.START_DATE = "2024-09-26"
 fake_run.END_DATE   = "2026-03-07"
-fake_run.DATA_DIR   = Path("/home/claude/port-washington/data")
+fake_run.DATA_DIR   = data_dir
 fake_run.classify_item = classify_item  # noqa: F821
 sys.modules["run"] = fake_run
 
 import generate_dashboards as gd
-
-out_dir = Path("/home/claude/port-washington")
-data_dir = Path("/home/claude/port-washington/data")
 
 # ── Merge all years ──────────────────────────────────────────────────────────
 merged = {"order_items": [], "orders": [], "employees": []}
@@ -120,7 +123,7 @@ window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
 import json as _json2, pandas as _pd2
 _all_dates = []
 for _yr in ["2024", "2025", "2026"]:
-    _p = out_dir.parent / "data" / f"all_data_{_yr}.json"
+    _p = data_dir / f"all_data_{_yr}.json"
     if _p.exists():
         with open(_p) as _f:
             _d = _json2.load(_f)
@@ -142,7 +145,7 @@ html += '</div>\n'
 import re as _re
 for yr in ["2024", "2025", "2026"]:
     display = "block" if yr == "2025" else "none"
-    html += f'<div class="yr-panel" id="panel-{yr}" style="display:{display}">\n'
+    html += f'<div class="yr-panel" id="panel-{yr}" style="display:{display}>\n'
     body = bodies[yr]
     def _wrap(m, _yr=yr):
         inner = m.group(0)[len("<script>\n"):-len("</script>")]
