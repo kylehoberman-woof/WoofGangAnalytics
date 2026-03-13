@@ -40,4 +40,5 @@ jobs:
           git add port-washington/data/
           git add port-washington/*.html
           git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
+          git pull --rebase origin main
           git push origin HEAD:main
