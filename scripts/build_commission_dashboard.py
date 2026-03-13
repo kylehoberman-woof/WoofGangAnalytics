@@ -94,6 +94,10 @@ if True:
             elif person in {"Jessica G", "Angela R"}:
                 # Bather revenue counts toward total but no commission
                 groom_by_day["_bather_revenue"][day] += price * qty
+                # Include bathers in tip split so tips are proportional
+                if oid:
+                    if oid not in order_groomer_rev: order_groomer_rev[oid] = {}
+                    order_groomer_rev[oid][person] = order_groomer_rev[oid].get(person, 0) + price * qty
     for o in data["orders"]:
         oid = o.get("OrderId")
         if oid:
@@ -373,6 +377,17 @@ for i, (s, e) in enumerate(pay_periods):
     }
     pp_data[f"pp_{i}"]["_bather_hours"] = bather_hours
     pp_data[f"pp_{i}"]["_bather_daily"] = bather_daily
+    # Bather tips for this period
+    bather_tips = {}
+    bather_tips_daily = {}
+    for bname in BATHER_NAME_MAP:
+        btdays = {d: v for d, v in tips_by_day.get(bname, {}).items()
+                  if s.isoformat() <= d <= e.isoformat()}
+        if btdays:
+            bather_tips[bname] = round(sum(btdays.values()), 2)
+            bather_tips_daily[bname] = btdays
+    pp_data[f"pp_{i}"]["_bather_tips"] = bather_tips
+    pp_data[f"pp_{i}"]["_bather_tips_daily"] = bather_tips_daily
     # Retail staff hours/pay
     retail_hours, retail_daily = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s_str, e.strftime("%Y-%m-%d"))
     pp_data[f"pp_{i}"]["_retail_pay"] = {
@@ -555,6 +570,12 @@ tr:hover td{{background:#fafaf8!important}}
     <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap" id="bather-pp-kpis"></div>
     <div class="detail-section" id="bather-pp-detail" style="display:none;margin-top:12px"></div>
     <button class="toggle-btn" onclick="toggleDetail('bather-pp-detail',this)">▼ Show daily breakdown</button>
+  </div>
+  <div class="card" id="bather-tips-card" style="display:none">
+    <div class="stitle">Bather Tips</div>
+    <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap" id="bather-tips-kpis"></div>
+    <div class="detail-section" id="bather-tips-detail" style="display:none;margin-top:12px"></div>
+    <button class="toggle-btn" onclick="toggleDetail('bather-tips-detail',this)">▼ Show daily breakdown</button>
   </div>
   <div class="card" id="retail-pp-card" style="display:none">
     <div class="stitle">Retail Staff Pay (Hourly)</div>
@@ -777,34 +798,44 @@ function renderPayPeriod(ppId) {{
   var batherCardId = 'bather-pp-card';
   var batherCard = document.getElementById(batherCardId);
   var batherNames = Object.keys(batherPay);
-  batherCard.style.display = batherNames.length > 0 ? 'block' : 'none';
-  if (batherNames.length > 0) {{
+  var batherTips = data._bather_tips || {{}};
+  var batherTipsDaily = data._bather_tips_daily || {{}};
+  var allBatherNames = Array.from(new Set(batherNames.concat(Object.keys(batherTips))));
+  batherCard.style.display = allBatherNames.length > 0 ? 'block' : 'none';
+  if (allBatherNames.length > 0) {{{{
     var batherKpis = '';
-    batherNames.forEach(function(name) {{
+    allBatherNames.forEach(function(name) {{{{
       var hrs = batherHours[name] || 0;
       var pay = batherPay[name] || 0;
+      var tips = batherTips[name] || 0;
+      var totalPay = pay + tips;
       batherKpis +=
-        '<div class="kpi" style="border-color:#00796B;flex:1;min-width:120px"><div class="kpi-val" style="color:#00796B;font-size:1.4rem">'+name+'</div><div class="kpi-label">Bather</div></div>'+
-        '<div class="kpi" style="border-color:#00796B;flex:1;min-width:120px"><div class="kpi-val" style="color:#00796B;font-size:1.4rem">'+hrs.toFixed(2)+'h</div><div class="kpi-label">Hours Worked</div></div>'+
-        '<div class="kpi" style="border-color:#00796B;flex:1;min-width:120px"><div class="kpi-val" style="color:#00796B;font-size:1.4rem">$17.00</div><div class="kpi-label">Hourly Rate</div></div>'+
-        '<div class="kpi" style="border-color:#00796B;flex:1;min-width:120px"><div class="kpi-val" style="color:#00796B;font-size:1.4rem">'+fc(pay)+'</div><div class="kpi-label">Total Pay</div></div>';
-    }});
+        '<div class=\"kpi\" style=\"border-color:#00796B;flex:1;min-width:120px\"><div class=\"kpi-val\" style=\"color:#00796B;font-size:1.4rem\">'+name+'</div><div class=\"kpi-label\">Bather</div></div>'+
+        '<div class=\"kpi\" style=\"border-color:#00796B;flex:1;min-width:120px\"><div class=\"kpi-val\" style=\"color:#00796B;font-size:1.4rem\">'+hrs.toFixed(2)+'h</div><div class=\"kpi-label\">Hours Worked</div></div>'+
+        '<div class=\"kpi\" style=\"border-color:#00796B;flex:1;min-width:120px\"><div class=\"kpi-val\" style=\"color:#00796B;font-size:1.4rem\">$17.00</div><div class=\"kpi-label\">Hourly Rate</div></div>'+
+        '<div class=\"kpi\" style=\"border-color:#00796B;flex:1;min-width:120px\"><div class=\"kpi-val\" style=\"color:#00796B;font-size:1.4rem\">'+fc(pay)+'</div><div class=\"kpi-label\">Hourly Pay</div></div>'+
+        '<div class=\"kpi\" style=\"border-color:#f57c00;flex:1;min-width:120px\"><div class=\"kpi-val\" style=\"color:#f57c00;font-size:1.4rem\">'+fc(tips)+'</div><div class=\"kpi-label\">Total Tips</div></div>'+
+        '<div class=\"kpi green\" style=\"flex:1;min-width:120px\"><div class=\"kpi-val\" style=\"font-size:1.4rem\">'+fc(totalPay)+'</div><div class=\"kpi-label\">Total Pay</div></div>';
+    }}}});
     document.getElementById('bather-pp-kpis').innerHTML = batherKpis;
-    // Daily breakdown
     var batherDailyData = data._bather_daily || {{}};
     var batherDailyRows = '';
-    batherNames.forEach(function(name) {{
+    allBatherNames.forEach(function(name) {{{{
       var days = batherDailyData[name] || [];
       var rate = 17.0;
-      days.forEach(function(r) {{
-        batherDailyRows += '<tr><td>'+name+'</td><td>'+r.date+'</td><td style="text-align:right">'+r.hours.toFixed(2)+'h</td><td style="text-align:right">$17.00</td><td style="text-align:right;font-weight:600;color:#00796B">'+fc(r.hours*rate)+'</td></tr>';
-      }});
-    }});
+      days.forEach(function(r) {{{{
+        var tipForDay = (batherTipsDaily[name] || {{}})[r.date] || 0;
+        var dayTotal = r.hours*rate + tipForDay;
+        batherDailyRows += '<tr><td>'+name+'</td><td>'+r.date+'</td><td style=\"text-align:right\">'+r.hours.toFixed(2)+'h</td><td style=\"text-align:right\">$17.00</td><td style=\"text-align:right;color:#00796B;font-weight:600\">'+fc(r.hours*rate)+'</td><td style=\"text-align:right;color:#f57c00\">'+fc(tipForDay)+'</td><td style=\"text-align:right;font-weight:700\">'+fc(dayTotal)+'</td></tr>';
+      }}}});
+    }}}});
     document.getElementById('bather-pp-detail').innerHTML =
-      '<table style="width:100%;border-collapse:collapse;font-size:0.83rem">'+
-      '<thead><tr><th style="text-align:left;padding:6px 10px;color:#888">Name</th><th style="text-align:left;padding:6px 10px;color:#888">Date</th><th style="text-align:right;padding:6px 10px;color:#888">Hours</th><th style="text-align:right;padding:6px 10px;color:#888">Rate</th><th style="text-align:right;padding:6px 10px;color:#888">Pay</th></tr></thead>'+
+      '<table style=\"width:100%;border-collapse:collapse;font-size:0.83rem\">'+
+      '<thead><tr><th style=\"text-align:left;padding:6px 10px;color:#888\">Name</th><th style=\"text-align:left;padding:6px 10px;color:#888\">Date</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Hours</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Rate</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Hourly Pay</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Tips</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Total</th></tr></thead>'+
       '<tbody>'+batherDailyRows+'</tbody></table>';
-  }}
+  }}}}
+  var batherTipsCard = document.getElementById('bather-tips-card');
+  if (batherTipsCard) batherTipsCard.style.display = 'none';
   // Retail staff card
   var retailCard = document.getElementById('retail-pp-card');
   var retailNames = Object.keys(retailPay);
@@ -892,7 +923,7 @@ function renderExec() {{
     kpiCard('Manager + Retail Staff', fc(ytdMgr + ytdRetail), '#7B1FA2') +
     kpiCard('Royalties (7%)', fc(ytdRoyalties), '#AD1457') +
     kpiCard('Rent', fc(ytdRent), '#6D4C41') +
-    kpiCard('Net Margin', fc(ytdMargin) + ' ('+ytdMarginPct+'%)', ytdMarginPct >= 0 ? '#558B2F' : '#e53935');
+    kpiCard('Net Margin', fc(ytdMargin) + ' ('+ytdMarginPct+'%)', parseFloat(ytdMarginPct) >= 0 ? '#558B2F' : '#e53935');
 
   // Monthly table
   var tbody = '';
