@@ -18,6 +18,11 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install httpx pandas openpyxl
+      - name: Write config.js with token
+        env:
+          GITHUB_OVERRIDES_TOKEN: ${{ secrets.GITHUB_OVERRIDES_TOKEN }}
+        run: |
+          echo "window.WOOF_CONFIG = { ghToken: '${GITHUB_OVERRIDES_TOKEN}' };" > port-washington/config.js
       - name: Run dashboard script
         env:
           FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}

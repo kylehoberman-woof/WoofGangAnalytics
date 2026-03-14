@@ -1,5 +1,6 @@
 # v2.1
 import json
+import os
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime, date, timedelta
@@ -7,6 +8,17 @@ from datetime import datetime, date, timedelta
 SCRIPTS_DIR = Path(__file__).parent
 DATA_DIR   = SCRIPTS_DIR.parent / "port-washington" / "data"
 OUTPUT_DIR = SCRIPTS_DIR.parent / "port-washington"
+
+# Load GitHub token from .env file (never committed to git)
+def _load_env():
+    env_file = SCRIPTS_DIR.parent / ".env"
+    if env_file.exists():
+        for line in env_file.read_text().splitlines():
+            if '=' in line and not line.startswith('#'):
+                k, v = line.split('=', 1)
+                os.environ.setdefault(k.strip(), v.strip())
+_load_env()
+GH_TOKEN = os.environ.get("GITHUB_OVERRIDES_TOKEN", "")
 
 GUARANTEES = {"Maria C": 200.0, "Sue M": 300.0}
 COMMISSION_RATE = 0.50
@@ -635,6 +647,7 @@ tr:hover td{{background:#fafaf8!important}}
   </div>
 </div>
 
+<script src="config.js"></script>
 <script>
 var PP_DATA = {pp_json};
 var GROOMERS = {groomers_json};
@@ -672,14 +685,30 @@ function groomerBadge(g) {{
 var _overrides = {{}};
 var _overridesDirty = false;
 
-// Load overrides from repo file on startup
-fetch('data/overrides.json')
-  .then(function(r) {{ return r.ok ? r.json() : {{}}; }})
-  .catch(function() {{ return {{}}; }})
+// ── Overrides: GitHub API (works from any device, no local server needed) ────
+var _ghRepo = 'kylehoberman-woof/WoofGangAnalytics';
+var _ghPath = 'port-washington/data/overrides.json';
+var _ghToken = (window.WOOF_CONFIG && window.WOOF_CONFIG.ghToken) || '';
+var _ghFileSha = null;
+
+function _loadOverrides() {{
+  fetch('https://api.github.com/repos/' + _ghRepo + '/contents/' + _ghPath, {{
+    headers: {{ 'Authorization': 'token ' + _ghToken, 'Accept': 'application/vnd.github.v3+json' }}
+  }})
+  .then(function(r) {{ return r.ok ? r.json() : null; }})
   .then(function(data) {{
-    _overrides = data || {{}};
+    if (data && data.content) {{
+      _ghFileSha = data.sha;
+      var decoded = JSON.parse(atob(data.content.replace(/\n/g, '')));
+      _overrides = decoded || {{}};
+    }}
+    renderPayPeriod(document.getElementById('pp-select').value);
+  }})
+  .catch(function() {{
     renderPayPeriod(document.getElementById('pp-select').value);
   }});
+}}
+_loadOverrides();
 
 function getOverride(key) {{
   return _overrides[key] === true;
@@ -688,25 +717,54 @@ function getOverride(key) {{
 function setOverride(key, val) {{
   if (val) {{ _overrides[key] = true; }} else {{ delete _overrides[key]; }}
   _overridesDirty = true;
-  document.getElementById('save-overrides-btn').style.display = 'inline-block';
+  _pushOverridesToGitHub();
+}}
+
+function _pushOverridesToGitHub() {{
+  var btn = document.getElementById('save-overrides-btn');
+  btn.style.display = 'inline-block';
+  btn.textContent = '⏳ Saving...';
+  btn.style.background = '#888';
+  var body = {{
+    message: 'Update guarantee overrides',
+    content: btoa(JSON.stringify(_overrides, null, 2)),
+    sha: _ghFileSha
+  }};
+  fetch('https://api.github.com/repos/' + _ghRepo + '/contents/' + _ghPath, {{
+    method: 'PUT',
+    headers: {{
+      'Authorization': 'token ' + _ghToken,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    }},
+    body: JSON.stringify(body)
+  }})
+  .then(function(r) {{ return r.json(); }})
+  .then(function(data) {{
+    if (data.content) {{
+      _ghFileSha = data.content.sha;
+      btn.textContent = '✓ Saved to GitHub';
+      btn.style.background = '#388E3C';
+      setTimeout(function() {{
+        btn.style.display = 'none';
+        btn.textContent = '💾 Save Overrides';
+        btn.style.background = '#C4276E';
+      }}, 3000);
+    }} else {{
+      btn.textContent = '✗ Error saving';
+      btn.style.background = '#c62828';
+      setTimeout(function() {{ btn.style.display = 'none'; btn.textContent = '💾 Save Overrides'; btn.style.background = '#C4276E'; }}, 4000);
+    }}
+  }})
+  .catch(function() {{
+    btn.textContent = '✗ Error saving';
+    btn.style.background = '#c62828';
+    setTimeout(function() {{ btn.style.display = 'none'; btn.textContent = '💾 Save Overrides'; btn.style.background = '#C4276E'; }}, 4000);
+  }});
 }}
 
 function saveOverrides() {{
-  var json = JSON.stringify(_overrides, null, 2);
-  var blob = new Blob([json], {{type: 'application/json'}});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'overrides.json';
-  a.click();
-  _overridesDirty = false;
-  var btn = document.getElementById('save-overrides-btn');
-  btn.textContent = '✓ Saved — commit overrides.json to git';
-  btn.style.background = '#388E3C';
-  setTimeout(function() {{
-    btn.textContent = '💾 Save Overrides';
-    btn.style.background = '#C4276E';
-    btn.style.display = 'none';
-  }}, 4000);
+  _pushOverridesToGitHub();
 }}
 
 function toggleGuar(key, ppId) {{
