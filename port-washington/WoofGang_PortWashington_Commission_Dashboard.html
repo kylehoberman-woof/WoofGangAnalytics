@@ -44,7 +44,7 @@ tr:hover td{background:#fafaf8!important}
 <div class="topbar">
   <div><div class="topbar-title">💅 Woof Gang Port Washington — Groomer Commission</div>
   <div class="topbar-sub">50% commission · Guarantees: Maria C $200/day · Sue M $300/day</div></div>
-  <div class="topbar-date">Updated March 14, 2026 at 12:36 AM ET</div>
+  <div class="topbar-date">Updated March 14, 2026 at 01:35 PM ET</div>
 </div>
 
 <div class="tab-bar">
@@ -55,6 +55,7 @@ tr:hover td{background:#fafaf8!important}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     <option value="pp_0" selected>Mar 9 – Mar 22, 2026</option><option value="pp_1" >Feb 23 – Mar 8, 2026</option><option value="pp_2" >Feb 9 – Feb 22, 2026</option><option value="pp_3" >Jan 26 – Feb 8, 2026</option><option value="pp_4" >Jan 12 – Jan 25, 2026</option><option value="pp_5" >Dec 29 – Jan 11, 2026</option><option value="pp_6" >Dec 15 – Dec 28, 2025</option><option value="pp_7" >Dec 1 – Dec 14, 2025</option><option value="pp_8" >Nov 17 – Nov 30, 2025</option><option value="pp_9" >Nov 3 – Nov 16, 2025</option><option value="pp_10" >Oct 20 – Nov 2, 2025</option><option value="pp_11" >Oct 6 – Oct 19, 2025</option><option value="pp_12" >Sep 22 – Oct 5, 2025</option><option value="pp_13" >Sep 8 – Sep 21, 2025</option><option value="pp_14" >Aug 25 – Sep 7, 2025</option><option value="pp_15" >Aug 11 – Aug 24, 2025</option><option value="pp_16" >Jul 28 – Aug 10, 2025</option><option value="pp_17" >Jul 14 – Jul 27, 2025</option><option value="pp_18" >Jun 30 – Jul 13, 2025</option><option value="pp_19" >Jun 16 – Jun 29, 2025</option><option value="pp_20" >Jun 2 – Jun 15, 2025</option><option value="pp_21" >May 19 – Jun 1, 2025</option><option value="pp_22" >May 5 – May 18, 2025</option><option value="pp_23" >Apr 21 – May 4, 2025</option><option value="pp_24" >Apr 7 – Apr 20, 2025</option><option value="pp_25" >Mar 24 – Apr 6, 2025</option><option value="pp_26" >Mar 10 – Mar 23, 2025</option><option value="pp_27" >Feb 24 – Mar 9, 2025</option><option value="pp_28" >Feb 10 – Feb 23, 2025</option><option value="pp_29" >Jan 27 – Feb 9, 2025</option><option value="pp_30" >Jan 13 – Jan 26, 2025</option><option value="pp_31" >Dec 30 – Jan 12, 2025</option><option value="pp_32" >Dec 16 – Dec 29, 2024</option><option value="pp_33" >Dec 2 – Dec 15, 2024</option><option value="pp_34" >Nov 18 – Dec 1, 2024</option><option value="pp_35" >Nov 4 – Nov 17, 2024</option><option value="pp_36" >Oct 21 – Nov 3, 2024</option><option value="pp_37" >Oct 7 – Oct 20, 2024</option><option value="pp_38" >Sep 23 – Oct 6, 2024</option>
   </select>
+  <button id="save-overrides-btn" onclick="saveOverrides()" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:none;background:#C4276E;color:#fff;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">💾 Save Overrides</button>
 </div>
 
 <div class="page">
@@ -3803,9 +3804,50 @@ function groomerBadge(g) {
   return '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+COLORS[g]+';margin-right:7px"></span><strong>'+g+'</strong>'+badge;
 }
 
+// ── Overrides system ─────────────────────────────────────────────────────────
+var _overrides = {};
+var _overridesDirty = false;
+
+// Load overrides from repo file on startup
+fetch('data/overrides.json')
+  .then(function(r) { return r.ok ? r.json() : {}; })
+  .catch(function() { return {}; })
+  .then(function(data) {
+    _overrides = data || {};
+    renderPayPeriod(document.getElementById('pp-select').value);
+  });
+
+function getOverride(key) {
+  return _overrides[key] === true;
+}
+
+function setOverride(key, val) {
+  if (val) { _overrides[key] = true; } else { delete _overrides[key]; }
+  _overridesDirty = true;
+  document.getElementById('save-overrides-btn').style.display = 'inline-block';
+}
+
+function saveOverrides() {
+  var json = JSON.stringify(_overrides, null, 2);
+  var blob = new Blob([json], {type: 'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'overrides.json';
+  a.click();
+  _overridesDirty = false;
+  var btn = document.getElementById('save-overrides-btn');
+  btn.textContent = '✓ Saved — commit overrides.json to git';
+  btn.style.background = '#388E3C';
+  setTimeout(function() {
+    btn.textContent = '💾 Save Overrides';
+    btn.style.background = '#C4276E';
+    btn.style.display = 'none';
+  }, 4000);
+}
+
 function toggleGuar(key, ppId) {
-  var current = localStorage.getItem(key) === 'true';
-  localStorage.setItem(key, current ? 'false' : 'true');
+  var current = getOverride(key);
+  setOverride(key, !current);
   renderPayPeriod(ppId);
 }
 
@@ -3828,7 +3870,7 @@ function renderPayPeriod(ppId) {
       adjPaid = 0; adjTotal = 0;
       d.daily.forEach(function(day) {
         var overrideKey = 'guar_override_'+day.date+'_'+g;
-        var overridden = localStorage.getItem(overrideKey) === 'true';
+        var overridden = getOverride(overrideKey);
         var guarActive = day.guar_applied && !overridden;
         var p = guarActive ? Math.max(day.comm, guar) : day.comm;
         adjPaid += p; adjTotal += p + day.tips;
@@ -3895,7 +3937,7 @@ function renderPayPeriod(ppId) {
     d.daily.forEach(function(day) {
       var guar = GUARANTEES[g] || 0;
       var overrideKey = 'guar_override_'+day.date+'_'+g;
-      var overridden = localStorage.getItem(overrideKey) === 'true';
+      var overridden = getOverride(overrideKey);
       var guarActive = day.guar_applied && !overridden;
       var actualPaid = guarActive ? Math.max(day.comm, guar) : day.comm;
       var actualTotal = actualPaid + day.tips;

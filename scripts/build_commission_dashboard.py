@@ -492,6 +492,7 @@ tr:hover td{{background:#fafaf8!important}}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
+  <button id="save-overrides-btn" onclick="saveOverrides()" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:none;background:#C4276E;color:#fff;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">💾 Save Overrides</button>
 </div>
 
 <div class="page">
@@ -667,9 +668,50 @@ function groomerBadge(g) {{
   return '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+COLORS[g]+';margin-right:7px"></span><strong>'+g+'</strong>'+badge;
 }}
 
+// ── Overrides system ─────────────────────────────────────────────────────────
+var _overrides = {{}};
+var _overridesDirty = false;
+
+// Load overrides from repo file on startup
+fetch('data/overrides.json')
+  .then(function(r) {{ return r.ok ? r.json() : {{}}; }})
+  .catch(function() {{ return {{}}; }})
+  .then(function(data) {{
+    _overrides = data || {{}};
+    renderPayPeriod(document.getElementById('pp-select').value);
+  }});
+
+function getOverride(key) {{
+  return _overrides[key] === true;
+}}
+
+function setOverride(key, val) {{
+  if (val) {{ _overrides[key] = true; }} else {{ delete _overrides[key]; }}
+  _overridesDirty = true;
+  document.getElementById('save-overrides-btn').style.display = 'inline-block';
+}}
+
+function saveOverrides() {{
+  var json = JSON.stringify(_overrides, null, 2);
+  var blob = new Blob([json], {{type: 'application/json'}});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'overrides.json';
+  a.click();
+  _overridesDirty = false;
+  var btn = document.getElementById('save-overrides-btn');
+  btn.textContent = '✓ Saved — commit overrides.json to git';
+  btn.style.background = '#388E3C';
+  setTimeout(function() {{
+    btn.textContent = '💾 Save Overrides';
+    btn.style.background = '#C4276E';
+    btn.style.display = 'none';
+  }}, 4000);
+}}
+
 function toggleGuar(key, ppId) {{
-  var current = localStorage.getItem(key) === 'true';
-  localStorage.setItem(key, current ? 'false' : 'true');
+  var current = getOverride(key);
+  setOverride(key, !current);
   renderPayPeriod(ppId);
 }}
 
@@ -692,7 +734,7 @@ function renderPayPeriod(ppId) {{
       adjPaid = 0; adjTotal = 0;
       d.daily.forEach(function(day) {{
         var overrideKey = 'guar_override_'+day.date+'_'+g;
-        var overridden = localStorage.getItem(overrideKey) === 'true';
+        var overridden = getOverride(overrideKey);
         var guarActive = day.guar_applied && !overridden;
         var p = guarActive ? Math.max(day.comm, guar) : day.comm;
         adjPaid += p; adjTotal += p + day.tips;
@@ -759,7 +801,7 @@ function renderPayPeriod(ppId) {{
     d.daily.forEach(function(day) {{
       var guar = GUARANTEES[g] || 0;
       var overrideKey = 'guar_override_'+day.date+'_'+g;
-      var overridden = localStorage.getItem(overrideKey) === 'true';
+      var overridden = getOverride(overrideKey);
       var guarActive = day.guar_applied && !overridden;
       var actualPaid = guarActive ? Math.max(day.comm, guar) : day.comm;
       var actualTotal = actualPaid + day.tips;
