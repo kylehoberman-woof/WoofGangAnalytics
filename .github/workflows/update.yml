@@ -21,11 +21,14 @@ jobs:
       - name: Run dashboard script
         env:
           FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
-          GITHUB_OVERRIDES_TOKEN: ${{ secrets.GITHUB_OVERRIDES_TOKEN }}
         run: |
           find . -name "*.pyc" -delete
           find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
           cd scripts && python run.py
+      - name: Rebuild commission dashboard with token
+        env:
+          GITHUB_OVERRIDES_TOKEN: ${{ secrets.GITHUB_OVERRIDES_TOKEN }}
+        run: python3 scripts/build_commission_dashboard.py
       - name: Fetch stock levels
         env:
           FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
