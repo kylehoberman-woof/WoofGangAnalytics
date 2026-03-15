@@ -647,7 +647,6 @@ tr:hover td{{background:#fafaf8!important}}
   </div>
 </div>
 
-<script src="config.js"></script>
 <script>
 var PP_DATA = {pp_json};
 var GROOMERS = {groomers_json};
@@ -688,7 +687,7 @@ var _overridesDirty = false;
 // ── Overrides: GitHub API (works from any device, no local server needed) ────
 var _ghRepo = 'kylehoberman-woof/WoofGangAnalytics';
 var _ghPath = 'port-washington/data/overrides.json';
-var _ghToken = (window.WOOF_CONFIG && window.WOOF_CONFIG.ghToken) || '';
+var _ghToken = '{{gh_token}}';
 var _ghFileSha = null;
 
 function _loadOverrides() {{
@@ -1105,6 +1104,9 @@ function kpiCard(label, val, color) {{
 }}
 </script>
 </body></html>'''
+
+# Inject GitHub token from .env (token never stored in repo as plaintext)
+if GH_TOKEN: html = html.replace("'{gh_token}'", "'" + GH_TOKEN + "'")
 
 out_path = OUTPUT_DIR / "WoofGang_PortWashington_Commission_Dashboard.html"
 with open(out_path, "w") as f:
