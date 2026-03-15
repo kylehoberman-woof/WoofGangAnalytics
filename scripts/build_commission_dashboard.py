@@ -18,7 +18,7 @@ def _load_env():
                 k, v = line.split('=', 1)
                 os.environ.setdefault(k.strip(), v.strip())
 _load_env()
-GH_TOKEN = os.environ.get("GITHUB_OVERRIDES_TOKEN", "")
+GH_TOKEN = os.environ.get("WOOF_OVERRIDES_TOKEN", "")
 
 GUARANTEES = {"Maria C": 200.0, "Sue M": 300.0}
 COMMISSION_RATE = 0.50
