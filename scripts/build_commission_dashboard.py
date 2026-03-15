@@ -698,7 +698,7 @@ function _loadOverrides() {{
   .then(function(data) {{
     if (data && data.content) {{
       _ghFileSha = data.sha;
-      var decoded = JSON.parse(atob(data.content.replace(/\n/g, '')));
+      var decoded = JSON.parse(atob(data.content.replace(/\\n/g, '')));
       _overrides = decoded || {{}};
     }}
     renderPayPeriod(document.getElementById('pp-select').value);
