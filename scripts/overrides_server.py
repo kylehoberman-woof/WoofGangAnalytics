@@ -12,9 +12,12 @@ import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 
-SCRIPT_DIR = Path(__file__).parent.resolve()
-REPO_DIR = SCRIPT_DIR.parent
-OVERRIDES_FILE = REPO_DIR / "port-washington" / "data" / "overrides.json"
+sys.path.insert(0, str(Path(__file__).parent))
+from config import get_store
+
+_store = get_store("port-washington")
+REPO_DIR = Path(__file__).parent.resolve().parent
+OVERRIDES_FILE = _store.data_dir / "overrides.json"
 PORT = 5678
 
 class OverridesHandler(BaseHTTPRequestHandler):

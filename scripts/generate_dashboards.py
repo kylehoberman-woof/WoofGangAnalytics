@@ -14,45 +14,17 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from run import classify_item, STORE_NAME, DATA_DIR, START_DATE, END_DATE
+from classifier import classify_item
+from config import C, FDD_RETAIL_COGS_PCT, FDD_GROOM_COGS_PCT
+from formatting import to_py, jslist
 
-# ─── Brand Palette ────────────────────────────────────────────────────────────
-
-C = {
-    "magenta": "#C4276E",
-    "brown": "#6B3520",
-    "pink_bg": "#FDF0F5",
-    "teal": "#1B6B6B",
-    "white": "#FFFFFF",
-    "light_gray": "#F8F9FA",
-    "green": "#2E7D32",
-    "red": "#C62828",
-    "amber": "#F9A825",
-    "chart": ["#C4276E", "#1B6B6B", "#6B3520", "#E91E63", "#26A69A", "#8D6E63",
-              "#F06292", "#4DB6AC", "#A1887F", "#CE93D8", "#80CBC4", "#FFAB91"],
-}
-
-
-# ─── FDD Margin Standards ─────────────────────────────────────────────────────
-# POS COGS data is unreliable (grooming "cost" is commission, not true COGS).
-# Using Woof Gang Franchise Disclosure Document standards:
-FDD_RETAIL_COGS_PCT = 48.5   # Retail cost of goods as % of retail revenue
-FDD_GROOM_COGS_PCT = 51.5    # Grooming cost (commission/labor) as % of groom revenue
-
-
-def to_py(val):
-    """Convert numpy/pandas scalars to plain Python types for JSON-safe JS output."""
-    import math as _m
-    if hasattr(val, 'item'):
-        val = val.item()
-    if isinstance(val, float) and (_m.isnan(val) or _m.isinf(val)):
-        return 0
-    return val
-
-
-def jslist(lst):
-    """Convert a list of possibly-numpy values to a JSON-safe Python list string."""
-    return str([round(to_py(v), 2) for v in lst])
+# Backward compat: these are read from the 'run' module at import time by some scripts.
+# They can be patched at runtime (e.g., for Hicksville).
+import run
+STORE_NAME = run.STORE_NAME
+DATA_DIR = run.DATA_DIR
+START_DATE = run.START_DATE
+END_DATE = run.END_DATE
 
 
 # ─── Load & Transform Data ────────────────────────────────────────────────────
@@ -164,26 +136,7 @@ def load_data():
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
-def fc(v):
-    import math as _m
-    if v is None or (isinstance(v, float) and _m.isnan(v)):
-        return "$0.00"
-    return f"${v:,.2f}" if v >= 0 else f"-${abs(v):,.2f}"
-
-def fp(v):
-    import math as _m
-    if v is None or (isinstance(v, float) and _m.isnan(v)):
-        return "0.0%"
-    return f"{v:.1f}%"
-
-def fi(v):
-    import math as _m
-    if v is None or (isinstance(v, float) and _m.isnan(v)):
-        return "0"
-    return f"{int(v):,}"
-
-def esc(s):
-    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#39;")
+from formatting import fc, fp, fi, esc
 
 def get_periods(df):
     """Get sorted list of year-month periods from data.

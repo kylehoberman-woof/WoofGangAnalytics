@@ -1,17 +1,20 @@
-import httpx, json, time, os
+import httpx, json, time, sys
 from pathlib import Path
 
-TOKEN = os.environ["FRANPOS_TOKEN"]
-BASE_URL = "https://publicapi.franpos.com"
-LOCATION_ID = 203698
-data_dir = Path(__file__).parent.parent / "port-washington" / "data"
+sys.path.insert(0, str(Path(__file__).parent))
+
+from config import get_store, BASE_URL
+
+store = get_store("port-washington")
+data_dir = store.data_dir
 
 all_data = json.load(open(data_dir / "all_data.json"))
 skus = set(i.get("Sku","").strip() for i in all_data["order_items"] if len(i.get("Sku","").strip()) > 2)
 stock = {}
 for sku in sorted(skus):
     try:
-        r = httpx.get(f"{BASE_URL}/api/getStockByProductSKU/{sku}/{LOCATION_ID}", params={"Token": TOKEN}, timeout=10)
+        r = httpx.get(f"{BASE_URL}/api/getStockByProductSKU/{sku}/{store.location_id}",
+                      params={"Token": store.token}, timeout=10)
         if r.status_code == 200:
             stock[sku] = float(r.text.strip())
         time.sleep(0.05)

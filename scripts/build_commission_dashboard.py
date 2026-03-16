@@ -1,13 +1,26 @@
 # v2.1
 import json
 import os
+import sys
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime, date, timedelta
 
+sys.path.insert(0, str(Path(__file__).parent))
+
+from config import (
+    get_store, GUARANTEES, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
+    BATHER_RATE, RETAIL_RATES, RETAIL_NAME_MAP, BATHER_NAME_MAP,
+    MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
+    MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
+    MONTHLY_RENT, ANCHOR_START, STORE_OPEN,
+)
+from formatting import fc
+
 SCRIPTS_DIR = Path(__file__).parent
-DATA_DIR   = SCRIPTS_DIR.parent / "port-washington" / "data"
-OUTPUT_DIR = SCRIPTS_DIR.parent / "port-washington"
+_store = get_store("port-washington")
+DATA_DIR   = _store.data_dir
+OUTPUT_DIR = _store.output_dir
 
 # Load GitHub token from .env file (never committed to git)
 def _load_env():
@@ -19,27 +32,6 @@ def _load_env():
                 os.environ.setdefault(k.strip(), v.strip())
 _load_env()
 GH_TOKEN = os.environ.get("WOOF_OVERRIDES_TOKEN", "")
-
-GUARANTEES = {"Maria C": 200.0, "Sue M": 300.0}
-COMMISSION_RATE = 0.50
-EXCLUDE = {"Unknown", "Wgb Port Washington", "Kyle Hoberman", "Jessica G", "Angela R"}
-BATHER_RATE = 17.0  # $/hr
-
-# Retail staff hourly rates
-RETAIL_RATES = {
-    "Chris": 20.0,
-    "Casey": 19.0,
-}
-
-# Name mapping from time clock full names to short names
-RETAIL_NAME_MAP = {
-    "Christine Brower": "Chris",
-    "Casey Makowski": "Casey",
-}
-BATHER_NAME_MAP = {
-    "Jessica G": "Jessica G",
-    "Angela R": "Angela R",
-}
 
 def get_hours_from_clocks(clocks, name_map, period_start, period_end):
     """Calculate hours worked from time clock records for a pay period.
@@ -61,13 +53,6 @@ def get_hours_from_clocks(clocks, name_map, period_start, period_end):
         daily[name] = sorted(daily[name], key=lambda x: x["date"])
     return total, daily
 
-MANAGER_SALARY_OLD    = 65000.0   # Mar 1 2025 – Feb 28 2026
-MANAGER_SALARY_NEW    = 67000.0   # Mar 1 2026 onward
-MANAGER_RAISE_DATE    = date(2026, 3, 1)
-MANAGER_BONUS_DATE    = date(2026, 3, 1)
-MANAGER_BONUS         = 2000.0
-MANAGER_START         = date(2025, 3, 1)
-MANAGER_NAME          = "Cindy Szczudlo"
 
 # ── Load all data ─────────────────────────────────────────────────────────────
 groom_by_day  = defaultdict(lambda: defaultdict(float))
@@ -146,8 +131,6 @@ for oid, tip in tips_by_order.items():
 groomers = sorted(g for g in groom_by_day.keys() if not g.startswith("_"))
 
 # ── Pay periods: bi-weekly Mon–Sun, anchor = Feb 23 2026 ─────────────────────
-ANCHOR_START = date(2026, 2, 23)
-STORE_OPEN   = date(2024, 9, 26)
 TODAY        = date.today()
 
 def build_pay_periods():
@@ -198,7 +181,6 @@ def period_summary(groomer, start, end):
             t["daily"].append({"date": day, **d})
     return t
 
-def fc(v): return f"${v:,.2f}"
 def period_label(s, e):
     return f"{s.strftime('%b %-d')} – {e.strftime('%b %-d, %Y')}"
 
@@ -218,7 +200,6 @@ ytd_bather_rev = sum(v for d, v in groom_by_day.get("_bather_revenue", {}).items
                      if ytd_start.isoformat() <= d <= TODAY.isoformat())
 ytd_total["rev"] += ytd_bather_rev
 
-MONTHLY_RENT = 7700.0
 DAILY_RENT   = MONTHLY_RENT * 12 / 365
 ytd_days_count = (TODAY - ytd_start).days + 1
 ytd_rent = round(DAILY_RENT * ytd_days_count, 2)
