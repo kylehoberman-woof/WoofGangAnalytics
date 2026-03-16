@@ -1,10 +1,17 @@
 import json
+import sys
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 
-DATA_DIR = Path(__file__).parent.parent / "port-washington" / "data"
-OUTPUT_DIR = Path(__file__).parent.parent / "port-washington"
+sys.path.insert(0, str(Path(__file__).parent))
+
+from config import get_store
+from classifier import is_service, detect_vendor
+
+_store = get_store("port-washington")
+DATA_DIR = _store.data_dir
+OUTPUT_DIR = _store.output_dir
 
 with open(DATA_DIR / "all_data.json") as f:
     all_data = json.load(f)
@@ -12,39 +19,6 @@ with open(DATA_DIR / "stock_levels.json") as f:
     stock_levels = json.load(f)
 
 order_items = all_data.get("order_items", [])
-
-SERVICE_PREFIXES = ("987", "765", "543", "432", "986", "985", "984", "983", "982")
-SERVICE_KEYWORDS = ("groom", "bath", "add-on", "walk-in", "spa upgrade", "nail", "brush", "teeth",
-                    "deshedd", "de-shed", "full groom", "mini groom", "classic bath", "lux bath",
-                    "miscellaneous", "gift card", "gratuity", "tip", "hypo allergenic")
-
-def is_service(sku, name):
-    sku = str(sku).strip()
-    name = str(name).lower().strip()
-    if any(sku.startswith(p) for p in SERVICE_PREFIXES):
-        return True
-    if any(k in name for k in SERVICE_KEYWORDS):
-        return True
-    if sku in ("000", "001", "TREAT01", "TREAT02", "1001", "1002", "1003", "1004", "1005", "1006", "1007", "1008", "1009", "1010"):
-        return True
-    return False
-
-def detect_vendor(sku, name):
-    sku = str(sku).upper()
-    name = str(name).lower()
-    if sku.startswith("810153") or "wgb" in name:
-        return "Woof Gang"
-    if any(b in name for b in ["stella", "open farm", "earth animal", "earth rated"]):
-        return "PFX"
-    if "pfx" in name or "performatrin" in name or sku.startswith("PFX"):
-        return "PFX"
-    if any(b in name for b in ["fromm", "benebone", "primal"]):
-        return "Fauna"
-    if "fauna" in name or sku.startswith("FAU"):
-        return "Fauna"
-    if "k9d" in sku.lower():
-        return "K9 Cuisine"
-    return "Other"
 
 sku_data = defaultdict(lambda: {"name":"","sku":"","cost":0,"revenue":0,"units":0,"months_all":set(),"vendor":""})
 

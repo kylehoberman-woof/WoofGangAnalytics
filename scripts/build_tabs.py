@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
-"""Builds the tabbed all-years dashboard by calling runner's setup then generate per-year."""
-import sys, types, json
+"""Builds the tabbed all-years dashboard by calling generate_dashboards per-year."""
+import sys, types, json, re
 from pathlib import Path
 
 SCRIPTS_DIR = Path(__file__).parent
 BASE_DIR    = SCRIPTS_DIR.parent
-out_dir     = BASE_DIR / "port-washington"
-data_dir    = BASE_DIR / "port-washington" / "data"
 
-# ── Inline the classify_item stub (copied from run.py) ───────────────────
 sys.path.insert(0, str(SCRIPTS_DIR))
-exec(open(SCRIPTS_DIR / "run.py").read().split("# ── Merge all three")[0].split("sys.modules")[0])
 
+from config import get_store
+from classifier import classify_item  # noqa: F401
+
+store = get_store("port-washington")
+out_dir  = store.output_dir
+data_dir = store.data_dir
+
+# Set up fake 'run' module so generate_dashboards can import from it
 fake_run = types.ModuleType('run')
-fake_run.STORE_NAME = "Woof Gang Bakery & Grooming -- Port Washington, NY (#264)"
-fake_run.START_DATE = "2024-09-26"
-fake_run.END_DATE   = "2026-03-07"
+fake_run.STORE_NAME = store.name
+fake_run.START_DATE = store.start_date
+fake_run.END_DATE   = store.end_date
 fake_run.DATA_DIR   = data_dir
-fake_run.classify_item = classify_item  # noqa: F821
+fake_run.classify_item = classify_item
 sys.modules["run"] = fake_run
 
 import generate_dashboards as gd
@@ -57,7 +61,7 @@ YEARS = {
     "2026": ("2026-01-01", "2026-03-07"),
 }
 YEAR_LABELS = {
-    "2024": "2024 (Sep–Dec)",
+    "2024": "2024 (Sep\u2013Dec)",
     "2025": "2025 (Full Year)",
     "2026": "2026 (YTD)",
 }
@@ -120,18 +124,18 @@ window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
 """
 
 # ── Build final HTML ─────────────────────────────────────────────────────────
-import json as _json2, pandas as _pd2
+import pandas as _pd2
 _all_dates = []
 for _yr in ["2024", "2025", "2026"]:
     _p = data_dir / f"all_data_{_yr}.json"
     if _p.exists():
         with open(_p) as _f:
-            _d = _json2.load(_f)
+            _d = json.load(_f)
         for _item in _d.get("order_items", []):
             if _item.get("created"):
                 _all_dates.append(_item["created"])
 _last_date = _pd2.to_datetime(_all_dates).max().strftime("%-m/%-d/%Y") if _all_dates else "today"
-html = gd.html_head("Woof Gang Port Washington", f"Store Performance Analysis  ·  Sales through {_last_date}")
+html = gd.html_head("Woof Gang Port Washington", f"Store Performance Analysis  \u00b7  Sales through {_last_date}")
 html = html.replace("</style>", tabbed_css + "\n</style>", 1)
 
 # Tab bar
@@ -142,7 +146,6 @@ for yr in ["2024", "2025", "2026"]:
 html += '</div>\n'
 
 # Tab panels — wrap each year's chart scripts in lazy init functions
-import re as _re
 for yr in ["2024", "2025", "2026"]:
     display = "block" if yr == "2025" else "none"
     html += f'<div class="yr-panel" id="panel-{yr}" style="display:{display}>\n'
@@ -150,7 +153,7 @@ for yr in ["2024", "2025", "2026"]:
     def _wrap(m, _yr=yr):
         inner = m.group(0)[len("<script>\n"):-len("</script>")]
         return f"<script>\nfunction initCharts_{_yr}() {{\n{inner}\n}}\n</script>"
-    body = _re.sub(r'<script>\nconst cc = .*?</script>', _wrap, body, flags=_re.DOTALL)
+    body = re.sub(r'<script>\nconst cc = .*?</script>', _wrap, body, flags=re.DOTALL)
     html += body
     html += '</div>\n'
 
