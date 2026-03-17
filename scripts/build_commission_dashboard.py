@@ -412,6 +412,70 @@ groomer_colors_json = _json.dumps(groomer_color)
 _guar_js = {name: {"rate": g[0], "start": g[1], "end": g[2]} for name, g in GUARANTEES.items()}
 guarantees_json = _json.dumps(_guar_js)
 
+# ── Sue M: weekly tips + product purchases ────────────────────────────────────
+sue_name = "Sue M"
+from collections import OrderedDict as _OD
+
+# Collect Sue's tips per order (proportionally split for multi-groomer orders)
+_sue_tip_by_day = defaultdict(float)
+for oid, rev_map in order_groomer_rev.items():
+    if sue_name not in rev_map:
+        continue
+    day = order_date.get(oid, "")
+    if not day:
+        continue
+    tip = tips_by_order.get(oid, 0)
+    total_rev = sum(rev_map.values())
+    sue_rev = rev_map[sue_name]
+    sue_tip = round(tip * sue_rev / total_rev, 2) if total_rev > 0 and len(rev_map) > 1 else tip
+    _sue_tip_by_day[day] += sue_tip
+# Sue Moore's purchases as customer (employee 20% discount → owes 80% of subtotal)
+SUE_CUSTOMER_ID = 418921628
+_sue_purchases = []
+for o in data["orders"]:
+    if o.get("CustomerId") == SUE_CUSTOMER_ID:
+        st = float(o.get("SubTotal") or 0)
+        if st <= 0:
+            continue
+        day = (o.get("CreatedOn") or "")[:10]
+        receipt = str(o.get("CustomReceiptNumber", ""))
+        oid = o.get("OrderId")
+        items = [item.get("Name", "") for item in data["order_items"] if item.get("OrderId") == oid]
+        _sue_purchases.append({
+            "date": day, "receipt": receipt,
+            "subtotal": round(st, 2), "owed": round(st * 0.80, 2),
+            "items": ", ".join(items),
+        })
+_sue_purchases.sort(key=lambda x: x["date"], reverse=True)
+
+# Build simple weekly summary: tips + purchases + net
+_sue_weekly = _OD()
+for day, tip in _sue_tip_by_day.items():
+    dt = datetime.strptime(day, "%Y-%m-%d")
+    monday = dt - timedelta(days=dt.weekday())
+    sunday = monday + timedelta(days=6)
+    wk = monday.isoformat()
+    if wk not in _sue_weekly:
+        _sue_weekly[wk] = {"label": f"{monday.strftime('%b %-d')} – {sunday.strftime('%b %-d, %Y')}",
+                           "tips": 0, "purchases": [], "owed": 0}
+    _sue_weekly[wk]["tips"] += tip
+for p in _sue_purchases:
+    dt = datetime.strptime(p["date"], "%Y-%m-%d")
+    monday = dt - timedelta(days=dt.weekday())
+    sunday = monday + timedelta(days=6)
+    wk = monday.isoformat()
+    if wk not in _sue_weekly:
+        _sue_weekly[wk] = {"label": f"{monday.strftime('%b %-d')} – {sunday.strftime('%b %-d, %Y')}",
+                           "tips": 0, "purchases": [], "owed": 0}
+    _sue_weekly[wk]["purchases"].append(p)
+    _sue_weekly[wk]["owed"] += p["owed"]
+_sue_weekly = _OD(sorted(_sue_weekly.items(), reverse=True))
+for w in _sue_weekly.values():
+    w["tips"] = round(w["tips"], 2)
+    w["owed"] = round(w["owed"], 2)
+    w["net"] = round(w["tips"] - w["owed"], 2)
+sue_weekly_json = _json.dumps(list(_sue_weekly.values()))
+
 # YTD summary rows
 ytd_rows = summary_table(ytd_data)
 ytd_daily = daily_detail_rows(ytd_data)
@@ -487,6 +551,7 @@ tr:hover td{{background:#fafaf8!important}}
   <button class="tab" onclick="showTab('l30',this)">Last 30 Days</button>
   <button class="tab" onclick="showTab('pp',this)">Pay Period</button>
   <button class="tab" onclick="showTab('exec',this)">&#128200; Executive</button>
+  <button class="tab" onclick="showTab('sue',this)">&#128149; Sue</button>
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
@@ -597,6 +662,13 @@ tr:hover td{{background:#fafaf8!important}}
 
 </div>
 
+<!-- ── Sue M ── -->
+<div class="panel" id="panel-sue">
+  <div class="kpi-grid" id="sue-kpis"></div>
+  <div class="info-box">Sue M's weekly tips and product purchases. Employees get a <strong>20% discount</strong> — purchases are charged at <strong>80% of subtotal</strong> and deducted from tips. Net = Tips − Purchases.</div>
+  <div id="sue-weeks-container"></div>
+</div>
+
 <div class="panel" id="panel-exec">
   <div style="padding:32px">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px" id="exec-kpis"></div>
@@ -639,6 +711,7 @@ var GROOMERS = {groomers_json};
 var MONTHLY_DATA = {monthly_json};
 var COLORS = {groomer_colors_json};
 var GUARANTEES = {guarantees_json};
+var SUE_WEEKLY = {sue_weekly_json};
 
 function fc(v) {{ return '$' + parseFloat(v).toLocaleString('en-US', {{minimumFractionDigits:2,maximumFractionDigits:2}}); }}
 
@@ -651,6 +724,7 @@ function showTab(id, btn) {{
   sel.style.display = id === 'pp' ? 'block' : 'none';
   if (id === 'pp') renderPayPeriod(sel.value);
   if (id === 'exec') renderExec();
+  if (id === 'sue') renderSue();
 }}
 
 function toggleDetail(id, btn) {{
@@ -1004,6 +1078,52 @@ function renderPayPeriod(ppId) {{
 
 // Init pay period on load
 renderPayPeriod(document.getElementById('pp-select').value);
+
+// ── Sue M Weekly Tab ──────────────────────────────────────────────────────
+var _sueRendered = false;
+function renderSue() {{
+  if (_sueRendered) return;
+  _sueRendered = true;
+
+  // KPIs
+  var totalTips = 0, totalOwed = 0;
+  SUE_WEEKLY.forEach(function(w) {{
+    totalTips += w.tips;
+    totalOwed += w.owed;
+  }});
+  var totalNet = totalTips - totalOwed;
+
+  document.getElementById('sue-kpis').innerHTML =
+    '<div class="kpi orange"><div class="kpi-val">'+fc(totalTips)+'</div><div class="kpi-label">Total Tips</div></div>'+
+    '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totalOwed)+'</div><div class="kpi-label">Product Purchases (80%)</div></div>'+
+    '<div class="kpi green"><div class="kpi-val">'+fc(totalNet)+'</div><div class="kpi-label">Net Tips</div></div>';
+
+  // Weekly rows
+  var html = '<div class="card"><div class="stitle">Weekly Summary</div><div class="tbl-wrap"><table>'+
+    '<thead><tr><th>Week</th><th style="text-align:right">Tips</th><th style="text-align:right">Purchases (80%)</th><th style="text-align:right">Net</th></tr></thead><tbody>';
+  SUE_WEEKLY.forEach(function(w, i) {{
+    var purchases = w.purchases || [];
+    var netColor = w.net >= 0 ? '#388E3C' : '#e53935';
+    html += '<tr>'+
+      '<td style="font-weight:600">'+w.label+'</td>'+
+      '<td style="text-align:right;color:#f57c00">'+fc(w.tips)+'</td>'+
+      '<td style="text-align:right;color:#6D4C41">'+(w.owed > 0 ? fc(w.owed) : '—')+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:'+netColor+'">'+fc(w.net)+'</td>'+
+      '</tr>';
+    // Show purchase detail rows
+    if (purchases.length > 0) {{
+      purchases.forEach(function(p) {{
+        html += '<tr style="background:#fff8f0">'+
+          '<td colspan="1" style="padding-left:24px;font-size:0.8rem;color:#888">'+p.date+'</td>'+
+          '<td colspan="2" style="font-size:0.8rem;color:#666">'+p.items+'</td>'+
+          '<td style="text-align:right;font-size:0.8rem;color:#6D4C41">'+fc(p.owed)+' <span style="color:#aaa;font-size:0.72rem">('+fc(p.subtotal)+' × 80%)</span></td>'+
+          '</tr>';
+      }});
+    }}
+  }});
+  html += '</tbody></table></div></div>';
+  document.getElementById('sue-weeks-container').innerHTML = html;
+}}
 
 // ── Executive Dashboard ───────────────────────────────────────────────────
 var _execCharts = {{}};
