@@ -198,6 +198,10 @@ body {
     top: -50%; left: -50%; width: 200%; height: 200%;
     background: radial-gradient(circle, rgba(196,39,110,0.15) 0%, transparent 50%);
 }
+.header-timestamp {
+    position: absolute; top: 12px; right: 20px; font-size: 0.78rem;
+    opacity: 0.85; font-weight: 400; z-index: 1;
+}
 .header h1 {
     font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;
     position: relative; margin-bottom: 4px;
@@ -364,7 +368,10 @@ td.magenta { color: """ + C['magenta'] + """; font-weight: 600; }
 """
 
 
-def html_head(title, subtitle=""):
+def html_head(title, subtitle="", timestamp=None):
+    if timestamp is None:
+        from zoneinfo import ZoneInfo
+        timestamp = datetime.now(ZoneInfo("America/New_York")).strftime("%B %d, %Y at %I:%M %p ET")
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -378,6 +385,7 @@ def html_head(title, subtitle=""):
 </head>
 <body>
 <div class="header">
+    <div class="header-timestamp">Updated {timestamp}</div>
     <h1>{esc(title)}</h1>
     <div class="subtitle">{esc(subtitle)}</div>
     <div class="brand-tag">Woof Gang Bakery & Grooming</div>
