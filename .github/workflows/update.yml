@@ -42,5 +42,11 @@ jobs:
           git add port-washington/data/
           git add port-washington/*.html
           git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
-          git pull --rebase origin main
+          # Pull latest main first, then re-generate would be ideal but
+          # for conflicts in generated HTML, just accept our freshly built version
+          git pull --rebase origin main || {
+            git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
+            git diff --name-only --diff-filter=U | xargs -r git add
+            GIT_EDITOR=true git rebase --continue
+          }
           git push origin HEAD:main
