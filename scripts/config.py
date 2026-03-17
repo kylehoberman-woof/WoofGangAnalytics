@@ -113,21 +113,38 @@ BATHER_RATE = 17.0  # $/hr
 GUARANTEES = {"Maria C": 200.0, "Sue M": 300.0}
 
 RETAIL_RATES = {
-    "Chris": 20.0,   # $/hr
-    "Casey": 19.0,   # $/hr
+    "Chris": 20.0,      # $/hr
+    "Casey": 19.0,      # $/hr
+    "Sitara": 19.0,     # $/hr (former)
+    "Ali": 19.0,        # $/hr (former)
+    "Giana": 19.0,      # $/hr (former)
+    "Parker": 19.0,     # $/hr (former)
 }
 
 RETAIL_NAME_MAP = {
     "Christine Brower": "Chris",
     "Casey Makowski": "Casey",
+    "Sitara Nagrani": "Sitara",
+    "Alize James": "Ali",
+    "Giana Golden": "Giana",
+    "Parker Spooner": "Parker",
 }
 
 BATHER_NAME_MAP = {
     "Jessica G": "Jessica G",
     "Angela R": "Angela R",
+    "Isabelle O": "Isabelle O",
+    "Brian Labianca": "Brian L",
 }
 
-EXCLUDE_EMPLOYEES = {"Unknown", "Wgb Port Washington", "Kyle Hoberman", "Jessica G", "Angela R"}
+EXCLUDE_EMPLOYEES = {
+    "Unknown", "Wgb Port Washington", "Kyle Hoberman", "Julie Schorr",
+    "Jessica G", "Angela R",                      # current bathers
+    "Isabelle O", "Brian Labianca",               # former bathers
+    "Sitara Nagrani", "Alize James",              # former sales associates
+    "Giana Golden", "Parker Spooner",             # former sales associates
+    "Casey Makowski", "Christine Brower",         # current sales associates
+}
 
 
 # ─── Manager Configuration ──────────────────────────────────────────────────
