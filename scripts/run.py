@@ -196,16 +196,16 @@ def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_
 </div>
 '''
 
-    # View toggle
+    # View toggle — Detail is default
     toggle_html = f'''<div class="view-toggle" id="{prefix}-toggle">
-  <button class="active" onclick="_showView('{prefix}','compare',this)">Compare</button>
-  <button onclick="_showView('{prefix}','detail',this)">Detail</button>
+  <button class="active" onclick="_showView('{prefix}','detail',this)">Detail</button>
+  <button onclick="_showView('{prefix}','compare',this)">Compare</button>
 </div>'''
 
-    # Detail panel
+    # Detail panel (shown by default)
     detail_select_id = f"{prefix}-detail-sel"
     detail_update_call = f"{detail_fn}()" if detail_fn else ""
-    detail_panel = f'''<div id="{prefix}-detail-panel" style="display:none">
+    detail_panel = f'''<div id="{prefix}-detail-panel">
   <div class="section">
     <h2><span class="dot"></span>Period Detail</h2>
     <p class="desc">View KPIs for a single period</p>
@@ -225,7 +225,8 @@ def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_
 </div>'''
 
     return f'''{toggle_html}
-<div id="{prefix}-compare-panel">
+{detail_panel}
+<div id="{prefix}-compare-panel" style="display:none">
 <div class="section">
   <h2><span class="dot"></span>{title}</h2>
   <p class="desc">{subtitle}</p>
@@ -250,7 +251,6 @@ def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_
   <div class="chart-container"><canvas id="{chart_id}" style="max-height:400px"></canvas></div>
 </div>
 </div>
-{detail_panel}
 '''
 
 
@@ -368,9 +368,9 @@ function showYear(yr) {
         if (yr === '2024' && typeof initCharts_2024 === 'function') initCharts_2024();
         if (yr === '2025' && typeof initCharts_2025 === 'function') initCharts_2025();
         if (yr === '2026' && typeof initCharts_2026 === 'function') initCharts_2026();
-        if (yr === 'monthly') updateMonthlyComparison();
-        if (yr === 'weekly') updateWeeklyComparison();
-        if (yr === 'daily') updateDailyComparison();
+        if (yr === 'monthly') updateMonthlyDetail();
+        if (yr === 'weekly') updateWeeklyDetail();
+        if (yr === 'daily') updateDailyDetail();
     }
 }
 window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
