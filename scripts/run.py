@@ -40,6 +40,118 @@ LOCATION_ID = _store.location_id
 TOKEN = _store.token
 
 
+def build_monthly_comparison_data(df_all, df_orders_all):
+    """Pre-compute per-month KPIs for all available months."""
+    from formatting import to_py
+
+    periods = sorted(df_all["ym"].dropna().unique())
+    result = {"periods": [], "data": {}}
+
+    for p in periods:
+        key = str(p)
+        label = p.strftime("%b '%y")
+        result["periods"].append({"key": key, "label": label})
+
+        df_m = df_all[df_all["ym"] == p]
+        df_ord_m = df_orders_all[df_orders_all["ym"] == p]
+
+        groom_m = df_m[df_m["is_groom"] == True]
+        retail_m = df_m[df_m["is_retail"] == True]
+
+        total_rev = to_py(df_m["net_sales"].sum())
+        groom_rev = to_py(groom_m["net_sales"].sum())
+        retail_rev = to_py(retail_m["net_sales"].sum())
+        txns = int(df_ord_m.shape[0])
+        avg_ticket = round(total_rev / txns, 2) if txns else 0
+        unique_cust = int(df_m["customer_id"].nunique())
+        tips = to_py(df_ord_m["tips"].sum())
+
+        result["data"][key] = {
+            "total_revenue": round(total_rev, 2),
+            "groom_revenue": round(groom_rev, 2),
+            "retail_revenue": round(retail_rev, 2),
+            "transactions": txns,
+            "avg_ticket": avg_ticket,
+            "unique_customers": unique_cust,
+            "tips": round(tips, 2),
+        }
+
+    return result
+
+
+def build_monthly_panel_html(monthly_data):
+    """Generate the HTML body for the monthly comparison tab."""
+    periods = monthly_data["periods"]
+
+    default_a = periods[-2]["key"] if len(periods) >= 2 else periods[0]["key"]
+    default_b = periods[-1]["key"] if len(periods) >= 1 else periods[0]["key"]
+
+    options_a = "\n".join(
+        f'<option value="{p["key"]}"{"selected" if p["key"] == default_a else ""}>{p["label"]}</option>'
+        for p in periods
+    )
+    options_b = "\n".join(
+        f'<option value="{p["key"]}"{"selected" if p["key"] == default_b else ""}>{p["label"]}</option>'
+        for p in periods
+    )
+
+    kpi_defs = [
+        ("total_revenue", "Total Revenue", ""),
+        ("groom_revenue", "Grooming Revenue", "accent"),
+        ("retail_revenue", "Retail Revenue", ""),
+        ("transactions", "Transactions", ""),
+        ("avg_ticket", "Avg Ticket", "green"),
+        ("unique_customers", "Unique Customers", ""),
+        ("tips", "Tips", ""),
+    ]
+
+    cards = ""
+    for key, label, cls in kpi_defs:
+        cards += f'''<div class="comparison-card kpi-card {cls}" id="cmp-{key}">
+  <div class="kpi-label">{label}</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-{key}-labelA"></div>
+      <div class="kpi-value" id="cmp-{key}-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-{key}-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-{key}-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-{key}-labelB"></div>
+      <div class="kpi-value" id="cmp-{key}-valB"></div>
+    </div>
+  </div>
+</div>
+'''
+
+    html = f'''<div class="section">
+  <h2><span class="dot"></span>Month-to-Month Comparison</h2>
+  <p class="desc">Select two months to compare key performance metrics side by side</p>
+  <div class="monthly-controls">
+    <div class="control-group">
+      <label for="monthA">Month A</label>
+      <select id="monthA" onchange="updateMonthlyComparison()">{options_a}</select>
+    </div>
+    <span class="vs-label">vs</span>
+    <div class="control-group">
+      <label for="monthB">Month B</label>
+      <select id="monthB" onchange="updateMonthlyComparison()">{options_b}</select>
+    </div>
+  </div>
+</div>
+<div class="comparison-grid">
+{cards}</div>
+<div class="section">
+  <h2><span class="dot"></span>Visual Comparison</h2>
+  <p class="desc">Side-by-side bar chart of selected months</p>
+  <div class="chart-container"><canvas id="monthlyCompareChart" style="max-height:400px"></canvas></div>
+</div>
+'''
+    return html
+
+
 def generate_dashboard(store):
     """Generate the tabbed HTML dashboard for all years."""
     import types
@@ -103,9 +215,83 @@ function showYear(yr) {
         if (yr === '2024' && typeof initCharts_2024 === 'function') initCharts_2024();
         if (yr === '2025' && typeof initCharts_2025 === 'function') initCharts_2025();
         if (yr === '2026' && typeof initCharts_2026 === 'function') initCharts_2026();
+        if (yr === 'monthly') updateMonthlyComparison();
     }
 }
 window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
+"""
+
+    # Build monthly comparison data
+    import json as _json_monthly
+    monthly_data = build_monthly_comparison_data(df_all, df_orders_all)
+    monthly_panel_body = build_monthly_panel_html(monthly_data)
+    monthly_json_str = _json_monthly.dumps(monthly_data)
+
+    monthly_js = """
+var MONTHLY_DATA = """ + monthly_json_str + """;
+var _monthlyChart = null;
+
+function _mfc(v) {
+    return (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+function _mfi(v) { return v.toLocaleString(); }
+
+function updateMonthlyComparison() {
+    var keyA = document.getElementById('monthA').value;
+    var keyB = document.getElementById('monthB').value;
+    var a = MONTHLY_DATA.data[keyA];
+    var b = MONTHLY_DATA.data[keyB];
+    if (!a || !b) return;
+    var labelA = document.getElementById('monthA').selectedOptions[0].text;
+    var labelB = document.getElementById('monthB').selectedOptions[0].text;
+
+    var kpis = [
+        {key: 'total_revenue', fmt: 'c'},
+        {key: 'groom_revenue', fmt: 'c'},
+        {key: 'retail_revenue', fmt: 'c'},
+        {key: 'transactions', fmt: 'i'},
+        {key: 'avg_ticket', fmt: 'c'},
+        {key: 'unique_customers', fmt: 'i'},
+        {key: 'tips', fmt: 'c'}
+    ];
+
+    kpis.forEach(function(kpi) {
+        var valA = a[kpi.key], valB = b[kpi.key];
+        var delta = valB - valA;
+        var deltaPct = valA !== 0 ? ((valB - valA) / Math.abs(valA) * 100) : 0;
+        var f = kpi.fmt === 'c' ? _mfc : _mfi;
+
+        document.getElementById('cmp-' + kpi.key + '-labelA').textContent = labelA;
+        document.getElementById('cmp-' + kpi.key + '-labelB').textContent = labelB;
+        document.getElementById('cmp-' + kpi.key + '-valA').textContent = f(valA);
+        document.getElementById('cmp-' + kpi.key + '-valB').textContent = f(valB);
+        document.getElementById('cmp-' + kpi.key + '-delta').textContent = (delta >= 0 ? '+' : '') + f(delta);
+        document.getElementById('cmp-' + kpi.key + '-deltaPct').textContent = (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + '%';
+
+        var deltaEl = document.getElementById('cmp-' + kpi.key).querySelector('.cmp-delta');
+        deltaEl.classList.remove('delta-positive', 'delta-negative');
+        deltaEl.classList.add(delta >= 0 ? 'delta-positive' : 'delta-negative');
+    });
+
+    // Revenue comparison chart
+    if (_monthlyChart) { _monthlyChart.destroy(); }
+    var ctx = document.getElementById('monthlyCompareChart');
+    _monthlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Revenue', 'Grooming', 'Retail', 'Avg Ticket', 'Tips'],
+            datasets: [
+                { label: labelA, data: [a.total_revenue, a.groom_revenue, a.retail_revenue, a.avg_ticket, a.tips], backgroundColor: '#C4276E', borderRadius: 6 },
+                { label: labelB, data: [b.total_revenue, b.groom_revenue, b.retail_revenue, b.avg_ticket, b.tips], backgroundColor: '#1B6B6B', borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.parsed.y.toLocaleString(); } } } },
+            scales: { y: { ticks: { callback: function(v) { return '$' + v.toLocaleString(); } } } }
+        }
+    });
+}
 """
 
     html = gd.html_head("Woof Gang Port Washington", f"Store Performance Analysis \u00b7 Sales through {through}")
@@ -114,6 +300,7 @@ window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
     for yr in ["2024", "2025", "2026"]:
         active = "active" if yr == "2025" else ""
         html += f'  <button class="yr-tab {active}" onclick="showYear(\'{yr}\')" id="tab-{yr}">{YEAR_LABELS[yr]}</button>\n'
+    html += '  <button class="yr-tab" onclick="showYear(\'monthly\')" id="tab-monthly">Monthly</button>\n'
     html += '</div>\n'
 
     for yr in ["2024", "2025", "2026"]:
@@ -127,7 +314,13 @@ window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
         html += body
         html += '</div>\n'
 
+    # Monthly comparison panel
+    html += '<div class="yr-panel" id="panel-monthly" style="display:none">\n'
+    html += monthly_panel_body
+    html += '</div>\n'
+
     html += f'<script>\n{tabbed_js}\n</script>\n'
+    html += f'<script>\n{monthly_js}\n</script>\n'
     html += gd.HTML_FOOT
 
     out_path = store.output_dir / "WoofGang_PortWashington_NY_AllYears_Dashboard.html"

@@ -152,6 +152,46 @@ td.magenta { color: #C4276E; font-weight: 600; }
     background: #e0e0e0; border-radius: 6px; height: 10px; overflow: hidden; margin: 4px 0;
 }
 .progress-bar-fill { height: 100%; border-radius: 6px; }
+.monthly-controls {
+    display: flex; align-items: center; gap: 16px;
+    margin-top: 14px; flex-wrap: wrap;
+}
+.monthly-controls .control-group { display: flex; flex-direction: column; gap: 4px; }
+.monthly-controls label {
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #888;
+}
+.monthly-controls select {
+    padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px;
+    font-size: 0.95rem; font-weight: 600; font-family: inherit;
+    background: white; cursor: pointer; min-width: 160px;
+    transition: border-color 0.2s;
+}
+.monthly-controls select:focus { border-color: #C4276E; outline: none; }
+.vs-label {
+    font-size: 0.85rem; font-weight: 700; color: #999;
+    padding-top: 18px;
+}
+.comparison-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px; margin-bottom: 22px;
+}
+.comparison-card .comparison-values {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px; gap: 8px;
+}
+.comparison-card .cmp-col { text-align: center; flex: 1; }
+.comparison-card .cmp-month-label {
+    font-size: 0.7rem; font-weight: 600; color: #999;
+    text-transform: uppercase; margin-bottom: 2px;
+}
+.comparison-card .cmp-delta { flex: 0 0 auto; padding: 0 8px; }
+.cmp-delta-val { font-size: 0.9rem; font-weight: 700; }
+.cmp-delta-pct { font-size: 0.75rem; color: #888; }
+.delta-positive .cmp-delta-val { color: #2E7D32; }
+.delta-positive .cmp-delta-pct { color: #2E7D32; }
+.delta-negative .cmp-delta-val { color: #C62828; }
+.delta-negative .cmp-delta-pct { color: #C62828; }
 
 .yr-tab-bar { background: #C4276E; padding: 0 24px; display: flex; gap: 4px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
 .yr-tab { padding: 14px 32px; border: none; background: transparent; color: rgba(255,255,255,0.6); font-size: 15px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-family: inherit; }
@@ -171,13 +211,14 @@ td.magenta { color: #C4276E; font-weight: 600; }
   <button class="yr-tab " onclick="showYear('2024')" id="tab-2024">2024 (Sep–Dec)</button>
   <button class="yr-tab active" onclick="showYear('2025')" id="tab-2025">2025 (Full Year)</button>
   <button class="yr-tab " onclick="showYear('2026')" id="tab-2026">2026 (YTD)</button>
+  <button class="yr-tab" onclick="showYear('monthly')" id="tab-monthly">Monthly</button>
 </div>
 <div class="yr-panel" id="panel-2024" style="display:none">
 <div class="kpi-grid">
 <div class="kpi-card "><div class="kpi-label">2024 Net Sales (YTD)</div><div class="kpi-value">$145,301.73</div><div class="kpi-sub">4 months of data</div></div>
-<div class="kpi-card green"><div class="kpi-label">Full Year 2024 Forecast</div><div class="kpi-value">$1,306,691.22</div><div class="kpi-sub">Based on 2023+2024 growth trend</div></div>
+<div class="kpi-card green"><div class="kpi-label">Full Year 2024 Forecast</div><div class="kpi-value">$311,330.86</div><div class="kpi-sub">+0% YoY growth × 2023 seasonality + run rate</div></div>
 <div class="kpi-card accent"><div class="kpi-label">Recent Run Rate (Annualized)</div><div class="kpi-value">$560,374.56</div><div class="kpi-sub">Last 3mo avg: $46,697.88</div></div>
-<div class="kpi-card green"><div class="kpi-label">Monthly Growth Rate</div><div class="kpi-value">+$19,993.32/mo</div><div class="kpi-sub">Trend from 2023 trajectory</div></div>
+<div class="kpi-card green"><div class="kpi-label">YoY Growth vs 2023</div><div class="kpi-value">+0.0%</div><div class="kpi-sub">Same-month comparison (0 months)</div></div>
 </div>
 <div class="kpi-grid">
 <div class="kpi-card accent"><div class="kpi-label">Grooming Revenue</div><div class="kpi-value">$84,537.49</div><div class="kpi-sub">58.2% of total</div></div>
@@ -194,7 +235,7 @@ td.magenta { color: #C4276E; font-weight: 600; }
 <h2><span class="dot"></span>Revenue Trajectory & Forecast</h2>
 <p class="desc">Monthly actual vs trend line — 4 months of data</p>
 <div class="chart-container"><canvas id="trajectoryChart_2024" style="max-height:340px"></canvas></div>
-<div class="opp-box"><strong>YTD 2024: $145,301.73</strong> across 4 months. Full-year 2024 forecast: <strong>$1,306,691.22</strong> &mdash; projected using the 2023&ndash;2024 growth trend (+$19,993.32/mo). That implies <strong>+0% YoY growth</strong> vs 2023 actual of $0.00.</div>
+<div class="opp-box"><strong>YTD 2024: $145,301.73</strong> across 4 months. Full-year 2024 forecast: <strong>$311,330.86</strong> &mdash; +0% YoY growth applied to 2023 seasonal pattern (actual: $0.00), blended with run rate.</div>
 </div>
 <div class="grid-2">
 <div class="section"><h2><span class="dot"></span>Revenue Mix</h2><p class="desc">Grooming vs Retail vs Gift Cards</p><div class="chart-container"><canvas id="revMixChart_2024"></canvas></div></div>
@@ -632,7 +673,7 @@ Chart.defaults.font.family = "'Inter', sans-serif";
 Chart.defaults.color = '#666';
 
 (function() {
-    var _trendData = [9308.71, 29302.04, 49295.36, 69288.68];
+    var _trendData = [11687.33, 28112.73, 44538.14, 60963.54];
     var _datasets = [
         { label: 'Actual Revenue', data: [5208.09, 37503.28, 45194.74, 57395.62], backgroundColor: mg+'cc', borderRadius: 6 }
     ];
@@ -1236,17 +1277,17 @@ if (document.getElementById('cancelTrendChart_2024')) {
 <tr><td>Sitara Nagrani</td><td class="num">19</td><td class="num">$444.19</td><td class="num">1,950</td><td class="num">1.0%</td><td class="num">$23.38</td></tr>
 <tr><td>Casey Makowski</td><td class="num">16</td><td class="num">$516.88</td><td class="num">2,138</td><td class="num">0.7%</td><td class="num">$32.30</td></tr>
 <tr><td>Giana Golden</td><td class="num">9</td><td class="num">$322.80</td><td class="num">1,839</td><td class="num">0.5%</td><td class="num">$35.87</td></tr>
-<tr><td>Joyce P</td><td class="num">5</td><td class="num">$445.00</td><td class="num">1,542</td><td class="num">0.3%</td><td class="num">$89.00</td></tr>
-<tr><td>Joant C</td><td class="num">5</td><td class="num">$250.00</td><td class="num">571</td><td class="num">0.9%</td><td class="num">$50.00</td></tr>
 <tr><td>Christine Brower</td><td class="num">5</td><td class="num">$96.96</td><td class="num">420</td><td class="num">1.2%</td><td class="num">$19.39</td></tr>
+<tr><td>Joant C</td><td class="num">5</td><td class="num">$250.00</td><td class="num">571</td><td class="num">0.9%</td><td class="num">$50.00</td></tr>
+<tr><td>Joyce P</td><td class="num">5</td><td class="num">$445.00</td><td class="num">1,542</td><td class="num">0.3%</td><td class="num">$89.00</td></tr>
 <tr><td>Sue M</td><td class="num">5</td><td class="num">$230.00</td><td class="num">1,669</td><td class="num">0.3%</td><td class="num">$46.00</td></tr>
 <tr><td>Isabelle O</td><td class="num">4</td><td class="num">$135.00</td><td class="num">764</td><td class="num">0.5%</td><td class="num">$33.75</td></tr>
-<tr><td>Olivia M</td><td class="num">2</td><td class="num">$110.00</td><td class="num">1,046</td><td class="num">0.2%</td><td class="num">$55.00</td></tr>
 <tr><td>Julie Schorr</td><td class="num">2</td><td class="num">$35.97</td><td class="num">259</td><td class="num">0.8%</td><td class="num">$17.98</td></tr>
+<tr><td>Olivia M</td><td class="num">2</td><td class="num">$110.00</td><td class="num">1,046</td><td class="num">0.2%</td><td class="num">$55.00</td></tr>
 <tr><td>Stacey W</td><td class="num">2</td><td class="num">$125.00</td><td class="num">174</td><td class="num">1.1%</td><td class="num">$62.50</td></tr>
-<tr><td>Jackie G. </td><td class="num">1</td><td class="num">$130.00</td><td class="num">709</td><td class="num">0.1%</td><td class="num">$130.00</td></tr>
 <tr><td>Angela R</td><td class="num">1</td><td class="num">$10.00</td><td class="num">753</td><td class="num">0.1%</td><td class="num">$10.00</td></tr>
 <tr><td>Danielle L</td><td class="num">1</td><td class="num">$10.00</td><td class="num">864</td><td class="num">0.1%</td><td class="num">$10.00</td></tr>
+<tr><td>Jackie G. </td><td class="num">1</td><td class="num">$130.00</td><td class="num">709</td><td class="num">0.1%</td><td class="num">$130.00</td></tr>
 </tbody></table>
 <h3 style="color:#6B3520;margin:22px 0 10px">Grooming Void Log</h3>
 <p class="desc">Every voided grooming service — review for patterns in employee, service type, timing, or customer.</p>
@@ -1419,9 +1460,9 @@ if (document.getElementById('cancelTrendChart_2025')) {
 <div class="yr-panel" id="panel-2026" style="display:none">
 <div class="kpi-grid">
 <div class="kpi-card "><div class="kpi-label">2026 Net Sales (YTD)</div><div class="kpi-value">$196,438.56</div><div class="kpi-sub">3 months of data</div></div>
-<div class="kpi-card green"><div class="kpi-label">Full Year 2026 Forecast</div><div class="kpi-value">$808,145.74</div><div class="kpi-sub">Based on 2025+2026 growth trend</div></div>
-<div class="kpi-card accent"><div class="kpi-label">Recent Run Rate (Annualized)</div><div class="kpi-value">$930,580.35</div><div class="kpi-sub">Last 3mo avg: $77,548.36 (partial mo. pro-rated)</div></div>
-<div class="kpi-card green"><div class="kpi-label">Monthly Growth Rate</div><div class="kpi-value">+-$2,234.95/mo</div><div class="kpi-sub">Trend from 2025 trajectory</div></div>
+<div class="kpi-card green"><div class="kpi-label">Full Year 2026 Forecast</div><div class="kpi-value">$1,123,228.94</div><div class="kpi-sub">+54% YoY growth × 2025 seasonality + run rate</div></div>
+<div class="kpi-card accent"><div class="kpi-label">Recent Run Rate (Annualized)</div><div class="kpi-value">$950,623.25</div><div class="kpi-sub">Last 3mo avg: $79,218.60 (partial mo. pro-rated)</div></div>
+<div class="kpi-card green"><div class="kpi-label">YoY Growth vs 2025</div><div class="kpi-value">+54.2%</div><div class="kpi-sub">Same-month comparison (3 months)</div></div>
 </div>
 <div class="kpi-grid">
 <div class="kpi-card accent"><div class="kpi-label">Grooming Revenue</div><div class="kpi-value">$158,102.42</div><div class="kpi-sub">80.5% of total</div></div>
@@ -1438,7 +1479,7 @@ if (document.getElementById('cancelTrendChart_2025')) {
 <h2><span class="dot"></span>Revenue Trajectory & Forecast</h2>
 <p class="desc">Monthly actual vs trend line — 3 months of data</p>
 <div class="chart-container"><canvas id="trajectoryChart_2026" style="max-height:340px"></canvas></div>
-<div class="opp-box"><strong>YTD 2026: $196,438.56</strong> across 3 months. Full-year 2026 forecast: <strong>$808,145.74</strong> &mdash; projected using the 2025&ndash;2026 growth trend (+-$2,234.95/mo). That implies <strong>+0% YoY growth</strong> vs 2025 actual of $0.00.</div>
+<div class="opp-box"><strong>YTD 2026: $196,438.56</strong> across 3 months. Full-year 2026 forecast: <strong>$1,123,228.94</strong> &mdash; +54% YoY growth applied to 2025 seasonal pattern (actual: $802,923.44), blended with run rate.</div>
 </div>
 <div class="grid-2">
 <div class="section"><h2><span class="dot"></span>Revenue Mix</h2><p class="desc">Grooming vs Retail vs Gift Cards</p><div class="chart-container"><canvas id="revMixChart_2026"></canvas></div></div>
@@ -1797,8 +1838,8 @@ if (document.getElementById('cancelTrendChart_2025')) {
 <tr><td>8</td><td>WagWellies® by wagwear Navy</td><td><span class="badge badge-green">Retail</span></td><td class="num">2</td><td class="num">$98.00</td></tr>
 <tr><td>9</td><td>Fromm 4 Star Dog Dry Salmon A La Veg 26# NEW SIZE</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$71.99</td></tr>
 <tr><td>10</td><td>Furrei Pets Collar</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$56.00</td></tr>
-<tr><td>11</td><td>wagwear boots s</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$49.99</td></tr>
-<tr><td>12</td><td>wagwear boots xs navy</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$49.99</td></tr>
+<tr><td>11</td><td>wagwear boots xs navy</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$49.99</td></tr>
+<tr><td>12</td><td>wagwear boots s</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$49.99</td></tr>
 <tr><td>13</td><td>Lucy&amp;Co Red Plaid Vest Large</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$45.00</td></tr>
 <tr><td>14</td><td>FUZZYARD PINK CORD JACKET 6</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$45.00</td></tr>
 <tr><td>15</td><td>Gooby Zip Up Sherpa Hot Pink LG</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$43.00</td></tr>
@@ -1839,8 +1880,8 @@ if (document.getElementById('cancelTrendChart_2025')) {
 <tr><td>Joyce P</td><td class="num">2</td><td class="num">$95.00</td><td class="num">364</td><td class="num">0.5%</td><td class="num">$47.50</td></tr>
 <tr><td>Kyle Hoberman</td><td class="num">2</td><td class="num">$40.00</td><td class="num">228</td><td class="num">0.9%</td><td class="num">$20.00</td></tr>
 <tr><td>Danielle L</td><td class="num">1</td><td class="num">$105.00</td><td class="num">305</td><td class="num">0.3%</td><td class="num">$105.00</td></tr>
-<tr><td>Jessica G</td><td class="num">1</td><td class="num">$20.00</td><td class="num">456</td><td class="num">0.2%</td><td class="num">$20.00</td></tr>
 <tr><td>Ingrid R</td><td class="num">1</td><td class="num">$85.00</td><td class="num">322</td><td class="num">0.3%</td><td class="num">$85.00</td></tr>
+<tr><td>Jessica G</td><td class="num">1</td><td class="num">$20.00</td><td class="num">456</td><td class="num">0.2%</td><td class="num">$20.00</td></tr>
 <tr><td>Kimberly S</td><td class="num">1</td><td class="num">$115.00</td><td class="num">34</td><td class="num" style="color:#C62828;font-weight:700">2.9%</td><td class="num">$115.00</td></tr>
 <tr><td>Olivia M</td><td class="num">1</td><td class="num">$145.00</td><td class="num">318</td><td class="num">0.3%</td><td class="num">$145.00</td></tr>
 </tbody></table>
@@ -1867,7 +1908,7 @@ Chart.defaults.font.family = "'Inter', sans-serif";
 Chart.defaults.color = '#666';
 
 (function() {
-    var _trendData = [77354.23, 75119.27, 72884.32];
+    var _trendData = [82174.1, 65479.52, 48784.94];
     var _datasets = [
         { label: 'Actual Revenue', data: [77354.23, 75119.27, 43965.06], backgroundColor: mg+'cc', borderRadius: 6 }
     ];
@@ -1994,6 +2035,185 @@ if (document.getElementById('cancelTrendChart_2026')) {
 }
 </script>
 </div>
+<div class="yr-panel" id="panel-monthly" style="display:none">
+<div class="section">
+  <h2><span class="dot"></span>Month-to-Month Comparison</h2>
+  <p class="desc">Select two months to compare key performance metrics side by side</p>
+  <div class="monthly-controls">
+    <div class="control-group">
+      <label for="monthA">Month A</label>
+      <select id="monthA" onchange="updateMonthlyComparison()"><option value="2024-09">Sep '24</option>
+<option value="2024-10">Oct '24</option>
+<option value="2024-11">Nov '24</option>
+<option value="2024-12">Dec '24</option>
+<option value="2025-01">Jan '25</option>
+<option value="2025-02">Feb '25</option>
+<option value="2025-03">Mar '25</option>
+<option value="2025-04">Apr '25</option>
+<option value="2025-05">May '25</option>
+<option value="2025-06">Jun '25</option>
+<option value="2025-07">Jul '25</option>
+<option value="2025-08">Aug '25</option>
+<option value="2025-09">Sep '25</option>
+<option value="2025-10">Oct '25</option>
+<option value="2025-11">Nov '25</option>
+<option value="2025-12">Dec '25</option>
+<option value="2026-01">Jan '26</option>
+<option value="2026-02"selected>Feb '26</option>
+<option value="2026-03">Mar '26</option></select>
+    </div>
+    <span class="vs-label">vs</span>
+    <div class="control-group">
+      <label for="monthB">Month B</label>
+      <select id="monthB" onchange="updateMonthlyComparison()"><option value="2024-09">Sep '24</option>
+<option value="2024-10">Oct '24</option>
+<option value="2024-11">Nov '24</option>
+<option value="2024-12">Dec '24</option>
+<option value="2025-01">Jan '25</option>
+<option value="2025-02">Feb '25</option>
+<option value="2025-03">Mar '25</option>
+<option value="2025-04">Apr '25</option>
+<option value="2025-05">May '25</option>
+<option value="2025-06">Jun '25</option>
+<option value="2025-07">Jul '25</option>
+<option value="2025-08">Aug '25</option>
+<option value="2025-09">Sep '25</option>
+<option value="2025-10">Oct '25</option>
+<option value="2025-11">Nov '25</option>
+<option value="2025-12">Dec '25</option>
+<option value="2026-01">Jan '26</option>
+<option value="2026-02">Feb '26</option>
+<option value="2026-03"selected>Mar '26</option></select>
+    </div>
+  </div>
+</div>
+<div class="comparison-grid">
+<div class="comparison-card kpi-card " id="cmp-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-total_revenue-labelA"></div>
+      <div class="kpi-value" id="cmp-total_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-total_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-total_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-total_revenue-labelB"></div>
+      <div class="kpi-value" id="cmp-total_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="cmp-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-groom_revenue-labelA"></div>
+      <div class="kpi-value" id="cmp-groom_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-groom_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-groom_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-groom_revenue-labelB"></div>
+      <div class="kpi-value" id="cmp-groom_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-retail_revenue-labelA"></div>
+      <div class="kpi-value" id="cmp-retail_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-retail_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-retail_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-retail_revenue-labelB"></div>
+      <div class="kpi-value" id="cmp-retail_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-transactions-labelA"></div>
+      <div class="kpi-value" id="cmp-transactions-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-transactions-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-transactions-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-transactions-labelB"></div>
+      <div class="kpi-value" id="cmp-transactions-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="cmp-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-avg_ticket-labelA"></div>
+      <div class="kpi-value" id="cmp-avg_ticket-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-avg_ticket-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-avg_ticket-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-avg_ticket-labelB"></div>
+      <div class="kpi-value" id="cmp-avg_ticket-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-unique_customers-labelA"></div>
+      <div class="kpi-value" id="cmp-unique_customers-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-unique_customers-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-unique_customers-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-unique_customers-labelB"></div>
+      <div class="kpi-value" id="cmp-unique_customers-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-tips-labelA"></div>
+      <div class="kpi-value" id="cmp-tips-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-tips-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-tips-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-tips-labelB"></div>
+      <div class="kpi-value" id="cmp-tips-valB"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section">
+  <h2><span class="dot"></span>Visual Comparison</h2>
+  <p class="desc">Side-by-side bar chart of selected months</p>
+  <div class="chart-container"><canvas id="monthlyCompareChart" style="max-height:400px"></canvas></div>
+</div>
+</div>
 <script>
 
 var _chartsInited = {};
@@ -2007,15 +2227,84 @@ function showYear(yr) {
         if (yr === '2024' && typeof initCharts_2024 === 'function') initCharts_2024();
         if (yr === '2025' && typeof initCharts_2025 === 'function') initCharts_2025();
         if (yr === '2026' && typeof initCharts_2026 === 'function') initCharts_2026();
+        if (yr === 'monthly') updateMonthlyComparison();
     }
 }
 window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
 
 </script>
+<script>
+
+var MONTHLY_DATA = {"periods": [{"key": "2024-09", "label": "Sep '24"}, {"key": "2024-10", "label": "Oct '24"}, {"key": "2024-11", "label": "Nov '24"}, {"key": "2024-12", "label": "Dec '24"}, {"key": "2025-01", "label": "Jan '25"}, {"key": "2025-02", "label": "Feb '25"}, {"key": "2025-03", "label": "Mar '25"}, {"key": "2025-04", "label": "Apr '25"}, {"key": "2025-05", "label": "May '25"}, {"key": "2025-06", "label": "Jun '25"}, {"key": "2025-07", "label": "Jul '25"}, {"key": "2025-08", "label": "Aug '25"}, {"key": "2025-09", "label": "Sep '25"}, {"key": "2025-10", "label": "Oct '25"}, {"key": "2025-11", "label": "Nov '25"}, {"key": "2025-12", "label": "Dec '25"}, {"key": "2026-01", "label": "Jan '26"}, {"key": "2026-02", "label": "Feb '26"}, {"key": "2026-03", "label": "Mar '26"}], "data": {"2024-09": {"total_revenue": 5208.09, "groom_revenue": 1820.0, "retail_revenue": 3388.09, "transactions": 126, "avg_ticket": 41.33, "unique_customers": 34, "tips": 232.6}, "2024-10": {"total_revenue": 37503.28, "groom_revenue": 19068.99, "retail_revenue": 18434.29, "transactions": 905, "avg_ticket": 41.44, "unique_customers": 291, "tips": 1952.46}, "2024-11": {"total_revenue": 45194.74, "groom_revenue": 27862.0, "retail_revenue": 17007.74, "transactions": 872, "avg_ticket": 51.83, "unique_customers": 353, "tips": 3310.65}, "2024-12": {"total_revenue": 57395.62, "groom_revenue": 35786.5, "retail_revenue": 21433.12, "transactions": 973, "avg_ticket": 58.99, "unique_customers": 417, "tips": 4214.59}, "2025-01": {"total_revenue": 49686.55, "groom_revenue": 36953.5, "retail_revenue": 12732.05, "transactions": 777, "avg_ticket": 63.95, "unique_customers": 407, "tips": 4313.0}, "2025-02": {"total_revenue": 48064.31, "groom_revenue": 34291.25, "retail_revenue": 13538.06, "transactions": 774, "avg_ticket": 62.1, "unique_customers": 365, "tips": 3995.3}, "2025-03": {"total_revenue": 56623.11, "groom_revenue": 42814.0, "retail_revenue": 13769.11, "transactions": 836, "avg_ticket": 67.73, "unique_customers": 457, "tips": 5482.25}, "2025-04": {"total_revenue": 56149.06, "groom_revenue": 42956.5, "retail_revenue": 12992.56, "transactions": 802, "avg_ticket": 70.01, "unique_customers": 455, "tips": 4977.73}, "2025-05": {"total_revenue": 57512.51, "groom_revenue": 42449.5, "retail_revenue": 15033.01, "transactions": 843, "avg_ticket": 68.22, "unique_customers": 463, "tips": 5362.25}, "2025-06": {"total_revenue": 66115.22, "groom_revenue": 52777.75, "retail_revenue": 13237.47, "transactions": 882, "avg_ticket": 74.96, "unique_customers": 516, "tips": 6225.17}, "2025-07": {"total_revenue": 71592.37, "groom_revenue": 56097.0, "retail_revenue": 15410.37, "transactions": 933, "avg_ticket": 76.73, "unique_customers": 560, "tips": 6866.66}, "2025-08": {"total_revenue": 74388.29, "groom_revenue": 57318.5, "retail_revenue": 17044.79, "transactions": 1010, "avg_ticket": 73.65, "unique_customers": 593, "tips": 7224.05}, "2025-09": {"total_revenue": 76099.73, "groom_revenue": 60156.0, "retail_revenue": 15943.73, "transactions": 1008, "avg_ticket": 75.5, "unique_customers": 612, "tips": 7559.27}, "2025-10": {"total_revenue": 84751.8, "groom_revenue": 68563.25, "retail_revenue": 15988.55, "transactions": 1042, "avg_ticket": 81.34, "unique_customers": 680, "tips": 8403.75}, "2025-11": {"total_revenue": 78742.79, "groom_revenue": 61578.0, "retail_revenue": 17089.79, "transactions": 1029, "avg_ticket": 76.52, "unique_customers": 619, "tips": 7878.65}, "2025-12": {"total_revenue": 85208.71, "groom_revenue": 61787.0, "retail_revenue": 22401.71, "transactions": 1141, "avg_ticket": 74.68, "unique_customers": 625, "tips": 8118.65}, "2026-01": {"total_revenue": 77354.23, "groom_revenue": 63117.42, "retail_revenue": 14236.81, "transactions": 991, "avg_ticket": 78.06, "unique_customers": 622, "tips": 8778.26}, "2026-02": {"total_revenue": 75119.27, "groom_revenue": 58912.0, "retail_revenue": 16037.27, "transactions": 972, "avg_ticket": 77.28, "unique_customers": 599, "tips": 8119.5}, "2026-03": {"total_revenue": 43965.06, "groom_revenue": 36073.0, "retail_revenue": 7892.06, "transactions": 537, "avg_ticket": 81.87, "unique_customers": 387, "tips": 4955.81}}};
+var _monthlyChart = null;
+
+function _mfc(v) {
+    return (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+function _mfi(v) { return v.toLocaleString(); }
+
+function updateMonthlyComparison() {
+    var keyA = document.getElementById('monthA').value;
+    var keyB = document.getElementById('monthB').value;
+    var a = MONTHLY_DATA.data[keyA];
+    var b = MONTHLY_DATA.data[keyB];
+    if (!a || !b) return;
+    var labelA = document.getElementById('monthA').selectedOptions[0].text;
+    var labelB = document.getElementById('monthB').selectedOptions[0].text;
+
+    var kpis = [
+        {key: 'total_revenue', fmt: 'c'},
+        {key: 'groom_revenue', fmt: 'c'},
+        {key: 'retail_revenue', fmt: 'c'},
+        {key: 'transactions', fmt: 'i'},
+        {key: 'avg_ticket', fmt: 'c'},
+        {key: 'unique_customers', fmt: 'i'},
+        {key: 'tips', fmt: 'c'}
+    ];
+
+    kpis.forEach(function(kpi) {
+        var valA = a[kpi.key], valB = b[kpi.key];
+        var delta = valB - valA;
+        var deltaPct = valA !== 0 ? ((valB - valA) / Math.abs(valA) * 100) : 0;
+        var f = kpi.fmt === 'c' ? _mfc : _mfi;
+
+        document.getElementById('cmp-' + kpi.key + '-labelA').textContent = labelA;
+        document.getElementById('cmp-' + kpi.key + '-labelB').textContent = labelB;
+        document.getElementById('cmp-' + kpi.key + '-valA').textContent = f(valA);
+        document.getElementById('cmp-' + kpi.key + '-valB').textContent = f(valB);
+        document.getElementById('cmp-' + kpi.key + '-delta').textContent = (delta >= 0 ? '+' : '') + f(delta);
+        document.getElementById('cmp-' + kpi.key + '-deltaPct').textContent = (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + '%';
+
+        var deltaEl = document.getElementById('cmp-' + kpi.key).querySelector('.cmp-delta');
+        deltaEl.classList.remove('delta-positive', 'delta-negative');
+        deltaEl.classList.add(delta >= 0 ? 'delta-positive' : 'delta-negative');
+    });
+
+    // Revenue comparison chart
+    if (_monthlyChart) { _monthlyChart.destroy(); }
+    var ctx = document.getElementById('monthlyCompareChart');
+    _monthlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Revenue', 'Grooming', 'Retail', 'Avg Ticket', 'Tips'],
+            datasets: [
+                { label: labelA, data: [a.total_revenue, a.groom_revenue, a.retail_revenue, a.avg_ticket, a.tips], backgroundColor: '#C4276E', borderRadius: 6 },
+                { label: labelB, data: [b.total_revenue, b.groom_revenue, b.retail_revenue, b.avg_ticket, b.tips], backgroundColor: '#1B6B6B', borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.parsed.y.toLocaleString(); } } } },
+            scales: { y: { ticks: { callback: function(v) { return '$' + v.toLocaleString(); } } } }
+        }
+    });
+}
+
+</script>
 
 </div>
 <div class="footer">
-    Generated March 17, 2026 &mdash; <span>Woof Gang Bakery & Grooming</span> &mdash; Operations Intelligence Dashboard
+    Generated March 16, 2026 &mdash; <span>Woof Gang Bakery & Grooming</span> &mdash; Operations Intelligence Dashboard
 </div>
 </body>
 </html>

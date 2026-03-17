@@ -317,6 +317,46 @@ td.magenta { color: """ + C['magenta'] + """; font-weight: 600; }
     background: #e0e0e0; border-radius: 6px; height: 10px; overflow: hidden; margin: 4px 0;
 }
 .progress-bar-fill { height: 100%; border-radius: 6px; }
+.monthly-controls {
+    display: flex; align-items: center; gap: 16px;
+    margin-top: 14px; flex-wrap: wrap;
+}
+.monthly-controls .control-group { display: flex; flex-direction: column; gap: 4px; }
+.monthly-controls label {
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #888;
+}
+.monthly-controls select {
+    padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px;
+    font-size: 0.95rem; font-weight: 600; font-family: inherit;
+    background: white; cursor: pointer; min-width: 160px;
+    transition: border-color 0.2s;
+}
+.monthly-controls select:focus { border-color: #C4276E; outline: none; }
+.vs-label {
+    font-size: 0.85rem; font-weight: 700; color: #999;
+    padding-top: 18px;
+}
+.comparison-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px; margin-bottom: 22px;
+}
+.comparison-card .comparison-values {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px; gap: 8px;
+}
+.comparison-card .cmp-col { text-align: center; flex: 1; }
+.comparison-card .cmp-month-label {
+    font-size: 0.7rem; font-weight: 600; color: #999;
+    text-transform: uppercase; margin-bottom: 2px;
+}
+.comparison-card .cmp-delta { flex: 0 0 auto; padding: 0 8px; }
+.cmp-delta-val { font-size: 0.9rem; font-weight: 700; }
+.cmp-delta-pct { font-size: 0.75rem; color: #888; }
+.delta-positive .cmp-delta-val { color: #2E7D32; }
+.delta-positive .cmp-delta-pct { color: #2E7D32; }
+.delta-negative .cmp-delta-val { color: #C62828; }
+.delta-negative .cmp-delta-pct { color: #C62828; }
 """
 
 
@@ -571,10 +611,11 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
 
     period_growth = (monthly_rev[-1] - monthly_rev[0]) / monthly_rev[0] * 100 if (monthly_rev and monthly_rev[0]) else 0
     if _too_few_for_trend:
-        _yoy_pct = (conservative_forecast / sum(_prior_monthly) - 1) * 100 if _prior_monthly else 0
-        _prior_rev_str = fc(sum(_prior_monthly))
+        _prior_total = sum(_prior_by_month.values()) if _prior_by_month else 0
+        _prior_rev_str = fc(_prior_total)
+        _yoy_pct = (_yoy_growth - 1) * 100
         _sign = "+" if _yoy_pct >= 0 else ""
-        html += f'<div class="opp-box"><strong>YTD {_this_year}: {fc(total_net)}</strong> across {n_periods} months. Full-year {_this_year} forecast: <strong>{fc(conservative_forecast)}</strong> &mdash; projected using the {_prior_year}&ndash;{_this_year} growth trend (+{fc(slope)}/mo). That implies <strong>{_sign}{_yoy_pct:.0f}% YoY growth</strong> vs {_prior_year} actual of {_prior_rev_str}.</div>\n'
+        html += f'<div class="opp-box"><strong>YTD {_this_year}: {fc(total_net)}</strong> across {n_periods} months. Full-year {_this_year} forecast: <strong>{fc(conservative_forecast)}</strong> &mdash; {_sign}{_yoy_pct:.0f}% YoY growth applied to {_prior_year} seasonal pattern (actual: {_prior_rev_str}), blended with run rate.</div>\n'
     else:
         html += f'<div class="opp-box"><strong>{"+" if period_growth>=0 else ""}{period_growth:.0f}% {periods[0]["label"]}→{periods[-1]["label"]} growth.</strong> Revenue went from {fc(monthly_rev[0])} to {fc(monthly_rev[-1])}. At this trajectory, annual forecast is <strong>{fc(conservative_forecast)}</strong>.</div>\n'
     html += '</div>\n'
