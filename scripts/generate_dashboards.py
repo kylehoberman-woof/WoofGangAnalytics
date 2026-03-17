@@ -77,6 +77,8 @@ def load_data():
     df["month"] = df["created"].dt.month
     df["year"] = df["created"].dt.year
     df["ym"] = df["created"].dt.to_period("M")
+    df["yw"] = df["created"].dt.isocalendar().week.astype(str).str.zfill(2).radd(df["created"].dt.isocalendar().year.astype(str) + "-W")
+    df["ymd"] = df["created"].dt.strftime("%Y-%m-%d")
     df["dow"] = df["created"].dt.day_name()
     df["hour"] = df["created"].dt.hour
     df = df[df["groom_category"] != "exclude"]
@@ -128,6 +130,8 @@ def load_data():
     df_orders["month"] = df_orders["created"].dt.month
     df_orders["year"] = df_orders["created"].dt.year
     df_orders["ym"] = df_orders["created"].dt.to_period("M")
+    df_orders["yw"] = df_orders["created"].dt.isocalendar().week.astype(str).str.zfill(2).radd(df_orders["created"].dt.isocalendar().year.astype(str) + "-W")
+    df_orders["ymd"] = df_orders["created"].dt.strftime("%Y-%m-%d")
     df_orders["dow"] = df_orders["created"].dt.day_name()
     df_orders["hour"] = df_orders["created"].dt.hour
 

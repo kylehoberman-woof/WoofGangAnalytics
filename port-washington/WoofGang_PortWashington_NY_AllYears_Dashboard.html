@@ -212,6 +212,8 @@ td.magenta { color: #C4276E; font-weight: 600; }
   <button class="yr-tab active" onclick="showYear('2025')" id="tab-2025">2025 (Full Year)</button>
   <button class="yr-tab " onclick="showYear('2026')" id="tab-2026">2026 (YTD)</button>
   <button class="yr-tab" onclick="showYear('monthly')" id="tab-monthly">Monthly</button>
+  <button class="yr-tab" onclick="showYear('weekly')" id="tab-weekly">Weekly</button>
+  <button class="yr-tab" onclick="showYear('daily')" id="tab-daily">Daily</button>
 </div>
 <div class="yr-panel" id="panel-2024" style="display:none">
 <div class="kpi-grid">
@@ -1278,17 +1280,17 @@ if (document.getElementById('cancelTrendChart_2024')) {
 <tr><td>Sitara Nagrani</td><td class="num">19</td><td class="num">$444.19</td><td class="num">1,950</td><td class="num">1.0%</td><td class="num">$23.38</td></tr>
 <tr><td>Casey Makowski</td><td class="num">16</td><td class="num">$516.88</td><td class="num">2,138</td><td class="num">0.7%</td><td class="num">$32.30</td></tr>
 <tr><td>Giana Golden</td><td class="num">9</td><td class="num">$322.80</td><td class="num">1,839</td><td class="num">0.5%</td><td class="num">$35.87</td></tr>
-<tr><td>Joyce P</td><td class="num">5</td><td class="num">$445.00</td><td class="num">1,542</td><td class="num">0.3%</td><td class="num">$89.00</td></tr>
-<tr><td>Joant C</td><td class="num">5</td><td class="num">$250.00</td><td class="num">571</td><td class="num">0.9%</td><td class="num">$50.00</td></tr>
 <tr><td>Christine Brower</td><td class="num">5</td><td class="num">$96.96</td><td class="num">420</td><td class="num">1.2%</td><td class="num">$19.39</td></tr>
+<tr><td>Joant C</td><td class="num">5</td><td class="num">$250.00</td><td class="num">571</td><td class="num">0.9%</td><td class="num">$50.00</td></tr>
+<tr><td>Joyce P</td><td class="num">5</td><td class="num">$445.00</td><td class="num">1,542</td><td class="num">0.3%</td><td class="num">$89.00</td></tr>
 <tr><td>Sue M</td><td class="num">5</td><td class="num">$230.00</td><td class="num">1,669</td><td class="num">0.3%</td><td class="num">$46.00</td></tr>
 <tr><td>Isabelle O</td><td class="num">4</td><td class="num">$135.00</td><td class="num">764</td><td class="num">0.5%</td><td class="num">$33.75</td></tr>
-<tr><td>Olivia M</td><td class="num">2</td><td class="num">$110.00</td><td class="num">1,046</td><td class="num">0.2%</td><td class="num">$55.00</td></tr>
 <tr><td>Julie Schorr</td><td class="num">2</td><td class="num">$35.97</td><td class="num">259</td><td class="num">0.8%</td><td class="num">$17.98</td></tr>
+<tr><td>Olivia M</td><td class="num">2</td><td class="num">$110.00</td><td class="num">1,046</td><td class="num">0.2%</td><td class="num">$55.00</td></tr>
 <tr><td>Stacey W</td><td class="num">2</td><td class="num">$125.00</td><td class="num">174</td><td class="num">1.1%</td><td class="num">$62.50</td></tr>
-<tr><td>Jackie G. </td><td class="num">1</td><td class="num">$130.00</td><td class="num">709</td><td class="num">0.1%</td><td class="num">$130.00</td></tr>
 <tr><td>Angela R</td><td class="num">1</td><td class="num">$10.00</td><td class="num">753</td><td class="num">0.1%</td><td class="num">$10.00</td></tr>
 <tr><td>Danielle L</td><td class="num">1</td><td class="num">$10.00</td><td class="num">864</td><td class="num">0.1%</td><td class="num">$10.00</td></tr>
+<tr><td>Jackie G. </td><td class="num">1</td><td class="num">$130.00</td><td class="num">709</td><td class="num">0.1%</td><td class="num">$130.00</td></tr>
 </tbody></table>
 <h3 style="color:#6B3520;margin:22px 0 10px">Grooming Void Log</h3>
 <p class="desc">Every voided grooming service — review for patterns in employee, service type, timing, or customer.</p>
@@ -1462,9 +1464,9 @@ if (document.getElementById('cancelTrendChart_2025')) {
 <div class="yr-panel" id="panel-2026" style="display:none">
 <div class="kpi-grid">
 <div class="kpi-card "><div class="kpi-label">2026 Net Sales (YTD)</div><div class="kpi-value">$196,438.56</div><div class="kpi-sub">3 months of data</div></div>
-<div class="kpi-card green"><div class="kpi-label">Full Year 2026 Forecast</div><div class="kpi-value">$1,305,955.56</div><div class="kpi-sub">+94% YoY growth × 2025 seasonality + run rate</div></div>
-<div class="kpi-card accent"><div class="kpi-label">Recent Run Rate (Annualized)</div><div class="kpi-value">$930,580.35</div><div class="kpi-sub">Last 3mo avg: $77,548.36 (partial mo. pro-rated)</div></div>
-<div class="kpi-card green"><div class="kpi-label">YoY Growth vs 2025</div><div class="kpi-value">+93.8%</div><div class="kpi-sub">Same-month comparison (3 months)</div></div>
+<div class="kpi-card green"><div class="kpi-label">Full Year 2026 Forecast</div><div class="kpi-value">$1,372,889.06</div><div class="kpi-sub">+106% YoY growth × 2025 seasonality + run rate</div></div>
+<div class="kpi-card accent"><div class="kpi-label">Recent Run Rate (Annualized)</div><div class="kpi-value">$950,623.25</div><div class="kpi-sub">Last 3mo avg: $79,218.60 (partial mo. pro-rated)</div></div>
+<div class="kpi-card green"><div class="kpi-label">YoY Growth vs 2025</div><div class="kpi-value">+106.0%</div><div class="kpi-sub">Same-month comparison (3 months)</div></div>
 </div>
 <div class="kpi-grid">
 <div class="kpi-card accent"><div class="kpi-label">Grooming Revenue</div><div class="kpi-value">$158,102.42</div><div class="kpi-sub">80.5% of total</div></div>
@@ -1481,7 +1483,7 @@ if (document.getElementById('cancelTrendChart_2025')) {
 <h2><span class="dot"></span>Revenue Trajectory & Forecast</h2>
 <p class="desc">Monthly actual vs trend line — 3 months of data</p>
 <div class="chart-container"><canvas id="trajectoryChart_2026" style="max-height:340px"></canvas></div>
-<div class="opp-box"><strong>YTD 2026: $196,438.56</strong> across 3 months. Full-year 2026 forecast: <strong>$1,305,955.56</strong> &mdash; +94% YoY growth applied to 2025 seasonal pattern (actual: $802,923.44), blended with run rate.</div>
+<div class="opp-box"><strong>YTD 2026: $196,438.56</strong> across 3 months. Full-year 2026 forecast: <strong>$1,372,889.06</strong> &mdash; +106% YoY growth applied to 2025 seasonal pattern (actual: $802,923.44), blended with run rate.</div>
 </div>
 <div class="grid-2">
 <div class="section"><h2><span class="dot"></span>Revenue Mix</h2><p class="desc">Grooming vs Retail vs Gift Cards</p><div class="chart-container"><canvas id="revMixChart_2026"></canvas></div></div>
@@ -1840,8 +1842,8 @@ if (document.getElementById('cancelTrendChart_2025')) {
 <tr><td>8</td><td>WagWellies® by wagwear Navy</td><td><span class="badge badge-green">Retail</span></td><td class="num">2</td><td class="num">$98.00</td></tr>
 <tr><td>9</td><td>Fromm 4 Star Dog Dry Salmon A La Veg 26# NEW SIZE</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$71.99</td></tr>
 <tr><td>10</td><td>Furrei Pets Collar</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$56.00</td></tr>
-<tr><td>11</td><td>wagwear boots s</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$49.99</td></tr>
-<tr><td>12</td><td>wagwear boots xs navy</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$49.99</td></tr>
+<tr><td>11</td><td>wagwear boots xs navy</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$49.99</td></tr>
+<tr><td>12</td><td>wagwear boots s</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$49.99</td></tr>
 <tr><td>13</td><td>Lucy&amp;Co Red Plaid Vest Large</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$45.00</td></tr>
 <tr><td>14</td><td>FUZZYARD PINK CORD JACKET 6</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$45.00</td></tr>
 <tr><td>15</td><td>Gooby Zip Up Sherpa Hot Pink LG</td><td><span class="badge badge-green">Retail</span></td><td class="num">1</td><td class="num">$43.00</td></tr>
@@ -1882,8 +1884,8 @@ if (document.getElementById('cancelTrendChart_2025')) {
 <tr><td>Joyce P</td><td class="num">2</td><td class="num">$95.00</td><td class="num">364</td><td class="num">0.5%</td><td class="num">$47.50</td></tr>
 <tr><td>Kyle Hoberman</td><td class="num">2</td><td class="num">$40.00</td><td class="num">228</td><td class="num">0.9%</td><td class="num">$20.00</td></tr>
 <tr><td>Danielle L</td><td class="num">1</td><td class="num">$105.00</td><td class="num">305</td><td class="num">0.3%</td><td class="num">$105.00</td></tr>
-<tr><td>Jessica G</td><td class="num">1</td><td class="num">$20.00</td><td class="num">456</td><td class="num">0.2%</td><td class="num">$20.00</td></tr>
 <tr><td>Ingrid R</td><td class="num">1</td><td class="num">$85.00</td><td class="num">322</td><td class="num">0.3%</td><td class="num">$85.00</td></tr>
+<tr><td>Jessica G</td><td class="num">1</td><td class="num">$20.00</td><td class="num">456</td><td class="num">0.2%</td><td class="num">$20.00</td></tr>
 <tr><td>Kimberly S</td><td class="num">1</td><td class="num">$115.00</td><td class="num">34</td><td class="num" style="color:#C62828;font-weight:700">2.9%</td><td class="num">$115.00</td></tr>
 <tr><td>Olivia M</td><td class="num">1</td><td class="num">$145.00</td><td class="num">318</td><td class="num">0.3%</td><td class="num">$145.00</td></tr>
 </tbody></table>
@@ -1910,10 +1912,10 @@ Chart.defaults.font.family = "'Inter', sans-serif";
 Chart.defaults.color = '#666';
 
 (function() {
-    var _trendData = [76139.68, 77548.36, 78957.04];
-    var _revColors = [77354.23, 75119.27, 80171.59].map(function(v,i,a) { return (i === a.length - 1 && true) ? mg+'66' : mg+'cc'; });
+    var _trendData = [75304.56, 79218.6, 83132.65];
+    var _revColors = [77354.23, 75119.27, 85182.31].map(function(v,i,a) { return (i === a.length - 1 && true) ? mg+'66' : mg+'cc'; });
     var _datasets = [
-        { label: 'Actual Revenue', data: [77354.23, 75119.27, 80171.59], backgroundColor: _revColors, borderRadius: 6 }
+        { label: 'Actual Revenue', data: [77354.23, 75119.27, 85182.31], backgroundColor: _revColors, borderRadius: 6 }
     ];
     if (_trendData.length > 0) {
         _datasets.push({ label: 'Trend Line', data: _trendData, type: 'line', borderColor: tl, borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false });
@@ -1940,8 +1942,8 @@ new Chart(document.getElementById('monthlyChart_2026'), {
     type: 'bar',
     data: { labels: ["Jan '26", "Feb '26", "Mar '26 (est.)"],
         datasets: [
-            { label: 'Grooming', data: [63117.42, 58912.0, 65780.18], backgroundColor: mg, borderRadius: 4 },
-            { label: 'Retail', data: [14236.81, 16037.27, 14391.4], backgroundColor: tl, borderRadius: 4 }
+            { label: 'Grooming', data: [63117.42, 58912.0, 69891.44], backgroundColor: mg, borderRadius: 4 },
+            { label: 'Retail', data: [14236.81, 16037.27, 15290.87], backgroundColor: tl, borderRadius: 4 }
         ] },
     options: { responsive: true, interaction: { mode: 'index' },
         scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => '$'+v.toLocaleString() } } },
@@ -2044,7 +2046,7 @@ if (document.getElementById('cancelTrendChart_2026')) {
   <p class="desc">Select two months to compare key performance metrics side by side</p>
   <div class="monthly-controls">
     <div class="control-group">
-      <label for="monthA">Month A</label>
+      <label for="monthA">Period A</label>
       <select id="monthA" onchange="updateMonthlyComparison()"><option value="2024-09">Sep '24</option>
 <option value="2024-10">Oct '24</option>
 <option value="2024-11">Nov '24</option>
@@ -2067,7 +2069,7 @@ if (document.getElementById('cancelTrendChart_2026')) {
     </div>
     <span class="vs-label">vs</span>
     <div class="control-group">
-      <label for="monthB">Month B</label>
+      <label for="monthB">Period B</label>
       <select id="monthB" onchange="updateMonthlyComparison()"><option value="2024-09">Sep '24</option>
 <option value="2024-10">Oct '24</option>
 <option value="2024-11">Nov '24</option>
@@ -2142,6 +2144,23 @@ if (document.getElementById('cancelTrendChart_2026')) {
     </div>
   </div>
 </div>
+<div class="comparison-card kpi-card green" id="cmp-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-appointments-labelA"></div>
+      <div class="kpi-value" id="cmp-appointments-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-appointments-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-appointments-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-appointments-labelB"></div>
+      <div class="kpi-value" id="cmp-appointments-valB"></div>
+    </div>
+  </div>
+</div>
 <div class="comparison-card kpi-card " id="cmp-transactions">
   <div class="kpi-label">Transactions</div>
   <div class="comparison-values">
@@ -2213,8 +2232,660 @@ if (document.getElementById('cancelTrendChart_2026')) {
 </div>
 <div class="section">
   <h2><span class="dot"></span>Visual Comparison</h2>
-  <p class="desc">Side-by-side bar chart of selected months</p>
+  <p class="desc">Side-by-side bar chart of selected periods</p>
   <div class="chart-container"><canvas id="monthlyCompareChart" style="max-height:400px"></canvas></div>
+</div>
+</div>
+<div class="yr-panel" id="panel-weekly" style="display:none">
+<div class="section">
+  <h2><span class="dot"></span>Week-to-Week Comparison</h2>
+  <p class="desc">Select two weeks to compare key performance metrics side by side</p>
+  <div class="monthly-controls">
+    <div class="control-group">
+      <label for="weekA">Period A</label>
+      <select id="weekA" onchange="updateWeeklyComparison()"><option value="2024-W39">Sep 23 – Sep 29, 2024</option>
+<option value="2024-W40">Sep 30 – Oct 6, 2024</option>
+<option value="2024-W41">Oct 7 – Oct 13, 2024</option>
+<option value="2024-W42">Oct 14 – Oct 20, 2024</option>
+<option value="2024-W43">Oct 21 – Oct 27, 2024</option>
+<option value="2024-W44">Oct 28 – Nov 3, 2024</option>
+<option value="2024-W45">Nov 4 – Nov 10, 2024</option>
+<option value="2024-W46">Nov 11 – Nov 17, 2024</option>
+<option value="2024-W47">Nov 18 – Nov 24, 2024</option>
+<option value="2024-W48">Nov 25 – Dec 1, 2024</option>
+<option value="2024-W49">Dec 2 – Dec 8, 2024</option>
+<option value="2024-W50">Dec 9 – Dec 15, 2024</option>
+<option value="2024-W51">Dec 16 – Dec 22, 2024</option>
+<option value="2024-W52">Dec 23 – Dec 29, 2024</option>
+<option value="2025-W01">Dec 30 – Jan 5, 2025</option>
+<option value="2025-W02">Jan 6 – Jan 12, 2025</option>
+<option value="2025-W03">Jan 13 – Jan 19, 2025</option>
+<option value="2025-W04">Jan 20 – Jan 26, 2025</option>
+<option value="2025-W05">Jan 27 – Feb 2, 2025</option>
+<option value="2025-W06">Feb 3 – Feb 9, 2025</option>
+<option value="2025-W07">Feb 10 – Feb 16, 2025</option>
+<option value="2025-W08">Feb 17 – Feb 23, 2025</option>
+<option value="2025-W09">Feb 24 – Mar 2, 2025</option>
+<option value="2025-W10">Mar 3 – Mar 9, 2025</option>
+<option value="2025-W11">Mar 10 – Mar 16, 2025</option>
+<option value="2025-W12">Mar 17 – Mar 23, 2025</option>
+<option value="2025-W13">Mar 24 – Mar 30, 2025</option>
+<option value="2025-W14">Mar 31 – Apr 6, 2025</option>
+<option value="2025-W15">Apr 7 – Apr 13, 2025</option>
+<option value="2025-W16">Apr 14 – Apr 20, 2025</option>
+<option value="2025-W17">Apr 21 – Apr 27, 2025</option>
+<option value="2025-W18">Apr 28 – May 4, 2025</option>
+<option value="2025-W19">May 5 – May 11, 2025</option>
+<option value="2025-W20">May 12 – May 18, 2025</option>
+<option value="2025-W21">May 19 – May 25, 2025</option>
+<option value="2025-W22">May 26 – Jun 1, 2025</option>
+<option value="2025-W23">Jun 2 – Jun 8, 2025</option>
+<option value="2025-W24">Jun 9 – Jun 15, 2025</option>
+<option value="2025-W25">Jun 16 – Jun 22, 2025</option>
+<option value="2025-W26">Jun 23 – Jun 29, 2025</option>
+<option value="2025-W27">Jun 30 – Jul 6, 2025</option>
+<option value="2025-W28">Jul 7 – Jul 13, 2025</option>
+<option value="2025-W29">Jul 14 – Jul 20, 2025</option>
+<option value="2025-W30">Jul 21 – Jul 27, 2025</option>
+<option value="2025-W31">Jul 28 – Aug 3, 2025</option>
+<option value="2025-W32">Aug 4 – Aug 10, 2025</option>
+<option value="2025-W33">Aug 11 – Aug 17, 2025</option>
+<option value="2025-W34">Aug 18 – Aug 24, 2025</option>
+<option value="2025-W35">Aug 25 – Aug 31, 2025</option>
+<option value="2025-W36">Sep 1 – Sep 7, 2025</option>
+<option value="2025-W37">Sep 8 – Sep 14, 2025</option>
+<option value="2025-W38">Sep 15 – Sep 21, 2025</option>
+<option value="2025-W39">Sep 22 – Sep 28, 2025</option>
+<option value="2025-W40">Sep 29 – Oct 5, 2025</option>
+<option value="2025-W41">Oct 6 – Oct 12, 2025</option>
+<option value="2025-W42">Oct 13 – Oct 19, 2025</option>
+<option value="2025-W43">Oct 20 – Oct 26, 2025</option>
+<option value="2025-W44">Oct 27 – Nov 2, 2025</option>
+<option value="2025-W45">Nov 3 – Nov 9, 2025</option>
+<option value="2025-W46">Nov 10 – Nov 16, 2025</option>
+<option value="2025-W47">Nov 17 – Nov 23, 2025</option>
+<option value="2025-W48">Nov 24 – Nov 30, 2025</option>
+<option value="2025-W49">Dec 1 – Dec 7, 2025</option>
+<option value="2025-W50">Dec 8 – Dec 14, 2025</option>
+<option value="2025-W51">Dec 15 – Dec 21, 2025</option>
+<option value="2025-W52">Dec 22 – Dec 28, 2025</option>
+<option value="2026-W01">Dec 29 – Jan 4, 2026</option>
+<option value="2026-W02">Jan 5 – Jan 11, 2026</option>
+<option value="2026-W03">Jan 12 – Jan 18, 2026</option>
+<option value="2026-W04">Jan 19 – Jan 25, 2026</option>
+<option value="2026-W05">Jan 26 – Feb 1, 2026</option>
+<option value="2026-W06">Feb 2 – Feb 8, 2026</option>
+<option value="2026-W07">Feb 9 – Feb 15, 2026</option>
+<option value="2026-W08">Feb 16 – Feb 22, 2026</option>
+<option value="2026-W09">Feb 23 – Mar 1, 2026</option>
+<option value="2026-W10">Mar 2 – Mar 8, 2026</option>
+<option value="2026-W11"selected>Mar 9 – Mar 15, 2026</option>
+<option value="2026-W12">Mar 16 – Mar 22, 2026</option></select>
+    </div>
+    <span class="vs-label">vs</span>
+    <div class="control-group">
+      <label for="weekB">Period B</label>
+      <select id="weekB" onchange="updateWeeklyComparison()"><option value="2024-W39">Sep 23 – Sep 29, 2024</option>
+<option value="2024-W40">Sep 30 – Oct 6, 2024</option>
+<option value="2024-W41">Oct 7 – Oct 13, 2024</option>
+<option value="2024-W42">Oct 14 – Oct 20, 2024</option>
+<option value="2024-W43">Oct 21 – Oct 27, 2024</option>
+<option value="2024-W44">Oct 28 – Nov 3, 2024</option>
+<option value="2024-W45">Nov 4 – Nov 10, 2024</option>
+<option value="2024-W46">Nov 11 – Nov 17, 2024</option>
+<option value="2024-W47">Nov 18 – Nov 24, 2024</option>
+<option value="2024-W48">Nov 25 – Dec 1, 2024</option>
+<option value="2024-W49">Dec 2 – Dec 8, 2024</option>
+<option value="2024-W50">Dec 9 – Dec 15, 2024</option>
+<option value="2024-W51">Dec 16 – Dec 22, 2024</option>
+<option value="2024-W52">Dec 23 – Dec 29, 2024</option>
+<option value="2025-W01">Dec 30 – Jan 5, 2025</option>
+<option value="2025-W02">Jan 6 – Jan 12, 2025</option>
+<option value="2025-W03">Jan 13 – Jan 19, 2025</option>
+<option value="2025-W04">Jan 20 – Jan 26, 2025</option>
+<option value="2025-W05">Jan 27 – Feb 2, 2025</option>
+<option value="2025-W06">Feb 3 – Feb 9, 2025</option>
+<option value="2025-W07">Feb 10 – Feb 16, 2025</option>
+<option value="2025-W08">Feb 17 – Feb 23, 2025</option>
+<option value="2025-W09">Feb 24 – Mar 2, 2025</option>
+<option value="2025-W10">Mar 3 – Mar 9, 2025</option>
+<option value="2025-W11">Mar 10 – Mar 16, 2025</option>
+<option value="2025-W12">Mar 17 – Mar 23, 2025</option>
+<option value="2025-W13">Mar 24 – Mar 30, 2025</option>
+<option value="2025-W14">Mar 31 – Apr 6, 2025</option>
+<option value="2025-W15">Apr 7 – Apr 13, 2025</option>
+<option value="2025-W16">Apr 14 – Apr 20, 2025</option>
+<option value="2025-W17">Apr 21 – Apr 27, 2025</option>
+<option value="2025-W18">Apr 28 – May 4, 2025</option>
+<option value="2025-W19">May 5 – May 11, 2025</option>
+<option value="2025-W20">May 12 – May 18, 2025</option>
+<option value="2025-W21">May 19 – May 25, 2025</option>
+<option value="2025-W22">May 26 – Jun 1, 2025</option>
+<option value="2025-W23">Jun 2 – Jun 8, 2025</option>
+<option value="2025-W24">Jun 9 – Jun 15, 2025</option>
+<option value="2025-W25">Jun 16 – Jun 22, 2025</option>
+<option value="2025-W26">Jun 23 – Jun 29, 2025</option>
+<option value="2025-W27">Jun 30 – Jul 6, 2025</option>
+<option value="2025-W28">Jul 7 – Jul 13, 2025</option>
+<option value="2025-W29">Jul 14 – Jul 20, 2025</option>
+<option value="2025-W30">Jul 21 – Jul 27, 2025</option>
+<option value="2025-W31">Jul 28 – Aug 3, 2025</option>
+<option value="2025-W32">Aug 4 – Aug 10, 2025</option>
+<option value="2025-W33">Aug 11 – Aug 17, 2025</option>
+<option value="2025-W34">Aug 18 – Aug 24, 2025</option>
+<option value="2025-W35">Aug 25 – Aug 31, 2025</option>
+<option value="2025-W36">Sep 1 – Sep 7, 2025</option>
+<option value="2025-W37">Sep 8 – Sep 14, 2025</option>
+<option value="2025-W38">Sep 15 – Sep 21, 2025</option>
+<option value="2025-W39">Sep 22 – Sep 28, 2025</option>
+<option value="2025-W40">Sep 29 – Oct 5, 2025</option>
+<option value="2025-W41">Oct 6 – Oct 12, 2025</option>
+<option value="2025-W42">Oct 13 – Oct 19, 2025</option>
+<option value="2025-W43">Oct 20 – Oct 26, 2025</option>
+<option value="2025-W44">Oct 27 – Nov 2, 2025</option>
+<option value="2025-W45">Nov 3 – Nov 9, 2025</option>
+<option value="2025-W46">Nov 10 – Nov 16, 2025</option>
+<option value="2025-W47">Nov 17 – Nov 23, 2025</option>
+<option value="2025-W48">Nov 24 – Nov 30, 2025</option>
+<option value="2025-W49">Dec 1 – Dec 7, 2025</option>
+<option value="2025-W50">Dec 8 – Dec 14, 2025</option>
+<option value="2025-W51">Dec 15 – Dec 21, 2025</option>
+<option value="2025-W52">Dec 22 – Dec 28, 2025</option>
+<option value="2026-W01">Dec 29 – Jan 4, 2026</option>
+<option value="2026-W02">Jan 5 – Jan 11, 2026</option>
+<option value="2026-W03">Jan 12 – Jan 18, 2026</option>
+<option value="2026-W04">Jan 19 – Jan 25, 2026</option>
+<option value="2026-W05">Jan 26 – Feb 1, 2026</option>
+<option value="2026-W06">Feb 2 – Feb 8, 2026</option>
+<option value="2026-W07">Feb 9 – Feb 15, 2026</option>
+<option value="2026-W08">Feb 16 – Feb 22, 2026</option>
+<option value="2026-W09">Feb 23 – Mar 1, 2026</option>
+<option value="2026-W10">Mar 2 – Mar 8, 2026</option>
+<option value="2026-W11">Mar 9 – Mar 15, 2026</option>
+<option value="2026-W12"selected>Mar 16 – Mar 22, 2026</option></select>
+    </div>
+  </div>
+</div>
+<div class="comparison-grid">
+<div class="comparison-card kpi-card " id="wcmp-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-total_revenue-labelA"></div>
+      <div class="kpi-value" id="wcmp-total_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-total_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-total_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-total_revenue-labelB"></div>
+      <div class="kpi-value" id="wcmp-total_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="wcmp-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-groom_revenue-labelA"></div>
+      <div class="kpi-value" id="wcmp-groom_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-groom_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-groom_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-groom_revenue-labelB"></div>
+      <div class="kpi-value" id="wcmp-groom_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-retail_revenue-labelA"></div>
+      <div class="kpi-value" id="wcmp-retail_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-retail_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-retail_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-retail_revenue-labelB"></div>
+      <div class="kpi-value" id="wcmp-retail_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="wcmp-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-appointments-labelA"></div>
+      <div class="kpi-value" id="wcmp-appointments-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-appointments-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-appointments-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-appointments-labelB"></div>
+      <div class="kpi-value" id="wcmp-appointments-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-transactions-labelA"></div>
+      <div class="kpi-value" id="wcmp-transactions-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-transactions-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-transactions-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-transactions-labelB"></div>
+      <div class="kpi-value" id="wcmp-transactions-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="wcmp-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-avg_ticket-labelA"></div>
+      <div class="kpi-value" id="wcmp-avg_ticket-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-avg_ticket-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-avg_ticket-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-avg_ticket-labelB"></div>
+      <div class="kpi-value" id="wcmp-avg_ticket-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-unique_customers-labelA"></div>
+      <div class="kpi-value" id="wcmp-unique_customers-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-unique_customers-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-unique_customers-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-unique_customers-labelB"></div>
+      <div class="kpi-value" id="wcmp-unique_customers-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-tips-labelA"></div>
+      <div class="kpi-value" id="wcmp-tips-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-tips-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-tips-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-tips-labelB"></div>
+      <div class="kpi-value" id="wcmp-tips-valB"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section">
+  <h2><span class="dot"></span>Visual Comparison</h2>
+  <p class="desc">Side-by-side bar chart of selected periods</p>
+  <div class="chart-container"><canvas id="weeklyCompareChart" style="max-height:400px"></canvas></div>
+</div>
+</div>
+<div class="yr-panel" id="panel-daily" style="display:none">
+<div class="section">
+  <h2><span class="dot"></span>Day-to-Day Comparison</h2>
+  <p class="desc">Select two days to compare key performance metrics side by side</p>
+  <div class="monthly-controls">
+    <div class="control-group">
+      <label for="dayA">Period A</label>
+      <select id="dayA" onchange="updateDailyComparison()"><option value="2025-12-11">Thu Dec 11, 2025</option>
+<option value="2025-12-12">Fri Dec 12, 2025</option>
+<option value="2025-12-13">Sat Dec 13, 2025</option>
+<option value="2025-12-14">Sun Dec 14, 2025</option>
+<option value="2025-12-15">Mon Dec 15, 2025</option>
+<option value="2025-12-16">Tue Dec 16, 2025</option>
+<option value="2025-12-17">Wed Dec 17, 2025</option>
+<option value="2025-12-18">Thu Dec 18, 2025</option>
+<option value="2025-12-19">Fri Dec 19, 2025</option>
+<option value="2025-12-20">Sat Dec 20, 2025</option>
+<option value="2025-12-21">Sun Dec 21, 2025</option>
+<option value="2025-12-22">Mon Dec 22, 2025</option>
+<option value="2025-12-23">Tue Dec 23, 2025</option>
+<option value="2025-12-24">Wed Dec 24, 2025</option>
+<option value="2025-12-26">Fri Dec 26, 2025</option>
+<option value="2025-12-28">Sun Dec 28, 2025</option>
+<option value="2025-12-29">Mon Dec 29, 2025</option>
+<option value="2025-12-30">Tue Dec 30, 2025</option>
+<option value="2025-12-31">Wed Dec 31, 2025</option>
+<option value="2026-01-02">Fri Jan 2, 2026</option>
+<option value="2026-01-03">Sat Jan 3, 2026</option>
+<option value="2026-01-04">Sun Jan 4, 2026</option>
+<option value="2026-01-05">Mon Jan 5, 2026</option>
+<option value="2026-01-06">Tue Jan 6, 2026</option>
+<option value="2026-01-07">Wed Jan 7, 2026</option>
+<option value="2026-01-08">Thu Jan 8, 2026</option>
+<option value="2026-01-09">Fri Jan 9, 2026</option>
+<option value="2026-01-10">Sat Jan 10, 2026</option>
+<option value="2026-01-11">Sun Jan 11, 2026</option>
+<option value="2026-01-12">Mon Jan 12, 2026</option>
+<option value="2026-01-13">Tue Jan 13, 2026</option>
+<option value="2026-01-14">Wed Jan 14, 2026</option>
+<option value="2026-01-15">Thu Jan 15, 2026</option>
+<option value="2026-01-16">Fri Jan 16, 2026</option>
+<option value="2026-01-17">Sat Jan 17, 2026</option>
+<option value="2026-01-18">Sun Jan 18, 2026</option>
+<option value="2026-01-19">Mon Jan 19, 2026</option>
+<option value="2026-01-20">Tue Jan 20, 2026</option>
+<option value="2026-01-21">Wed Jan 21, 2026</option>
+<option value="2026-01-22">Thu Jan 22, 2026</option>
+<option value="2026-01-23">Fri Jan 23, 2026</option>
+<option value="2026-01-24">Sat Jan 24, 2026</option>
+<option value="2026-01-27">Tue Jan 27, 2026</option>
+<option value="2026-01-28">Wed Jan 28, 2026</option>
+<option value="2026-01-29">Thu Jan 29, 2026</option>
+<option value="2026-01-30">Fri Jan 30, 2026</option>
+<option value="2026-01-31">Sat Jan 31, 2026</option>
+<option value="2026-02-01">Sun Feb 1, 2026</option>
+<option value="2026-02-02">Mon Feb 2, 2026</option>
+<option value="2026-02-03">Tue Feb 3, 2026</option>
+<option value="2026-02-04">Wed Feb 4, 2026</option>
+<option value="2026-02-05">Thu Feb 5, 2026</option>
+<option value="2026-02-06">Fri Feb 6, 2026</option>
+<option value="2026-02-07">Sat Feb 7, 2026</option>
+<option value="2026-02-08">Sun Feb 8, 2026</option>
+<option value="2026-02-09">Mon Feb 9, 2026</option>
+<option value="2026-02-10">Tue Feb 10, 2026</option>
+<option value="2026-02-11">Wed Feb 11, 2026</option>
+<option value="2026-02-12">Thu Feb 12, 2026</option>
+<option value="2026-02-13">Fri Feb 13, 2026</option>
+<option value="2026-02-14">Sat Feb 14, 2026</option>
+<option value="2026-02-15">Sun Feb 15, 2026</option>
+<option value="2026-02-16">Mon Feb 16, 2026</option>
+<option value="2026-02-17">Tue Feb 17, 2026</option>
+<option value="2026-02-18">Wed Feb 18, 2026</option>
+<option value="2026-02-19">Thu Feb 19, 2026</option>
+<option value="2026-02-20">Fri Feb 20, 2026</option>
+<option value="2026-02-21">Sat Feb 21, 2026</option>
+<option value="2026-02-22">Sun Feb 22, 2026</option>
+<option value="2026-02-24">Tue Feb 24, 2026</option>
+<option value="2026-02-25">Wed Feb 25, 2026</option>
+<option value="2026-02-26">Thu Feb 26, 2026</option>
+<option value="2026-02-27">Fri Feb 27, 2026</option>
+<option value="2026-02-28">Sat Feb 28, 2026</option>
+<option value="2026-03-01">Sun Mar 1, 2026</option>
+<option value="2026-03-02">Mon Mar 2, 2026</option>
+<option value="2026-03-03">Tue Mar 3, 2026</option>
+<option value="2026-03-04">Wed Mar 4, 2026</option>
+<option value="2026-03-05">Thu Mar 5, 2026</option>
+<option value="2026-03-06">Fri Mar 6, 2026</option>
+<option value="2026-03-07">Sat Mar 7, 2026</option>
+<option value="2026-03-08">Sun Mar 8, 2026</option>
+<option value="2026-03-09">Mon Mar 9, 2026</option>
+<option value="2026-03-10">Tue Mar 10, 2026</option>
+<option value="2026-03-11">Wed Mar 11, 2026</option>
+<option value="2026-03-12">Thu Mar 12, 2026</option>
+<option value="2026-03-13">Fri Mar 13, 2026</option>
+<option value="2026-03-14">Sat Mar 14, 2026</option>
+<option value="2026-03-15"selected>Sun Mar 15, 2026</option>
+<option value="2026-03-16">Mon Mar 16, 2026</option></select>
+    </div>
+    <span class="vs-label">vs</span>
+    <div class="control-group">
+      <label for="dayB">Period B</label>
+      <select id="dayB" onchange="updateDailyComparison()"><option value="2025-12-11">Thu Dec 11, 2025</option>
+<option value="2025-12-12">Fri Dec 12, 2025</option>
+<option value="2025-12-13">Sat Dec 13, 2025</option>
+<option value="2025-12-14">Sun Dec 14, 2025</option>
+<option value="2025-12-15">Mon Dec 15, 2025</option>
+<option value="2025-12-16">Tue Dec 16, 2025</option>
+<option value="2025-12-17">Wed Dec 17, 2025</option>
+<option value="2025-12-18">Thu Dec 18, 2025</option>
+<option value="2025-12-19">Fri Dec 19, 2025</option>
+<option value="2025-12-20">Sat Dec 20, 2025</option>
+<option value="2025-12-21">Sun Dec 21, 2025</option>
+<option value="2025-12-22">Mon Dec 22, 2025</option>
+<option value="2025-12-23">Tue Dec 23, 2025</option>
+<option value="2025-12-24">Wed Dec 24, 2025</option>
+<option value="2025-12-26">Fri Dec 26, 2025</option>
+<option value="2025-12-28">Sun Dec 28, 2025</option>
+<option value="2025-12-29">Mon Dec 29, 2025</option>
+<option value="2025-12-30">Tue Dec 30, 2025</option>
+<option value="2025-12-31">Wed Dec 31, 2025</option>
+<option value="2026-01-02">Fri Jan 2, 2026</option>
+<option value="2026-01-03">Sat Jan 3, 2026</option>
+<option value="2026-01-04">Sun Jan 4, 2026</option>
+<option value="2026-01-05">Mon Jan 5, 2026</option>
+<option value="2026-01-06">Tue Jan 6, 2026</option>
+<option value="2026-01-07">Wed Jan 7, 2026</option>
+<option value="2026-01-08">Thu Jan 8, 2026</option>
+<option value="2026-01-09">Fri Jan 9, 2026</option>
+<option value="2026-01-10">Sat Jan 10, 2026</option>
+<option value="2026-01-11">Sun Jan 11, 2026</option>
+<option value="2026-01-12">Mon Jan 12, 2026</option>
+<option value="2026-01-13">Tue Jan 13, 2026</option>
+<option value="2026-01-14">Wed Jan 14, 2026</option>
+<option value="2026-01-15">Thu Jan 15, 2026</option>
+<option value="2026-01-16">Fri Jan 16, 2026</option>
+<option value="2026-01-17">Sat Jan 17, 2026</option>
+<option value="2026-01-18">Sun Jan 18, 2026</option>
+<option value="2026-01-19">Mon Jan 19, 2026</option>
+<option value="2026-01-20">Tue Jan 20, 2026</option>
+<option value="2026-01-21">Wed Jan 21, 2026</option>
+<option value="2026-01-22">Thu Jan 22, 2026</option>
+<option value="2026-01-23">Fri Jan 23, 2026</option>
+<option value="2026-01-24">Sat Jan 24, 2026</option>
+<option value="2026-01-27">Tue Jan 27, 2026</option>
+<option value="2026-01-28">Wed Jan 28, 2026</option>
+<option value="2026-01-29">Thu Jan 29, 2026</option>
+<option value="2026-01-30">Fri Jan 30, 2026</option>
+<option value="2026-01-31">Sat Jan 31, 2026</option>
+<option value="2026-02-01">Sun Feb 1, 2026</option>
+<option value="2026-02-02">Mon Feb 2, 2026</option>
+<option value="2026-02-03">Tue Feb 3, 2026</option>
+<option value="2026-02-04">Wed Feb 4, 2026</option>
+<option value="2026-02-05">Thu Feb 5, 2026</option>
+<option value="2026-02-06">Fri Feb 6, 2026</option>
+<option value="2026-02-07">Sat Feb 7, 2026</option>
+<option value="2026-02-08">Sun Feb 8, 2026</option>
+<option value="2026-02-09">Mon Feb 9, 2026</option>
+<option value="2026-02-10">Tue Feb 10, 2026</option>
+<option value="2026-02-11">Wed Feb 11, 2026</option>
+<option value="2026-02-12">Thu Feb 12, 2026</option>
+<option value="2026-02-13">Fri Feb 13, 2026</option>
+<option value="2026-02-14">Sat Feb 14, 2026</option>
+<option value="2026-02-15">Sun Feb 15, 2026</option>
+<option value="2026-02-16">Mon Feb 16, 2026</option>
+<option value="2026-02-17">Tue Feb 17, 2026</option>
+<option value="2026-02-18">Wed Feb 18, 2026</option>
+<option value="2026-02-19">Thu Feb 19, 2026</option>
+<option value="2026-02-20">Fri Feb 20, 2026</option>
+<option value="2026-02-21">Sat Feb 21, 2026</option>
+<option value="2026-02-22">Sun Feb 22, 2026</option>
+<option value="2026-02-24">Tue Feb 24, 2026</option>
+<option value="2026-02-25">Wed Feb 25, 2026</option>
+<option value="2026-02-26">Thu Feb 26, 2026</option>
+<option value="2026-02-27">Fri Feb 27, 2026</option>
+<option value="2026-02-28">Sat Feb 28, 2026</option>
+<option value="2026-03-01">Sun Mar 1, 2026</option>
+<option value="2026-03-02">Mon Mar 2, 2026</option>
+<option value="2026-03-03">Tue Mar 3, 2026</option>
+<option value="2026-03-04">Wed Mar 4, 2026</option>
+<option value="2026-03-05">Thu Mar 5, 2026</option>
+<option value="2026-03-06">Fri Mar 6, 2026</option>
+<option value="2026-03-07">Sat Mar 7, 2026</option>
+<option value="2026-03-08">Sun Mar 8, 2026</option>
+<option value="2026-03-09">Mon Mar 9, 2026</option>
+<option value="2026-03-10">Tue Mar 10, 2026</option>
+<option value="2026-03-11">Wed Mar 11, 2026</option>
+<option value="2026-03-12">Thu Mar 12, 2026</option>
+<option value="2026-03-13">Fri Mar 13, 2026</option>
+<option value="2026-03-14">Sat Mar 14, 2026</option>
+<option value="2026-03-15">Sun Mar 15, 2026</option>
+<option value="2026-03-16"selected>Mon Mar 16, 2026</option></select>
+    </div>
+  </div>
+</div>
+<div class="comparison-grid">
+<div class="comparison-card kpi-card " id="dcmp-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-total_revenue-labelA"></div>
+      <div class="kpi-value" id="dcmp-total_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-total_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-total_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-total_revenue-labelB"></div>
+      <div class="kpi-value" id="dcmp-total_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="dcmp-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-groom_revenue-labelA"></div>
+      <div class="kpi-value" id="dcmp-groom_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-groom_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-groom_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-groom_revenue-labelB"></div>
+      <div class="kpi-value" id="dcmp-groom_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-retail_revenue-labelA"></div>
+      <div class="kpi-value" id="dcmp-retail_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-retail_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-retail_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-retail_revenue-labelB"></div>
+      <div class="kpi-value" id="dcmp-retail_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="dcmp-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-appointments-labelA"></div>
+      <div class="kpi-value" id="dcmp-appointments-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-appointments-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-appointments-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-appointments-labelB"></div>
+      <div class="kpi-value" id="dcmp-appointments-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-transactions-labelA"></div>
+      <div class="kpi-value" id="dcmp-transactions-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-transactions-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-transactions-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-transactions-labelB"></div>
+      <div class="kpi-value" id="dcmp-transactions-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="dcmp-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-avg_ticket-labelA"></div>
+      <div class="kpi-value" id="dcmp-avg_ticket-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-avg_ticket-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-avg_ticket-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-avg_ticket-labelB"></div>
+      <div class="kpi-value" id="dcmp-avg_ticket-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-unique_customers-labelA"></div>
+      <div class="kpi-value" id="dcmp-unique_customers-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-unique_customers-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-unique_customers-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-unique_customers-labelB"></div>
+      <div class="kpi-value" id="dcmp-unique_customers-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-tips-labelA"></div>
+      <div class="kpi-value" id="dcmp-tips-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-tips-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-tips-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-tips-labelB"></div>
+      <div class="kpi-value" id="dcmp-tips-valB"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section">
+  <h2><span class="dot"></span>Visual Comparison</h2>
+  <p class="desc">Side-by-side bar chart of selected periods</p>
+  <div class="chart-container"><canvas id="dailyCompareChart" style="max-height:400px"></canvas></div>
 </div>
 </div>
 <script>
@@ -2231,6 +2902,8 @@ function showYear(yr) {
         if (yr === '2025' && typeof initCharts_2025 === 'function') initCharts_2025();
         if (yr === '2026' && typeof initCharts_2026 === 'function') initCharts_2026();
         if (yr === 'monthly') updateMonthlyComparison();
+        if (yr === 'weekly') updateWeeklyComparison();
+        if (yr === 'daily') updateDailyComparison();
     }
 }
 window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
@@ -2238,31 +2911,29 @@ window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
 </script>
 <script>
 
-var MONTHLY_DATA = {"periods": [{"key": "2024-09", "label": "Sep '24"}, {"key": "2024-10", "label": "Oct '24"}, {"key": "2024-11", "label": "Nov '24"}, {"key": "2024-12", "label": "Dec '24"}, {"key": "2025-01", "label": "Jan '25"}, {"key": "2025-02", "label": "Feb '25"}, {"key": "2025-03", "label": "Mar '25"}, {"key": "2025-04", "label": "Apr '25"}, {"key": "2025-05", "label": "May '25"}, {"key": "2025-06", "label": "Jun '25"}, {"key": "2025-07", "label": "Jul '25"}, {"key": "2025-08", "label": "Aug '25"}, {"key": "2025-09", "label": "Sep '25"}, {"key": "2025-10", "label": "Oct '25"}, {"key": "2025-11", "label": "Nov '25"}, {"key": "2025-12", "label": "Dec '25"}, {"key": "2026-01", "label": "Jan '26"}, {"key": "2026-02", "label": "Feb '26"}, {"key": "2026-03", "label": "Mar '26"}], "data": {"2024-09": {"total_revenue": 5208.09, "groom_revenue": 1820.0, "retail_revenue": 3388.09, "transactions": 126, "avg_ticket": 41.33, "unique_customers": 34, "tips": 232.6}, "2024-10": {"total_revenue": 37503.28, "groom_revenue": 19068.99, "retail_revenue": 18434.29, "transactions": 905, "avg_ticket": 41.44, "unique_customers": 291, "tips": 1952.46}, "2024-11": {"total_revenue": 45194.74, "groom_revenue": 27862.0, "retail_revenue": 17007.74, "transactions": 872, "avg_ticket": 51.83, "unique_customers": 353, "tips": 3310.65}, "2024-12": {"total_revenue": 57395.62, "groom_revenue": 35786.5, "retail_revenue": 21433.12, "transactions": 973, "avg_ticket": 58.99, "unique_customers": 417, "tips": 4214.59}, "2025-01": {"total_revenue": 49686.55, "groom_revenue": 36953.5, "retail_revenue": 12732.05, "transactions": 777, "avg_ticket": 63.95, "unique_customers": 407, "tips": 4313.0}, "2025-02": {"total_revenue": 48064.31, "groom_revenue": 34291.25, "retail_revenue": 13538.06, "transactions": 774, "avg_ticket": 62.1, "unique_customers": 365, "tips": 3995.3}, "2025-03": {"total_revenue": 56623.11, "groom_revenue": 42814.0, "retail_revenue": 13769.11, "transactions": 836, "avg_ticket": 67.73, "unique_customers": 457, "tips": 5482.25}, "2025-04": {"total_revenue": 56149.06, "groom_revenue": 42956.5, "retail_revenue": 12992.56, "transactions": 802, "avg_ticket": 70.01, "unique_customers": 455, "tips": 4977.73}, "2025-05": {"total_revenue": 57512.51, "groom_revenue": 42449.5, "retail_revenue": 15033.01, "transactions": 843, "avg_ticket": 68.22, "unique_customers": 463, "tips": 5362.25}, "2025-06": {"total_revenue": 66115.22, "groom_revenue": 52777.75, "retail_revenue": 13237.47, "transactions": 882, "avg_ticket": 74.96, "unique_customers": 516, "tips": 6225.17}, "2025-07": {"total_revenue": 71592.37, "groom_revenue": 56097.0, "retail_revenue": 15410.37, "transactions": 933, "avg_ticket": 76.73, "unique_customers": 560, "tips": 6866.66}, "2025-08": {"total_revenue": 74388.29, "groom_revenue": 57318.5, "retail_revenue": 17044.79, "transactions": 1010, "avg_ticket": 73.65, "unique_customers": 593, "tips": 7224.05}, "2025-09": {"total_revenue": 76099.73, "groom_revenue": 60156.0, "retail_revenue": 15943.73, "transactions": 1008, "avg_ticket": 75.5, "unique_customers": 612, "tips": 7559.27}, "2025-10": {"total_revenue": 84751.8, "groom_revenue": 68563.25, "retail_revenue": 15988.55, "transactions": 1042, "avg_ticket": 81.34, "unique_customers": 680, "tips": 8403.75}, "2025-11": {"total_revenue": 78742.79, "groom_revenue": 61578.0, "retail_revenue": 17089.79, "transactions": 1029, "avg_ticket": 76.52, "unique_customers": 619, "tips": 7878.65}, "2025-12": {"total_revenue": 85208.71, "groom_revenue": 61787.0, "retail_revenue": 22401.71, "transactions": 1141, "avg_ticket": 74.68, "unique_customers": 625, "tips": 8118.65}, "2026-01": {"total_revenue": 77354.23, "groom_revenue": 63117.42, "retail_revenue": 14236.81, "transactions": 991, "avg_ticket": 78.06, "unique_customers": 622, "tips": 8778.26}, "2026-02": {"total_revenue": 75119.27, "groom_revenue": 58912.0, "retail_revenue": 16037.27, "transactions": 972, "avg_ticket": 77.28, "unique_customers": 599, "tips": 8119.5}, "2026-03": {"total_revenue": 43965.06, "groom_revenue": 36073.0, "retail_revenue": 7892.06, "transactions": 537, "avg_ticket": 81.87, "unique_customers": 387, "tips": 4955.81}}};
-var _monthlyChart = null;
+var MONTHLY_DATA = {"periods": [{"key": "2024-09", "label": "Sep '24"}, {"key": "2024-10", "label": "Oct '24"}, {"key": "2024-11", "label": "Nov '24"}, {"key": "2024-12", "label": "Dec '24"}, {"key": "2025-01", "label": "Jan '25"}, {"key": "2025-02", "label": "Feb '25"}, {"key": "2025-03", "label": "Mar '25"}, {"key": "2025-04", "label": "Apr '25"}, {"key": "2025-05", "label": "May '25"}, {"key": "2025-06", "label": "Jun '25"}, {"key": "2025-07", "label": "Jul '25"}, {"key": "2025-08", "label": "Aug '25"}, {"key": "2025-09", "label": "Sep '25"}, {"key": "2025-10", "label": "Oct '25"}, {"key": "2025-11", "label": "Nov '25"}, {"key": "2025-12", "label": "Dec '25"}, {"key": "2026-01", "label": "Jan '26"}, {"key": "2026-02", "label": "Feb '26"}, {"key": "2026-03", "label": "Mar '26"}], "data": {"2024-09": {"total_revenue": 5208.09, "groom_revenue": 1820.0, "retail_revenue": 3388.09, "appointments": 25, "transactions": 126, "avg_ticket": 41.33, "unique_customers": 34, "tips": 232.6}, "2024-10": {"total_revenue": 37503.28, "groom_revenue": 19068.99, "retail_revenue": 18434.29, "appointments": 302, "transactions": 905, "avg_ticket": 41.44, "unique_customers": 291, "tips": 1952.46}, "2024-11": {"total_revenue": 45194.74, "groom_revenue": 27862.0, "retail_revenue": 17007.74, "appointments": 348, "transactions": 872, "avg_ticket": 51.83, "unique_customers": 353, "tips": 3310.65}, "2024-12": {"total_revenue": 57395.62, "groom_revenue": 35786.5, "retail_revenue": 21433.12, "appointments": 396, "transactions": 973, "avg_ticket": 58.99, "unique_customers": 417, "tips": 4214.59}, "2025-01": {"total_revenue": 49686.55, "groom_revenue": 36953.5, "retail_revenue": 12732.05, "appointments": 397, "transactions": 777, "avg_ticket": 63.95, "unique_customers": 407, "tips": 4313.0}, "2025-02": {"total_revenue": 48064.31, "groom_revenue": 34291.25, "retail_revenue": 13538.06, "appointments": 356, "transactions": 774, "avg_ticket": 62.1, "unique_customers": 365, "tips": 3995.3}, "2025-03": {"total_revenue": 56623.11, "groom_revenue": 42814.0, "retail_revenue": 13769.11, "appointments": 432, "transactions": 836, "avg_ticket": 67.73, "unique_customers": 457, "tips": 5482.25}, "2025-04": {"total_revenue": 56149.06, "groom_revenue": 42956.5, "retail_revenue": 12992.56, "appointments": 441, "transactions": 802, "avg_ticket": 70.01, "unique_customers": 455, "tips": 4977.73}, "2025-05": {"total_revenue": 57512.51, "groom_revenue": 42449.5, "retail_revenue": 15033.01, "appointments": 430, "transactions": 843, "avg_ticket": 68.22, "unique_customers": 463, "tips": 5362.25}, "2025-06": {"total_revenue": 66115.22, "groom_revenue": 52777.75, "retail_revenue": 13237.47, "appointments": 511, "transactions": 882, "avg_ticket": 74.96, "unique_customers": 516, "tips": 6225.17}, "2025-07": {"total_revenue": 71592.37, "groom_revenue": 56097.0, "retail_revenue": 15410.37, "appointments": 550, "transactions": 933, "avg_ticket": 76.73, "unique_customers": 560, "tips": 6866.66}, "2025-08": {"total_revenue": 74388.29, "groom_revenue": 57318.5, "retail_revenue": 17044.79, "appointments": 569, "transactions": 1010, "avg_ticket": 73.65, "unique_customers": 593, "tips": 7224.05}, "2025-09": {"total_revenue": 76099.73, "groom_revenue": 60156.0, "retail_revenue": 15943.73, "appointments": 592, "transactions": 1008, "avg_ticket": 75.5, "unique_customers": 612, "tips": 7559.27}, "2025-10": {"total_revenue": 84751.8, "groom_revenue": 68563.25, "retail_revenue": 15988.55, "appointments": 667, "transactions": 1042, "avg_ticket": 81.34, "unique_customers": 680, "tips": 8403.75}, "2025-11": {"total_revenue": 78742.79, "groom_revenue": 61578.0, "retail_revenue": 17089.79, "appointments": 600, "transactions": 1029, "avg_ticket": 76.52, "unique_customers": 619, "tips": 7878.65}, "2025-12": {"total_revenue": 85208.71, "groom_revenue": 61787.0, "retail_revenue": 22401.71, "appointments": 596, "transactions": 1141, "avg_ticket": 74.68, "unique_customers": 625, "tips": 8118.65}, "2026-01": {"total_revenue": 77354.23, "groom_revenue": 63117.42, "retail_revenue": 14236.81, "appointments": 596, "transactions": 991, "avg_ticket": 78.06, "unique_customers": 622, "tips": 8778.26}, "2026-02": {"total_revenue": 75119.27, "groom_revenue": 58912.0, "retail_revenue": 16037.27, "appointments": 565, "transactions": 972, "avg_ticket": 77.28, "unique_customers": 599, "tips": 8119.5}, "2026-03": {"total_revenue": 43965.06, "groom_revenue": 36073.0, "retail_revenue": 7892.06, "appointments": 347, "transactions": 537, "avg_ticket": 81.87, "unique_customers": 387, "tips": 4955.81}}};
+var WEEKLY_DATA = {"periods": [{"key": "2024-W39", "label": "Sep 23 \u2013 Sep 29, 2024"}, {"key": "2024-W40", "label": "Sep 30 \u2013 Oct 6, 2024"}, {"key": "2024-W41", "label": "Oct 7 \u2013 Oct 13, 2024"}, {"key": "2024-W42", "label": "Oct 14 \u2013 Oct 20, 2024"}, {"key": "2024-W43", "label": "Oct 21 \u2013 Oct 27, 2024"}, {"key": "2024-W44", "label": "Oct 28 \u2013 Nov 3, 2024"}, {"key": "2024-W45", "label": "Nov 4 \u2013 Nov 10, 2024"}, {"key": "2024-W46", "label": "Nov 11 \u2013 Nov 17, 2024"}, {"key": "2024-W47", "label": "Nov 18 \u2013 Nov 24, 2024"}, {"key": "2024-W48", "label": "Nov 25 \u2013 Dec 1, 2024"}, {"key": "2024-W49", "label": "Dec 2 \u2013 Dec 8, 2024"}, {"key": "2024-W50", "label": "Dec 9 \u2013 Dec 15, 2024"}, {"key": "2024-W51", "label": "Dec 16 \u2013 Dec 22, 2024"}, {"key": "2024-W52", "label": "Dec 23 \u2013 Dec 29, 2024"}, {"key": "2025-W01", "label": "Dec 30 \u2013 Jan 5, 2025"}, {"key": "2025-W02", "label": "Jan 6 \u2013 Jan 12, 2025"}, {"key": "2025-W03", "label": "Jan 13 \u2013 Jan 19, 2025"}, {"key": "2025-W04", "label": "Jan 20 \u2013 Jan 26, 2025"}, {"key": "2025-W05", "label": "Jan 27 \u2013 Feb 2, 2025"}, {"key": "2025-W06", "label": "Feb 3 \u2013 Feb 9, 2025"}, {"key": "2025-W07", "label": "Feb 10 \u2013 Feb 16, 2025"}, {"key": "2025-W08", "label": "Feb 17 \u2013 Feb 23, 2025"}, {"key": "2025-W09", "label": "Feb 24 \u2013 Mar 2, 2025"}, {"key": "2025-W10", "label": "Mar 3 \u2013 Mar 9, 2025"}, {"key": "2025-W11", "label": "Mar 10 \u2013 Mar 16, 2025"}, {"key": "2025-W12", "label": "Mar 17 \u2013 Mar 23, 2025"}, {"key": "2025-W13", "label": "Mar 24 \u2013 Mar 30, 2025"}, {"key": "2025-W14", "label": "Mar 31 \u2013 Apr 6, 2025"}, {"key": "2025-W15", "label": "Apr 7 \u2013 Apr 13, 2025"}, {"key": "2025-W16", "label": "Apr 14 \u2013 Apr 20, 2025"}, {"key": "2025-W17", "label": "Apr 21 \u2013 Apr 27, 2025"}, {"key": "2025-W18", "label": "Apr 28 \u2013 May 4, 2025"}, {"key": "2025-W19", "label": "May 5 \u2013 May 11, 2025"}, {"key": "2025-W20", "label": "May 12 \u2013 May 18, 2025"}, {"key": "2025-W21", "label": "May 19 \u2013 May 25, 2025"}, {"key": "2025-W22", "label": "May 26 \u2013 Jun 1, 2025"}, {"key": "2025-W23", "label": "Jun 2 \u2013 Jun 8, 2025"}, {"key": "2025-W24", "label": "Jun 9 \u2013 Jun 15, 2025"}, {"key": "2025-W25", "label": "Jun 16 \u2013 Jun 22, 2025"}, {"key": "2025-W26", "label": "Jun 23 \u2013 Jun 29, 2025"}, {"key": "2025-W27", "label": "Jun 30 \u2013 Jul 6, 2025"}, {"key": "2025-W28", "label": "Jul 7 \u2013 Jul 13, 2025"}, {"key": "2025-W29", "label": "Jul 14 \u2013 Jul 20, 2025"}, {"key": "2025-W30", "label": "Jul 21 \u2013 Jul 27, 2025"}, {"key": "2025-W31", "label": "Jul 28 \u2013 Aug 3, 2025"}, {"key": "2025-W32", "label": "Aug 4 \u2013 Aug 10, 2025"}, {"key": "2025-W33", "label": "Aug 11 \u2013 Aug 17, 2025"}, {"key": "2025-W34", "label": "Aug 18 \u2013 Aug 24, 2025"}, {"key": "2025-W35", "label": "Aug 25 \u2013 Aug 31, 2025"}, {"key": "2025-W36", "label": "Sep 1 \u2013 Sep 7, 2025"}, {"key": "2025-W37", "label": "Sep 8 \u2013 Sep 14, 2025"}, {"key": "2025-W38", "label": "Sep 15 \u2013 Sep 21, 2025"}, {"key": "2025-W39", "label": "Sep 22 \u2013 Sep 28, 2025"}, {"key": "2025-W40", "label": "Sep 29 \u2013 Oct 5, 2025"}, {"key": "2025-W41", "label": "Oct 6 \u2013 Oct 12, 2025"}, {"key": "2025-W42", "label": "Oct 13 \u2013 Oct 19, 2025"}, {"key": "2025-W43", "label": "Oct 20 \u2013 Oct 26, 2025"}, {"key": "2025-W44", "label": "Oct 27 \u2013 Nov 2, 2025"}, {"key": "2025-W45", "label": "Nov 3 \u2013 Nov 9, 2025"}, {"key": "2025-W46", "label": "Nov 10 \u2013 Nov 16, 2025"}, {"key": "2025-W47", "label": "Nov 17 \u2013 Nov 23, 2025"}, {"key": "2025-W48", "label": "Nov 24 \u2013 Nov 30, 2025"}, {"key": "2025-W49", "label": "Dec 1 \u2013 Dec 7, 2025"}, {"key": "2025-W50", "label": "Dec 8 \u2013 Dec 14, 2025"}, {"key": "2025-W51", "label": "Dec 15 \u2013 Dec 21, 2025"}, {"key": "2025-W52", "label": "Dec 22 \u2013 Dec 28, 2025"}, {"key": "2026-W01", "label": "Dec 29 \u2013 Jan 4, 2026"}, {"key": "2026-W02", "label": "Jan 5 \u2013 Jan 11, 2026"}, {"key": "2026-W03", "label": "Jan 12 \u2013 Jan 18, 2026"}, {"key": "2026-W04", "label": "Jan 19 \u2013 Jan 25, 2026"}, {"key": "2026-W05", "label": "Jan 26 \u2013 Feb 1, 2026"}, {"key": "2026-W06", "label": "Feb 2 \u2013 Feb 8, 2026"}, {"key": "2026-W07", "label": "Feb 9 \u2013 Feb 15, 2026"}, {"key": "2026-W08", "label": "Feb 16 \u2013 Feb 22, 2026"}, {"key": "2026-W09", "label": "Feb 23 \u2013 Mar 1, 2026"}, {"key": "2026-W10", "label": "Mar 2 \u2013 Mar 8, 2026"}, {"key": "2026-W11", "label": "Mar 9 \u2013 Mar 15, 2026"}, {"key": "2026-W12", "label": "Mar 16 \u2013 Mar 22, 2026"}], "data": {"2024-W39": {"total_revenue": 3820.11, "groom_revenue": 1175.0, "retail_revenue": 2645.11, "appointments": 15, "transactions": 93, "avg_ticket": 41.08, "unique_customers": 24, "tips": 153.7}, "2024-W40": {"total_revenue": 6867.07, "groom_revenue": 2700.0, "retail_revenue": 4167.07, "appointments": 44, "transactions": 176, "avg_ticket": 39.02, "unique_customers": 51, "tips": 379.15}, "2024-W41": {"total_revenue": 8060.64, "groom_revenue": 3660.0, "retail_revenue": 4400.64, "appointments": 59, "transactions": 197, "avg_ticket": 40.92, "unique_customers": 63, "tips": 453.45}, "2024-W42": {"total_revenue": 7748.77, "groom_revenue": 4115.0, "retail_revenue": 3633.77, "appointments": 67, "transactions": 179, "avg_ticket": 43.29, "unique_customers": 68, "tips": 468.45}, "2024-W43": {"total_revenue": 10083.39, "groom_revenue": 5023.99, "retail_revenue": 5059.4, "appointments": 81, "transactions": 252, "avg_ticket": 40.01, "unique_customers": 87, "tips": 556.11}, "2024-W44": {"total_revenue": 9972.45, "groom_revenue": 5890.0, "retail_revenue": 4082.45, "appointments": 85, "transactions": 226, "avg_ticket": 44.13, "unique_customers": 91, "tips": 326.85}, "2024-W45": {"total_revenue": 10005.07, "groom_revenue": 6460.0, "retail_revenue": 3295.07, "appointments": 85, "transactions": 187, "avg_ticket": 53.5, "unique_customers": 87, "tips": 850.7}, "2024-W46": {"total_revenue": 10748.23, "groom_revenue": 6385.0, "retail_revenue": 4363.23, "appointments": 79, "transactions": 220, "avg_ticket": 48.86, "unique_customers": 87, "tips": 888.3}, "2024-W47": {"total_revenue": 10890.79, "groom_revenue": 7299.0, "retail_revenue": 3591.79, "appointments": 91, "transactions": 200, "avg_ticket": 54.45, "unique_customers": 89, "tips": 713.65}, "2024-W48": {"total_revenue": 11429.53, "groom_revenue": 6723.0, "retail_revenue": 4631.53, "appointments": 79, "transactions": 197, "avg_ticket": 58.02, "unique_customers": 99, "tips": 766.35}, "2024-W49": {"total_revenue": 9440.77, "groom_revenue": 6253.0, "retail_revenue": 3187.77, "appointments": 68, "transactions": 161, "avg_ticket": 58.64, "unique_customers": 93, "tips": 841.03}, "2024-W50": {"total_revenue": 12245.6, "groom_revenue": 7868.0, "retail_revenue": 4377.6, "appointments": 86, "transactions": 199, "avg_ticket": 61.54, "unique_customers": 103, "tips": 1080.65}, "2024-W51": {"total_revenue": 15934.65, "groom_revenue": 10122.0, "retail_revenue": 5636.65, "appointments": 99, "transactions": 261, "avg_ticket": 61.05, "unique_customers": 115, "tips": 1110.6}, "2024-W52": {"total_revenue": 14508.57, "groom_revenue": 8610.5, "retail_revenue": 5898.07, "appointments": 107, "transactions": 264, "avg_ticket": 54.96, "unique_customers": 113, "tips": 1048.06}, "2025-W01": {"total_revenue": 9629.77, "groom_revenue": 6722.0, "retail_revenue": 2907.77, "appointments": 78, "transactions": 160, "avg_ticket": 60.19, "unique_customers": 97, "tips": 581.35}, "2025-W02": {"total_revenue": 11904.39, "groom_revenue": 9147.0, "retail_revenue": 2757.39, "appointments": 103, "transactions": 177, "avg_ticket": 67.26, "unique_customers": 113, "tips": 1141.05}, "2025-W03": {"total_revenue": 11854.69, "groom_revenue": 8601.0, "retail_revenue": 3252.69, "appointments": 87, "transactions": 184, "avg_ticket": 64.43, "unique_customers": 105, "tips": 1042.45}, "2025-W04": {"total_revenue": 11220.51, "groom_revenue": 8295.0, "retail_revenue": 2925.51, "appointments": 83, "transactions": 179, "avg_ticket": 62.68, "unique_customers": 99, "tips": 1080.1}, "2025-W05": {"total_revenue": 12636.08, "groom_revenue": 8730.5, "retail_revenue": 3905.58, "appointments": 98, "transactions": 202, "avg_ticket": 62.55, "unique_customers": 112, "tips": 753.45}, "2025-W06": {"total_revenue": 11188.87, "groom_revenue": 7841.0, "retail_revenue": 3212.87, "appointments": 86, "transactions": 185, "avg_ticket": 60.48, "unique_customers": 94, "tips": 949.55}, "2025-W07": {"total_revenue": 12081.63, "groom_revenue": 8485.5, "retail_revenue": 3596.13, "appointments": 91, "transactions": 215, "avg_ticket": 56.19, "unique_customers": 108, "tips": 1129.3}, "2025-W08": {"total_revenue": 11138.37, "groom_revenue": 8246.0, "retail_revenue": 2792.37, "appointments": 86, "transactions": 186, "avg_ticket": 59.88, "unique_customers": 101, "tips": 722.45}, "2025-W09": {"total_revenue": 11922.48, "groom_revenue": 8742.75, "retail_revenue": 3179.73, "appointments": 86, "transactions": 180, "avg_ticket": 66.24, "unique_customers": 99, "tips": 1213.4}, "2025-W10": {"total_revenue": 13586.66, "groom_revenue": 10546.0, "retail_revenue": 3040.66, "appointments": 105, "transactions": 198, "avg_ticket": 68.62, "unique_customers": 132, "tips": 1395.95}, "2025-W11": {"total_revenue": 13477.74, "groom_revenue": 10220.5, "retail_revenue": 3257.24, "appointments": 101, "transactions": 204, "avg_ticket": 66.07, "unique_customers": 122, "tips": 1543.55}, "2025-W12": {"total_revenue": 12413.23, "groom_revenue": 9398.0, "retail_revenue": 2975.23, "appointments": 101, "transactions": 188, "avg_ticket": 66.03, "unique_customers": 115, "tips": 1221.0}, "2025-W13": {"total_revenue": 12769.52, "groom_revenue": 9612.5, "retail_revenue": 3157.02, "appointments": 92, "transactions": 169, "avg_ticket": 75.56, "unique_customers": 115, "tips": 1090.2}, "2025-W14": {"total_revenue": 12819.41, "groom_revenue": 10113.0, "retail_revenue": 2606.41, "appointments": 106, "transactions": 168, "avg_ticket": 76.31, "unique_customers": 122, "tips": 1060.75}, "2025-W15": {"total_revenue": 14141.7, "groom_revenue": 10740.0, "retail_revenue": 3401.7, "appointments": 103, "transactions": 201, "avg_ticket": 70.36, "unique_customers": 125, "tips": 1338.52}, "2025-W16": {"total_revenue": 13673.37, "groom_revenue": 10150.5, "retail_revenue": 3422.87, "appointments": 103, "transactions": 201, "avg_ticket": 68.03, "unique_customers": 112, "tips": 1215.85}, "2025-W17": {"total_revenue": 12026.1, "groom_revenue": 8697.0, "retail_revenue": 3329.1, "appointments": 94, "transactions": 188, "avg_ticket": 63.97, "unique_customers": 102, "tips": 1018.61}, "2025-W18": {"total_revenue": 12384.72, "groom_revenue": 9578.0, "retail_revenue": 2806.72, "appointments": 100, "transactions": 180, "avg_ticket": 68.8, "unique_customers": 116, "tips": 929.0}, "2025-W19": {"total_revenue": 13263.83, "groom_revenue": 9748.0, "retail_revenue": 3485.83, "appointments": 96, "transactions": 196, "avg_ticket": 67.67, "unique_customers": 119, "tips": 1485.95}, "2025-W20": {"total_revenue": 9735.08, "groom_revenue": 6952.0, "retail_revenue": 2783.08, "appointments": 73, "transactions": 161, "avg_ticket": 60.47, "unique_customers": 96, "tips": 1001.05}, "2025-W21": {"total_revenue": 13494.64, "groom_revenue": 10122.0, "retail_revenue": 3372.64, "appointments": 104, "transactions": 193, "avg_ticket": 69.92, "unique_customers": 127, "tips": 1202.65}, "2025-W22": {"total_revenue": 15355.35, "groom_revenue": 11783.25, "retail_revenue": 3572.1, "appointments": 115, "transactions": 202, "avg_ticket": 76.02, "unique_customers": 145, "tips": 1217.35}, "2025-W23": {"total_revenue": 14911.71, "groom_revenue": 12290.0, "retail_revenue": 2621.71, "appointments": 116, "transactions": 207, "avg_ticket": 72.04, "unique_customers": 132, "tips": 1555.35}, "2025-W24": {"total_revenue": 15615.59, "groom_revenue": 11805.0, "retail_revenue": 3810.59, "appointments": 122, "transactions": 213, "avg_ticket": 73.31, "unique_customers": 135, "tips": 1510.42}, "2025-W25": {"total_revenue": 15163.12, "groom_revenue": 12080.0, "retail_revenue": 2983.12, "appointments": 112, "transactions": 191, "avg_ticket": 79.39, "unique_customers": 124, "tips": 1308.0}, "2025-W26": {"total_revenue": 16830.73, "groom_revenue": 13674.0, "retail_revenue": 3156.73, "appointments": 131, "transactions": 214, "avg_ticket": 78.65, "unique_customers": 147, "tips": 1721.65}, "2025-W27": {"total_revenue": 13044.54, "groom_revenue": 9914.0, "retail_revenue": 3130.54, "appointments": 102, "transactions": 186, "avg_ticket": 70.13, "unique_customers": 119, "tips": 1095.55}, "2025-W28": {"total_revenue": 16372.17, "groom_revenue": 11954.0, "retail_revenue": 4333.17, "appointments": 118, "transactions": 222, "avg_ticket": 73.75, "unique_customers": 143, "tips": 1768.9}, "2025-W29": {"total_revenue": 17176.89, "groom_revenue": 13853.0, "retail_revenue": 3323.89, "appointments": 133, "transactions": 217, "avg_ticket": 79.16, "unique_customers": 153, "tips": 1557.0}, "2025-W30": {"total_revenue": 15665.65, "groom_revenue": 12515.0, "retail_revenue": 3150.65, "appointments": 124, "transactions": 209, "avg_ticket": 74.96, "unique_customers": 145, "tips": 1595.26}, "2025-W31": {"total_revenue": 18649.9, "groom_revenue": 14781.0, "retail_revenue": 3868.9, "appointments": 145, "transactions": 246, "avg_ticket": 75.81, "unique_customers": 177, "tips": 1540.25}, "2025-W32": {"total_revenue": 18241.48, "groom_revenue": 13667.0, "retail_revenue": 4574.48, "appointments": 139, "transactions": 240, "avg_ticket": 76.01, "unique_customers": 162, "tips": 1811.0}, "2025-W33": {"total_revenue": 16344.83, "groom_revenue": 12820.0, "retail_revenue": 3499.83, "appointments": 130, "transactions": 219, "avg_ticket": 74.63, "unique_customers": 154, "tips": 1527.0}, "2025-W34": {"total_revenue": 16635.11, "groom_revenue": 13557.5, "retail_revenue": 3077.61, "appointments": 129, "transactions": 216, "avg_ticket": 77.01, "unique_customers": 142, "tips": 1651.75}, "2025-W35": {"total_revenue": 16307.64, "groom_revenue": 12529.0, "retail_revenue": 3778.64, "appointments": 120, "transactions": 224, "avg_ticket": 72.8, "unique_customers": 145, "tips": 1544.0}, "2025-W36": {"total_revenue": 15154.9, "groom_revenue": 11727.0, "retail_revenue": 3427.9, "appointments": 122, "transactions": 210, "avg_ticket": 72.17, "unique_customers": 142, "tips": 1624.55}, "2025-W37": {"total_revenue": 17356.33, "groom_revenue": 13497.0, "retail_revenue": 3859.33, "appointments": 133, "transactions": 227, "avg_ticket": 76.46, "unique_customers": 169, "tips": 1780.62}, "2025-W38": {"total_revenue": 17441.35, "groom_revenue": 13866.0, "retail_revenue": 3575.35, "appointments": 138, "transactions": 236, "avg_ticket": 73.9, "unique_customers": 164, "tips": 1493.75}, "2025-W39": {"total_revenue": 19980.71, "groom_revenue": 16281.0, "retail_revenue": 3699.71, "appointments": 151, "transactions": 257, "avg_ticket": 77.75, "unique_customers": 175, "tips": 2129.7}, "2025-W40": {"total_revenue": 18933.74, "groom_revenue": 14892.0, "retail_revenue": 4041.74, "appointments": 150, "transactions": 246, "avg_ticket": 76.97, "unique_customers": 175, "tips": 1772.45}, "2025-W41": {"total_revenue": 19324.81, "groom_revenue": 15762.0, "retail_revenue": 3362.81, "appointments": 155, "transactions": 245, "avg_ticket": 78.88, "unique_customers": 175, "tips": 2100.75}, "2025-W42": {"total_revenue": 18422.02, "groom_revenue": 14451.5, "retail_revenue": 3970.52, "appointments": 135, "transactions": 228, "avg_ticket": 80.8, "unique_customers": 158, "tips": 1891.25}, "2025-W43": {"total_revenue": 19261.06, "groom_revenue": 15409.75, "retail_revenue": 3851.31, "appointments": 154, "transactions": 234, "avg_ticket": 82.31, "unique_customers": 178, "tips": 2092.4}, "2025-W44": {"total_revenue": 18369.67, "groom_revenue": 15123.0, "retail_revenue": 3246.67, "appointments": 146, "transactions": 226, "avg_ticket": 81.28, "unique_customers": 167, "tips": 1367.95}, "2025-W45": {"total_revenue": 17225.97, "groom_revenue": 13897.0, "retail_revenue": 3328.97, "appointments": 131, "transactions": 224, "avg_ticket": 76.9, "unique_customers": 156, "tips": 1727.05}, "2025-W46": {"total_revenue": 20343.27, "groom_revenue": 15804.0, "retail_revenue": 4539.27, "appointments": 144, "transactions": 249, "avg_ticket": 81.7, "unique_customers": 177, "tips": 1958.95}, "2025-W47": {"total_revenue": 20949.55, "groom_revenue": 16812.0, "retail_revenue": 4137.55, "appointments": 166, "transactions": 261, "avg_ticket": 80.27, "unique_customers": 186, "tips": 2217.05}, "2025-W48": {"total_revenue": 16830.95, "groom_revenue": 12775.0, "retail_revenue": 3980.95, "appointments": 134, "transactions": 236, "avg_ticket": 71.32, "unique_customers": 157, "tips": 1685.2}, "2025-W49": {"total_revenue": 17764.04, "groom_revenue": 13602.0, "retail_revenue": 4162.04, "appointments": 136, "transactions": 225, "avg_ticket": 78.95, "unique_customers": 163, "tips": 1898.05}, "2025-W50": {"total_revenue": 18542.06, "groom_revenue": 14201.0, "retail_revenue": 4341.06, "appointments": 131, "transactions": 234, "avg_ticket": 79.24, "unique_customers": 156, "tips": 2097.6}, "2025-W51": {"total_revenue": 22875.27, "groom_revenue": 16082.0, "retail_revenue": 6263.27, "appointments": 156, "transactions": 301, "avg_ticket": 76.0, "unique_customers": 173, "tips": 2281.75}, "2025-W52": {"total_revenue": 17762.57, "groom_revenue": 11332.0, "retail_revenue": 5940.57, "appointments": 110, "transactions": 271, "avg_ticket": 65.54, "unique_customers": 143, "tips": 1447.85}, "2026-W01": {"total_revenue": 13451.04, "groom_revenue": 10462.0, "retail_revenue": 2989.03, "appointments": 108, "transactions": 193, "avg_ticket": 69.69, "unique_customers": 129, "tips": 837.95}, "2026-W02": {"total_revenue": 20532.26, "groom_revenue": 17261.42, "retail_revenue": 3270.84, "appointments": 161, "transactions": 251, "avg_ticket": 81.8, "unique_customers": 187, "tips": 2363.8}, "2026-W03": {"total_revenue": 18271.33, "groom_revenue": 14964.0, "retail_revenue": 3307.33, "appointments": 138, "transactions": 230, "avg_ticket": 79.44, "unique_customers": 154, "tips": 2207.45}, "2026-W04": {"total_revenue": 19873.14, "groom_revenue": 15970.0, "retail_revenue": 3903.14, "appointments": 154, "transactions": 266, "avg_ticket": 74.71, "unique_customers": 184, "tips": 2218.85}, "2026-W05": {"total_revenue": 14409.85, "groom_revenue": 11570.0, "retail_revenue": 2669.85, "appointments": 104, "transactions": 178, "avg_ticket": 80.95, "unique_customers": 125, "tips": 1629.61}, "2026-W06": {"total_revenue": 19883.7, "groom_revenue": 16026.0, "retail_revenue": 3857.7, "appointments": 154, "transactions": 243, "avg_ticket": 81.83, "unique_customers": 177, "tips": 2086.15}, "2026-W07": {"total_revenue": 19195.37, "groom_revenue": 14219.0, "retail_revenue": 4976.37, "appointments": 146, "transactions": 272, "avg_ticket": 70.57, "unique_customers": 183, "tips": 2164.8}, "2026-W08": {"total_revenue": 19475.54, "groom_revenue": 15927.0, "retail_revenue": 3548.54, "appointments": 149, "transactions": 243, "avg_ticket": 80.15, "unique_customers": 174, "tips": 1987.55}, "2026-W09": {"total_revenue": 16888.64, "groom_revenue": 13018.0, "retail_revenue": 3870.64, "appointments": 121, "transactions": 220, "avg_ticket": 76.77, "unique_customers": 151, "tips": 1895.75}, "2026-W10": {"total_revenue": 20247.64, "groom_revenue": 17295.0, "retail_revenue": 2952.64, "appointments": 171, "transactions": 247, "avg_ticket": 81.97, "unique_customers": 192, "tips": 2389.1}, "2026-W11": {"total_revenue": 19707.77, "groom_revenue": 15610.0, "retail_revenue": 4097.77, "appointments": 144, "transactions": 236, "avg_ticket": 83.51, "unique_customers": 177, "tips": 2206.41}, "2026-W12": {"total_revenue": 2767.08, "groom_revenue": 2350.0, "retail_revenue": 417.08, "appointments": 21, "transactions": 31, "avg_ticket": 89.26, "unique_customers": 25, "tips": 259.55}}};
+var DAILY_DATA = {"periods": [{"key": "2025-12-11", "label": "Thu Dec 11, 2025"}, {"key": "2025-12-12", "label": "Fri Dec 12, 2025"}, {"key": "2025-12-13", "label": "Sat Dec 13, 2025"}, {"key": "2025-12-14", "label": "Sun Dec 14, 2025"}, {"key": "2025-12-15", "label": "Mon Dec 15, 2025"}, {"key": "2025-12-16", "label": "Tue Dec 16, 2025"}, {"key": "2025-12-17", "label": "Wed Dec 17, 2025"}, {"key": "2025-12-18", "label": "Thu Dec 18, 2025"}, {"key": "2025-12-19", "label": "Fri Dec 19, 2025"}, {"key": "2025-12-20", "label": "Sat Dec 20, 2025"}, {"key": "2025-12-21", "label": "Sun Dec 21, 2025"}, {"key": "2025-12-22", "label": "Mon Dec 22, 2025"}, {"key": "2025-12-23", "label": "Tue Dec 23, 2025"}, {"key": "2025-12-24", "label": "Wed Dec 24, 2025"}, {"key": "2025-12-26", "label": "Fri Dec 26, 2025"}, {"key": "2025-12-28", "label": "Sun Dec 28, 2025"}, {"key": "2025-12-29", "label": "Mon Dec 29, 2025"}, {"key": "2025-12-30", "label": "Tue Dec 30, 2025"}, {"key": "2025-12-31", "label": "Wed Dec 31, 2025"}, {"key": "2026-01-02", "label": "Fri Jan 2, 2026"}, {"key": "2026-01-03", "label": "Sat Jan 3, 2026"}, {"key": "2026-01-04", "label": "Sun Jan 4, 2026"}, {"key": "2026-01-05", "label": "Mon Jan 5, 2026"}, {"key": "2026-01-06", "label": "Tue Jan 6, 2026"}, {"key": "2026-01-07", "label": "Wed Jan 7, 2026"}, {"key": "2026-01-08", "label": "Thu Jan 8, 2026"}, {"key": "2026-01-09", "label": "Fri Jan 9, 2026"}, {"key": "2026-01-10", "label": "Sat Jan 10, 2026"}, {"key": "2026-01-11", "label": "Sun Jan 11, 2026"}, {"key": "2026-01-12", "label": "Mon Jan 12, 2026"}, {"key": "2026-01-13", "label": "Tue Jan 13, 2026"}, {"key": "2026-01-14", "label": "Wed Jan 14, 2026"}, {"key": "2026-01-15", "label": "Thu Jan 15, 2026"}, {"key": "2026-01-16", "label": "Fri Jan 16, 2026"}, {"key": "2026-01-17", "label": "Sat Jan 17, 2026"}, {"key": "2026-01-18", "label": "Sun Jan 18, 2026"}, {"key": "2026-01-19", "label": "Mon Jan 19, 2026"}, {"key": "2026-01-20", "label": "Tue Jan 20, 2026"}, {"key": "2026-01-21", "label": "Wed Jan 21, 2026"}, {"key": "2026-01-22", "label": "Thu Jan 22, 2026"}, {"key": "2026-01-23", "label": "Fri Jan 23, 2026"}, {"key": "2026-01-24", "label": "Sat Jan 24, 2026"}, {"key": "2026-01-27", "label": "Tue Jan 27, 2026"}, {"key": "2026-01-28", "label": "Wed Jan 28, 2026"}, {"key": "2026-01-29", "label": "Thu Jan 29, 2026"}, {"key": "2026-01-30", "label": "Fri Jan 30, 2026"}, {"key": "2026-01-31", "label": "Sat Jan 31, 2026"}, {"key": "2026-02-01", "label": "Sun Feb 1, 2026"}, {"key": "2026-02-02", "label": "Mon Feb 2, 2026"}, {"key": "2026-02-03", "label": "Tue Feb 3, 2026"}, {"key": "2026-02-04", "label": "Wed Feb 4, 2026"}, {"key": "2026-02-05", "label": "Thu Feb 5, 2026"}, {"key": "2026-02-06", "label": "Fri Feb 6, 2026"}, {"key": "2026-02-07", "label": "Sat Feb 7, 2026"}, {"key": "2026-02-08", "label": "Sun Feb 8, 2026"}, {"key": "2026-02-09", "label": "Mon Feb 9, 2026"}, {"key": "2026-02-10", "label": "Tue Feb 10, 2026"}, {"key": "2026-02-11", "label": "Wed Feb 11, 2026"}, {"key": "2026-02-12", "label": "Thu Feb 12, 2026"}, {"key": "2026-02-13", "label": "Fri Feb 13, 2026"}, {"key": "2026-02-14", "label": "Sat Feb 14, 2026"}, {"key": "2026-02-15", "label": "Sun Feb 15, 2026"}, {"key": "2026-02-16", "label": "Mon Feb 16, 2026"}, {"key": "2026-02-17", "label": "Tue Feb 17, 2026"}, {"key": "2026-02-18", "label": "Wed Feb 18, 2026"}, {"key": "2026-02-19", "label": "Thu Feb 19, 2026"}, {"key": "2026-02-20", "label": "Fri Feb 20, 2026"}, {"key": "2026-02-21", "label": "Sat Feb 21, 2026"}, {"key": "2026-02-22", "label": "Sun Feb 22, 2026"}, {"key": "2026-02-24", "label": "Tue Feb 24, 2026"}, {"key": "2026-02-25", "label": "Wed Feb 25, 2026"}, {"key": "2026-02-26", "label": "Thu Feb 26, 2026"}, {"key": "2026-02-27", "label": "Fri Feb 27, 2026"}, {"key": "2026-02-28", "label": "Sat Feb 28, 2026"}, {"key": "2026-03-01", "label": "Sun Mar 1, 2026"}, {"key": "2026-03-02", "label": "Mon Mar 2, 2026"}, {"key": "2026-03-03", "label": "Tue Mar 3, 2026"}, {"key": "2026-03-04", "label": "Wed Mar 4, 2026"}, {"key": "2026-03-05", "label": "Thu Mar 5, 2026"}, {"key": "2026-03-06", "label": "Fri Mar 6, 2026"}, {"key": "2026-03-07", "label": "Sat Mar 7, 2026"}, {"key": "2026-03-08", "label": "Sun Mar 8, 2026"}, {"key": "2026-03-09", "label": "Mon Mar 9, 2026"}, {"key": "2026-03-10", "label": "Tue Mar 10, 2026"}, {"key": "2026-03-11", "label": "Wed Mar 11, 2026"}, {"key": "2026-03-12", "label": "Thu Mar 12, 2026"}, {"key": "2026-03-13", "label": "Fri Mar 13, 2026"}, {"key": "2026-03-14", "label": "Sat Mar 14, 2026"}, {"key": "2026-03-15", "label": "Sun Mar 15, 2026"}, {"key": "2026-03-16", "label": "Mon Mar 16, 2026"}], "data": {"2025-12-11": {"total_revenue": 2227.67, "groom_revenue": 1914.0, "retail_revenue": 313.67, "appointments": 19, "transactions": 27, "avg_ticket": 82.51, "unique_customers": 22, "tips": 220.45}, "2025-12-12": {"total_revenue": 3992.76, "groom_revenue": 3097.0, "retail_revenue": 895.76, "appointments": 29, "transactions": 50, "avg_ticket": 79.86, "unique_customers": 34, "tips": 576.3}, "2025-12-13": {"total_revenue": 2586.56, "groom_revenue": 1685.0, "retail_revenue": 901.56, "appointments": 16, "transactions": 44, "avg_ticket": 58.79, "unique_customers": 26, "tips": 193.5}, "2025-12-14": {"total_revenue": 127.97, "groom_revenue": 0.0, "retail_revenue": 127.97, "appointments": 0, "transactions": 4, "avg_ticket": 31.99, "unique_customers": 1, "tips": 0.0}, "2025-12-15": {"total_revenue": 2749.7, "groom_revenue": 2065.0, "retail_revenue": 684.7, "appointments": 19, "transactions": 34, "avg_ticket": 80.87, "unique_customers": 22, "tips": 262.0}, "2025-12-16": {"total_revenue": 4321.61, "groom_revenue": 3355.0, "retail_revenue": 966.61, "appointments": 32, "transactions": 49, "avg_ticket": 88.2, "unique_customers": 35, "tips": 425.1}, "2025-12-17": {"total_revenue": 3855.15, "groom_revenue": 2975.0, "retail_revenue": 580.15, "appointments": 29, "transactions": 44, "avg_ticket": 87.62, "unique_customers": 33, "tips": 433.45}, "2025-12-18": {"total_revenue": 2420.59, "groom_revenue": 2060.0, "retail_revenue": 360.59, "appointments": 20, "transactions": 37, "avg_ticket": 65.42, "unique_customers": 23, "tips": 348.3}, "2025-12-19": {"total_revenue": 3877.99, "groom_revenue": 2627.0, "retail_revenue": 1020.99, "appointments": 26, "transactions": 49, "avg_ticket": 79.14, "unique_customers": 32, "tips": 359.3}, "2025-12-20": {"total_revenue": 3864.16, "groom_revenue": 2550.0, "retail_revenue": 1314.16, "appointments": 24, "transactions": 49, "avg_ticket": 78.86, "unique_customers": 27, "tips": 374.75}, "2025-12-21": {"total_revenue": 1786.07, "groom_revenue": 450.0, "retail_revenue": 1336.07, "appointments": 6, "transactions": 39, "avg_ticket": 45.8, "unique_customers": 10, "tips": 78.85}, "2025-12-22": {"total_revenue": 4597.96, "groom_revenue": 2840.0, "retail_revenue": 1417.96, "appointments": 30, "transactions": 73, "avg_ticket": 62.99, "unique_customers": 35, "tips": 381.65}, "2025-12-23": {"total_revenue": 4527.78, "groom_revenue": 2979.0, "retail_revenue": 1548.78, "appointments": 28, "transactions": 66, "avg_ticket": 68.6, "unique_customers": 39, "tips": 330.9}, "2025-12-24": {"total_revenue": 5457.29, "groom_revenue": 3130.0, "retail_revenue": 2177.29, "appointments": 28, "transactions": 88, "avg_ticket": 62.01, "unique_customers": 46, "tips": 393.25}, "2025-12-26": {"total_revenue": 2204.07, "groom_revenue": 1728.0, "retail_revenue": 476.07, "appointments": 16, "transactions": 28, "avg_ticket": 78.72, "unique_customers": 19, "tips": 214.05}, "2025-12-28": {"total_revenue": 975.47, "groom_revenue": 655.0, "retail_revenue": 320.47, "appointments": 8, "transactions": 16, "avg_ticket": 60.97, "unique_customers": 10, "tips": 128.0}, "2025-12-29": {"total_revenue": 2195.03, "groom_revenue": 1860.0, "retail_revenue": 335.03, "appointments": 19, "transactions": 26, "avg_ticket": 84.42, "unique_customers": 22, "tips": 248.95}, "2025-12-30": {"total_revenue": 2753.22, "groom_revenue": 2255.0, "retail_revenue": 498.22, "appointments": 20, "transactions": 37, "avg_ticket": 74.41, "unique_customers": 28, "tips": 0.0}, "2025-12-31": {"total_revenue": 3316.52, "groom_revenue": 2455.0, "retail_revenue": 861.52, "appointments": 24, "transactions": 47, "avg_ticket": 70.56, "unique_customers": 30, "tips": 144.45}, "2026-01-02": {"total_revenue": 2520.01, "groom_revenue": 2177.0, "retail_revenue": 343.01, "appointments": 24, "transactions": 37, "avg_ticket": 68.11, "unique_customers": 29, "tips": 229.1}, "2026-01-03": {"total_revenue": 2168.12, "groom_revenue": 1715.0, "retail_revenue": 453.12, "appointments": 21, "transactions": 32, "avg_ticket": 67.75, "unique_customers": 25, "tips": 215.45}, "2026-01-04": {"total_revenue": 498.14, "groom_revenue": 0.0, "retail_revenue": 498.14, "appointments": 0, "transactions": 14, "avg_ticket": 35.58, "unique_customers": 5, "tips": 0.0}, "2026-01-05": {"total_revenue": 2189.36, "groom_revenue": 1875.0, "retail_revenue": 314.36, "appointments": 17, "transactions": 28, "avg_ticket": 78.19, "unique_customers": 24, "tips": 252.55}, "2026-01-06": {"total_revenue": 3455.02, "groom_revenue": 3210.0, "retail_revenue": 245.02, "appointments": 27, "transactions": 38, "avg_ticket": 90.92, "unique_customers": 34, "tips": 421.8}, "2026-01-07": {"total_revenue": 3849.39, "groom_revenue": 3481.42, "retail_revenue": 367.97, "appointments": 31, "transactions": 40, "avg_ticket": 96.23, "unique_customers": 36, "tips": 506.5}, "2026-01-08": {"total_revenue": 2868.08, "groom_revenue": 2489.0, "retail_revenue": 379.08, "appointments": 22, "transactions": 31, "avg_ticket": 92.52, "unique_customers": 23, "tips": 416.6}, "2026-01-09": {"total_revenue": 3668.47, "groom_revenue": 3112.0, "retail_revenue": 556.47, "appointments": 31, "transactions": 44, "avg_ticket": 83.37, "unique_customers": 34, "tips": 336.7}, "2026-01-10": {"total_revenue": 3679.87, "groom_revenue": 2665.0, "retail_revenue": 1014.87, "appointments": 26, "transactions": 47, "avg_ticket": 78.3, "unique_customers": 34, "tips": 357.05}, "2026-01-11": {"total_revenue": 822.07, "groom_revenue": 429.0, "retail_revenue": 393.07, "appointments": 7, "transactions": 23, "avg_ticket": 35.74, "unique_customers": 14, "tips": 72.6}, "2026-01-12": {"total_revenue": 3170.28, "groom_revenue": 2600.0, "retail_revenue": 570.28, "appointments": 24, "transactions": 39, "avg_ticket": 81.29, "unique_customers": 29, "tips": 427.5}, "2026-01-13": {"total_revenue": 3801.4, "groom_revenue": 3415.0, "retail_revenue": 386.4, "appointments": 29, "transactions": 41, "avg_ticket": 92.72, "unique_customers": 33, "tips": 454.15}, "2026-01-14": {"total_revenue": 3322.49, "groom_revenue": 2620.0, "retail_revenue": 702.49, "appointments": 21, "transactions": 37, "avg_ticket": 89.8, "unique_customers": 29, "tips": 323.75}, "2026-01-15": {"total_revenue": 2562.41, "groom_revenue": 2203.0, "retail_revenue": 359.41, "appointments": 20, "transactions": 31, "avg_ticket": 82.66, "unique_customers": 26, "tips": 350.0}, "2026-01-16": {"total_revenue": 2543.87, "groom_revenue": 1987.0, "retail_revenue": 556.87, "appointments": 21, "transactions": 40, "avg_ticket": 63.6, "unique_customers": 26, "tips": 322.1}, "2026-01-17": {"total_revenue": 2167.77, "groom_revenue": 1674.0, "retail_revenue": 493.77, "appointments": 18, "transactions": 29, "avg_ticket": 74.75, "unique_customers": 20, "tips": 248.7}, "2026-01-18": {"total_revenue": 703.1, "groom_revenue": 465.0, "retail_revenue": 238.1, "appointments": 5, "transactions": 13, "avg_ticket": 54.08, "unique_customers": 8, "tips": 81.25}, "2026-01-19": {"total_revenue": 2848.75, "groom_revenue": 2335.0, "retail_revenue": 513.75, "appointments": 23, "transactions": 39, "avg_ticket": 73.04, "unique_customers": 27, "tips": 329.45}, "2026-01-20": {"total_revenue": 2790.32, "groom_revenue": 2410.0, "retail_revenue": 380.32, "appointments": 26, "transactions": 40, "avg_ticket": 69.76, "unique_customers": 31, "tips": 296.55}, "2026-01-21": {"total_revenue": 3726.31, "groom_revenue": 3190.0, "retail_revenue": 536.31, "appointments": 29, "transactions": 45, "avg_ticket": 82.81, "unique_customers": 34, "tips": 424.4}, "2026-01-22": {"total_revenue": 3205.62, "groom_revenue": 2745.0, "retail_revenue": 460.62, "appointments": 26, "transactions": 36, "avg_ticket": 89.04, "unique_customers": 29, "tips": 419.85}, "2026-01-23": {"total_revenue": 4189.56, "groom_revenue": 3170.0, "retail_revenue": 1019.56, "appointments": 27, "transactions": 52, "avg_ticket": 80.57, "unique_customers": 38, "tips": 409.5}, "2026-01-24": {"total_revenue": 3112.59, "groom_revenue": 2120.0, "retail_revenue": 992.59, "appointments": 23, "transactions": 54, "avg_ticket": 57.64, "unique_customers": 37, "tips": 339.1}, "2026-01-27": {"total_revenue": 3173.55, "groom_revenue": 2795.0, "retail_revenue": 378.55, "appointments": 22, "transactions": 29, "avg_ticket": 109.43, "unique_customers": 24, "tips": 372.25}, "2026-01-28": {"total_revenue": 2429.76, "groom_revenue": 2080.0, "retail_revenue": 349.76, "appointments": 19, "transactions": 26, "avg_ticket": 93.45, "unique_customers": 23, "tips": 199.1}, "2026-01-29": {"total_revenue": 2855.85, "groom_revenue": 2110.0, "retail_revenue": 745.85, "appointments": 19, "transactions": 37, "avg_ticket": 77.19, "unique_customers": 24, "tips": 390.1}, "2026-01-30": {"total_revenue": 2541.58, "groom_revenue": 2195.0, "retail_revenue": 346.58, "appointments": 22, "transactions": 30, "avg_ticket": 84.72, "unique_customers": 26, "tips": 285.0}, "2026-01-31": {"total_revenue": 2490.5, "groom_revenue": 1850.0, "retail_revenue": 640.5, "appointments": 16, "transactions": 39, "avg_ticket": 63.86, "unique_customers": 28, "tips": 297.16}, "2026-02-01": {"total_revenue": 918.61, "groom_revenue": 540.0, "retail_revenue": 208.61, "appointments": 6, "transactions": 17, "avg_ticket": 54.04, "unique_customers": 8, "tips": 86.0}, "2026-02-02": {"total_revenue": 2673.62, "groom_revenue": 2277.0, "retail_revenue": 396.62, "appointments": 23, "transactions": 31, "avg_ticket": 86.25, "unique_customers": 24, "tips": 301.05}, "2026-02-03": {"total_revenue": 3282.39, "groom_revenue": 2835.0, "retail_revenue": 447.38, "appointments": 23, "transactions": 34, "avg_ticket": 96.54, "unique_customers": 27, "tips": 446.4}, "2026-02-04": {"total_revenue": 3263.83, "groom_revenue": 2762.0, "retail_revenue": 501.83, "appointments": 27, "transactions": 42, "avg_ticket": 77.71, "unique_customers": 29, "tips": 293.2}, "2026-02-05": {"total_revenue": 3358.9, "groom_revenue": 2670.0, "retail_revenue": 688.9, "appointments": 25, "transactions": 35, "avg_ticket": 95.97, "unique_customers": 29, "tips": 373.45}, "2026-02-06": {"total_revenue": 3869.77, "groom_revenue": 3342.0, "retail_revenue": 527.77, "appointments": 31, "transactions": 49, "avg_ticket": 78.97, "unique_customers": 41, "tips": 431.9}, "2026-02-07": {"total_revenue": 2073.5, "groom_revenue": 1335.0, "retail_revenue": 738.5, "appointments": 16, "transactions": 30, "avg_ticket": 69.12, "unique_customers": 23, "tips": 167.45}, "2026-02-08": {"total_revenue": 1361.7, "groom_revenue": 805.0, "retail_revenue": 556.7, "appointments": 9, "transactions": 22, "avg_ticket": 61.9, "unique_customers": 15, "tips": 72.7}, "2026-02-09": {"total_revenue": 2394.76, "groom_revenue": 1775.0, "retail_revenue": 619.76, "appointments": 16, "transactions": 32, "avg_ticket": 74.84, "unique_customers": 22, "tips": 319.45}, "2026-02-10": {"total_revenue": 3574.05, "groom_revenue": 2794.0, "retail_revenue": 780.05, "appointments": 29, "transactions": 43, "avg_ticket": 83.12, "unique_customers": 32, "tips": 365.3}, "2026-02-11": {"total_revenue": 3604.34, "groom_revenue": 2935.0, "retail_revenue": 669.34, "appointments": 31, "transactions": 50, "avg_ticket": 72.09, "unique_customers": 39, "tips": 432.3}, "2026-02-12": {"total_revenue": 3127.33, "groom_revenue": 2395.0, "retail_revenue": 732.33, "appointments": 22, "transactions": 41, "avg_ticket": 76.28, "unique_customers": 26, "tips": 421.7}, "2026-02-13": {"total_revenue": 3167.35, "groom_revenue": 2375.0, "retail_revenue": 792.35, "appointments": 27, "transactions": 49, "avg_ticket": 64.64, "unique_customers": 37, "tips": 374.75}, "2026-02-14": {"total_revenue": 2472.23, "groom_revenue": 1525.0, "retail_revenue": 947.23, "appointments": 15, "transactions": 40, "avg_ticket": 61.81, "unique_customers": 26, "tips": 176.55}, "2026-02-15": {"total_revenue": 855.31, "groom_revenue": 420.0, "retail_revenue": 435.31, "appointments": 6, "transactions": 17, "avg_ticket": 50.31, "unique_customers": 10, "tips": 74.75}, "2026-02-16": {"total_revenue": 2289.71, "groom_revenue": 2025.0, "retail_revenue": 264.71, "appointments": 21, "transactions": 34, "avg_ticket": 67.34, "unique_customers": 27, "tips": 208.65}, "2026-02-17": {"total_revenue": 2405.05, "groom_revenue": 2090.0, "retail_revenue": 315.05, "appointments": 18, "transactions": 31, "avg_ticket": 77.58, "unique_customers": 22, "tips": 328.1}, "2026-02-18": {"total_revenue": 4030.83, "groom_revenue": 3565.0, "retail_revenue": 465.83, "appointments": 31, "transactions": 39, "avg_ticket": 103.35, "unique_customers": 33, "tips": 421.7}, "2026-02-19": {"total_revenue": 3237.67, "groom_revenue": 2650.0, "retail_revenue": 587.67, "appointments": 28, "transactions": 36, "avg_ticket": 89.94, "unique_customers": 29, "tips": 282.2}, "2026-02-20": {"total_revenue": 3638.58, "groom_revenue": 3047.0, "retail_revenue": 591.58, "appointments": 26, "transactions": 40, "avg_ticket": 90.96, "unique_customers": 33, "tips": 329.25}, "2026-02-21": {"total_revenue": 3160.51, "groom_revenue": 2175.0, "retail_revenue": 985.51, "appointments": 21, "transactions": 47, "avg_ticket": 67.24, "unique_customers": 34, "tips": 358.6}, "2026-02-22": {"total_revenue": 713.19, "groom_revenue": 375.0, "retail_revenue": 338.19, "appointments": 4, "transactions": 16, "avg_ticket": 44.57, "unique_customers": 9, "tips": 59.05}, "2026-02-24": {"total_revenue": 2347.8, "groom_revenue": 1805.0, "retail_revenue": 542.8, "appointments": 18, "transactions": 33, "avg_ticket": 71.15, "unique_customers": 23, "tips": 222.75}, "2026-02-25": {"total_revenue": 3106.04, "groom_revenue": 2420.0, "retail_revenue": 686.04, "appointments": 19, "transactions": 37, "avg_ticket": 83.95, "unique_customers": 28, "tips": 431.3}, "2026-02-26": {"total_revenue": 3592.38, "groom_revenue": 2920.0, "retail_revenue": 672.38, "appointments": 25, "transactions": 45, "avg_ticket": 79.83, "unique_customers": 32, "tips": 448.65}, "2026-02-27": {"total_revenue": 3487.05, "groom_revenue": 2845.0, "retail_revenue": 642.05, "appointments": 24, "transactions": 37, "avg_ticket": 94.24, "unique_customers": 30, "tips": 388.6}, "2026-02-28": {"total_revenue": 3112.79, "groom_revenue": 2210.0, "retail_revenue": 902.79, "appointments": 24, "transactions": 45, "avg_ticket": 69.17, "unique_customers": 33, "tips": 303.7}, "2026-03-01": {"total_revenue": 1242.57, "groom_revenue": 818.0, "retail_revenue": 424.57, "appointments": 11, "transactions": 23, "avg_ticket": 54.02, "unique_customers": 16, "tips": 100.75}, "2026-03-02": {"total_revenue": 2586.97, "groom_revenue": 2160.0, "retail_revenue": 426.97, "appointments": 22, "transactions": 35, "avg_ticket": 73.91, "unique_customers": 31, "tips": 294.1}, "2026-03-03": {"total_revenue": 3418.18, "groom_revenue": 3115.0, "retail_revenue": 303.18, "appointments": 30, "transactions": 35, "avg_ticket": 97.66, "unique_customers": 31, "tips": 438.5}, "2026-03-04": {"total_revenue": 3825.4, "groom_revenue": 3330.0, "retail_revenue": 495.4, "appointments": 27, "transactions": 39, "avg_ticket": 98.09, "unique_customers": 32, "tips": 425.45}, "2026-03-05": {"total_revenue": 3025.13, "groom_revenue": 2680.0, "retail_revenue": 345.13, "appointments": 28, "transactions": 37, "avg_ticket": 81.76, "unique_customers": 31, "tips": 332.9}, "2026-03-06": {"total_revenue": 3302.54, "groom_revenue": 2930.0, "retail_revenue": 372.54, "appointments": 27, "transactions": 38, "avg_ticket": 86.91, "unique_customers": 34, "tips": 492.0}, "2026-03-07": {"total_revenue": 2785.4, "groom_revenue": 2250.0, "retail_revenue": 535.4, "appointments": 24, "transactions": 39, "avg_ticket": 71.42, "unique_customers": 30, "tips": 276.65}, "2026-03-08": {"total_revenue": 1304.01, "groom_revenue": 830.0, "retail_revenue": 474.01, "appointments": 13, "transactions": 24, "avg_ticket": 54.33, "unique_customers": 16, "tips": 129.5}, "2026-03-09": {"total_revenue": 2210.59, "groom_revenue": 1720.0, "retail_revenue": 490.59, "appointments": 17, "transactions": 31, "avg_ticket": 71.31, "unique_customers": 25, "tips": 226.6}, "2026-03-10": {"total_revenue": 3238.02, "groom_revenue": 2925.0, "retail_revenue": 313.02, "appointments": 27, "transactions": 33, "avg_ticket": 98.12, "unique_customers": 30, "tips": 405.5}, "2026-03-11": {"total_revenue": 2412.67, "groom_revenue": 2010.0, "retail_revenue": 402.67, "appointments": 15, "transactions": 26, "avg_ticket": 92.8, "unique_customers": 20, "tips": 342.75}, "2026-03-12": {"total_revenue": 3610.92, "groom_revenue": 3145.0, "retail_revenue": 465.92, "appointments": 27, "transactions": 38, "avg_ticket": 95.02, "unique_customers": 30, "tips": 400.05}, "2026-03-13": {"total_revenue": 3710.42, "groom_revenue": 2945.0, "retail_revenue": 765.42, "appointments": 29, "transactions": 46, "avg_ticket": 80.66, "unique_customers": 36, "tips": 414.81}, "2026-03-14": {"total_revenue": 3269.3, "groom_revenue": 2065.0, "retail_revenue": 1204.3, "appointments": 20, "transactions": 43, "avg_ticket": 76.03, "unique_customers": 31, "tips": 322.3}, "2026-03-15": {"total_revenue": 1255.85, "groom_revenue": 800.0, "retail_revenue": 455.85, "appointments": 9, "transactions": 19, "avg_ticket": 66.1, "unique_customers": 18, "tips": 94.4}, "2026-03-16": {"total_revenue": 2767.08, "groom_revenue": 2350.0, "retail_revenue": 417.08, "appointments": 21, "transactions": 31, "avg_ticket": 89.26, "unique_customers": 25, "tips": 259.55}}};
+var _monthlyChart = null, _weeklyChart = null, _dailyChart = null;
 
 function _mfc(v) {
     return (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
 }
 function _mfi(v) { return v.toLocaleString(); }
 
-function updateMonthlyComparison() {
-    var keyA = document.getElementById('monthA').value;
-    var keyB = document.getElementById('monthB').value;
-    var a = MONTHLY_DATA.data[keyA];
-    var b = MONTHLY_DATA.data[keyB];
-    if (!a || !b) return;
-    var labelA = document.getElementById('monthA').selectedOptions[0].text;
-    var labelB = document.getElementById('monthB').selectedOptions[0].text;
+function _updateComparison(DATA, selA, selB, prefix, chartId, chartRef) {
+    var keyA = document.getElementById(selA).value;
+    var keyB = document.getElementById(selB).value;
+    var a = DATA.data[keyA], b = DATA.data[keyB];
+    if (!a || !b) return null;
+    var labelA = document.getElementById(selA).selectedOptions[0].text;
+    var labelB = document.getElementById(selB).selectedOptions[0].text;
 
     var kpis = [
-        {key: 'total_revenue', fmt: 'c'},
-        {key: 'groom_revenue', fmt: 'c'},
-        {key: 'retail_revenue', fmt: 'c'},
-        {key: 'transactions', fmt: 'i'},
-        {key: 'avg_ticket', fmt: 'c'},
-        {key: 'unique_customers', fmt: 'i'},
-        {key: 'tips', fmt: 'c'}
+        {key: 'total_revenue', fmt: 'c'}, {key: 'groom_revenue', fmt: 'c'},
+        {key: 'retail_revenue', fmt: 'c'}, {key: 'appointments', fmt: 'i'},
+        {key: 'transactions', fmt: 'i'}, {key: 'avg_ticket', fmt: 'c'},
+        {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'}
     ];
 
     kpis.forEach(function(kpi) {
@@ -2270,44 +2941,46 @@ function updateMonthlyComparison() {
         var delta = valB - valA;
         var deltaPct = valA !== 0 ? ((valB - valA) / Math.abs(valA) * 100) : 0;
         var f = kpi.fmt === 'c' ? _mfc : _mfi;
-
-        document.getElementById('cmp-' + kpi.key + '-labelA').textContent = labelA;
-        document.getElementById('cmp-' + kpi.key + '-labelB').textContent = labelB;
-        document.getElementById('cmp-' + kpi.key + '-valA').textContent = f(valA);
-        document.getElementById('cmp-' + kpi.key + '-valB').textContent = f(valB);
-        document.getElementById('cmp-' + kpi.key + '-delta').textContent = (delta >= 0 ? '+' : '') + f(delta);
-        document.getElementById('cmp-' + kpi.key + '-deltaPct').textContent = (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + '%';
-
-        var deltaEl = document.getElementById('cmp-' + kpi.key).querySelector('.cmp-delta');
+        var pid = prefix + '-' + kpi.key;
+        document.getElementById(pid + '-labelA').textContent = labelA;
+        document.getElementById(pid + '-labelB').textContent = labelB;
+        document.getElementById(pid + '-valA').textContent = f(valA);
+        document.getElementById(pid + '-valB').textContent = f(valB);
+        document.getElementById(pid + '-delta').textContent = (delta >= 0 ? '+' : '') + f(delta);
+        document.getElementById(pid + '-deltaPct').textContent = (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + '%';
+        var deltaEl = document.getElementById(pid).querySelector('.cmp-delta');
         deltaEl.classList.remove('delta-positive', 'delta-negative');
         deltaEl.classList.add(delta >= 0 ? 'delta-positive' : 'delta-negative');
     });
 
-    // Revenue comparison chart
-    if (_monthlyChart) { _monthlyChart.destroy(); }
-    var ctx = document.getElementById('monthlyCompareChart');
-    _monthlyChart = new Chart(ctx, {
+    if (chartRef) { chartRef.destroy(); }
+    var ctx = document.getElementById(chartId);
+    return new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Total Revenue', 'Grooming', 'Retail', 'Avg Ticket', 'Tips'],
+            labels: ['Total Revenue', 'Grooming', 'Retail', 'Appointments', 'Avg Ticket', 'Tips'],
             datasets: [
-                { label: labelA, data: [a.total_revenue, a.groom_revenue, a.retail_revenue, a.avg_ticket, a.tips], backgroundColor: '#C4276E', borderRadius: 6 },
-                { label: labelB, data: [b.total_revenue, b.groom_revenue, b.retail_revenue, b.avg_ticket, b.tips], backgroundColor: '#1B6B6B', borderRadius: 6 }
+                { label: labelA, data: [a.total_revenue, a.groom_revenue, a.retail_revenue, a.appointments, a.avg_ticket, a.tips], backgroundColor: '#C4276E', borderRadius: 6 },
+                { label: labelB, data: [b.total_revenue, b.groom_revenue, b.retail_revenue, b.appointments, b.avg_ticket, b.tips], backgroundColor: '#1B6B6B', borderRadius: 6 }
             ]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.parsed.y.toLocaleString(); } } } },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(c) { var v = c.parsed.y; return c.dataset.label + ': ' + (c.dataIndex <= 2 || c.dataIndex === 4 || c.dataIndex === 5 ? '$' + v.toLocaleString() : v.toLocaleString()); } } } },
             scales: { y: { ticks: { callback: function(v) { return '$' + v.toLocaleString(); } } } }
         }
     });
 }
 
+function updateMonthlyComparison() { _monthlyChart = _updateComparison(MONTHLY_DATA, 'monthA', 'monthB', 'cmp', 'monthlyCompareChart', _monthlyChart); }
+function updateWeeklyComparison() { _weeklyChart = _updateComparison(WEEKLY_DATA, 'weekA', 'weekB', 'wcmp', 'weeklyCompareChart', _weeklyChart); }
+function updateDailyComparison() { _dailyChart = _updateComparison(DAILY_DATA, 'dayA', 'dayB', 'dcmp', 'dailyCompareChart', _dailyChart); }
+
 </script>
 
 </div>
 <div class="footer">
-    Generated March 17, 2026 &mdash; <span>Woof Gang Bakery & Grooming</span> &mdash; Operations Intelligence Dashboard
+    Generated March 16, 2026 &mdash; <span>Woof Gang Bakery & Grooming</span> &mdash; Operations Intelligence Dashboard
 </div>
 </body>
 </html>

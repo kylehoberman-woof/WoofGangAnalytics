@@ -40,49 +40,98 @@ LOCATION_ID = _store.location_id
 TOKEN = _store.token
 
 
+def _compute_period_kpis(df_slice, df_orders_slice):
+    """Compute KPIs for a single period slice. Returns dict."""
+    from formatting import to_py
+    groom = df_slice[df_slice["is_groom"] == True]
+    retail = df_slice[df_slice["is_retail"] == True]
+    total_rev = to_py(df_slice["net_sales"].sum())
+    groom_rev = to_py(groom["net_sales"].sum())
+    retail_rev = to_py(retail["net_sales"].sum())
+    txns = int(df_orders_slice.shape[0])
+    # Appointments = orders that have at least one grooming item
+    groom_order_ids = set(groom["order_id"].dropna().unique()) if "order_id" in groom.columns else set()
+    appointments = len(groom_order_ids)
+    return {
+        "total_revenue": round(total_rev, 2),
+        "groom_revenue": round(groom_rev, 2),
+        "retail_revenue": round(retail_rev, 2),
+        "appointments": appointments,
+        "transactions": txns,
+        "avg_ticket": round(total_rev / txns, 2) if txns else 0,
+        "unique_customers": int(df_slice["customer_id"].nunique()),
+        "tips": round(to_py(df_orders_slice["tips"].sum()), 2),
+    }
+
+
 def build_monthly_comparison_data(df_all, df_orders_all):
     """Pre-compute per-month KPIs for all available months."""
-    from formatting import to_py
-
     periods = sorted(df_all["ym"].dropna().unique())
     result = {"periods": [], "data": {}}
-
     for p in periods:
         key = str(p)
-        label = p.strftime("%b '%y")
-        result["periods"].append({"key": key, "label": label})
-
-        df_m = df_all[df_all["ym"] == p]
-        df_ord_m = df_orders_all[df_orders_all["ym"] == p]
-
-        groom_m = df_m[df_m["is_groom"] == True]
-        retail_m = df_m[df_m["is_retail"] == True]
-
-        total_rev = to_py(df_m["net_sales"].sum())
-        groom_rev = to_py(groom_m["net_sales"].sum())
-        retail_rev = to_py(retail_m["net_sales"].sum())
-        txns = int(df_ord_m.shape[0])
-        avg_ticket = round(total_rev / txns, 2) if txns else 0
-        unique_cust = int(df_m["customer_id"].nunique())
-        tips = to_py(df_ord_m["tips"].sum())
-
-        result["data"][key] = {
-            "total_revenue": round(total_rev, 2),
-            "groom_revenue": round(groom_rev, 2),
-            "retail_revenue": round(retail_rev, 2),
-            "transactions": txns,
-            "avg_ticket": avg_ticket,
-            "unique_customers": unique_cust,
-            "tips": round(tips, 2),
-        }
-
+        result["periods"].append({"key": key, "label": p.strftime("%b '%y")})
+        result["data"][key] = _compute_period_kpis(
+            df_all[df_all["ym"] == p], df_orders_all[df_orders_all["ym"] == p])
     return result
 
 
-def build_monthly_panel_html(monthly_data):
-    """Generate the HTML body for the monthly comparison tab."""
-    periods = monthly_data["periods"]
+def build_weekly_comparison_data(df_all, df_orders_all):
+    """Pre-compute per-week KPIs for all available weeks."""
+    from datetime import datetime, timedelta
+    weeks = sorted(df_all["yw"].dropna().unique())
+    result = {"periods": [], "data": {}}
+    for w in weeks:
+        # Parse "2026-W11" → Monday date for label
+        try:
+            yr, wk = int(w[:4]), int(w.split("W")[1])
+            mon = datetime.strptime(f"{yr}-W{wk:02d}-1", "%Y-W%W-%w")
+            if mon.isocalendar()[1] != wk:
+                mon = datetime.strptime(f"{yr}-W{wk:02d}-1", "%G-W%V-%u")
+            sun = mon + timedelta(days=6)
+            label = f"{mon.strftime('%b %-d')} – {sun.strftime('%b %-d, %Y')}"
+        except Exception:
+            label = w
+        result["periods"].append({"key": w, "label": label})
+        result["data"][w] = _compute_period_kpis(
+            df_all[df_all["yw"] == w], df_orders_all[df_orders_all["yw"] == w])
+    return result
 
+
+def build_daily_comparison_data(df_all, df_orders_all, max_days=90):
+    """Pre-compute per-day KPIs for recent days (default last 90)."""
+    from datetime import datetime
+    days = sorted(df_all["ymd"].dropna().unique())
+    if max_days and len(days) > max_days:
+        days = days[-max_days:]
+    result = {"periods": [], "data": {}}
+    for d in days:
+        try:
+            dt = datetime.strptime(d, "%Y-%m-%d")
+            label = dt.strftime("%a %b %-d, %Y")
+        except Exception:
+            label = d
+        result["periods"].append({"key": d, "label": label})
+        result["data"][d] = _compute_period_kpis(
+            df_all[df_all["ymd"] == d], df_orders_all[df_orders_all["ymd"] == d])
+    return result
+
+
+KPI_DEFS = [
+    ("total_revenue", "Total Revenue", ""),
+    ("groom_revenue", "Grooming Revenue", "accent"),
+    ("retail_revenue", "Retail Revenue", ""),
+    ("appointments", "Appointments", "green"),
+    ("transactions", "Transactions", ""),
+    ("avg_ticket", "Avg Ticket", "green"),
+    ("unique_customers", "Unique Customers", ""),
+    ("tips", "Tips", ""),
+]
+
+
+def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_fn, title, subtitle, chart_id):
+    """Generic comparison panel builder shared by monthly/weekly/daily."""
+    periods = data["periods"]
     default_a = periods[-2]["key"] if len(periods) >= 2 else periods[0]["key"]
     default_b = periods[-1]["key"] if len(periods) >= 1 else periods[0]["key"]
 
@@ -95,49 +144,40 @@ def build_monthly_panel_html(monthly_data):
         for p in periods
     )
 
-    kpi_defs = [
-        ("total_revenue", "Total Revenue", ""),
-        ("groom_revenue", "Grooming Revenue", "accent"),
-        ("retail_revenue", "Retail Revenue", ""),
-        ("transactions", "Transactions", ""),
-        ("avg_ticket", "Avg Ticket", "green"),
-        ("unique_customers", "Unique Customers", ""),
-        ("tips", "Tips", ""),
-    ]
-
     cards = ""
-    for key, label, cls in kpi_defs:
-        cards += f'''<div class="comparison-card kpi-card {cls}" id="cmp-{key}">
+    for key, label, cls in KPI_DEFS:
+        pid = f"{prefix}-{key}"
+        cards += f'''<div class="comparison-card kpi-card {cls}" id="{pid}">
   <div class="kpi-label">{label}</div>
   <div class="comparison-values">
     <div class="cmp-col">
-      <div class="cmp-month-label" id="cmp-{key}-labelA"></div>
-      <div class="kpi-value" id="cmp-{key}-valA"></div>
+      <div class="cmp-month-label" id="{pid}-labelA"></div>
+      <div class="kpi-value" id="{pid}-valA"></div>
     </div>
     <div class="cmp-col cmp-delta">
-      <div class="cmp-delta-val" id="cmp-{key}-delta"></div>
-      <div class="cmp-delta-pct" id="cmp-{key}-deltaPct"></div>
+      <div class="cmp-delta-val" id="{pid}-delta"></div>
+      <div class="cmp-delta-pct" id="{pid}-deltaPct"></div>
     </div>
     <div class="cmp-col">
-      <div class="cmp-month-label" id="cmp-{key}-labelB"></div>
-      <div class="kpi-value" id="cmp-{key}-valB"></div>
+      <div class="cmp-month-label" id="{pid}-labelB"></div>
+      <div class="kpi-value" id="{pid}-valB"></div>
     </div>
   </div>
 </div>
 '''
 
-    html = f'''<div class="section">
-  <h2><span class="dot"></span>Month-to-Month Comparison</h2>
-  <p class="desc">Select two months to compare key performance metrics side by side</p>
+    return f'''<div class="section">
+  <h2><span class="dot"></span>{title}</h2>
+  <p class="desc">{subtitle}</p>
   <div class="monthly-controls">
     <div class="control-group">
-      <label for="monthA">Month A</label>
-      <select id="monthA" onchange="updateMonthlyComparison()">{options_a}</select>
+      <label for="{select_id_a}">Period A</label>
+      <select id="{select_id_a}" onchange="{update_fn}()">{options_a}</select>
     </div>
     <span class="vs-label">vs</span>
     <div class="control-group">
-      <label for="monthB">Month B</label>
-      <select id="monthB" onchange="updateMonthlyComparison()">{options_b}</select>
+      <label for="{select_id_b}">Period B</label>
+      <select id="{select_id_b}" onchange="{update_fn}()">{options_b}</select>
     </div>
   </div>
 </div>
@@ -145,11 +185,31 @@ def build_monthly_panel_html(monthly_data):
 {cards}</div>
 <div class="section">
   <h2><span class="dot"></span>Visual Comparison</h2>
-  <p class="desc">Side-by-side bar chart of selected months</p>
-  <div class="chart-container"><canvas id="monthlyCompareChart" style="max-height:400px"></canvas></div>
+  <p class="desc">Side-by-side bar chart of selected periods</p>
+  <div class="chart-container"><canvas id="{chart_id}" style="max-height:400px"></canvas></div>
 </div>
 '''
-    return html
+
+
+def build_monthly_panel_html(data):
+    return _build_comparison_panel_html(
+        data, "cmp", "monthA", "monthB", "updateMonthlyComparison",
+        "Month-to-Month Comparison", "Select two months to compare key performance metrics side by side",
+        "monthlyCompareChart")
+
+
+def build_weekly_panel_html(data):
+    return _build_comparison_panel_html(
+        data, "wcmp", "weekA", "weekB", "updateWeeklyComparison",
+        "Week-to-Week Comparison", "Select two weeks to compare key performance metrics side by side",
+        "weeklyCompareChart")
+
+
+def build_daily_panel_html(data):
+    return _build_comparison_panel_html(
+        data, "dcmp", "dayA", "dayB", "updateDailyComparison",
+        "Day-to-Day Comparison", "Select two days to compare key performance metrics side by side",
+        "dailyCompareChart")
 
 
 def generate_dashboard(store):
@@ -216,43 +276,47 @@ function showYear(yr) {
         if (yr === '2025' && typeof initCharts_2025 === 'function') initCharts_2025();
         if (yr === '2026' && typeof initCharts_2026 === 'function') initCharts_2026();
         if (yr === 'monthly') updateMonthlyComparison();
+        if (yr === 'weekly') updateWeeklyComparison();
+        if (yr === 'daily') updateDailyComparison();
     }
 }
 window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
 """
 
-    # Build monthly comparison data
-    import json as _json_monthly
+    # Build comparison data for all three tabs
+    import json as _json_cmp
     monthly_data = build_monthly_comparison_data(df_all, df_orders_all)
+    weekly_data = build_weekly_comparison_data(df_all, df_orders_all)
+    daily_data = build_daily_comparison_data(df_all, df_orders_all)
     monthly_panel_body = build_monthly_panel_html(monthly_data)
-    monthly_json_str = _json_monthly.dumps(monthly_data)
+    weekly_panel_body = build_weekly_panel_html(weekly_data)
+    daily_panel_body = build_daily_panel_html(daily_data)
 
-    monthly_js = """
-var MONTHLY_DATA = """ + monthly_json_str + """;
-var _monthlyChart = null;
+    # Generic JS comparison function — reused by monthly, weekly, daily
+    comparison_js = """
+var MONTHLY_DATA = """ + _json_cmp.dumps(monthly_data) + """;
+var WEEKLY_DATA = """ + _json_cmp.dumps(weekly_data) + """;
+var DAILY_DATA = """ + _json_cmp.dumps(daily_data) + """;
+var _monthlyChart = null, _weeklyChart = null, _dailyChart = null;
 
 function _mfc(v) {
     return (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
 }
 function _mfi(v) { return v.toLocaleString(); }
 
-function updateMonthlyComparison() {
-    var keyA = document.getElementById('monthA').value;
-    var keyB = document.getElementById('monthB').value;
-    var a = MONTHLY_DATA.data[keyA];
-    var b = MONTHLY_DATA.data[keyB];
-    if (!a || !b) return;
-    var labelA = document.getElementById('monthA').selectedOptions[0].text;
-    var labelB = document.getElementById('monthB').selectedOptions[0].text;
+function _updateComparison(DATA, selA, selB, prefix, chartId, chartRef) {
+    var keyA = document.getElementById(selA).value;
+    var keyB = document.getElementById(selB).value;
+    var a = DATA.data[keyA], b = DATA.data[keyB];
+    if (!a || !b) return null;
+    var labelA = document.getElementById(selA).selectedOptions[0].text;
+    var labelB = document.getElementById(selB).selectedOptions[0].text;
 
     var kpis = [
-        {key: 'total_revenue', fmt: 'c'},
-        {key: 'groom_revenue', fmt: 'c'},
-        {key: 'retail_revenue', fmt: 'c'},
-        {key: 'transactions', fmt: 'i'},
-        {key: 'avg_ticket', fmt: 'c'},
-        {key: 'unique_customers', fmt: 'i'},
-        {key: 'tips', fmt: 'c'}
+        {key: 'total_revenue', fmt: 'c'}, {key: 'groom_revenue', fmt: 'c'},
+        {key: 'retail_revenue', fmt: 'c'}, {key: 'appointments', fmt: 'i'},
+        {key: 'transactions', fmt: 'i'}, {key: 'avg_ticket', fmt: 'c'},
+        {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'}
     ];
 
     kpis.forEach(function(kpi) {
@@ -260,38 +324,40 @@ function updateMonthlyComparison() {
         var delta = valB - valA;
         var deltaPct = valA !== 0 ? ((valB - valA) / Math.abs(valA) * 100) : 0;
         var f = kpi.fmt === 'c' ? _mfc : _mfi;
-
-        document.getElementById('cmp-' + kpi.key + '-labelA').textContent = labelA;
-        document.getElementById('cmp-' + kpi.key + '-labelB').textContent = labelB;
-        document.getElementById('cmp-' + kpi.key + '-valA').textContent = f(valA);
-        document.getElementById('cmp-' + kpi.key + '-valB').textContent = f(valB);
-        document.getElementById('cmp-' + kpi.key + '-delta').textContent = (delta >= 0 ? '+' : '') + f(delta);
-        document.getElementById('cmp-' + kpi.key + '-deltaPct').textContent = (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + '%';
-
-        var deltaEl = document.getElementById('cmp-' + kpi.key).querySelector('.cmp-delta');
+        var pid = prefix + '-' + kpi.key;
+        document.getElementById(pid + '-labelA').textContent = labelA;
+        document.getElementById(pid + '-labelB').textContent = labelB;
+        document.getElementById(pid + '-valA').textContent = f(valA);
+        document.getElementById(pid + '-valB').textContent = f(valB);
+        document.getElementById(pid + '-delta').textContent = (delta >= 0 ? '+' : '') + f(delta);
+        document.getElementById(pid + '-deltaPct').textContent = (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + '%';
+        var deltaEl = document.getElementById(pid).querySelector('.cmp-delta');
         deltaEl.classList.remove('delta-positive', 'delta-negative');
         deltaEl.classList.add(delta >= 0 ? 'delta-positive' : 'delta-negative');
     });
 
-    // Revenue comparison chart
-    if (_monthlyChart) { _monthlyChart.destroy(); }
-    var ctx = document.getElementById('monthlyCompareChart');
-    _monthlyChart = new Chart(ctx, {
+    if (chartRef) { chartRef.destroy(); }
+    var ctx = document.getElementById(chartId);
+    return new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Total Revenue', 'Grooming', 'Retail', 'Avg Ticket', 'Tips'],
+            labels: ['Total Revenue', 'Grooming', 'Retail', 'Appointments', 'Avg Ticket', 'Tips'],
             datasets: [
-                { label: labelA, data: [a.total_revenue, a.groom_revenue, a.retail_revenue, a.avg_ticket, a.tips], backgroundColor: '#C4276E', borderRadius: 6 },
-                { label: labelB, data: [b.total_revenue, b.groom_revenue, b.retail_revenue, b.avg_ticket, b.tips], backgroundColor: '#1B6B6B', borderRadius: 6 }
+                { label: labelA, data: [a.total_revenue, a.groom_revenue, a.retail_revenue, a.appointments, a.avg_ticket, a.tips], backgroundColor: '#C4276E', borderRadius: 6 },
+                { label: labelB, data: [b.total_revenue, b.groom_revenue, b.retail_revenue, b.appointments, b.avg_ticket, b.tips], backgroundColor: '#1B6B6B', borderRadius: 6 }
             ]
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': $' + c.parsed.y.toLocaleString(); } } } },
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(c) { var v = c.parsed.y; return c.dataset.label + ': ' + (c.dataIndex <= 2 || c.dataIndex === 4 || c.dataIndex === 5 ? '$' + v.toLocaleString() : v.toLocaleString()); } } } },
             scales: { y: { ticks: { callback: function(v) { return '$' + v.toLocaleString(); } } } }
         }
     });
 }
+
+function updateMonthlyComparison() { _monthlyChart = _updateComparison(MONTHLY_DATA, 'monthA', 'monthB', 'cmp', 'monthlyCompareChart', _monthlyChart); }
+function updateWeeklyComparison() { _weeklyChart = _updateComparison(WEEKLY_DATA, 'weekA', 'weekB', 'wcmp', 'weeklyCompareChart', _weeklyChart); }
+function updateDailyComparison() { _dailyChart = _updateComparison(DAILY_DATA, 'dayA', 'dayB', 'dcmp', 'dailyCompareChart', _dailyChart); }
 """
 
     html = gd.html_head("Woof Gang Port Washington", f"Store Performance Analysis \u00b7 Sales through {through}")
@@ -301,6 +367,8 @@ function updateMonthlyComparison() {
         active = "active" if yr == "2025" else ""
         html += f'  <button class="yr-tab {active}" onclick="showYear(\'{yr}\')" id="tab-{yr}">{YEAR_LABELS[yr]}</button>\n'
     html += '  <button class="yr-tab" onclick="showYear(\'monthly\')" id="tab-monthly">Monthly</button>\n'
+    html += '  <button class="yr-tab" onclick="showYear(\'weekly\')" id="tab-weekly">Weekly</button>\n'
+    html += '  <button class="yr-tab" onclick="showYear(\'daily\')" id="tab-daily">Daily</button>\n'
     html += '</div>\n'
 
     for yr in ["2024", "2025", "2026"]:
@@ -314,13 +382,19 @@ function updateMonthlyComparison() {
         html += body
         html += '</div>\n'
 
-    # Monthly comparison panel
+    # Comparison panels
     html += '<div class="yr-panel" id="panel-monthly" style="display:none">\n'
     html += monthly_panel_body
     html += '</div>\n'
+    html += '<div class="yr-panel" id="panel-weekly" style="display:none">\n'
+    html += weekly_panel_body
+    html += '</div>\n'
+    html += '<div class="yr-panel" id="panel-daily" style="display:none">\n'
+    html += daily_panel_body
+    html += '</div>\n'
 
     html += f'<script>\n{tabbed_js}\n</script>\n'
-    html += f'<script>\n{monthly_js}\n</script>\n'
+    html += f'<script>\n{comparison_js}\n</script>\n'
     html += gd.HTML_FOOT
 
     out_path = store.output_dir / "WoofGang_PortWashington_NY_AllYears_Dashboard.html"
