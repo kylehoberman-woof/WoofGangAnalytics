@@ -110,7 +110,24 @@ FDD_GROOM_COGS_PCT = 51.5     # Grooming cost (commission/labor) as % of groom r
 COMMISSION_RATE = 0.50
 BATHER_RATE = 17.0  # $/hr
 
-GUARANTEES = {"Maria C": 200.0, "Sue M": 300.0}
+# Guarantees: {name: (daily_rate, first_grooming_date, end_date)}
+# All groomers except Kimberly get $200/day for first 90 days.
+# Sue M negotiated $300/day.
+GUARANTEES = {
+    "Ashley Fribbley": (200.0, "2024-09-27", "2024-12-26"),
+    "Cindy Szczudlo":  (200.0, "2025-04-19", "2025-07-18"),
+    "Danielle L":      (200.0, "2025-03-05", "2025-06-03"),
+    "Ingrid R":        (200.0, "2025-09-23", "2025-12-22"),
+    "Jackie G. ":      (200.0, "2025-05-24", "2025-08-22"),
+    "Joant C":         (200.0, "2024-12-01", "2025-03-01"),
+    "Joi Ockimey":     (200.0, "2024-10-01", "2024-12-30"),
+    "Joyce P":         (200.0, "2024-10-21", "2025-01-19"),
+    "Maria C":         (200.0, "2024-09-29", "2024-12-28"),
+    "Marie D.":        (200.0, "2025-04-15", "2025-07-14"),
+    "Olivia M":        (200.0, "2025-05-27", "2025-08-25"),
+    "Stacey W":        (200.0, "2024-10-02", "2024-12-31"),
+    "Sue M":           (300.0, "2024-10-23", "2025-01-21"),
+}
 
 RETAIL_RATES = {
     "Chris": 20.0,      # $/hr

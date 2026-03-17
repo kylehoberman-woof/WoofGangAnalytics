@@ -140,11 +140,21 @@ def build_pay_periods():
 pay_periods = build_pay_periods()
 
 # ── Commission helpers ────────────────────────────────────────────────────────
+def get_guarantee(groomer, day):
+    """Return daily guarantee amount if groomer has an active guarantee on this day, else 0."""
+    g = GUARANTEES.get(groomer)
+    if not g:
+        return 0
+    rate, start, end = g
+    if start <= day <= end:
+        return rate
+    return 0
+
 def day_pay(groomer, day):
     rev  = groom_by_day[groomer].get(day, 0)
     tips = tips_by_day[groomer].get(day, 0)
     comm = rev * COMMISSION_RATE
-    guar = GUARANTEES.get(groomer, 0)
+    guar = get_guarantee(groomer, day)
     paid = max(comm, guar) if guar else comm
     return {"rev": rev, "comm": comm, "paid": paid, "tips": tips,
             "total": paid + tips, "guar_applied": guar > 0 and comm < guar}
@@ -287,7 +297,10 @@ l30_data = {g: period_summary(g, l30_start, TODAY) for g in groomers}
 
 def groomer_badge(g):
     guar = GUARANTEES.get(g)
-    badge = f' <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G${guar:.0f}</span>' if guar else ""
+    if guar and TODAY.isoformat() <= guar[2]:
+        badge = f' <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G${guar[0]:.0f}</span>'
+    else:
+        badge = ""
     dot = f'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:{groomer_color[g]};margin-right:7px"></span>'
     return f"{dot}<strong>{g}</strong>{badge}"
 
@@ -395,7 +408,9 @@ def _sanitize(obj):
 pp_json = _json.dumps(pp_data)
 groomers_json = _json.dumps(groomers)
 groomer_colors_json = _json.dumps(groomer_color)
-guarantees_json = _json.dumps(GUARANTEES)
+# Convert guarantees to JS-friendly format: {name: {rate, start, end}}
+_guar_js = {name: {"rate": g[0], "start": g[1], "end": g[2]} for name, g in GUARANTEES.items()}
+guarantees_json = _json.dumps(_guar_js)
 
 # YTD summary rows
 ytd_rows = summary_table(ytd_data)
@@ -493,7 +508,7 @@ tr:hover td{{background:#fafaf8!important}}
     <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_total["rev"] - ytd_total["paid"] - ytd_manager - ytd_total["rev"] * 0.07 - ytd_rent)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_total["rev"] - ytd_total["paid"] - ytd_manager - ytd_total["rev"] * 0.07 - ytd_rent) / (ytd_total["rev"] or 1) * 100:.1f}%</div></div>
     <div class="kpi grey"><div class="kpi-val">{int(ytd_total["guar_days"])}</div><div class="kpi-label">Guarantee Days</div></div>
   </div>
-  <div class="info-box">Commission = 50% of daily grooming revenue. <strong>Maria C</strong> guaranteed $200/day · <strong>Sue M</strong> guaranteed $300/day — paid whichever is higher. Tips assigned to the groomer who performed the service.</div>
+  <div class="info-box">Commission = 50% of daily grooming revenue. All groomers (except Kimberly) receive a <strong>$200/day guarantee</strong> for their first 90 days (Sue M: $300/day). Paid whichever is higher. Tips assigned to the groomer who performed the service.</div>
   <div class="card">
     <div class="stitle">2026 YTD Summary</div>
     <div class="tbl-wrap"><table>{TABLE_HEADER}<tbody>{ytd_rows}</tbody></table></div>
@@ -645,9 +660,16 @@ function toggleDetail(id, btn) {{
   btn.textContent = open ? '▼ Show daily detail' : '▲ Hide daily detail';
 }}
 
+function getGuarRate(g, day) {{
+  var gd = GUARANTEES[g];
+  if (!gd) return 0;
+  if (day && (day < gd.start || day > gd.end)) return 0;
+  return gd.rate;
+}}
 function groomerBadge(g) {{
-  var guar = GUARANTEES[g];
-  var badge = guar ? ' <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$'+guar+'</span>' : '';
+  var gd = GUARANTEES[g];
+  var today = new Date().toISOString().slice(0,10);
+  var badge = (gd && today <= gd.end) ? ' <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$'+gd.rate+'</span>' : '';
   return '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+COLORS[g]+';margin-right:7px"></span><strong>'+g+'</strong>'+badge;
 }}
 
@@ -772,14 +794,14 @@ function renderPayPeriod(ppId) {{
   var totRev=0, totPaid=0, totTips=0, totTotal=0, totGuar=0;
   GROOMERS.forEach(function(g) {{
     var d = data[g]; if (!d) return;
-    var guar = GUARANTEES[g] || 0;
     var adjPaid = d.paid, adjTotal = d.total;
-    if (guar && d.daily) {{
+    if (GUARANTEES[g] && d.daily) {{
       adjPaid = 0; adjTotal = 0;
       d.daily.forEach(function(day) {{
+        var guar = getGuarRate(g, day.date);
         var overrideKey = 'guar_override_'+day.date+'_'+g;
         var overridden = getOverride(overrideKey);
-        var guarActive = day.guar_applied && !overridden;
+        var guarActive = guar > 0 && day.guar_applied && !overridden;
         var p = guarActive ? Math.max(day.comm, guar) : day.comm;
         adjPaid += p; adjTotal += p + day.tips;
       }});
@@ -843,10 +865,10 @@ function renderPayPeriod(ppId) {{
     var d = data[g]; if (!d || !d.daily || !d.daily.length) return;
     detailRows += '<tr style="background:#f8f7f4"><td colspan="8" style="padding:10px 14px;font-weight:700">'+groomerBadge(g)+'</td></tr>';
     d.daily.forEach(function(day) {{
-      var guar = GUARANTEES[g] || 0;
+      var guar = getGuarRate(g, day.date);
       var overrideKey = 'guar_override_'+day.date+'_'+g;
       var overridden = getOverride(overrideKey);
-      var guarActive = day.guar_applied && !overridden;
+      var guarActive = guar > 0 && day.guar_applied && !overridden;
       var actualPaid = guarActive ? Math.max(day.comm, guar) : day.comm;
       var actualTotal = actualPaid + day.tips;
       var gflag = '';
