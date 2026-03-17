@@ -414,8 +414,8 @@ TABLE_HEADER = '''<thead><tr>
   <th style="text-align:right">Avg/Day</th>
 </tr></thead>'''
 
-from datetime import timezone, timedelta
-et_tz = timezone(timedelta(hours=-5))
+from zoneinfo import ZoneInfo
+et_tz = ZoneInfo("America/New_York")
 now_et = datetime.now(et_tz).strftime("%B %d, %Y at %I:%M %p ET")
 
 html = f'''<!DOCTYPE html>

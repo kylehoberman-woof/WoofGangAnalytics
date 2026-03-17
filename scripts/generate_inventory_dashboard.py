@@ -154,8 +154,8 @@ nocost_rows = "\n".join(
     for r in results if not r["has_cost"]
 )
 
-from datetime import timezone, timedelta
-et = timezone(timedelta(hours=-5))
+from zoneinfo import ZoneInfo
+et = ZoneInfo("America/New_York")
 now = datetime.now(et).strftime("%B %d, %Y at %I:%M %p ET")
 top50_rows = make_rows(top50)
 all_rows = make_rows(results)
