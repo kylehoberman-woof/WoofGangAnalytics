@@ -386,9 +386,26 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
     monthly_rev = periods_data(df, periods, "net_sales")
 
     # Last-quarter average (last 3 periods or all if < 3)
+    # Pro-rate the current partial month to a full-month estimate
     lq_count = min(3, n_periods)
-    lq_avg = sum(monthly_rev[-lq_count:]) / lq_count if lq_count else 0
+    lq_months = list(monthly_rev[-lq_count:]) if lq_count else []
+
+    _rr_prorated = False
+    if lq_months and periods:
+        from datetime import date as _d_rr
+        import calendar as _cal_rr
+        _last_p = periods[-1]
+        _today_rr = _d_rr.today()
+        if _last_p["year"] == _today_rr.year and _last_p["month"] == _today_rr.month:
+            _days_elapsed = _today_rr.day
+            _days_in_month = _cal_rr.monthrange(_today_rr.year, _today_rr.month)[1]
+            if _days_elapsed > 0 and _days_elapsed < _days_in_month:
+                lq_months[-1] = lq_months[-1] / _days_elapsed * _days_in_month
+                _rr_prorated = True
+
+    lq_avg = sum(lq_months) / len(lq_months) if lq_months else 0
     lq_annualized = lq_avg * 12
+    _rr_sub = f"Last {lq_count}mo avg: {fc(lq_avg)}" + (" (partial mo. pro-rated)" if _rr_prorated else "")
 
     # Linear trend — only meaningful with 6+ months of data
     months_x = list(range(1, n_periods + 1))
@@ -492,14 +509,14 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
         kpis = [
             (f"{_yr_label} Net Sales (YTD)", fc(total_net), f"{n_periods} months of data", ""),
             (f"Full Year {_this_year} Forecast", fc(conservative_forecast), f"Based on {_prior_year}+{_this_year} growth trend", "green"),
-            ("Recent Run Rate (Annualized)", fc(lq_annualized), f"Last {lq_count}mo avg: {fc(lq_avg)}", "accent"),
+            ("Recent Run Rate (Annualized)", fc(lq_annualized), _rr_sub, "accent"),
             ("Monthly Growth Rate", f"+{fc(slope)}/mo", f"Trend from {_prior_year} trajectory", "green"),
         ]
     else:
         kpis = [
             (f"{_yr_label} Net Sales", fc(total_net), f"{n_periods} months of data", ""),
             ("Annual Forecast (Conservative)", fc(conservative_forecast), f"Trend: {fc(forecast_next_yr)}", "green"),
-            ("Recent Run Rate (Annualized)", fc(lq_annualized), f"Last {lq_count}mo avg: {fc(lq_avg)}", "accent"),
+            ("Recent Run Rate (Annualized)", fc(lq_annualized), _rr_sub, "accent"),
             ("Monthly Growth Rate", f"+{fc(slope)}/mo", f"Trajectory: {fp(slope/monthly_rev[0]*100 if monthly_rev[0] else 0)}/mo from baseline", "green"),
         ]
     for label, value, sub, cls in kpis:
