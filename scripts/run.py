@@ -66,20 +66,48 @@ def _compute_period_kpis(df_slice, df_orders_slice):
     }
 
 
+def _compute_daily_sub_kpis(df_slice, df_orders_slice):
+    """Compute per-day KPI arrays within a period slice for pro-rating.
+
+    Returns list of {dom: day_of_month, dow: day_of_week(0=Mon), ...kpis} sorted by date.
+    """
+    days = sorted(df_slice["ymd"].dropna().unique())
+    from datetime import datetime
+    daily = []
+    for d in days:
+        df_d = df_slice[df_slice["ymd"] == d]
+        df_o_d = df_orders_slice[df_orders_slice["ymd"] == d]
+        kpis = _compute_period_kpis(df_d, df_o_d)
+        dt = datetime.strptime(d, "%Y-%m-%d")
+        kpis["dom"] = dt.day          # day of month (1-31)
+        kpis["dow"] = dt.weekday()     # day of week (0=Mon, 6=Sun)
+        daily.append(kpis)
+    return daily
+
+
 def build_monthly_comparison_data(df_all, df_orders_all):
-    """Pre-compute per-month KPIs for all available months."""
+    """Pre-compute per-month KPIs for all available months.
+
+    Each period includes a 'daily' array for pro-rate comparisons.
+    """
     periods = sorted(df_all["ym"].dropna().unique())
     result = {"periods": [], "data": {}}
     for p in periods:
         key = str(p)
         result["periods"].append({"key": key, "label": p.strftime("%b '%y")})
-        result["data"][key] = _compute_period_kpis(
-            df_all[df_all["ym"] == p], df_orders_all[df_orders_all["ym"] == p])
+        df_p = df_all[df_all["ym"] == p]
+        df_o_p = df_orders_all[df_orders_all["ym"] == p]
+        kpis = _compute_period_kpis(df_p, df_o_p)
+        kpis["daily"] = _compute_daily_sub_kpis(df_p, df_o_p)
+        result["data"][key] = kpis
     return result
 
 
 def build_weekly_comparison_data(df_all, df_orders_all):
-    """Pre-compute per-week KPIs for all available weeks."""
+    """Pre-compute per-week KPIs for all available weeks.
+
+    Each period includes a 'daily' array for pro-rate comparisons.
+    """
     from datetime import datetime, timedelta
     weeks = sorted(df_all["yw"].dropna().unique())
     result = {"periods": [], "data": {}}
@@ -95,8 +123,11 @@ def build_weekly_comparison_data(df_all, df_orders_all):
         except Exception:
             label = w
         result["periods"].append({"key": w, "label": label})
-        result["data"][w] = _compute_period_kpis(
-            df_all[df_all["yw"] == w], df_orders_all[df_orders_all["yw"] == w])
+        df_w = df_all[df_all["yw"] == w]
+        df_o_w = df_orders_all[df_orders_all["yw"] == w]
+        kpis = _compute_period_kpis(df_w, df_o_w)
+        kpis["daily"] = _compute_daily_sub_kpis(df_w, df_o_w)
+        result["data"][w] = kpis
     return result
 
 
@@ -132,12 +163,13 @@ KPI_DEFS = [
 ]
 
 
-def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_fn, title, subtitle, chart_id, quick_buttons=None, detail_fn=None, detail_chart_id=None):
+def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_fn, title, subtitle, chart_id, quick_buttons=None, detail_fn=None, detail_chart_id=None, prorate=False):
     """Generic comparison panel builder shared by monthly/weekly/daily.
 
     quick_buttons: list of (label, js_onclick) for shortcut compare buttons
     detail_fn: JS function name for updating detail view (enables Compare/Detail toggle)
     detail_chart_id: canvas ID for the detail breakdown chart
+    prorate: if True, adds a pro-rate checkbox for partial period comparisons
     """
     periods = data["periods"]
     default_a = periods[-2]["key"] if len(periods) >= 2 else periods[0]["key"]
@@ -241,6 +273,7 @@ def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_
       <label for="{select_id_b}">Period B</label>
       <select id="{select_id_b}" onchange="{update_fn}()">{options_b}</select>
     </div>
+    {f'<label class="prorate-toggle" title="Limit Period A to the same number of calendar days as Period B (useful for partial months/weeks)"><input type="checkbox" id="{prefix}-prorate" onchange="{update_fn}()"><span>Pro-rate to match days</span></label>' if prorate else ''}
   </div>
 </div>
 <div class="comparison-grid">
@@ -264,7 +297,8 @@ def build_monthly_panel_html(data):
             ("vs Same Month Last Year", "_qcMonth('yoy')"),
         ],
         detail_fn="updateMonthlyDetail",
-        detail_chart_id="monthlyDetailChart")
+        detail_chart_id="monthlyDetailChart",
+        prorate=True)
 
 
 def build_weekly_panel_html(data):
@@ -277,7 +311,8 @@ def build_weekly_panel_html(data):
             ("vs Same Week Last Year", "_qcWeek('yoy')"),
         ],
         detail_fn="updateWeeklyDetail",
-        detail_chart_id="weeklyDetailChart")
+        detail_chart_id="weeklyDetailChart",
+        prorate=True)
 
 
 def build_daily_panel_html(data):
@@ -355,6 +390,9 @@ def generate_dashboard(store):
 .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 22px; padding: 0 24px; }
 .detail-card { text-align: center; }
 .detail-card .kpi-value { font-size: 1.6rem; }
+.prorate-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; padding-top: 18px; font-size: 0.82rem; font-weight: 600; color: #666; user-select: none; white-space: nowrap; }
+.prorate-toggle input { accent-color: #C4276E; width: 16px; height: 16px; cursor: pointer; }
+.prorate-toggle:hover span { color: #C4276E; }
 """
     tabbed_js = """
 var _chartsInited = {};
@@ -397,13 +435,56 @@ function _mfc(v) {
 }
 function _mfi(v) { return v.toLocaleString(); }
 
+/* ── Pro-rate helper: sum daily sub-data up to a calendar day cutoff ── */
+function _proRate(periodData, maxDom, useDOM) {
+    // periodData has a 'daily' array of {dom, dow, ...kpis}
+    // useDOM=true → filter by dom <= maxDom (monthly: calendar day of month)
+    // useDOM=false → filter by dow <= maxDom (weekly: day of week index)
+    var daily = periodData.daily;
+    if (!daily || !daily.length) return periodData;
+    var filtered = daily.filter(function(d) { return useDOM ? d.dom <= maxDom : d.dow <= maxDom; });
+    if (!filtered.length) return periodData;
+    var sum = {days_open: filtered.length};
+    ['total_revenue','groom_revenue','retail_revenue','appointments','transactions','unique_customers','tips'].forEach(function(k) {
+        sum[k] = 0;
+        filtered.forEach(function(d) { sum[k] += d[k]; });
+        sum[k] = Math.round(sum[k] * 100) / 100;
+    });
+    sum.avg_ticket = sum.transactions > 0 ? Math.round(sum.total_revenue / sum.transactions * 100) / 100 : 0;
+    return sum;
+}
+
 function _updateComparison(DATA, selA, selB, prefix, chartId, chartRef) {
     var keyA = document.getElementById(selA).value;
     var keyB = document.getElementById(selB).value;
-    var a = DATA.data[keyA], b = DATA.data[keyB];
-    if (!a || !b) return null;
+    var aRaw = DATA.data[keyA], b = DATA.data[keyB];
+    if (!aRaw || !b) return null;
     var labelA = document.getElementById(selA).selectedOptions[0].text;
     var labelB = document.getElementById(selB).selectedOptions[0].text;
+
+    // Check pro-rate checkbox
+    var prCb = document.getElementById(prefix + '-prorate');
+    var prorated = prCb && prCb.checked && b.daily && aRaw.daily;
+    var a = aRaw;
+    if (prorated) {
+        var useDOM = prefix === 'cmp'; // cmp = monthly → day-of-month, wcmp = weekly → day-of-week
+        var field = useDOM ? 'dom' : 'dow';
+        // Find max calendar day in each period
+        var maxA = 0, maxB = 0;
+        aRaw.daily.forEach(function(d) { if (d[field] > maxA) maxA = d[field]; });
+        b.daily.forEach(function(d) { if (d[field] > maxB) maxB = d[field]; });
+        var cutoff = Math.min(maxA, maxB);
+        var daysLabel = useDOM ? cutoff : (cutoff + 1);
+        // Pro-rate whichever period has more days
+        if (maxA > cutoff) {
+            a = _proRate(aRaw, cutoff, useDOM);
+            labelA += ' (first ' + daysLabel + ' days)';
+        }
+        if (maxB > cutoff) {
+            b = _proRate(b, cutoff, useDOM);
+            labelB += ' (first ' + daysLabel + ' days)';
+        }
+    }
 
     var kpis = [
         {key: 'total_revenue', fmt: 'c'}, {key: 'groom_revenue', fmt: 'c'},

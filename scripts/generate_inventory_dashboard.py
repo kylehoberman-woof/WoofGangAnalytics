@@ -299,6 +299,7 @@ html = f"""<!DOCTYPE html>
   <button class=\"fb\" onclick=\"setFilter('woof gang',this)\">Woof Gang</button>
   <button class=\"fb\" onclick=\"setFilter('pfx',this)\">PFX</button>
   <button class=\"fb\" onclick=\"setFilter('fauna',this)\">Fauna</button>
+  <button class=\"fb\" onclick=\"setFilter('other',this)\">Other</button>
   <input class=\"sb\" type=\"text\" placeholder=\"Search name or SKU...\" oninput=\"doSearch(this.value)\">
 </div>
 <div class=\"tw\">
