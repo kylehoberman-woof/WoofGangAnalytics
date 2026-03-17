@@ -52,6 +52,7 @@ def _compute_period_kpis(df_slice, df_orders_slice):
     # Appointments = orders that have at least one grooming item
     groom_order_ids = set(groom["order_id"].dropna().unique()) if "order_id" in groom.columns else set()
     appointments = len(groom_order_ids)
+    days_open = int(df_slice["ymd"].nunique()) if "ymd" in df_slice.columns else 1
     return {
         "total_revenue": round(total_rev, 2),
         "groom_revenue": round(groom_rev, 2),
@@ -61,6 +62,7 @@ def _compute_period_kpis(df_slice, df_orders_slice):
         "avg_ticket": round(total_rev / txns, 2) if txns else 0,
         "unique_customers": int(df_slice["customer_id"].nunique()),
         "tips": round(to_py(df_orders_slice["tips"].sum()), 2),
+        "days_open": days_open,
     }
 
 
@@ -126,11 +128,17 @@ KPI_DEFS = [
     ("avg_ticket", "Avg Ticket", "green"),
     ("unique_customers", "Unique Customers", ""),
     ("tips", "Tips", ""),
+    ("days_open", "Days Open", ""),
 ]
 
 
-def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_fn, title, subtitle, chart_id):
-    """Generic comparison panel builder shared by monthly/weekly/daily."""
+def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_fn, title, subtitle, chart_id, quick_buttons=None, detail_fn=None, detail_chart_id=None):
+    """Generic comparison panel builder shared by monthly/weekly/daily.
+
+    quick_buttons: list of (label, js_onclick) for shortcut compare buttons
+    detail_fn: JS function name for updating detail view (enables Compare/Detail toggle)
+    detail_chart_id: canvas ID for the detail breakdown chart
+    """
     periods = data["periods"]
     default_a = periods[-2]["key"] if len(periods) >= 2 else periods[0]["key"]
     default_b = periods[-1]["key"] if len(periods) >= 1 else periods[0]["key"]
@@ -143,7 +151,19 @@ def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_
         f'<option value="{p["key"]}"{"selected" if p["key"] == default_b else ""}>{p["label"]}</option>'
         for p in periods
     )
+    # Detail view uses same options, default to latest
+    options_detail = "\n".join(
+        f'<option value="{p["key"]}"{"selected" if p["key"] == default_b else ""}>{p["label"]}</option>'
+        for p in periods
+    )
 
+    # Quick compare buttons HTML
+    quick_html = ""
+    if quick_buttons:
+        btns = " ".join(f'<button class="quick-btn" onclick="{js}">{label}</button>' for label, js in quick_buttons)
+        quick_html = f'<div class="quick-btns">{btns}</div>'
+
+    # Comparison KPI cards
     cards = ""
     for key, label, cls in KPI_DEFS:
         pid = f"{prefix}-{key}"
@@ -166,9 +186,50 @@ def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_
 </div>
 '''
 
-    return f'''<div class="section">
+    # Detail KPI cards (single-period, no delta)
+    detail_cards = ""
+    for key, label, cls in KPI_DEFS:
+        did = f"{prefix}-det-{key}"
+        detail_cards += f'''<div class="kpi-card detail-card {cls}" id="{did}">
+  <div class="kpi-label">{label}</div>
+  <div class="kpi-value" id="{did}-val"></div>
+</div>
+'''
+
+    # View toggle
+    toggle_html = f'''<div class="view-toggle" id="{prefix}-toggle">
+  <button class="active" onclick="_showView('{prefix}','compare',this)">Compare</button>
+  <button onclick="_showView('{prefix}','detail',this)">Detail</button>
+</div>'''
+
+    # Detail panel
+    detail_select_id = f"{prefix}-detail-sel"
+    detail_update_call = f"{detail_fn}()" if detail_fn else ""
+    detail_panel = f'''<div id="{prefix}-detail-panel" style="display:none">
+  <div class="section">
+    <h2><span class="dot"></span>Period Detail</h2>
+    <p class="desc">View KPIs for a single period</p>
+    <div class="monthly-controls">
+      <div class="control-group">
+        <label for="{detail_select_id}">Period</label>
+        <select id="{detail_select_id}" onchange="{detail_update_call}">{options_detail}</select>
+      </div>
+    </div>
+  </div>
+  <div class="detail-grid">{detail_cards}</div>
+  <div class="section" id="{prefix}-detail-chart-section">
+    <h2><span class="dot"></span>Daily Breakdown</h2>
+    <p class="desc">Revenue by day within the selected period</p>
+    <div class="chart-container"><canvas id="{detail_chart_id}" style="max-height:400px"></canvas></div>
+  </div>
+</div>'''
+
+    return f'''{toggle_html}
+<div id="{prefix}-compare-panel">
+<div class="section">
   <h2><span class="dot"></span>{title}</h2>
   <p class="desc">{subtitle}</p>
+  {quick_html}
   <div class="monthly-controls">
     <div class="control-group">
       <label for="{select_id_a}">Period A</label>
@@ -188,6 +249,8 @@ def _build_comparison_panel_html(data, prefix, select_id_a, select_id_b, update_
   <p class="desc">Side-by-side bar chart of selected periods</p>
   <div class="chart-container"><canvas id="{chart_id}" style="max-height:400px"></canvas></div>
 </div>
+</div>
+{detail_panel}
 '''
 
 
@@ -195,21 +258,40 @@ def build_monthly_panel_html(data):
     return _build_comparison_panel_html(
         data, "cmp", "monthA", "monthB", "updateMonthlyComparison",
         "Month-to-Month Comparison", "Select two months to compare key performance metrics side by side",
-        "monthlyCompareChart")
+        "monthlyCompareChart",
+        quick_buttons=[
+            ("vs Last Month", "_qcMonth('prev')"),
+            ("vs Same Month Last Year", "_qcMonth('yoy')"),
+        ],
+        detail_fn="updateMonthlyDetail",
+        detail_chart_id="monthlyDetailChart")
 
 
 def build_weekly_panel_html(data):
     return _build_comparison_panel_html(
         data, "wcmp", "weekA", "weekB", "updateWeeklyComparison",
         "Week-to-Week Comparison", "Select two weeks to compare key performance metrics side by side",
-        "weeklyCompareChart")
+        "weeklyCompareChart",
+        quick_buttons=[
+            ("vs Last Week", "_qcWeek('prev')"),
+            ("vs Same Week Last Year", "_qcWeek('yoy')"),
+        ],
+        detail_fn="updateWeeklyDetail",
+        detail_chart_id="weeklyDetailChart")
 
 
 def build_daily_panel_html(data):
     return _build_comparison_panel_html(
         data, "dcmp", "dayA", "dayB", "updateDailyComparison",
         "Day-to-Day Comparison", "Select two days to compare key performance metrics side by side",
-        "dailyCompareChart")
+        "dailyCompareChart",
+        quick_buttons=[
+            ("vs Yesterday", "_qcDay('prev')"),
+            ("vs Same Day Last Week", "_qcDay('week')"),
+            ("vs Same Day Last Year", "_qcDay('yoy')"),
+        ],
+        detail_fn="updateDailyDetail",
+        detail_chart_id="dailyDetailChart")
 
 
 def generate_dashboard(store):
@@ -258,10 +340,21 @@ def generate_dashboard(store):
     through = last_txn.strftime("%-m/%-d/%Y") if not pd.isnull(last_txn) else "today"
 
     tabbed_css = """
-.yr-tab-bar { background: #C4276E; padding: 0 24px; display: flex; gap: 4px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+.yr-tab-bar { background: #C4276E; padding: 0 24px; display: flex; gap: 4px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.25); flex-wrap: wrap; }
 .yr-tab { padding: 14px 32px; border: none; background: transparent; color: rgba(255,255,255,0.6); font-size: 15px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-family: inherit; }
 .yr-tab:hover { color: white; background: rgba(255,255,255,0.08); }
 .yr-tab.active { color: white; border-bottom-color: white; }
+.quick-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.quick-btn { padding: 6px 14px; border: 1.5px solid #C4276E; border-radius: 20px; background: transparent; color: #C4276E; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.quick-btn:hover { background: #C4276E; color: white; }
+.view-toggle { display: flex; gap: 0; margin: 16px 24px 0; }
+.view-toggle button { padding: 8px 20px; border: 2px solid #e0e0e0; background: white; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: inherit; color: #666; transition: all 0.2s; }
+.view-toggle button:first-child { border-radius: 8px 0 0 8px; }
+.view-toggle button:last-child { border-radius: 0 8px 8px 0; border-left: none; }
+.view-toggle button.active { background: #C4276E; color: white; border-color: #C4276E; }
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 22px; padding: 0 24px; }
+.detail-card { text-align: center; }
+.detail-card .kpi-value { font-size: 1.6rem; }
 """
     tabbed_js = """
 var _chartsInited = {};
@@ -316,7 +409,8 @@ function _updateComparison(DATA, selA, selB, prefix, chartId, chartRef) {
         {key: 'total_revenue', fmt: 'c'}, {key: 'groom_revenue', fmt: 'c'},
         {key: 'retail_revenue', fmt: 'c'}, {key: 'appointments', fmt: 'i'},
         {key: 'transactions', fmt: 'i'}, {key: 'avg_ticket', fmt: 'c'},
-        {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'}
+        {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'},
+        {key: 'days_open', fmt: 'i'}
     ];
 
     kpis.forEach(function(kpi) {
@@ -358,6 +452,132 @@ function _updateComparison(DATA, selA, selB, prefix, chartId, chartRef) {
 function updateMonthlyComparison() { _monthlyChart = _updateComparison(MONTHLY_DATA, 'monthA', 'monthB', 'cmp', 'monthlyCompareChart', _monthlyChart); }
 function updateWeeklyComparison() { _weeklyChart = _updateComparison(WEEKLY_DATA, 'weekA', 'weekB', 'wcmp', 'weeklyCompareChart', _weeklyChart); }
 function updateDailyComparison() { _dailyChart = _updateComparison(DAILY_DATA, 'dayA', 'dayB', 'dcmp', 'dailyCompareChart', _dailyChart); }
+
+/* ── Quick Compare helpers ─────────────────────────── */
+function _findPeriodIdx(periods, key) {
+    for (var i = 0; i < periods.length; i++) { if (periods[i].key === key) return i; }
+    return -1;
+}
+function _setSelAndUpdate(selA, keyA, updateFn) {
+    var el = document.getElementById(selA);
+    for (var i = 0; i < el.options.length; i++) {
+        if (el.options[i].value === keyA) { el.selectedIndex = i; updateFn(); return true; }
+    }
+    return false;
+}
+
+function _qcMonth(mode) {
+    var keyB = document.getElementById('monthB').value;
+    var idx = _findPeriodIdx(MONTHLY_DATA.periods, keyB);
+    if (idx < 0) return;
+    var targetKey;
+    if (mode === 'prev') {
+        if (idx <= 0) return;
+        targetKey = MONTHLY_DATA.periods[idx - 1].key;
+    } else {
+        // yoy: subtract 1 year from the period key (format: "2026-03")
+        var parts = keyB.split('-');
+        targetKey = (parseInt(parts[0]) - 1) + '-' + parts[1];
+    }
+    _setSelAndUpdate('monthA', targetKey, updateMonthlyComparison);
+}
+
+function _qcWeek(mode) {
+    var keyB = document.getElementById('weekB').value;
+    var idx = _findPeriodIdx(WEEKLY_DATA.periods, keyB);
+    if (idx < 0) return;
+    var targetKey;
+    if (mode === 'prev') {
+        if (idx <= 0) return;
+        targetKey = WEEKLY_DATA.periods[idx - 1].key;
+    } else {
+        // yoy: "2026-W11" → "2025-W11"
+        var parts = keyB.split('-W');
+        targetKey = (parseInt(parts[0]) - 1) + '-W' + parts[1];
+    }
+    _setSelAndUpdate('weekA', targetKey, updateWeeklyComparison);
+}
+
+function _qcDay(mode) {
+    var keyB = document.getElementById('dayB').value;
+    var idx = _findPeriodIdx(DAILY_DATA.periods, keyB);
+    if (idx < 0) return;
+    var targetKey;
+    if (mode === 'prev') {
+        if (idx <= 0) return;
+        targetKey = DAILY_DATA.periods[idx - 1].key;
+    } else if (mode === 'week') {
+        // 7 days back
+        var d = new Date(keyB + 'T12:00:00');
+        d.setDate(d.getDate() - 7);
+        targetKey = d.toISOString().slice(0, 10);
+    } else {
+        // yoy: "2026-03-17" → "2025-03-17"
+        var parts = keyB.split('-');
+        targetKey = (parseInt(parts[0]) - 1) + '-' + parts[1] + '-' + parts[2];
+    }
+    _setSelAndUpdate('dayA', targetKey, updateDailyComparison);
+}
+
+/* ── Compare / Detail toggle ───────────────────────── */
+function _showView(prefix, mode, btn) {
+    var toggle = document.getElementById(prefix + '-toggle');
+    toggle.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById(prefix + '-compare-panel').style.display = mode === 'compare' ? 'block' : 'none';
+    document.getElementById(prefix + '-detail-panel').style.display = mode === 'detail' ? 'block' : 'none';
+    if (mode === 'detail') {
+        if (prefix === 'cmp') updateMonthlyDetail();
+        if (prefix === 'wcmp') updateWeeklyDetail();
+        if (prefix === 'dcmp') updateDailyDetail();
+    }
+}
+
+/* ── Detail view (single period KPIs + breakdown chart) ── */
+var _monthlyDetailChart = null, _weeklyDetailChart = null, _dailyDetailChart = null;
+
+function _updateDetail(DATA, selId, prefix, chartId, chartRef, showChart) {
+    var key = document.getElementById(selId).value;
+    var d = DATA.data[key];
+    if (!d) return chartRef;
+    var kpis = [
+        {key: 'total_revenue', fmt: 'c'}, {key: 'groom_revenue', fmt: 'c'},
+        {key: 'retail_revenue', fmt: 'c'}, {key: 'appointments', fmt: 'i'},
+        {key: 'transactions', fmt: 'i'}, {key: 'avg_ticket', fmt: 'c'},
+        {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'},
+        {key: 'days_open', fmt: 'i'}
+    ];
+    kpis.forEach(function(kpi) {
+        var el = document.getElementById(prefix + '-det-' + kpi.key + '-val');
+        if (el) el.textContent = kpi.fmt === 'c' ? _mfc(d[kpi.key]) : _mfi(d[kpi.key]);
+    });
+    // Breakdown chart: horizontal bars for the key revenue metrics
+    var chartSection = document.getElementById(prefix + '-detail-chart-section');
+    if (!showChart) { if (chartSection) chartSection.style.display = 'none'; return chartRef; }
+    if (chartSection) chartSection.style.display = 'block';
+    if (chartRef) chartRef.destroy();
+    var ctx = document.getElementById(chartId);
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Revenue', 'Grooming', 'Retail', 'Avg Ticket', 'Tips'],
+            datasets: [{
+                data: [d.total_revenue, d.groom_revenue, d.retail_revenue, d.avg_ticket, d.tips],
+                backgroundColor: ['#C4276E', '#1B6B6B', '#6B3520', '#2E7D32', '#F4A261'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return '$' + c.parsed.x.toLocaleString(); } } } },
+            scales: { x: { ticks: { callback: function(v) { return '$' + v.toLocaleString(); } } } }
+        }
+    });
+}
+
+function updateMonthlyDetail() { _monthlyDetailChart = _updateDetail(MONTHLY_DATA, 'cmp-detail-sel', 'cmp', 'monthlyDetailChart', _monthlyDetailChart, true); }
+function updateWeeklyDetail() { _weeklyDetailChart = _updateDetail(WEEKLY_DATA, 'wcmp-detail-sel', 'wcmp', 'weeklyDetailChart', _weeklyDetailChart, true); }
+function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dcmp-detail-sel', 'dcmp', 'dailyDetailChart', _dailyDetailChart, false); }
 """
 
     html = gd.html_head("Woof Gang Port Washington", f"Store Performance Analysis \u00b7 Sales through {through}")
