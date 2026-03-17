@@ -551,7 +551,7 @@ tr:hover td{{background:#fafaf8!important}}
   <button class="tab" onclick="showTab('l30',this)">Last 30 Days</button>
   <button class="tab" onclick="showTab('pp',this)">Pay Period</button>
   <button class="tab" onclick="showTab('exec',this)">&#128200; Executive</button>
-  <button class="tab" onclick="showTab('sue',this)">&#128149; Sue</button>
+  <button class="tab" onclick="showTab('sue',this)">Sue</button>
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
