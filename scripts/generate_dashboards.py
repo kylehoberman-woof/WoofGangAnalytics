@@ -423,15 +423,12 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
     # ── Run Rate & Forecast ──
     periods = get_periods(df)
     n_periods = len(periods)
-    monthly_rev = periods_data(df, periods, "net_sales")
+    monthly_rev = list(periods_data(df, periods, "net_sales"))
 
-    # Last-quarter average (last 3 periods or all if < 3)
-    # Pro-rate the current partial month to a full-month estimate
-    lq_count = min(3, n_periods)
-    lq_months = list(monthly_rev[-lq_count:]) if lq_count else []
-
+    # Pro-rate the current partial month everywhere (slope, chart, run rate)
     _rr_prorated = False
-    if lq_months and periods:
+    _partial_raw = 0.0      # keep the raw value for the chart annotation
+    if monthly_rev and periods:
         from datetime import date as _d_rr
         import calendar as _cal_rr
         _last_p = periods[-1]
@@ -440,9 +437,13 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
             _days_elapsed = _today_rr.day
             _days_in_month = _cal_rr.monthrange(_today_rr.year, _today_rr.month)[1]
             if _days_elapsed > 0 and _days_elapsed < _days_in_month:
-                lq_months[-1] = lq_months[-1] / _days_elapsed * _days_in_month
+                _partial_raw = monthly_rev[-1]
+                monthly_rev[-1] = monthly_rev[-1] / _days_elapsed * _days_in_month
                 _rr_prorated = True
 
+    # Last-quarter average (last 3 periods or all if < 3)
+    lq_count = min(3, n_periods)
+    lq_months = list(monthly_rev[-lq_count:]) if lq_count else []
     lq_avg = sum(lq_months) / len(lq_months) if lq_months else 0
     lq_annualized = lq_avg * 12
     _rr_sub = f"Last {lq_count}mo avg: {fc(lq_avg)}" + (" (partial mo. pro-rated)" if _rr_prorated else "")
@@ -576,7 +577,7 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
             (f"{_yr_label} Net Sales", fc(total_net), f"{n_periods} months of data", ""),
             ("Annual Forecast (Conservative)", fc(conservative_forecast), f"Trend: {fc(forecast_next_yr)}", "green"),
             ("Recent Run Rate (Annualized)", fc(lq_annualized), _rr_sub, "accent"),
-            ("Monthly Growth Rate", f"+{fc(slope)}/mo", f"Trajectory: {fp(slope/monthly_rev[0]*100 if monthly_rev[0] else 0)}/mo from baseline", "green"),
+            ("Monthly Growth Rate", f"+{fc(slope)}/mo", f"Trajectory: {fp(slope/monthly_rev[0]*100 if monthly_rev[0] else 0)}/mo from baseline" + (" (partial mo. pro-rated)" if _rr_prorated else ""), "green"),
         ]
     for label, value, sub, cls in kpis:
         html += f'<div class="kpi-card {cls}"><div class="kpi-label">{label}</div><div class="kpi-value">{value}</div><div class="kpi-sub">{sub}</div></div>\n'
@@ -1708,12 +1709,20 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
     months_labels = []
     for _i2, _p2 in enumerate(periods):
         _lbl = _p2["label"]
-        if _i2 == len(periods) - 1 and _last_partial:
+        if _i2 == len(periods) - 1 and _rr_prorated:
+            _lbl = _lbl + " (est.)"
+        elif _i2 == len(periods) - 1 and _last_partial:
             _lbl = _lbl + " (partial)"
         months_labels.append(_lbl)
 
     groom_monthly = [round(to_py(groom[groom["ym"] == p["period"]]["net_sales"].sum()), 2) for p in periods]
     retail_monthly = [round(to_py(retail[retail["ym"] == p["period"]]["net_sales"].sum()), 2) for p in periods]
+
+    # Pro-rate groom/retail monthly for partial month too
+    if _rr_prorated and groom_monthly and retail_monthly:
+        _pr_factor = monthly_rev[-1] / _partial_raw if _partial_raw > 0 else 1.0
+        groom_monthly[-1] = round(groom_monthly[-1] * _pr_factor, 2)
+        retail_monthly[-1] = round(retail_monthly[-1] * _pr_factor, 2)
 
     monthly_rev_js = [round(to_py(v), 2) for v in monthly_rev]
     # For partial years, trend_values has been rebuilt using combined prior+current trend
@@ -1751,8 +1760,9 @@ Chart.defaults.color = '#666';
 
 (function() {{
     var _trendData = {trend_vals_js};
+    var _revColors = {monthly_rev_js}.map(function(v,i,a) {{ return (i === a.length - 1 && {'true' if _rr_prorated else 'false'}) ? mg+'66' : mg+'cc'; }});
     var _datasets = [
-        {{ label: 'Actual Revenue', data: {monthly_rev_js}, backgroundColor: mg+'cc', borderRadius: 6 }}
+        {{ label: 'Actual Revenue', data: {monthly_rev_js}, backgroundColor: _revColors, borderRadius: 6 }}
     ];
     if (_trendData.length > 0) {{
         _datasets.push({{ label: 'Trend Line', data: _trendData, type: 'line', borderColor: tl, borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false }});
