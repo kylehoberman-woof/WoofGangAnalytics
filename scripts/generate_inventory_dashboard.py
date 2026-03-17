@@ -201,7 +201,7 @@ CSS = """
 :root{--m:#C4276E;--ml:#FDF0F5;--t:#1B6B6B;--br:#6B3520;--dk:#1a1a2e;--md:#2d2d44;--tx:#1f2937;--mu:#6b7280;--bd:#e5e7eb;--bg:#f8f9fb;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);}
-.hdr{background:linear-gradient(135deg,var(--dk),var(--md));padding:28px 40px 24px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--m);}
+.hdr{background:var(--m);padding:28px 40px 24px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--m);}
 .hdr h1{font-size:20px;font-weight:800;color:#fff;}
 .hdr p{font-size:12px;color:rgba(255,255,255,.55);margin-top:4px;}
 .hdr-r{font-size:11px;color:rgba(255,255,255,.4);text-align:right;}
