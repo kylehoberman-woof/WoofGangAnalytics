@@ -1,4 +1,4 @@
-Add persistent overrides system
+Rename secret to WOOF_OVERRIDES_TOKEN
 
 # Conflicts:
 #	port-washington/WoofGang_PortWashington_Commission_Dashboard.html
@@ -8,14 +8,14 @@ Add persistent overrides system
 #
 # Committer: Julie Schorr <julieschorr@julies-air.mynetworksettings.com>
 #
-# interactive rebase in progress; onto 91cbbe0
+# interactive rebase in progress; onto 2c938a9
 # Last command done (1 command done):
-#    pick d685cd3 # Add persistent overrides system
+#    pick eb4583e # Rename secret to WOOF_OVERRIDES_TOKEN
 # No commands remaining.
-# You are currently rebasing branch 'main' on '91cbbe0'.
+# You are currently rebasing branch 'main' on '2c938a9'.
 #
 # Changes to be committed:
+#	modified:   .github/workflows/update.yml
 #	modified:   port-washington/WoofGang_PortWashington_Commission_Dashboard.html
-#	new file:   port-washington/data/overrides.json
 #	modified:   scripts/build_commission_dashboard.py
 #

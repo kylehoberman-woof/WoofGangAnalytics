@@ -415,78 +415,97 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
     _too_few_for_trend = n_periods < 6
 
     if _too_few_for_trend:
-        # Not enough months in this year for a reliable trend.
-        # Instead, load the prior year from the data directory and build a
-        # combined trend across prior year + this year's complete months,
-        # then project the remainder of this year.
+        # ── Seasonality-Adjusted Growth Forecast ─────────────────────────────
+        # Uses last year's monthly pattern + this year's YoY growth rate to
+        # project remaining months, then blends with run rate for stability.
         import run as _r
-        from datetime import datetime as _dt
+        from datetime import date as _date_fc
         import calendar as _cal_fc
         import json as _json_fc
+        from collections import defaultdict as _dd
 
         _this_year = periods[0]["year"] if periods else 2026
         _prior_year = _this_year - 1
-        _prior_path = _r.DATA_DIR / f"all_data_{_prior_year}.json"
 
-        _prior_monthly = []
-        if _prior_path.exists():
-            with open(_prior_path) as _f:
-                _prior_raw = _json_fc.load(_f)
-            from collections import defaultdict as _dd
+        # Build prior year monthly revenue dict {1: $rev, 2: $rev, ...}
+        # Load from all_data.json and filter for prior year
+        _prior_by_month = {}
+        _data_path = _r.DATA_DIR / "all_data.json"
+        if _data_path.exists():
+            with open(_data_path) as _f:
+                _all_raw = _json_fc.load(_f)
             _pm = _dd(float)
-            for _item in _prior_raw.get("order_items", []):
-                _n = _item.get("Name",""); _s = _item.get("Sku","")
+            _prior_prefix = str(_prior_year)
+            for _item in _all_raw.get("order_items", []):
+                _created = _item.get("CreatedOn", "")
+                if not _created.startswith(_prior_prefix):
+                    continue
+                _n = _item.get("Name", "")
                 if "GIFT" in _n.upper() or "DEPOSIT" in _n.upper() or "NO-SHOW" in _n.upper() or "NO SHOW" in _n.upper():
                     continue
-                _mo = _item.get("CreatedOn","")[:7]
-                _qty = float(_item.get("Quantity",1))
-                _pr  = float(_item.get("Price",0))
-                _dc  = float(_item.get("Discount",0))
-                _pm[_mo] += _pr * _qty - _dc
-            _prior_monthly = [_pm[m] for m in sorted(_pm.keys())]
+                _mo_str = _created[:7]  # "2025-03"
+                _qty = float(_item.get("Quantity", 1))
+                _pr = float(_item.get("Price", 0))
+                _dc = float(_item.get("Discount", 0))
+                _pm[_mo_str] += _pr * _qty - _dc
+            for _k, _v in _pm.items():
+                try:
+                    _prior_by_month[int(_k.split("-")[1])] = _v
+                except (ValueError, IndexError):
+                    pass
 
-        # Only include complete months from current year (exclude partial final month)
-        try:
-            from datetime import date as _date_fc
-            _today_fc = _date_fc.today()
-            _end_dt_fc = _dt(_today_fc.year, _today_fc.month, _today_fc.day)
-            _last_day_fc = _cal_fc.monthrange(_end_dt_fc.year, _end_dt_fc.month)[1]
-            _last_partial_fc = _end_dt_fc.day < _last_day_fc
-        except Exception:
-            _last_partial_fc = False
+        # Detect partial month
+        _today_fc = _date_fc.today()
+        _last_day_fc = _cal_fc.monthrange(_today_fc.year, _today_fc.month)[1]
+        _last_partial_fc = _today_fc.day < _last_day_fc
 
-        _complete_months = monthly_rev[:-1] if _last_partial_fc and len(monthly_rev) > 1 else monthly_rev
-        _combined_series = _prior_monthly + list(_complete_months)
-        _n_combined = len(_combined_series)
-        _cx = list(range(1, _n_combined + 1))
-        _cslope, _cintercept = trend_line(_cx, _combined_series)
+        # Build current year monthly revenue dict {1: $rev, 2: $rev, ...}
+        _curr_by_month = {}
+        for p, rev in zip(periods, monthly_rev):
+            _curr_by_month[p["month"]] = rev
 
-        # Project remaining months of current year
-        _month_offset = _n_combined  # next month index
-        _complete_count = len(_complete_months)
-        _remaining_months = 12 - (_complete_count + (1 if _last_partial_fc else 0))
-        # Full-year forecast = complete months actuals + partial month prorated + projected remaining
-        _actuals_sum = sum(_complete_months)
-        if _last_partial_fc and monthly_rev:
-            # Prorate the partial month to a full month
-            _partial_days = _end_dt_fc.day
-            _full_month_est = monthly_rev[-1] / _partial_days * _last_day_fc
-            _actuals_sum += _full_month_est
-            _remaining_months = 12 - _complete_count - 1
-        _projected_sum = sum(_cslope * (_month_offset + i) + _cintercept for i in range(1, _remaining_months + 1))
-        forecast_next_yr = _actuals_sum + _projected_sum
-        conservative_forecast = forecast_next_yr
-        slope = _cslope  # use combined slope for display
-        intercept = _cintercept
-        # Rebuild trend_values for the current year's periods using combined model
-        trend_values = [_cslope * (_n_combined - _complete_count + i) + _cintercept
-                        for i in range(1, n_periods + 1)]
-        _days = None  # not used in this path
+        # Pro-rate the current partial month to a full-month estimate
+        if _last_partial_fc and _today_fc.month in _curr_by_month:
+            _curr_by_month[_today_fc.month] = (
+                _curr_by_month[_today_fc.month] / _today_fc.day * _last_day_fc
+            )
+
+        # YoY growth rate: compare same months that exist in both years
+        _overlap_months = sorted(set(_curr_by_month.keys()) & set(_prior_by_month.keys()))
+        if _overlap_months:
+            _ytd_curr = sum(_curr_by_month[m] for m in _overlap_months)
+            _ytd_prior = sum(_prior_by_month[m] for m in _overlap_months)
+            _yoy_growth = _ytd_curr / _ytd_prior if _ytd_prior > 0 else 1.0
+        else:
+            _yoy_growth = 1.0
+
+        # Method 1: Seasonality-adjusted — apply growth rate to prior year's remaining months
+        _actuals_sum = sum(_curr_by_month.values())
+        _covered_months = set(_curr_by_month.keys())
+        _seasonal_projected = 0.0
+        for _mo in range(1, 13):
+            if _mo not in _covered_months:
+                _prior_mo_rev = _prior_by_month.get(_mo, 0)
+                _seasonal_projected += _prior_mo_rev * _yoy_growth
+        _seasonal_forecast = _actuals_sum + _seasonal_projected
+
+        # Method 2: Run rate (already calculated above)
+        # lq_annualized
+
+        # Blend: 60% seasonality-adjusted, 40% run rate
+        conservative_forecast = _seasonal_forecast * 0.6 + lq_annualized * 0.4
+
+        _fc_method = f"{_yoy_growth - 1:+.0%} YoY growth × {_prior_year} seasonality + run rate"
+
+        # Keep slope/trend for chart (use simple current-year trend for display)
+        slope, intercept = trend_line(months_x, monthly_rev)
+        trend_values = [slope * m + intercept for m in months_x]
     else:
         # Project next 12 months via trend
         forecast_next_yr = sum(slope * m + intercept for m in range(n_periods + 1, n_periods + 13))
         # Conservative forecast: average of LQ annualized and trend-projected
         conservative_forecast = (lq_annualized + forecast_next_yr) / 2
+        _fc_method = None
 
     # Dynamic titles
     _store_label = STORE_NAME.split("--")[-1].strip() if "--" in STORE_NAME else STORE_NAME
@@ -508,9 +527,9 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
     if _too_few_for_trend:
         kpis = [
             (f"{_yr_label} Net Sales (YTD)", fc(total_net), f"{n_periods} months of data", ""),
-            (f"Full Year {_this_year} Forecast", fc(conservative_forecast), f"Based on {_prior_year}+{_this_year} growth trend", "green"),
+            (f"Full Year {_this_year} Forecast", fc(conservative_forecast), _fc_method, "green"),
             ("Recent Run Rate (Annualized)", fc(lq_annualized), _rr_sub, "accent"),
-            ("Monthly Growth Rate", f"+{fc(slope)}/mo", f"Trend from {_prior_year} trajectory", "green"),
+            (f"YoY Growth vs {_prior_year}", f"{_yoy_growth - 1:+.1%}", f"Same-month comparison ({len(_overlap_months)} months)", "green"),
         ]
     else:
         kpis = [
