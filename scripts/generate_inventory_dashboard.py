@@ -180,15 +180,17 @@ for v in ["Woof Gang","PFX","Fauna","K9 Cuisine","Other"]:
     reorder_total += vtotal
     reorder_rows += f'<tr style="background:#f0f0f0;font-weight:bold"><td colspan="8">{v} — {len(items)} items · Est. ${vtotal:,.0f}</td></tr>'
     for i in sorted(items, key=lambda x: -x["velocity_monthly"]):
-        reorder_rows += (f'<tr><td>{i["sku"]}</td><td>{i["name"][:45]}</td>'
+        reorder_rows += (f'<tr data-status="{i["status"]}" data-vendor="{i["vendor"].lower()}">'
+            f'<td>{i["sku"]}</td><td>{i["name"][:45]}</td>'
             f'<td class="num">{i.get("stock",0):.1f}</td><td class="num">{i["velocity_monthly"]}</td>'
             f'<td class="num">{i["needed"]}</td><td class="num">${i["cost"]:.2f}</td>'
-            f'<td class="num">${i["est_cost"]:,.2f}</td><td>{i["status"]}</td></tr>')
+            f'<td class="num">${i["est_cost"]:,.2f}</td><td>{badge(i["status"])}</td></tr>')
 
 neg_rows = ""
 for r in sorted(results, key=lambda x: x.get("stock") or 0):
     if (r.get("stock") or 0) >= 0: continue
-    neg_rows += (f'<tr><td>{r["sku"]}</td><td>{r["name"][:45]}</td>'
+    neg_rows += (f'<tr data-status="{r["status"]}" data-vendor="{r["vendor"].lower()}">'
+        f'<td>{r["sku"]}</td><td>{r["name"][:45]}</td>'
         f'<td class="num" style="color:red">{r.get("stock",0):.1f}</td>'
         f'<td>{r["vendor"]}</td><td class="num">{r["velocity_monthly"]}</td></tr>')
 
@@ -252,7 +254,16 @@ let cf='all',cs='',ct='top50';
 function switchTab(t,b){ct=t;document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById('p-'+t).classList.add('active');af();}
 function setFilter(f,b){cf=f;document.querySelectorAll('.fb').forEach(x=>x.classList.remove('active'));b.classList.add('active');af();}
 function doSearch(v){cs=v.toLowerCase();af();}
-function af(){const id=ct==='nocost'?'b-nocost':ct==='all'?'b-all':'b-top50';document.querySelectorAll('#'+id+' tr').forEach(r=>{const s=r.dataset.status||'',v=r.dataset.vendor||'';let mf=cf==='all'||(['out','critical','low','ok','untracked'].includes(cf)?s===cf:v.includes(cf));r.classList.toggle('hidden',!(mf&&(!cs||r.textContent.toLowerCase().includes(cs))));});}
+function af(){
+  var tbodyMap={top50:'b-top50',all:'b-all',nocost:'b-nocost',reorder:'b-reorder',negative:'b-negative'};
+  var id=tbodyMap[ct]||'b-top50';
+  document.querySelectorAll('#'+id+' tr').forEach(function(r){
+    var s=r.dataset.status||'',v=r.dataset.vendor||'';
+    if(!s&&!v){return;}
+    var mf=cf==='all'||(['out','critical','low','ok','untracked'].includes(cf)?s===cf:v.includes(cf));
+    r.classList.toggle('hidden',!(mf&&(!cs||r.textContent.toLowerCase().includes(cs))));
+  });
+}
 """
 
 TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
@@ -294,8 +305,8 @@ html = f"""<!DOCTYPE html>
   <div id=\"p-top50\" class=\"panel active\"><table><thead><tr>{TH}</tr></thead><tbody id=\"b-top50\">{top50_rows}</tbody></table></div>
   <div id=\"p-all\" class=\"panel\"><table><thead><tr>{TH}</tr></thead><tbody id=\"b-all\">{all_rows}</tbody></table></div>
   <div id=\"p-nocost\" class=\"panel\"><table><thead><tr>{TH2}</tr></thead><tbody id=\"b-nocost\">{nocost_rows}</tbody></table></div>
-  <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px\">Reorder Recommendations (8-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3><table><thead><tr>{TH_REORDER}</tr></thead><tbody>{reorder_rows}</tbody></table></div>
-  <div id=\"p-negative\" class=\"panel\"><table><thead><tr>{TH_NEG}</tr></thead><tbody>{neg_rows}</tbody></table></div>
+  <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px\">Reorder Recommendations (8-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3><table><thead><tr>{TH_REORDER}</tr></thead><tbody id=\"b-reorder\">{reorder_rows}</tbody></table></div>
+  <div id=\"p-negative\" class=\"panel\"><table><thead><tr>{TH_NEG}</tr></thead><tbody id=\"b-negative\">{neg_rows}</tbody></table></div>
 </div>
 <script>{JS}</script></body></html>"""
 
