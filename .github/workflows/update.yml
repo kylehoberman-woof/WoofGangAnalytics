@@ -25,9 +25,7 @@ jobs:
           find . -name "*.pyc" -delete
           find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
           cd scripts && python run.py
-      - name: Rebuild commission dashboard with token
-        env:
-          WOOF_OVERRIDES_TOKEN: ${{ secrets.WOOF_OVERRIDES_TOKEN }}
+      - name: Rebuild commission dashboard
         run: python3 scripts/build_commission_dashboard.py
       - name: Fetch stock levels
         env:

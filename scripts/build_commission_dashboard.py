@@ -14,6 +14,7 @@ from config import (
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
     MONTHLY_RENT, ANCHOR_START, STORE_OPEN,
+    SUPABASE_URL, SUPABASE_ANON_KEY,
 )
 from formatting import fc
 
@@ -21,17 +22,6 @@ SCRIPTS_DIR = Path(__file__).parent
 _store = get_store("port-washington")
 DATA_DIR   = _store.data_dir
 OUTPUT_DIR = _store.output_dir
-
-# Load GitHub token from .env file (never committed to git)
-def _load_env():
-    env_file = SCRIPTS_DIR.parent / ".env"
-    if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            if '=' in line and not line.startswith('#'):
-                k, v = line.split('=', 1)
-                os.environ.setdefault(k.strip(), v.strip())
-_load_env()
-GH_TOKEN = os.environ.get("WOOF_OVERRIDES_TOKEN", "")
 
 def get_hours_from_clocks(clocks, name_map, period_start, period_end):
     """Calculate hours worked from time clock records for a pay period.
@@ -661,27 +651,29 @@ function groomerBadge(g) {{
   return '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+COLORS[g]+';margin-right:7px"></span><strong>'+g+'</strong>'+badge;
 }}
 
-// ── Overrides system ─────────────────────────────────────────────────────────
+// ── Overrides system (Supabase) ──────────────────────────────────────────────
 var _overrides = {{}};
-var _overridesDirty = false;
-
-// ── Overrides: GitHub API (works from any device, no local server needed) ────
-var _ghRepo = 'kylehoberman-woof/WoofGangAnalytics';
-var _ghPath = 'port-washington/data/overrides.json';
-var _ghToken = '{{gh_token}}';
-var _ghFileSha = null;
+var _sbUrl = '{{supabase_url}}';
+var _sbKey = '{{supabase_key}}';
+var _sbHeaders = {{
+  'apikey': _sbKey,
+  'Authorization': 'Bearer ' + _sbKey,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=minimal'
+}};
 
 function _loadOverrides() {{
-  fetch('https://api.github.com/repos/' + _ghRepo + '/contents/' + _ghPath, {{
-    headers: {{ 'Authorization': 'token ' + _ghToken, 'Accept': 'application/vnd.github.v3+json' }}
+  fetch(_sbUrl + '/rest/v1/guarantee_overrides?select=groomer_name,override_date,waived', {{
+    headers: {{ 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey }}
   }})
-  .then(function(r) {{ return r.ok ? r.json() : null; }})
-  .then(function(data) {{
-    if (data && data.content) {{
-      _ghFileSha = data.sha;
-      var decoded = JSON.parse(atob(data.content.replace(/\\n/g, '')));
-      _overrides = decoded || {{}};
-    }}
+  .then(function(r) {{ return r.ok ? r.json() : []; }})
+  .then(function(rows) {{
+    _overrides = {{}};
+    rows.forEach(function(row) {{
+      if (row.waived) {{
+        _overrides['guar_override_' + row.override_date + '_' + row.groomer_name] = true;
+      }}
+    }});
     renderPayPeriod(document.getElementById('pp-select').value);
   }})
   .catch(function() {{
@@ -694,57 +686,71 @@ function getOverride(key) {{
   return _overrides[key] === true;
 }}
 
-function setOverride(key, val) {{
-  if (val) {{ _overrides[key] = true; }} else {{ delete _overrides[key]; }}
-  _overridesDirty = true;
-  _pushOverridesToGitHub();
+function _parseOverrideKey(key) {{
+  // key format: guar_override_YYYY-MM-DD_Groomer Name
+  var parts = key.replace('guar_override_', '').split('_');
+  var dt = parts[0];
+  var name = parts.slice(1).join('_');
+  return {{ groomer_name: name, override_date: dt }};
 }}
 
-function _pushOverridesToGitHub() {{
+function setOverride(key, val) {{
+  var parsed = _parseOverrideKey(key);
   var btn = document.getElementById('save-overrides-btn');
   btn.style.display = 'inline-block';
   btn.textContent = '⏳ Saving...';
   btn.style.background = '#888';
-  var body = {{
-    message: 'Update guarantee overrides',
-    content: btoa(JSON.stringify(_overrides, null, 2)),
-    sha: _ghFileSha
-  }};
-  fetch('https://api.github.com/repos/' + _ghRepo + '/contents/' + _ghPath, {{
-    method: 'PUT',
-    headers: {{
-      'Authorization': 'token ' + _ghToken,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    }},
-    body: JSON.stringify(body)
-  }})
-  .then(function(r) {{ return r.json(); }})
-  .then(function(data) {{
-    if (data.content) {{
-      _ghFileSha = data.content.sha;
-      btn.textContent = '✓ Saved to GitHub';
-      btn.style.background = '#388E3C';
-      setTimeout(function() {{
-        btn.style.display = 'none';
-        btn.textContent = '💾 Save Overrides';
-        btn.style.background = '#C4276E';
-      }}, 3000);
-    }} else {{
-      btn.textContent = '✗ Error saving';
+
+  if (val) {{
+    // Upsert: insert or update
+    _overrides[key] = true;
+    fetch(_sbUrl + '/rest/v1/guarantee_overrides', {{
+      method: 'POST',
+      headers: Object.assign({{}}, _sbHeaders, {{'Prefer': 'return=minimal,resolution=merge-duplicates'}}),
+      body: JSON.stringify({{ groomer_name: parsed.groomer_name, override_date: parsed.override_date, waived: true }})
+    }})
+    .then(function(r) {{
+      if (r.ok || r.status === 201 || r.status === 200) {{
+        btn.textContent = '✓ Saved';
+        btn.style.background = '#388E3C';
+      }} else {{
+        btn.textContent = '✗ Error';
+        btn.style.background = '#c62828';
+      }}
+      setTimeout(function() {{ btn.style.display = 'none'; }}, 2000);
+    }})
+    .catch(function() {{
+      btn.textContent = '✗ Error';
       btn.style.background = '#c62828';
-      setTimeout(function() {{ btn.style.display = 'none'; btn.textContent = '💾 Save Overrides'; btn.style.background = '#C4276E'; }}, 4000);
-    }}
-  }})
-  .catch(function() {{
-    btn.textContent = '✗ Error saving';
-    btn.style.background = '#c62828';
-    setTimeout(function() {{ btn.style.display = 'none'; btn.textContent = '💾 Save Overrides'; btn.style.background = '#C4276E'; }}, 4000);
-  }});
+      setTimeout(function() {{ btn.style.display = 'none'; }}, 3000);
+    }});
+  }} else {{
+    // Delete the override row
+    delete _overrides[key];
+    fetch(_sbUrl + '/rest/v1/guarantee_overrides?groomer_name=eq.' + encodeURIComponent(parsed.groomer_name) + '&override_date=eq.' + parsed.override_date, {{
+      method: 'DELETE',
+      headers: _sbHeaders
+    }})
+    .then(function(r) {{
+      if (r.ok) {{
+        btn.textContent = '✓ Saved';
+        btn.style.background = '#388E3C';
+      }} else {{
+        btn.textContent = '✗ Error';
+        btn.style.background = '#c62828';
+      }}
+      setTimeout(function() {{ btn.style.display = 'none'; }}, 2000);
+    }})
+    .catch(function() {{
+      btn.textContent = '✗ Error';
+      btn.style.background = '#c62828';
+      setTimeout(function() {{ btn.style.display = 'none'; }}, 3000);
+    }});
+  }}
 }}
 
 function saveOverrides() {{
-  _pushOverridesToGitHub();
+  // No-op: overrides auto-save on each toggle now
 }}
 
 function toggleGuar(key, ppId) {{
@@ -1086,11 +1092,9 @@ function kpiCard(label, val, color) {{
 </script>
 </body></html>'''
 
-# Inject GitHub token as XOR'd char codes to avoid GitHub push-protection blocking the commit
-if GH_TOKEN:
-    _xor_key = 0x5A
-    _codes = ','.join(str(ord(c) ^ _xor_key) for c in GH_TOKEN)
-    html = html.replace("'{gh_token}'", f"[{_codes}].map(function(c){{return String.fromCharCode(c^0x5A)}}).join('')")
+# Inject Supabase credentials
+html = html.replace("{supabase_url}", SUPABASE_URL)
+html = html.replace("{supabase_key}", SUPABASE_ANON_KEY)
 
 out_path = OUTPUT_DIR / "WoofGang_PortWashington_Commission_Dashboard.html"
 with open(out_path, "w") as f:

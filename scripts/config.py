@@ -85,6 +85,12 @@ C = {
 }
 
 
+# ─── Supabase (Override Storage) ───────────────────────────────────────────
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://bqzinttbjeeaybywhhet.supabase.co")
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "sb_publishable_J-0b5wB84dbLQ5sRErwEAw_1qaX5ZX-")
+
+
 # ─── API Configuration ──────────────────────────────────────────────────────
 
 BASE_URL = "https://publicapi.franpos.com"
