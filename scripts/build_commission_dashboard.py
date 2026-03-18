@@ -639,7 +639,7 @@ tr:hover td{{background:#fafaf8!important}}
     <div class="stitle">Retail Staff</div>
     <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap" id="retail-pp-kpis"></div>
     <div class="detail-section" id="retail-pp-detail" style="display:none;margin-top:12px"></div>
-    <button class="toggle-btn" onclick="toggleDetail('retail-pp-detail',this)">▼ Show daily breakdown</button>
+    <button class="toggle-btn" data-label="details by person" onclick="toggleDetail('retail-pp-detail',this)">▼ Show details by person</button>
   </div>
   <div class="card" id="cindy-pp-card" style="display:none">
     <div class="stitle">Manager Salary — Cindy Szczudlo</div>
@@ -1019,28 +1019,25 @@ function renderPayPeriod(ppId) {{
     document.getElementById('retail-pp-kpis').innerHTML =
       '<div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">'+totRHrs.toFixed(1)+'h</div><div class="kpi-label">Total Hours</div></div>'+
       '<div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">'+fc(totRetailPay)+'</div><div class="kpi-label">Total Retail Wages</div></div>';
-    // Daily totals breakdown
+    // Per-person detail breakdown
     var retailDailyData = data._retail_daily || {{}};
-    var dayTotals = {{}};
+    var retailDetailHtml = '';
     retailNames.forEach(function(name) {{
-      var days = retailDailyData[name] || [];
+      var hrs = retailHours[name] || 0;
+      var pay = retailPay[name] || 0;
       var rate = retailRates[name] || 0;
-      days.forEach(function(r) {{
-        if (!dayTotals[r.date]) dayTotals[r.date] = {{hours: 0, pay: 0}};
-        dayTotals[r.date].hours += r.hours;
-        dayTotals[r.date].pay += r.hours * rate;
-      }});
+      retailDetailHtml += '<div style="margin-bottom:18px"><div style="font-weight:700;font-size:0.95rem;margin-bottom:8px;color:#6A1B9A">'+name+' — '+hrs.toFixed(2)+'h · $'+rate.toFixed(2)+'/hr · Pay: '+fc(pay)+'</div>';
+      var days = retailDailyData[name] || [];
+      if (days.length > 0) {{
+        retailDetailHtml += '<table style="width:100%;border-collapse:collapse;font-size:0.83rem"><thead><tr><th style="text-align:left;padding:6px 10px;color:#888">Date</th><th style="text-align:right;padding:6px 10px;color:#888">Hours</th><th style="text-align:right;padding:6px 10px;color:#888">Rate</th><th style="text-align:right;padding:6px 10px;color:#888">Pay</th></tr></thead><tbody>';
+        days.forEach(function(r) {{
+          retailDetailHtml += '<tr><td>'+r.date+'</td><td style="text-align:right">'+r.hours.toFixed(2)+'h</td><td style="text-align:right">'+fc(rate)+'</td><td style="text-align:right;font-weight:600;color:#6A1B9A">'+fc(r.hours*rate)+'</td></tr>';
+        }});
+        retailDetailHtml += '</tbody></table>';
+      }}
+      retailDetailHtml += '</div>';
     }});
-    var sortedDates = Object.keys(dayTotals).sort();
-    var retailDailyRows = '';
-    sortedDates.forEach(function(dt) {{
-      var d = dayTotals[dt];
-      retailDailyRows += '<tr><td>'+dt+'</td><td style="text-align:right">'+d.hours.toFixed(2)+'h</td><td style="text-align:right;font-weight:600;color:#6A1B9A">'+fc(d.pay)+'</td></tr>';
-    }});
-    document.getElementById('retail-pp-detail').innerHTML =
-      '<table style="width:100%;border-collapse:collapse;font-size:0.83rem">'+
-      '<thead><tr><th style="text-align:left;padding:6px 10px;color:#888">Date</th><th style="text-align:right;padding:6px 10px;color:#888">Hours</th><th style="text-align:right;padding:6px 10px;color:#888">Wages</th></tr></thead>'+
-      '<tbody>'+retailDailyRows+'</tbody></table>';
+    document.getElementById('retail-pp-detail').innerHTML = retailDetailHtml;
   }}
   if (mgr > 0) {{
     document.getElementById('cindy-pp-kpis').innerHTML =
