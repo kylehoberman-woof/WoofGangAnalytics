@@ -446,7 +446,10 @@ function getPickedBy(teamName) {
   const owners = [];
   for (const p of state.order) {
     for (const t of state.players[p]) {
-      if (matchTeamName(teamName, [t.team])) { owners.push(p); break; }
+      // Try both directions so aliases work regardless of which side has the alias
+      if (matchTeamName(teamName, [t.team]) || matchTeamName(t.team, [teamName])) {
+        owners.push(p); break;
+      }
     }
   }
   return owners;
@@ -748,6 +751,7 @@ const NAME_ALIASES = {
   'smu': ['southern methodist', 'smu'],
   'ole miss': ['mississippi', 'ole miss'],
   'ucf': ['central florida', 'ucf'],
+  'penn': ['pennsylvania', 'penn'],
 };
 
 function normalizeTeamName(name) {
@@ -759,9 +763,9 @@ function matchTeamName(pickName, espnNames) {
   for (const en of espnNames) { if (normalizeTeamName(en) === pick) return en; }
   for (const en of espnNames) { const ne = normalizeTeamName(en); if (ne.includes(pick) || pick.includes(ne)) return en; }
   const pickWords = pick.split(' ');
-  for (let wc = Math.min(pickWords.length, 2); wc >= 1; wc--) {
+  for (let wc = Math.min(pickWords.length, 3); wc >= 2; wc--) {
     const prefix = pickWords.slice(0, wc).join(' ');
-    if (prefix.length < 3) continue;
+    if (prefix.length < 5) continue;
     for (const en of espnNames) { if (normalizeTeamName(en).startsWith(prefix)) return en; }
   }
   for (const [alias, variants] of Object.entries(NAME_ALIASES)) {
