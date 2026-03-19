@@ -281,6 +281,13 @@ const DEFAULT_PLAYERS = {
     { team: "Vanderbilt Commodores", seed: 5 },
     { team: "Louisville Cardinals", seed: 6 },
     { team: "Tennessee Volunteers", seed: 6 },
+    { team: "Utah State Aggies", seed: 9 },
+    { team: "High Point Panthers", seed: 12 },
+    { team: "Ohio State Buckeyes", seed: 8 },
+    { team: "Georgia Bulldogs", seed: 8 },
+    { team: "North Dakota State Bison", seed: 14 },
+    { team: "California Baptist Lancers", seed: 13 },
+    { team: "Tennessee State Tigers", seed: 15 },
   ],
   KYLE: [
     { team: "Duke Blue Devils", seed: 1 },
@@ -288,6 +295,13 @@ const DEFAULT_PLAYERS = {
     { team: "Alabama Crimson Tide", seed: 4 },
     { team: "Virginia Cavaliers", seed: 3 },
     { team: "USF Bulls", seed: 11 },
+    { team: "Saint Louis Billikens", seed: 9 },
+    { team: "Saint Mary's Gaels", seed: 7 },
+    { team: "Clemson Tigers", seed: 8 },
+    { team: "TCU Horned Frogs", seed: 9 },
+    { team: "Texas A&M Aggies", seed: 10 },
+    { team: "Penn Quakers", seed: 14 },
+    { team: "Northern Iowa Panthers", seed: 12 },
   ],
   ADAM: [
     { team: "Florida Gators", seed: 1 },
@@ -295,6 +309,13 @@ const DEFAULT_PLAYERS = {
     { team: "Arkansas Razorbacks", seed: 4 },
     { team: "Michigan State Spartans", seed: 3 },
     { team: "UCLA Bruins", seed: 7 },
+    { team: "Santa Clara Broncos", seed: 10 },
+    { team: "VCU Rams", seed: 11 },
+    { team: "Akron Zips", seed: 12 },
+    { team: "Villanova Wildcats", seed: 8 },
+    { team: "Miami (OH) RedHawks", seed: 11 },
+    { team: "Troy Trojans", seed: 13 },
+    { team: "Siena Saints", seed: 16 },
   ],
   DAVID: [
     { team: "Michigan Wolverines", seed: 1 },
@@ -302,6 +323,13 @@ const DEFAULT_PLAYERS = {
     { team: "Gonzaga Bulldogs", seed: 3 },
     { team: "Kansas Jayhawks", seed: 4 },
     { team: "Nebraska Cornhuskers", seed: 4 },
+    { team: "North Carolina Tar Heels", seed: 6 },
+    { team: "Kentucky Wildcats", seed: 7 },
+    { team: "Iowa Hawkeyes", seed: 9 },
+    { team: "UCF Knights", seed: 10 },
+    { team: "Hawai'i Rainbow Warriors", seed: 13 },
+    { team: "Wright State Raiders", seed: 14 },
+    { team: "Kennesaw State Owls", seed: 15 },
   ],
   GREG: [
     { team: "Arizona Wildcats", seed: 1 },
@@ -310,6 +338,12 @@ const DEFAULT_PLAYERS = {
     { team: "Wisconsin Badgers", seed: 5 },
     { team: "Texas Tech Red Raiders", seed: 5 },
     { team: "Texas Longhorns", seed: 11 },
+    { team: "Miami Hurricanes", seed: 7 },
+    { team: "Missouri Tigers", seed: 10 },
+    { team: "Hofstra Pride", seed: 13 },
+    { team: "McNeese Cowboys", seed: 12 },
+    { team: "Furman Paladins", seed: 15 },
+    { team: "Howard Bison", seed: 16 },
   ],
 };
 
@@ -322,7 +356,7 @@ let liveTimer = null;
 
 function loadState() {
   try {
-    const saved = localStorage.getItem('mm2026_v2');
+    const saved = localStorage.getItem('mm2026_v3');
     if (saved) return JSON.parse(saved);
   } catch(e) {}
   return initState();
@@ -338,7 +372,7 @@ function initState() {
 }
 
 function saveState() {
-  localStorage.setItem('mm2026_v2', JSON.stringify(state));
+  localStorage.setItem('mm2026_v3', JSON.stringify(state));
 }
 
 // ── Scoring ──────────────────────────────────────────────────────
@@ -697,7 +731,7 @@ function addPlayer() {
 
 function resetAll() {
   if (confirm('Reset all scores and picks to defaults?')) {
-    localStorage.removeItem('mm2026_v2');
+    localStorage.removeItem('mm2026_v3');
     state = initState();
     render();
     showToast('Reset complete');
