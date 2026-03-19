@@ -234,6 +234,12 @@ def manager_salary_for_range(start, end):
 
 ytd_manager, ytd_mgr_old_days, ytd_mgr_new_days, ytd_mgr_daily, ytd_mgr_bonus = manager_salary_for_range(ytd_start, TODAY)
 
+# YTD bather & retail pay from time clocks
+ytd_bather_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), BATHER_NAME_MAP, ytd_start.strftime("%Y-%m-%d"), TODAY.strftime("%Y-%m-%d"))
+ytd_bather_pay = round(sum(h * BATHER_RATE for h in ytd_bather_hours.values()), 2)
+ytd_retail_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, ytd_start.strftime("%Y-%m-%d"), TODAY.strftime("%Y-%m-%d"))
+ytd_retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in ytd_retail_hours.items()), 2)
+
 # Monthly breakdown for exec dashboard
 import calendar as _cal
 monthly_data = []
@@ -568,9 +574,11 @@ tr:hover td{{background:#fafaf8!important}}
     <div class="kpi orange"><div class="kpi-val">{fc(ytd_total["tips"])}</div><div class="kpi-label">Tips</div></div>
     <div class="kpi green"><div class="kpi-val">{fc(ytd_total["total"])}</div><div class="kpi-label">Total Groomer Pay</div></div>
     <div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">{fc(ytd_manager)}</div><div class="kpi-label">Manager Salary</div><div style="font-size:0.78rem;color:#5C6BC0;margin-top:3px">from Feb 23</div></div>
+    <div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">{fc(ytd_bather_pay)}</div><div class="kpi-label">Bather Pay</div></div>
+    <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">{fc(ytd_retail_pay)}</div><div class="kpi-label">Retail Staff Pay</div></div>
     <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">{fc(ytd_total["rev"] * 0.07)}</div><div class="kpi-label">Royalties (7%)</div></div>
     <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">{fc(ytd_rent)}</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">{ytd_days_count} days</div></div>
-    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_total["rev"] - ytd_total["paid"] - ytd_manager - ytd_total["rev"] * 0.07 - ytd_rent)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_total["rev"] - ytd_total["paid"] - ytd_manager - ytd_total["rev"] * 0.07 - ytd_rent) / (ytd_total["rev"] or 1) * 100:.1f}%</div></div>
+    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_total["rev"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_total["rev"] * 0.07 - ytd_rent)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_total["rev"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_total["rev"] * 0.07 - ytd_rent) / (ytd_total["rev"] or 1) * 100:.1f}%</div></div>
     <div class="kpi grey"><div class="kpi-val">{int(ytd_total["guar_days"])}</div><div class="kpi-label">Guarantee Days</div></div>
   </div>
   <div class="info-box">Commission = 50% of daily grooming revenue. All groomers (except Kimberly) receive a <strong>$200/day guarantee</strong> for their first 90 days (Sue M: $300/day). Paid whichever is higher. Tips assigned to the groomer who performed the service.</div>
