@@ -46,6 +46,7 @@ def get_hours_from_clocks(clocks, name_map, period_start, period_end):
 
 # ── Load all data ─────────────────────────────────────────────────────────────
 groom_by_day  = defaultdict(lambda: defaultdict(float))
+groom_disc_by_day = defaultdict(lambda: defaultdict(float))  # grooming discounts
 order_groomer = {}
 order_date    = {}
 tips_by_order = {}
@@ -59,6 +60,7 @@ if True:
         person = item.get("SalesPerson","") or "Unknown"
         price  = float(item.get("Price") or 0)
         qty    = float(item.get("Quantity") or 0)
+        disc   = float(item.get("Discount") or 0)
         day    = (item.get("CreatedOn") or "")[:10]
         oid    = item.get("OrderId")
         is_groom_sku = (
@@ -74,6 +76,8 @@ if True:
         if is_groom_sku:
             if person not in EXCLUDE:
                 groom_by_day[person][day] += price * qty
+                if disc > 0:
+                    groom_disc_by_day[person][day] += disc
                 if oid:
                     order_groomer[oid] = person  # fallback
                     if oid not in order_groomer_rev: order_groomer_rev[oid] = {}
@@ -152,11 +156,12 @@ def get_guarantee(groomer, day):
 
 def day_pay(groomer, day):
     rev  = groom_by_day[groomer].get(day, 0)
+    disc = groom_disc_by_day[groomer].get(day, 0)
     tips = tips_by_day[groomer].get(day, 0)
     comm = rev * COMMISSION_RATE
     guar = get_guarantee(groomer, day)
     paid = max(comm, guar) if guar else comm
-    return {"rev": rev, "comm": comm, "paid": paid, "tips": tips,
+    return {"rev": rev, "disc": round(disc, 2), "comm": comm, "paid": paid, "tips": tips,
             "total": paid + tips, "guar_applied": guar > 0 and comm < guar}
 
 def period_summary(groomer, start, end):
@@ -167,11 +172,12 @@ def period_summary(groomer, start, end):
                 if start.isoformat() <= d <= end.isoformat() and d not in days]
     all_days = sorted(set(days + tip_days))
     
-    t = {"rev":0,"comm":0,"paid":0,"tips":0,"total":0,"working_days":0,"guar_days":0,"daily":[]}
+    t = {"rev":0,"disc":0,"comm":0,"paid":0,"tips":0,"total":0,"working_days":0,"guar_days":0,"daily":[]}
     for day in all_days:
         d = day_pay(groomer, day)
         if d["rev"] > 0 or d["tips"] > 0:
             t["rev"]   += d["rev"]
+            t["disc"]  += d["disc"]
             t["comm"]  += d["comm"]
             t["paid"]  += d["paid"]
             t["tips"]  += d["tips"]
@@ -194,7 +200,7 @@ groomer_color = {g: COLORS[i % len(COLORS)] for i, g in enumerate(groomers)}
 ytd_start = date(2026, 1, 1)
 ytd_data = {g: period_summary(g, ytd_start, TODAY) for g in groomers}
 ytd_total = {k: sum(ytd_data[g][k] for g in groomers)
-             for k in ["rev","comm","paid","tips","total","working_days","guar_days"]}
+             for k in ["rev","disc","comm","paid","tips","total","working_days","guar_days"]}
 # Add bather revenue to total revenue (no commission)
 ytd_bather_rev = sum(v for d, v in groom_by_day.get("_bather_revenue", {}).items()
                      if ytd_start.isoformat() <= d <= TODAY.isoformat())
@@ -316,10 +322,12 @@ def summary_table(data_dict, show_groomers=None):
     for g in groomers_to_show:
         d = data_dict[g]
         if d["rev"] == 0 and d["tips"] == 0: continue
+        disc_cell = f'<span style="color:#e53935">-{fc(d["disc"])}</span>' if d["disc"] > 0 else "—"
         rows += f'''<tr>
           <td>{groomer_badge(g)}</td>
           <td style="text-align:right;color:#888;font-weight:600">{d["working_days"]}</td>
           <td style="text-align:right">{fc(d["rev"])}</td>
+          <td style="text-align:right">{disc_cell}</td>
           <td style="text-align:right;color:#888">{fc(d["comm"])}</td>
           <td style="text-align:right;color:#1565c0;font-weight:600">{fc(d["paid"])}{"<br><span style='font-size:0.72rem;color:#1565c0'>↑ "+str(d['guar_days'])+" guar days</span>" if d["guar_days"] else ""}</td>
           <td style="text-align:right;color:#f57c00">{fc(d["tips"])}</td>
@@ -333,13 +341,15 @@ def daily_detail_rows(data_dict):
     for g in sorted(groomers, key=lambda x: -data_dict[x]["total"]):
         d = data_dict[g]
         if not d["daily"]: continue
-        rows += f'<tr style="background:#f8f7f4"><td colspan="8" style="padding:10px 14px;font-weight:700">{groomer_badge(g)}</td></tr>'
+        rows += f'<tr style="background:#f8f7f4"><td colspan="9" style="padding:10px 14px;font-weight:700">{groomer_badge(g)}</td></tr>'
         for day in d["daily"]:
             gflag = '<span style="background:#e3f2fd;color:#1565c0;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px">guarantee</span>' if day["guar_applied"] else ""
             wflag = '<span style="background:#fce4ec;color:#c62828;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:4px">waive</span>' if day["guar_applied"] else ""
+            day_disc = f'<span style="color:#e53935">-{fc(day["disc"])}</span>' if day.get("disc", 0) > 0 else "—"
             rows += f'''<tr>
               <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">{day["date"]}</td>
               <td style="text-align:right">{fc(day["rev"])}</td>
+              <td style="text-align:right">{day_disc}</td>
               <td style="text-align:right;color:#888">{fc(day["comm"])}</td>
               <td style="text-align:right;color:#1565c0">{fc(day["paid"])}{gflag}{wflag}</td>
               <td style="text-align:right;color:#f57c00">{fc(day["tips"])}</td>
@@ -492,6 +502,7 @@ TABLE_HEADER = '''<thead><tr>
   <th>Groomer</th>
   <th style="text-align:right">Days</th>
   <th style="text-align:right">Groom Revenue</th>
+  <th style="text-align:right">Discounts</th>
   <th style="text-align:right">50% Comm</th>
   <th style="text-align:right">Comm Paid</th>
   <th style="text-align:right">Tips</th>
@@ -570,6 +581,7 @@ tr:hover td{{background:#fafaf8!important}}
 <div class="panel active" id="panel-ytd">
   <div class="kpi-grid">
     <div class="kpi"><div class="kpi-val">{fc(ytd_total["rev"])}</div><div class="kpi-label">Groom Revenue</div></div>
+    <div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-{fc(ytd_total["disc"])}</div><div class="kpi-label">Grooming Discounts</div></div>
     <div class="kpi blue"><div class="kpi-val">{fc(ytd_total["paid"])}</div><div class="kpi-label">Commission Paid</div></div>
     <div class="kpi orange"><div class="kpi-val">{fc(ytd_total["tips"])}</div><div class="kpi-label">Tips</div></div>
     <div class="kpi green"><div class="kpi-val">{fc(ytd_total["total"])}</div><div class="kpi-label">Total Groomer Pay</div></div>
@@ -868,9 +880,10 @@ function renderPayPeriod(ppId) {{
   document.getElementById('pp-title').innerHTML = '<span style="content:none"></span>' + label;
 
   // Totals
-  var totRev=0, totPaid=0, totTips=0, totTotal=0, totGuar=0;
+  var totRev=0, totDisc=0, totPaid=0, totTips=0, totTotal=0, totGuar=0;
   GROOMERS.forEach(function(g) {{
     var d = data[g]; if (!d) return;
+    totDisc += (d.disc || 0);
     var adjPaid = d.paid, adjTotal = d.total;
     if (GUARANTEES[g] && d.daily) {{
       adjPaid = 0; adjTotal = 0;
@@ -905,6 +918,7 @@ function renderPayPeriod(ppId) {{
 
   document.getElementById('pp-kpis').innerHTML =
     '<div class="kpi"><div class="kpi-val">'+fc(totRev)+'</div><div class="kpi-label">Groom Revenue</div></div>'+
+    (totDisc > 0 ? '<div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-'+fc(totDisc)+'</div><div class="kpi-label">Grooming Discounts</div></div>' : '')+
     '<div class="kpi blue"><div class="kpi-val">'+fc(totPaid)+'</div><div class="kpi-label">Commission Paid</div></div>'+
     '<div class="kpi orange"><div class="kpi-val">'+fc(totTips)+'</div><div class="kpi-label">Tips</div></div>'+
     '<div class="kpi green"><div class="kpi-val">'+fc(totTotal)+'</div><div class="kpi-label">Total Pay</div></div>'+
@@ -923,10 +937,12 @@ function renderPayPeriod(ppId) {{
     var d = data[g]; if (!d || (d.rev===0 && d.tips===0)) return;
     var guarNote = d.guar_days ? '<br><span style="font-size:0.72rem;color:#1565c0">↑ '+d.guar_days+' guar days</span>' : '';
     var avgDay = d.working_days ? fc(d.total/d.working_days) : '—';
+    var discCell = (d.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(d.disc)+'</span>' : '—';
     rows += '<tr>'+
       '<td>'+groomerBadge(g)+'</td>'+
       '<td style="text-align:right;color:#888;font-weight:600">'+d.working_days+'</td>'+
       '<td style="text-align:right">'+fc(d.rev)+'</td>'+
+      '<td style="text-align:right">'+discCell+'</td>'+
       '<td style="text-align:right;color:#888">'+fc(d.comm)+'</td>'+
       '<td style="text-align:right;color:#1565c0;font-weight:600">'+fc(d.paid)+guarNote+'</td>'+
       '<td style="text-align:right;color:#f57c00">'+fc(d.tips)+'</td>'+
@@ -940,7 +956,7 @@ function renderPayPeriod(ppId) {{
   var detailRows = '';
   sorted.forEach(function(g) {{
     var d = data[g]; if (!d || !d.daily || !d.daily.length) return;
-    detailRows += '<tr style="background:#f8f7f4"><td colspan="8" style="padding:10px 14px;font-weight:700">'+groomerBadge(g)+'</td></tr>';
+    detailRows += '<tr style="background:#f8f7f4"><td colspan="9" style="padding:10px 14px;font-weight:700">'+groomerBadge(g)+'</td></tr>';
     d.daily.forEach(function(day) {{
       var guar = getGuarRate(g, day.date);
       var overrideKey = 'guar_override_'+day.date+'_'+g;
@@ -958,9 +974,11 @@ function renderPayPeriod(ppId) {{
                   '<button onclick="toggleGuar(&quot;'+overrideKey+'&quot;,&quot;'+ppId+'&quot;)" style="margin-left:6px;font-size:0.7rem;padding:1px 6px;border-radius:5px;border:1px solid #e57373;background:#fff;color:#e57373;cursor:pointer">waive</button>';
         }}
       }}
+      var dayDisc = (day.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(day.disc)+'</span>' : '—';
       detailRows += '<tr>'+
         '<td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">'+day.date+'</td>'+
         '<td style="text-align:right">'+fc(day.rev)+'</td>'+
+        '<td style="text-align:right">'+dayDisc+'</td>'+
         '<td style="text-align:right;color:#888">'+fc(day.comm)+'</td>'+
         '<td style="text-align:right;color:#1565c0">'+fc(actualPaid)+gflag+'</td>'+
         '<td style="text-align:right;color:#f57c00">'+fc(day.tips)+'</td>'+
