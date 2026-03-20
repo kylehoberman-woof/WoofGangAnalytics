@@ -273,8 +273,10 @@ while m_start <= TODAY:
     m_bather_pay = round(sum(h * BATHER_RATE for h in m_bather_hours.values()), 2)
     m_retail_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s_str, e_str)
     m_retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in m_retail_hours.items()), 2)
+    m_disc = round(sum(v for g in groom_disc_by_day for d, v in groom_disc_by_day[g].items()
+                       if m_start.isoformat() <= d <= m_end.isoformat()), 2)
     m_total_cost = m_paid + m_mgr + m_bather_pay + m_retail_pay + m_royalties + m_rent
-    m_net_margin = round(m_rev - m_total_cost, 2)
+    m_net_margin = round(m_rev - m_disc - m_total_cost, 2)
     m_net_margin_pct = round(m_net_margin / m_rev * 100, 1) if m_rev else 0
     monthly_data.append({
         "month": m_start.strftime("%b %Y"),
@@ -590,7 +592,7 @@ tr:hover td{{background:#fafaf8!important}}
     <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">{fc(ytd_retail_pay)}</div><div class="kpi-label">Retail Staff Pay</div></div>
     <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">{fc(ytd_total["rev"] * 0.07)}</div><div class="kpi-label">Royalties (7%)</div></div>
     <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">{fc(ytd_rent)}</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">{ytd_days_count} days</div></div>
-    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_total["rev"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_total["rev"] * 0.07 - ytd_rent)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_total["rev"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_total["rev"] * 0.07 - ytd_rent) / (ytd_total["rev"] or 1) * 100:.1f}%</div></div>
+    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_total["rev"] * 0.07 - ytd_rent)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_total["rev"] * 0.07 - ytd_rent) / (ytd_total["rev"] or 1) * 100:.1f}%</div></div>
     <div class="kpi grey"><div class="kpi-val">{int(ytd_total["guar_days"])}</div><div class="kpi-label">Guarantee Days</div></div>
   </div>
   <div class="info-box">Commission = 50% of daily grooming revenue. All groomers (except Kimberly) receive a <strong>$200/day guarantee</strong> for their first 90 days (Sue M: $300/day). Paid whichever is higher. Tips assigned to the groomer who performed the service.</div>
@@ -913,7 +915,7 @@ function renderPayPeriod(ppId) {{
   var retailHours = data._retail_hours || {{}};
   var retailRates = data._retail_rates || {{}};
   var totRetailPay = Object.values(retailPay).reduce(function(a,b){{return a+b;}}, 0);
-  var totMargin = totRev - totPaid - totRoyalties - totRent - totManager - totBatherPay - totRetailPay;
+  var totMargin = totRev - totDisc - totPaid - totRoyalties - totRent - totManager - totBatherPay - totRetailPay;
   var totMarginPct = totRev > 0 ? (totMargin / totRev * 100).toFixed(1) : '0.0';
 
   document.getElementById('pp-kpis').innerHTML =
