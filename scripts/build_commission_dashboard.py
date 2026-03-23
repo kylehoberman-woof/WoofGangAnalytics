@@ -89,21 +89,33 @@ if True:
                 if oid:
                     if oid not in order_groomer_rev: order_groomer_rev[oid] = {}
                     order_groomer_rev[oid][person] = order_groomer_rev[oid].get(person, 0) + price * qty
+    order_customer = {}
     for o in data["orders"]:
         oid = o.get("OrderId")
         if oid:
             order_date[oid] = (o.get("CreatedOn") or "")[:10]
             tip = float(o.get("Tips") or 0)
             if tip > 0: tips_by_order[oid] = tip
+            cid = o.get("CustomerId")
+            if cid:
+                order_customer[oid] = cid
 
 # For orders missing from orders table, use order_item date as fallback
 for oid in tips_by_order:
     if oid not in order_date:
-        # Find date from order_items
         for item in data["order_items"]:
             if item.get("OrderId") == oid:
                 order_date[oid] = (item.get("CreatedOn") or "")[:10]
                 break
+
+# Build (CustomerId, date) → groomer rev map for tip-only order matching
+customer_day_rev = defaultdict(lambda: defaultdict(float))
+for oid, rev_map in order_groomer_rev.items():
+    cid = order_customer.get(oid)
+    day = order_date.get(oid, "")
+    if cid and day and rev_map:
+        for groomer, rev in rev_map.items():
+            customer_day_rev[(cid, day)][groomer] += rev
 
 # Tips → groomer by day (split proportionally for multi-groomer orders)
 tips_by_day = defaultdict(lambda: defaultdict(float))
@@ -113,8 +125,17 @@ for oid, tip in tips_by_order.items():
     rev_map = order_groomer_rev.get(oid, {})
     if not rev_map:
         groomer = order_groomer.get(oid)
-        if groomer: tips_by_day[groomer][day] += tip
-    elif len(rev_map) == 1:
+        if groomer:
+            tips_by_day[groomer][day] += tip
+        else:
+            # Tip-only order (e.g. manual tip on separate transaction)
+            # Match back to original grooming order by CustomerId + same day
+            cid = order_customer.get(oid)
+            if cid:
+                rev_map = customer_day_rev.get((cid, day), {})
+    if not rev_map:
+        continue
+    if len(rev_map) == 1:
         tips_by_day[list(rev_map.keys())[0]][day] += tip
     else:
         total_rev = sum(rev_map.values())
