@@ -162,12 +162,15 @@ BATHER_NAME_MAP = {
 
 EXCLUDE_EMPLOYEES = {
     "Unknown", "Wgb Port Washington", "Wgb Hicksville", "Kyle Hoberman", "Julie Schorr",
+    "Cindy Szczudlo",                             # manager (paid from PW only)
     "Jessica G", "Angela R",                      # PW current bathers
     "Isabelle O", "Brian Labianca",               # PW former bathers
     "Hailey Imhof",                               # HV retail associate
-    "Sitara Nagrani", "Alize James",              # former sales associates
-    "Giana Golden", "Parker Spooner",             # former sales associates
-    "Casey Makowski", "Christine Brower",         # current sales associates
+    "Nicole Alarcon", "Naomi Dutes",              # HV sales associates
+    "Sophia Kurkowski", "Christina Ramkissoon",   # HV sales associates
+    "Sitara Nagrani", "Alize James",              # PW former sales associates
+    "Giana Golden", "Parker Spooner",             # PW former sales associates
+    "Casey Makowski", "Christine Brower",         # PW current sales associates
 }
 
 
