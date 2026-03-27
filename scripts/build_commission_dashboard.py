@@ -582,7 +582,7 @@ tr:hover td{{background:#fafaf8!important}}
 </head>
 <body>
 <div class="topbar">
-  <div><div class="topbar-title">💅 Woof Gang Port Washington — Groomer Commission</div>
+  <div><div style="display:flex;align-items:center;gap:12px"><a href="index.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600">&larr; Home</a><div class="topbar-title">💅 Woof Gang Port Washington — Groomer Commission</div></div>
   <div class="topbar-sub">50% commission · Guarantees: Maria C $200/day · Sue M $300/day</div></div>
   <div class="topbar-date">Updated {now_et}</div>
 </div>

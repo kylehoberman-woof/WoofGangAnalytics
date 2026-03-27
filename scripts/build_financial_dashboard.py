@@ -407,6 +407,8 @@ table{{width:100%;border-collapse:collapse;font-size:0.82rem}}
 th{{text-align:right;padding:8px 10px;color:#888;font-weight:600;border-bottom:2px solid #eee;white-space:nowrap}}
 th:first-child{{text-align:left}}
 td.n{{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.8rem}}
+tr:hover td{{background:#fdf0f5}}
+thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 .panel{{display:none}}.panel.active{{display:block}}
 .home-link{{color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600}}
 .home-link:hover{{color:white}}

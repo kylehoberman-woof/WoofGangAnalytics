@@ -210,8 +210,8 @@ for v in all_reorder_vendors:
             f'<td class="num">{i["needed"]}</td><td class="num">${i["cost"]:.2f}</td>'
             f'<td class="num">${i["est_cost"]:,.2f}</td><td>{badge(i["status"])}</td></tr>')
     reorder_html += (f'<div style="background:white;border-radius:10px;border-top:4px solid {vc};padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)">'
-        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
-        f'<div style="font-weight:700;font-size:1rem;color:{vc}">{v}</div>'
+        f'<div class="vendor-hdr" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+        f'<div style="font-weight:700;font-size:1rem;color:{vc}"><span class="collapse-arrow">▼</span>{v}</div>'
         f'<div style="font-size:0.85rem;color:#666">{len(items)} items · Est. <strong>${vtotal:,.0f}</strong></div></div>'
         f'<div style="overflow-x:auto"><table><thead><tr>{TH_REORDER}</tr></thead><tbody>{rows}</tbody></table></div></div>')
 
@@ -275,6 +275,22 @@ td.vendor-cell{font-size:12px;color:var(--mu);font-weight:500;}
 .badge-out{background:#fee2e2;color:#dc2626;}.badge-critical{background:#ffedd5;color:#ea580c;}
 .badge-low{background:#fef9c3;color:#ca8a04;}.badge-ok{background:#dcfce7;color:#16a34a;}.badge-na{background:#f3f4f6;color:#9ca3af;}
 .hidden{display:none !important;}.panel{display:none;}.panel.active{display:block;}
+/* Sortable headers */
+thead th{cursor:pointer;user-select:none;position:relative;}
+thead th:hover{background:var(--md);}
+thead th .sort-arrow{font-size:9px;margin-left:4px;opacity:0.5;}
+thead th.sorted-asc .sort-arrow,thead th.sorted-desc .sort-arrow{opacity:1;}
+/* Sticky table headers */
+.tw{position:relative;}
+thead th{position:sticky;top:0;z-index:10;}
+/* Collapsible vendor sections */
+.vendor-hdr{cursor:pointer;user-select:none;}
+.vendor-hdr:hover{opacity:0.85;}
+.vendor-hdr .collapse-arrow{transition:transform 0.2s;display:inline-block;margin-right:6px;font-size:0.8rem;}
+.vendor-hdr.collapsed .collapse-arrow{transform:rotate(-90deg);}
+/* Home link */
+.home-link{color:rgba(255,255,255,.7);text-decoration:none;font-size:12px;font-weight:600;margin-right:12px;}
+.home-link:hover{color:#fff;}
 """
 
 JS = """
@@ -292,6 +308,49 @@ function af(){
     r.classList.toggle('hidden',!(mf&&(!cs||r.textContent.toLowerCase().includes(cs))));
   });
 }
+
+// ── Sortable columns ──
+function sortTable(th){
+  var table=th.closest('table');
+  var tbody=table.querySelector('tbody');
+  if(!tbody) return;
+  var idx=Array.from(th.parentNode.children).indexOf(th);
+  var rows=Array.from(tbody.querySelectorAll('tr')).filter(function(r){return r.children.length>1;});
+  var isNum=th.classList.contains('num');
+  // Determine sort direction
+  var asc=!th.classList.contains('sorted-asc');
+  // Clear all sort indicators in this table
+  th.parentNode.querySelectorAll('th').forEach(function(h){h.classList.remove('sorted-asc','sorted-desc');});
+  th.classList.add(asc?'sorted-asc':'sorted-desc');
+  rows.sort(function(a,b){
+    var aVal=a.children[idx]?a.children[idx].textContent.trim():'';
+    var bVal=b.children[idx]?b.children[idx].textContent.trim():'';
+    if(isNum){
+      aVal=parseFloat(aVal.replace(/[^\\d.-]/g,''))||0;
+      bVal=parseFloat(bVal.replace(/[^\\d.-]/g,''))||0;
+      return asc?aVal-bVal:bVal-aVal;
+    }
+    return asc?aVal.localeCompare(bVal):bVal.localeCompare(aVal);
+  });
+  rows.forEach(function(r){tbody.appendChild(r);});
+}
+// Attach click handlers to all sortable headers
+document.querySelectorAll('thead th').forEach(function(th){
+  th.addEventListener('click',function(){sortTable(th);});
+  th.innerHTML+='<span class="sort-arrow">⇅</span>';
+});
+
+// ── Collapsible vendor sections in Reorder ──
+document.querySelectorAll('.vendor-hdr').forEach(function(hdr){
+  hdr.addEventListener('click',function(){
+    var body=hdr.nextElementSibling;
+    if(body){
+      var hidden=body.style.display==='none';
+      body.style.display=hidden?'block':'none';
+      hdr.classList.toggle('collapsed',!hidden);
+    }
+  });
+});
 """
 
 TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
@@ -302,7 +361,7 @@ html = f"""<!DOCTYPE html>
 <title>Woof Gang - Inventory Dashboard</title>
 <link href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">
 <style>{CSS}</style></head><body>
-<div class=\"hdr\"><div><h1>&#128062; Woof Gang Port Washington - Inventory Dashboard</h1><p>Retail stock levels, velocity &amp; reorder analysis</p></div><div class=\"hdr-r\">Updated {now}</div></div>
+<div class=\"hdr\"><div><div style=\"display:flex;align-items:center;gap:8px\"><a href=\"index.html\" class=\"home-link\">&larr; Home</a><h1>&#128062; Woof Gang Port Washington - Inventory Dashboard</h1></div><p>Retail stock levels, velocity &amp; reorder analysis</p></div><div class=\"hdr-r\">Updated {now}</div></div>
 <div class=\"sum-row\">
   <div class=\"sc s-out\"><div class=\"v\">{out_count}</div><div class=\"l\">Out of Stock</div></div>
   <div class=\"sc s-crit\"><div class=\"v\">{critical_count}</div><div class=\"l\">Critical (1-2)</div></div>
