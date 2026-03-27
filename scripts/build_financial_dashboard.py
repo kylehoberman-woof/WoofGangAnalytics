@@ -159,8 +159,7 @@ while m_start <= TODAY:
     retail_hrs = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s, e)
     retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in retail_hrs.items()), 2)
     royalties = round(total_rev * 0.07, 2)
-    days_in_month = (m_end - m_start).days + 1
-    rent = round(DAILY_RENT * days_in_month, 2)
+    rent = MONTHLY_RENT  # flat $7,700/month regardless of days
 
     gross_profit = round(net_rev - retail_cogs - comm_paid, 2)
     total_opex = round(mgr + bather_pay + retail_pay + royalties + rent, 2)

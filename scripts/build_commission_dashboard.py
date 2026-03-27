@@ -227,9 +227,10 @@ ytd_bather_rev = sum(v for d, v in groom_by_day.get("_bather_revenue", {}).items
                      if ytd_start.isoformat() <= d <= TODAY.isoformat())
 ytd_total["rev"] += ytd_bather_rev
 
-DAILY_RENT   = MONTHLY_RENT * 12 / 365
+DAILY_RENT   = MONTHLY_RENT * 12 / 365  # kept for pay period calc
 ytd_days_count = (TODAY - ytd_start).days + 1
-ytd_rent = round(DAILY_RENT * ytd_days_count, 2)
+ytd_months = TODAY.month  # number of months in YTD (Jan=1, Feb=2, etc.)
+ytd_rent = MONTHLY_RENT * ytd_months
 
 def manager_salary_for_range(start, end):
     """Returns (total_pay, old_days, new_days, daily_rows, bonus) accounting for salary change and bonus."""
@@ -285,7 +286,7 @@ while m_start <= TODAY:
     m_mgr, _, _, _, _ = manager_salary_for_range(m_start, m_end)
     m_days = sum(1 for n in range((m_end - m_start).days + 1)
                  if (m_start + timedelta(days=n)).weekday() < 5)
-    m_rent = round(DAILY_RENT * ((m_end - m_start).days + 1), 2)
+    m_rent = MONTHLY_RENT  # flat monthly rent
     m_royalties = round(m_rev * 0.07, 2)
     # Bather pay for this month from time clocks
     s_str = m_start.strftime("%Y-%m-%d")
