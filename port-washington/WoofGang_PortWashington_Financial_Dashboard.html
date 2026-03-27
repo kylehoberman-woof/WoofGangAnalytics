@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Woof Gang Port Washington — Financial Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f4f0;color:#1a1a2e}
+.topbar{background:#C4276E;padding:18px 32px;color:white;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3);display:flex;justify-content:space-between;align-items:center}
+.topbar-title{font-size:1.1rem;font-weight:700}
+.topbar-sub{color:rgba(255,255,255,0.75);font-size:0.82rem;margin-top:2px}
+.topbar-time{font-family:'DM Mono',monospace;font-size:0.78rem;opacity:0.8}
+.tabs{background:white;border-bottom:2px solid #eee;position:sticky;top:56px;z-index:99;display:flex;padding:0 24px}
+.tab{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit}
+.tab.active{color:#C4276E;border-bottom-color:#C4276E}
+.page{max-width:1400px;margin:0 auto;padding:28px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:white;border-radius:12px;padding:16px;text-align:center;border-top:3px solid #C4276E;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.kpi-val{font-size:1.5rem;font-weight:700}
+.kpi-label{font-size:0.73rem;color:#999;margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.card{background:white;border-radius:14px;padding:22px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.stitle{font-size:1.05rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.stitle::before{content:'';display:inline-block;width:4px;height:18px;background:#C4276E;border-radius:2px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.82rem}
+th{text-align:right;padding:8px 10px;color:#888;font-weight:600;border-bottom:2px solid #eee;white-space:nowrap}
+th:first-child{text-align:left}
+td.n{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.8rem}
+.panel{display:none}.panel.active{display:block}
+.home-link{color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600}
+.home-link:hover{color:white}
+</style>
+</head><body>
+
+<div class="topbar">
+  <div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="index.html" class="home-link">← Home</a>
+      <div class="topbar-title">💰 Woof Gang Port Washington — Financial Dashboard</div>
+    </div>
+    <div class="topbar-sub">Revenue · COGS · Operating Expenses · Net Margin</div>
+  </div>
+  <div class="topbar-time">Updated March 26, 2026 at 10:06 PM ET</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('ytd',this)">2026 YTD</button>
+  <button class="tab" onclick="showTab('monthly',this)">Monthly P&L</button>
+</div>
+
+<div class="page">
+
+<!-- ── YTD ── -->
+<div class="panel active" id="panel-ytd">
+  <div class="kpi-grid">
+    <div class="kpi" style="border-color:#C4276E"><div class="kpi-val" style="color:#C4276E">$183,165.00</div><div class="kpi-label">Grooming Revenue</div></div>
+    <div class="kpi" style="border-color:#1B6B6B"><div class="kpi-val" style="color:#1B6B6B">$45,133.05</div><div class="kpi-label">Retail Revenue</div></div>
+    <div class="kpi" style="border-color:#1a1a2e"><div class="kpi-val" style="color:#1a1a2e">$228,298.05</div><div class="kpi-label">Total Revenue</div></div>
+    <div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-$1,189.08</div><div class="kpi-label">Grooming Discounts</div></div>
+    <div class="kpi" style="border-color:#e65100"><div class="kpi-val" style="color:#e65100">$21,684.68</div><div class="kpi-label">Retail COGS</div></div>
+    <div class="kpi" style="border-color:#1565C0"><div class="kpi-val" style="color:#1565C0">$82,962.50</div><div class="kpi-label">Groomer Commission</div></div>
+    <div class="kpi" style="border-color:#2E7D32"><div class="kpi-val" style="color:#2E7D32">$122,461.79</div><div class="kpi-label">Gross Profit</div><div style="font-size:0.78rem;color:#2E7D32;margin-top:3px;font-weight:600">53.6%</div></div>
+    <div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">$17,396.15</div><div class="kpi-label">Manager Salary</div></div>
+    <div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">$7,070.64</div><div class="kpi-label">Bather Pay</div></div>
+    <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">$15,106.62</div><div class="kpi-label">Retail Staff Pay</div></div>
+    <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">$15,980.87</div><div class="kpi-label">Royalties (7%)</div></div>
+    <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">$21,517.81</div><div class="kpi-label">Rent</div></div>
+    <div class="kpi" style="border-color:#2E7D32"><div class="kpi-val" style="color:#2E7D32">$45,389.70</div><div class="kpi-label">Net Margin</div><div style="font-size:0.78rem;color:#2E7D32;margin-top:3px;font-weight:600">19.9%</div></div>
+    <div class="kpi" style="border-color:#F57C00"><div class="kpi-val" style="color:#F57C00">$25,158.02</div><div class="kpi-label">Tips Collected</div></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Cost Breakdown</div>
+    <div style="max-width:500px;margin:0 auto"><canvas id="chart-costs"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">P&L Waterfall</div>
+    <div style="max-width:800px;margin:0 auto"><canvas id="chart-waterfall" height="300"></canvas></div>
+  </div>
+</div>
+
+<!-- ── Monthly ── -->
+<div class="panel" id="panel-monthly">
+  <div class="card">
+    <div class="stitle">Monthly P&L</div>
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th style="text-align:left">Month</th>
+        <th>Groom Rev</th><th>Retail Rev</th><th>Total Rev</th>
+        <th>Discounts</th><th>Retail COGS</th><th>Commission</th><th>Gross Profit</th>
+        <th>Manager</th><th>Bather</th><th>Retail Staff</th><th>Royalties</th><th>Rent</th>
+        <th>Net Margin</th>
+      </tr></thead>
+      <tbody><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Sep 2024</td>
+      <td class="n">$1,820.00</td>
+      <td class="n">$3,826.32</td>
+      <td class="n" style="font-weight:600">$5,646.32</td>
+      <td class="n" style="color:#e53935">-$0.00</td>
+      <td class="n">$1,739.46</td>
+      <td class="n">$1,205.00</td>
+      <td class="n" style="font-weight:600">$2,701.86</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$439.66</td>
+      <td class="n">$395.24</td>
+      <td class="n">$7,594.52</td>
+      <td class="n" style="font-weight:700;color:#e53935">-$5,727.56<br><span style="font-size:0.72rem;font-weight:400">-101.4%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Oct 2024</td>
+      <td class="n">$18,890.00</td>
+      <td class="n">$18,918.60</td>
+      <td class="n" style="font-weight:600">$37,808.60</td>
+      <td class="n" style="color:#e53935">-$0.00</td>
+      <td class="n">$8,458.63</td>
+      <td class="n">$12,870.00</td>
+      <td class="n" style="font-weight:600">$16,479.97</td>
+      <td class="n">$0.00</td>
+      <td class="n">$2,523.48</td>
+      <td class="n">$7,705.64</td>
+      <td class="n">$2,646.60</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#e53935">-$4,243.42<br><span style="font-size:0.72rem;font-weight:400">-11.2%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Nov 2024</td>
+      <td class="n">$30,265.00</td>
+      <td class="n">$17,895.64</td>
+      <td class="n" style="font-weight:600">$48,160.64</td>
+      <td class="n" style="color:#e53935">-$2,488.00</td>
+      <td class="n">$8,614.49</td>
+      <td class="n">$15,690.00</td>
+      <td class="n" style="font-weight:600">$21,368.15</td>
+      <td class="n">$0.00</td>
+      <td class="n">$1,348.10</td>
+      <td class="n">$7,864.29</td>
+      <td class="n">$3,371.24</td>
+      <td class="n">$7,594.52</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$1,190.00<br><span style="font-size:0.72rem;font-weight:400">2.5%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Dec 2024</td>
+      <td class="n">$38,510.00</td>
+      <td class="n">$21,915.37</td>
+      <td class="n" style="font-weight:600">$60,425.37</td>
+      <td class="n" style="color:#e53935">-$2,753.50</td>
+      <td class="n">$9,726.95</td>
+      <td class="n">$18,197.50</td>
+      <td class="n" style="font-weight:600">$29,747.42</td>
+      <td class="n">$0.00</td>
+      <td class="n">$2,000.56</td>
+      <td class="n">$6,043.90</td>
+      <td class="n">$4,229.78</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$9,625.51<br><span style="font-size:0.72rem;font-weight:400">15.9%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Jan 2025</td>
+      <td class="n">$37,975.00</td>
+      <td class="n">$13,084.10</td>
+      <td class="n" style="font-weight:600">$51,059.10</td>
+      <td class="n" style="color:#e53935">-$1,041.50</td>
+      <td class="n">$6,104.42</td>
+      <td class="n">$17,815.00</td>
+      <td class="n" style="font-weight:600">$26,098.18</td>
+      <td class="n">$0.00</td>
+      <td class="n">$2,040.17</td>
+      <td class="n">$5,747.12</td>
+      <td class="n">$3,574.14</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$6,889.08<br><span style="font-size:0.72rem;font-weight:400">13.5%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Feb 2025</td>
+      <td class="n">$35,185.00</td>
+      <td class="n">$14,021.62</td>
+      <td class="n" style="font-weight:600">$49,206.62</td>
+      <td class="n" style="color:#e53935">-$893.75</td>
+      <td class="n">$6,620.60</td>
+      <td class="n">$16,095.00</td>
+      <td class="n" style="font-weight:600">$25,597.27</td>
+      <td class="n">$0.00</td>
+      <td class="n">$1,862.52</td>
+      <td class="n">$4,783.25</td>
+      <td class="n">$3,444.46</td>
+      <td class="n">$7,088.22</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$8,418.82<br><span style="font-size:0.72rem;font-weight:400">17.1%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Mar 2025</td>
+      <td class="n">$44,104.00</td>
+      <td class="n">$14,001.06</td>
+      <td class="n" style="font-weight:600">$58,105.06</td>
+      <td class="n" style="color:#e53935">-$1,290.00</td>
+      <td class="n">$6,695.28</td>
+      <td class="n">$19,847.50</td>
+      <td class="n" style="font-weight:600">$30,272.28</td>
+      <td class="n">$5,250.00</td>
+      <td class="n">$2,102.56</td>
+      <td class="n">$3,874.48</td>
+      <td class="n">$4,067.35</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$7,130.22<br><span style="font-size:0.72rem;font-weight:400">12.3%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Apr 2025</td>
+      <td class="n">$43,850.00</td>
+      <td class="n">$13,265.52</td>
+      <td class="n" style="font-weight:600">$57,115.52</td>
+      <td class="n" style="color:#e53935">-$893.50</td>
+      <td class="n">$6,397.28</td>
+      <td class="n">$19,945.00</td>
+      <td class="n" style="font-weight:600">$29,879.74</td>
+      <td class="n">$5,500.00</td>
+      <td class="n">$1,951.26</td>
+      <td class="n">$3,160.65</td>
+      <td class="n">$3,998.09</td>
+      <td class="n">$7,594.52</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$7,675.22<br><span style="font-size:0.72rem;font-weight:400">13.4%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">May 2025</td>
+      <td class="n">$42,870.00</td>
+      <td class="n">$15,167.99</td>
+      <td class="n" style="font-weight:600">$58,037.99</td>
+      <td class="n" style="color:#e53935">-$420.50</td>
+      <td class="n">$7,296.21</td>
+      <td class="n">$18,752.50</td>
+      <td class="n" style="font-weight:600">$31,568.78</td>
+      <td class="n">$5,500.00</td>
+      <td class="n">$3,553.34</td>
+      <td class="n">$4,053.65</td>
+      <td class="n">$4,062.66</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$6,551.46<br><span style="font-size:0.72rem;font-weight:400">11.3%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Jun 2025</td>
+      <td class="n">$53,220.00</td>
+      <td class="n">$13,478.44</td>
+      <td class="n" style="font-weight:600">$66,698.44</td>
+      <td class="n" style="color:#e53935">-$442.25</td>
+      <td class="n">$6,419.91</td>
+      <td class="n">$24,460.00</td>
+      <td class="n" style="font-weight:600">$35,376.28</td>
+      <td class="n">$5,250.00</td>
+      <td class="n">$2,911.93</td>
+      <td class="n">$4,131.93</td>
+      <td class="n">$4,668.89</td>
+      <td class="n">$7,594.52</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$10,819.01<br><span style="font-size:0.72rem;font-weight:400">16.2%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Jul 2025</td>
+      <td class="n">$56,335.00</td>
+      <td class="n">$15,562.33</td>
+      <td class="n" style="font-weight:600">$71,897.33</td>
+      <td class="n" style="color:#e53935">-$238.00</td>
+      <td class="n">$7,652.78</td>
+      <td class="n">$25,375.00</td>
+      <td class="n" style="font-weight:600">$38,631.55</td>
+      <td class="n">$5,750.00</td>
+      <td class="n">$3,192.09</td>
+      <td class="n">$4,225.03</td>
+      <td class="n">$5,032.81</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$12,583.95<br><span style="font-size:0.72rem;font-weight:400">17.5%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Aug 2025</td>
+      <td class="n">$57,710.00</td>
+      <td class="n">$17,341.53</td>
+      <td class="n" style="font-weight:600">$75,051.53</td>
+      <td class="n" style="color:#e53935">-$391.50</td>
+      <td class="n">$9,866.62</td>
+      <td class="n">$25,117.50</td>
+      <td class="n" style="font-weight:600">$39,675.91</td>
+      <td class="n">$5,250.00</td>
+      <td class="n">$3,095.19</td>
+      <td class="n">$4,653.29</td>
+      <td class="n">$5,253.61</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$13,576.15<br><span style="font-size:0.72rem;font-weight:400">18.1%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Sep 2025</td>
+      <td class="n">$60,635.00</td>
+      <td class="n">$16,126.55</td>
+      <td class="n" style="font-weight:600">$76,761.55</td>
+      <td class="n" style="color:#e53935">-$479.00</td>
+      <td class="n">$9,270.62</td>
+      <td class="n">$27,460.00</td>
+      <td class="n" style="font-weight:600">$39,551.93</td>
+      <td class="n">$5,500.00</td>
+      <td class="n">$2,081.99</td>
+      <td class="n">$3,796.77</td>
+      <td class="n">$5,373.31</td>
+      <td class="n">$7,594.52</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$15,205.34<br><span style="font-size:0.72rem;font-weight:400">19.8%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Oct 2025</td>
+      <td class="n">$69,260.00</td>
+      <td class="n">$16,405.49</td>
+      <td class="n" style="font-weight:600">$85,665.49</td>
+      <td class="n" style="color:#e53935">-$741.75</td>
+      <td class="n">$7,736.43</td>
+      <td class="n">$32,727.50</td>
+      <td class="n" style="font-weight:600">$44,459.81</td>
+      <td class="n">$5,750.00</td>
+      <td class="n">$2,606.95</td>
+      <td class="n">$3,309.61</td>
+      <td class="n">$5,996.58</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$18,949.00<br><span style="font-size:0.72rem;font-weight:400">22.1%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Nov 2025</td>
+      <td class="n">$62,040.00</td>
+      <td class="n">$17,340.76</td>
+      <td class="n" style="font-weight:600">$79,380.76</td>
+      <td class="n" style="color:#e53935">-$462.00</td>
+      <td class="n">$8,075.75</td>
+      <td class="n">$27,272.50</td>
+      <td class="n" style="font-weight:600">$43,570.51</td>
+      <td class="n">$5,000.00</td>
+      <td class="n">$3,045.72</td>
+      <td class="n">$5,036.94</td>
+      <td class="n">$5,556.65</td>
+      <td class="n">$7,594.52</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$17,336.68<br><span style="font-size:0.72rem;font-weight:400">21.8%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Dec 2025</td>
+      <td class="n">$62,275.00</td>
+      <td class="n">$23,964.60</td>
+      <td class="n" style="font-weight:600">$86,239.60</td>
+      <td class="n" style="color:#e53935">-$418.00</td>
+      <td class="n">$10,834.13</td>
+      <td class="n">$27,915.00</td>
+      <td class="n" style="font-weight:600">$47,072.47</td>
+      <td class="n">$5,750.00</td>
+      <td class="n">$2,558.67</td>
+      <td class="n">$6,252.99</td>
+      <td class="n">$6,036.77</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$18,626.37<br><span style="font-size:0.72rem;font-weight:400">21.6%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Jan 2026</td>
+      <td class="n">$63,520.00</td>
+      <td class="n">$15,114.70</td>
+      <td class="n" style="font-weight:600">$78,634.70</td>
+      <td class="n" style="color:#e53935">-$402.58</td>
+      <td class="n">$7,112.31</td>
+      <td class="n">$28,735.00</td>
+      <td class="n" style="font-weight:600">$42,384.81</td>
+      <td class="n">$5,500.00</td>
+      <td class="n">$2,447.83</td>
+      <td class="n">$4,531.36</td>
+      <td class="n">$5,504.43</td>
+      <td class="n">$7,847.67</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$16,553.52<br><span style="font-size:0.72rem;font-weight:400">21.1%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Feb 2026</td>
+      <td class="n">$59,350.00</td>
+      <td class="n">$16,404.41</td>
+      <td class="n" style="font-weight:600">$75,754.41</td>
+      <td class="n" style="color:#e53935">-$438.00</td>
+      <td class="n">$7,995.42</td>
+      <td class="n">$26,785.00</td>
+      <td class="n" style="font-weight:600">$40,535.99</td>
+      <td class="n">$5,000.00</td>
+      <td class="n">$2,380.85</td>
+      <td class="n">$5,800.72</td>
+      <td class="n">$5,302.81</td>
+      <td class="n">$7,088.22</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$14,963.39<br><span style="font-size:0.72rem;font-weight:400">19.8%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Mar 2026</td>
+      <td class="n">$60,295.00</td>
+      <td class="n">$13,613.94</td>
+      <td class="n" style="font-weight:600">$73,908.94</td>
+      <td class="n" style="color:#e53935">-$348.50</td>
+      <td class="n">$6,576.95</td>
+      <td class="n">$27,442.50</td>
+      <td class="n" style="font-weight:600">$39,540.99</td>
+      <td class="n">$6,896.15</td>
+      <td class="n">$2,241.96</td>
+      <td class="n">$4,774.54</td>
+      <td class="n">$5,173.63</td>
+      <td class="n">$6,581.92</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$13,872.79<br><span style="font-size:0.72rem;font-weight:400">18.8%</span></td>
+    </tr></tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Revenue vs Net Margin by Month</div>
+    <canvas id="chart-monthly" height="280"></canvas>
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center;padding:24px;font-size:0.8rem;color:#999">
+  <strong style="color:#C4276E">Woof Gang Bakery &amp; Grooming</strong> — Port Washington, NY &middot; Financial Dashboard
+</div>
+
+<script>
+var DATA = [{"label": "Sep 2024", "year": 2024, "groom_rev": 1820.0, "retail_rev": 3826.32, "total_rev": 5646.32, "groom_disc": 0, "net_rev": 5646.32, "retail_cogs": 1739.46, "comm_paid": 1205.0, "gross_profit": 2701.86, "mgr": 0.0, "bather_pay": 0, "retail_pay": 439.66, "royalties": 395.24, "rent": 7594.52, "total_opex": 8429.42, "net_margin": -5727.56, "net_margin_pct": -101.4, "tips": 232.6}, {"label": "Oct 2024", "year": 2024, "groom_rev": 18890.0, "retail_rev": 18918.6, "total_rev": 37808.6, "groom_disc": 0, "net_rev": 37808.6, "retail_cogs": 8458.63, "comm_paid": 12870.0, "gross_profit": 16479.97, "mgr": 0.0, "bather_pay": 2523.48, "retail_pay": 7705.64, "royalties": 2646.6, "rent": 7847.67, "total_opex": 20723.39, "net_margin": -4243.42, "net_margin_pct": -11.2, "tips": 1962.21}, {"label": "Nov 2024", "year": 2024, "groom_rev": 30265.0, "retail_rev": 17895.64, "total_rev": 48160.64, "groom_disc": 2488.0, "net_rev": 45672.64, "retail_cogs": 8614.49, "comm_paid": 15690.0, "gross_profit": 21368.15, "mgr": 0.0, "bather_pay": 1348.1, "retail_pay": 7864.29, "royalties": 3371.24, "rent": 7594.52, "total_opex": 20178.15, "net_margin": 1190.0, "net_margin_pct": 2.5, "tips": 3310.65}, {"label": "Dec 2024", "year": 2024, "groom_rev": 38510.0, "retail_rev": 21915.37, "total_rev": 60425.369999999995, "groom_disc": 2753.5, "net_rev": 57671.869999999995, "retail_cogs": 9726.95, "comm_paid": 18197.5, "gross_profit": 29747.42, "mgr": 0.0, "bather_pay": 2000.56, "retail_pay": 6043.9, "royalties": 4229.78, "rent": 7847.67, "total_opex": 20121.91, "net_margin": 9625.51, "net_margin_pct": 15.9, "tips": 4250.59}, {"label": "Jan 2025", "year": 2025, "groom_rev": 37975.0, "retail_rev": 13084.1, "total_rev": 51059.1, "groom_disc": 1041.5, "net_rev": 50017.6, "retail_cogs": 6104.42, "comm_paid": 17815.0, "gross_profit": 26098.18, "mgr": 0.0, "bather_pay": 2040.17, "retail_pay": 5747.12, "royalties": 3574.14, "rent": 7847.67, "total_opex": 19209.1, "net_margin": 6889.08, "net_margin_pct": 13.5, "tips": 4313.0}, {"label": "Feb 2025", "year": 2025, "groom_rev": 35185.0, "retail_rev": 14021.62, "total_rev": 49206.62, "groom_disc": 893.75, "net_rev": 48312.87, "retail_cogs": 6620.6, "comm_paid": 16095.0, "gross_profit": 25597.27, "mgr": 0.0, "bather_pay": 1862.52, "retail_pay": 4783.25, "royalties": 3444.46, "rent": 7088.22, "total_opex": 17178.45, "net_margin": 8418.82, "net_margin_pct": 17.1, "tips": 4014.3}, {"label": "Mar 2025", "year": 2025, "groom_rev": 44104.0, "retail_rev": 14001.06, "total_rev": 58105.06, "groom_disc": 1290.0, "net_rev": 56815.06, "retail_cogs": 6695.28, "comm_paid": 19847.5, "gross_profit": 30272.28, "mgr": 5250.0, "bather_pay": 2102.56, "retail_pay": 3874.48, "royalties": 4067.35, "rent": 7847.67, "total_opex": 23142.06, "net_margin": 7130.22, "net_margin_pct": 12.3, "tips": 5508.25}, {"label": "Apr 2025", "year": 2025, "groom_rev": 43850.0, "retail_rev": 13265.52, "total_rev": 57115.520000000004, "groom_disc": 893.5, "net_rev": 56222.020000000004, "retail_cogs": 6397.28, "comm_paid": 19945.0, "gross_profit": 29879.74, "mgr": 5500.0, "bather_pay": 1951.26, "retail_pay": 3160.65, "royalties": 3998.09, "rent": 7594.52, "total_opex": 22204.52, "net_margin": 7675.22, "net_margin_pct": 13.4, "tips": 5003.43}, {"label": "May 2025", "year": 2025, "groom_rev": 42870.0, "retail_rev": 15167.99, "total_rev": 58037.99, "groom_disc": 420.5, "net_rev": 57617.49, "retail_cogs": 7296.21, "comm_paid": 18752.5, "gross_profit": 31568.78, "mgr": 5500.0, "bather_pay": 3553.34, "retail_pay": 4053.65, "royalties": 4062.66, "rent": 7847.67, "total_opex": 25017.32, "net_margin": 6551.46, "net_margin_pct": 11.3, "tips": 5372.0}, {"label": "Jun 2025", "year": 2025, "groom_rev": 53220.0, "retail_rev": 13478.44, "total_rev": 66698.44, "groom_disc": 442.25, "net_rev": 66256.19, "retail_cogs": 6419.91, "comm_paid": 24460.0, "gross_profit": 35376.28, "mgr": 5250.0, "bather_pay": 2911.93, "retail_pay": 4131.93, "royalties": 4668.89, "rent": 7594.52, "total_opex": 24557.27, "net_margin": 10819.01, "net_margin_pct": 16.2, "tips": 6242.17}, {"label": "Jul 2025", "year": 2025, "groom_rev": 56335.0, "retail_rev": 15562.33, "total_rev": 71897.33, "groom_disc": 238.0, "net_rev": 71659.33, "retail_cogs": 7652.78, "comm_paid": 25375.0, "gross_profit": 38631.55, "mgr": 5750.0, "bather_pay": 3192.09, "retail_pay": 4225.03, "royalties": 5032.81, "rent": 7847.67, "total_opex": 26047.6, "net_margin": 12583.95, "net_margin_pct": 17.5, "tips": 6866.66}, {"label": "Aug 2025", "year": 2025, "groom_rev": 57710.0, "retail_rev": 17341.53, "total_rev": 75051.53, "groom_disc": 391.5, "net_rev": 74660.03, "retail_cogs": 9866.62, "comm_paid": 25117.5, "gross_profit": 39675.91, "mgr": 5250.0, "bather_pay": 3095.19, "retail_pay": 4653.29, "royalties": 5253.61, "rent": 7847.67, "total_opex": 26099.76, "net_margin": 13576.15, "net_margin_pct": 18.1, "tips": 7224.05}, {"label": "Sep 2025", "year": 2025, "groom_rev": 60635.0, "retail_rev": 16126.55, "total_rev": 76761.55, "groom_disc": 479.0, "net_rev": 76282.55, "retail_cogs": 9270.62, "comm_paid": 27460.0, "gross_profit": 39551.93, "mgr": 5500.0, "bather_pay": 2081.99, "retail_pay": 3796.77, "royalties": 5373.31, "rent": 7594.52, "total_opex": 24346.59, "net_margin": 15205.34, "net_margin_pct": 19.8, "tips": 7611.27}, {"label": "Oct 2025", "year": 2025, "groom_rev": 69260.0, "retail_rev": 16405.49, "total_rev": 85665.49, "groom_disc": 741.75, "net_rev": 84923.74, "retail_cogs": 7736.43, "comm_paid": 32727.5, "gross_profit": 44459.81, "mgr": 5750.0, "bather_pay": 2606.95, "retail_pay": 3309.61, "royalties": 5996.58, "rent": 7847.67, "total_opex": 25510.81, "net_margin": 18949.0, "net_margin_pct": 22.1, "tips": 8403.75}, {"label": "Nov 2025", "year": 2025, "groom_rev": 62040.0, "retail_rev": 17340.76, "total_rev": 79380.76, "groom_disc": 462.0, "net_rev": 78918.76, "retail_cogs": 8075.75, "comm_paid": 27272.5, "gross_profit": 43570.51, "mgr": 5000.0, "bather_pay": 3045.72, "retail_pay": 5036.94, "royalties": 5556.65, "rent": 7594.52, "total_opex": 26233.83, "net_margin": 17336.68, "net_margin_pct": 21.8, "tips": 7953.65}, {"label": "Dec 2025", "year": 2025, "groom_rev": 62275.0, "retail_rev": 23964.6, "total_rev": 86239.6, "groom_disc": 418.0, "net_rev": 85821.6, "retail_cogs": 10834.13, "comm_paid": 27915.0, "gross_profit": 47072.47, "mgr": 5750.0, "bather_pay": 2558.67, "retail_pay": 6252.99, "royalties": 6036.77, "rent": 7847.67, "total_opex": 28446.1, "net_margin": 18626.37, "net_margin_pct": 21.6, "tips": 8118.65}, {"label": "Jan 2026", "year": 2026, "groom_rev": 63520.0, "retail_rev": 15114.7, "total_rev": 78634.7, "groom_disc": 402.58, "net_rev": 78232.12, "retail_cogs": 7112.31, "comm_paid": 28735.0, "gross_profit": 42384.81, "mgr": 5500.0, "bather_pay": 2447.83, "retail_pay": 4531.36, "royalties": 5504.43, "rent": 7847.67, "total_opex": 25831.29, "net_margin": 16553.52, "net_margin_pct": 21.1, "tips": 8795.36}, {"label": "Feb 2026", "year": 2026, "groom_rev": 59350.0, "retail_rev": 16404.41, "total_rev": 75754.41, "groom_disc": 438.0, "net_rev": 75316.41, "retail_cogs": 7995.42, "comm_paid": 26785.0, "gross_profit": 40535.99, "mgr": 5000.0, "bather_pay": 2380.85, "retail_pay": 5800.72, "royalties": 5302.81, "rent": 7088.22, "total_opex": 25572.6, "net_margin": 14963.39, "net_margin_pct": 19.8, "tips": 8119.5}, {"label": "Mar 2026", "year": 2026, "groom_rev": 60295.0, "retail_rev": 13613.94, "total_rev": 73908.94, "groom_disc": 348.5, "net_rev": 73560.44, "retail_cogs": 6576.95, "comm_paid": 27442.5, "gross_profit": 39540.99, "mgr": 6896.15, "bather_pay": 2241.96, "retail_pay": 4774.54, "royalties": 5173.63, "rent": 6581.92, "total_opex": 25668.2, "net_margin": 13872.79, "net_margin_pct": 18.8, "tips": 8243.16}];
+
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function fc(n) { return '$' + Math.round(n).toLocaleString(); }
+
+// ── Cost breakdown donut ──
+var costData = [
+  82962.5,
+  21684.68,
+  17396.15,
+  7070.64,
+  15106.62,
+  15980.87,
+  21517.81,
+  1189.08
+];
+new Chart(document.getElementById('chart-costs'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Groomer Commission','Retail COGS','Manager','Bather Pay','Retail Staff','Royalties','Rent','Discounts'],
+    datasets: [{
+      data: costData,
+      backgroundColor: ['#1565C0','#e65100','#5C6BC0','#00796B','#6A1B9A','#AD1457','#6D4C41','#e53935']
+    }]
+  },
+  options: {
+    plugins: {
+      legend: { position: 'right', labels: { font: { family: "'DM Sans'" } } },
+      tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + fc(ctx.raw); } } }
+    }
+  }
+});
+
+// ── P&L waterfall ──
+var wf = [
+  { label: 'Groom Rev', val: 183165.0 },
+  { label: 'Retail Rev', val: 45133.05 },
+  { label: 'Discounts', val: -1189.08 },
+  { label: 'Retail COGS', val: -21684.68 },
+  { label: 'Commission', val: -82962.5 },
+  { label: 'Manager', val: -17396.15 },
+  { label: 'Bather', val: -7070.64 },
+  { label: 'Retail Staff', val: -15106.62 },
+  { label: 'Royalties', val: -15980.87 },
+  { label: 'Rent', val: -21517.81 },
+];
+var running = 0;
+var wfBases = [], wfVals = [], wfColors = [];
+wf.forEach(function(w) {
+  if (w.val >= 0) {
+    wfBases.push(running);
+    wfVals.push(w.val);
+    wfColors.push('#2E7D32');
+    running += w.val;
+  } else {
+    running += w.val;
+    wfBases.push(running);
+    wfVals.push(Math.abs(w.val));
+    wfColors.push('#e53935');
+  }
+});
+// Add net margin bar
+wfBases.push(0);
+wfVals.push(running);
+wfColors.push(running >= 0 ? '#1B6B6B' : '#e53935');
+wf.push({ label: 'Net Margin' });
+
+new Chart(document.getElementById('chart-waterfall'), {
+  type: 'bar',
+  data: {
+    labels: wf.map(function(w) { return w.label; }),
+    datasets: [
+      { data: wfBases, backgroundColor: 'transparent', stack: 's' },
+      { data: wfVals, backgroundColor: wfColors, stack: 's' }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            if (ctx.datasetIndex === 0) return '';
+            var i = ctx.dataIndex;
+            var total = wfBases[i] + wfVals[i];
+            return ctx.label + ': ' + fc(wf[i] && wf[i].val !== undefined ? wf[i].val : total);
+          }
+        }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: "'DM Sans'", size: 11 } } },
+      y: { ticks: { callback: function(v) { return fc(v); }, font: { family: "'DM Mono'" } } }
+    }
+  }
+});
+
+// ── Monthly revenue vs margin chart ──
+var labels2026 = DATA.filter(function(m) { return m.year >= 2025; }).map(function(m) { return m.label; });
+var revs = DATA.filter(function(m) { return m.year >= 2025; }).map(function(m) { return m.total_rev; });
+var margins = DATA.filter(function(m) { return m.year >= 2025; }).map(function(m) { return m.net_margin; });
+
+new Chart(document.getElementById('chart-monthly'), {
+  type: 'bar',
+  data: {
+    labels: labels2026,
+    datasets: [
+      { label: 'Total Revenue', data: revs, backgroundColor: 'rgba(196,39,110,0.7)', order: 1 },
+      { label: 'Net Margin', data: margins, backgroundColor: margins.map(function(v) { return v >= 0 ? 'rgba(27,107,107,0.8)' : 'rgba(229,57,53,0.8)'; }), order: 0 }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { labels: { font: { family: "'DM Sans'" } } },
+      tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + fc(ctx.raw); } } }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: "'DM Sans'", size: 11 } } },
+      y: { ticks: { callback: function(v) { return fc(v); }, font: { family: "'DM Mono'" } } }
+    }
+  }
+});
+</script>
+</body></html>

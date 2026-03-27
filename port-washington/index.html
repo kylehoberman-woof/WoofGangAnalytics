@@ -30,7 +30,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 
 .cards{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
   gap:24px;
 }
 
@@ -45,6 +45,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 
 .card:nth-child(2){border-left-color:#1B6B6B}
 .card:nth-child(3){border-left-color:#6B3520}
+.card:nth-child(4){border-left-color:#2E7D32}
 
 .card-icon{font-size:2.4rem;margin-bottom:14px}
 .card-title{font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:8px}
@@ -56,6 +57,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
   background:#FDF0F5;color:#C4276E;text-transform:uppercase;letter-spacing:0.04em;
 }
 .card:nth-child(2) .tag{background:#e0f2f1;color:#1B6B6B}
+.card:nth-child(4) .tag{background:#e8f5e9;color:#2E7D32}
 .card:nth-child(3) .tag{background:#efebe9;color:#6B3520}
 
 .card-btn{
@@ -69,6 +71,8 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 .card:nth-child(2) .card-btn:hover{background:#145252}
 .card:nth-child(3) .card-btn{background:#6B3520}
 .card:nth-child(3) .card-btn:hover{background:#4d2717}
+.card:nth-child(4) .card-btn{background:#2E7D32}
+.card:nth-child(4) .card-btn:hover{background:#1b5e20}
 
 .footer{
   text-align:center;padding:24px;
@@ -129,6 +133,18 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
         <span class="tag">Vendors</span>
       </div>
       <a class="card-btn" href="WoofGang_PortWashington_Inventory_Dashboard.html">Open Inventory Dashboard</a>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <div class="card-title">Financial Dashboard</div>
+      <div class="card-desc">Full P&amp;L — grooming &amp; retail revenue, COGS, operating expenses (commission, labor, rent, royalties), gross profit, and net margin. Monthly and YTD views.</div>
+      <div class="card-tags">
+        <span class="tag">P&amp;L</span>
+        <span class="tag">COGS</span>
+        <span class="tag">Margin</span>
+      </div>
+      <a class="card-btn" href="WoofGang_PortWashington_Financial_Dashboard.html">Open Financial Dashboard</a>
     </div>
 
   </div>

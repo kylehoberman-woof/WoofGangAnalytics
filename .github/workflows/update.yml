@@ -33,6 +33,8 @@ jobs:
         run: python3 scripts/fetch_stock.py
       - name: Generate inventory dashboard
         run: cd scripts && python generate_inventory_dashboard.py
+      - name: Generate financial dashboard
+        run: python3 scripts/build_financial_dashboard.py
       - name: Commit and push
         run: |
           git config --global user.name "github-actions[bot]"
