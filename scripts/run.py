@@ -359,16 +359,21 @@ def generate_dashboard(store):
 
     df_all, df_orders_all, _ = gd.load_data()
 
-    YEARS = {
-        "2024": ("2024-09-26", "2024-12-31"),
-        "2025": ("2025-01-01", "2025-12-31"),
-        "2026": ("2026-01-01", "2026-12-31"),
-    }
-    YEAR_LABELS = {
-        "2024": "2024 (Sep\u2013Dec)",
-        "2025": "2025 (Full Year)",
-        "2026": "2026 (YTD)",
-    }
+    # Build year tabs dynamically based on available data
+    available_years = sorted(df_all["year"].unique())
+    YEARS = {}
+    YEAR_LABELS = {}
+    for y in available_years:
+        y_str = str(y)
+        if y == 2024:
+            YEARS[y_str] = ("2024-09-26", "2024-12-31")
+            YEAR_LABELS[y_str] = "2024 (Sep\u2013Dec)"
+        elif y == int(pd.Timestamp.now().year):
+            YEARS[y_str] = (f"{y}-01-01", f"{y}-12-31")
+            YEAR_LABELS[y_str] = f"{y} (YTD)"
+        else:
+            YEARS[y_str] = (f"{y}-01-01", f"{y}-12-31")
+            YEAR_LABELS[y_str] = f"{y} (Full Year)"
 
     bodies = {}
     for yr, (start, end) in YEARS.items():
