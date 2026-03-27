@@ -595,7 +595,7 @@ tr:hover td{{background:#fafaf8!important}}
   <button class="tab" onclick="showTab('l30',this)">Last 30 Days</button>
   <button class="tab" onclick="showTab('pp',this)">Pay Period</button>
   <button class="tab" onclick="showTab('exec',this)">&#128200; Executive</button>
-  <button class="tab" onclick="showTab('sue',this)">Sue</button>
+  {'<button class="tab" onclick="showTab(\\\'sue\\\',this)">Sue</button>' if _store_name == "port-washington" else ''}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
@@ -703,12 +703,12 @@ tr:hover td{{background:#fafaf8!important}}
 
 </div>
 
-<!-- ── Sue M ── -->
+{"" if _store_name != "port-washington" else '''<!-- ── Sue M ── -->
 <div class="panel" id="panel-sue">
   <div class="kpi-grid" id="sue-kpis"></div>
-  <div class="info-box">Sue M's weekly tips and product purchases. Employees get a <strong>20% discount</strong> — purchases are charged at <strong>80% of subtotal</strong> and deducted from tips. Net = Tips − Purchases.</div>
+  <div class="info-box">Sue M\\\'s weekly tips and product purchases. Employees get a <strong>20% discount</strong> — purchases are charged at <strong>80% of subtotal</strong> and deducted from tips. Net = Tips − Purchases.</div>
   <div id="sue-weeks-container"></div>
-</div>
+</div>'''}
 
 <div class="panel" id="panel-exec">
   <div style="padding:32px">
