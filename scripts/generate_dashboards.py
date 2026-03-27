@@ -386,6 +386,7 @@ def html_head(title, subtitle="", timestamp=None):
 <body>
 <div class="header">
     <div class="header-timestamp">Updated {timestamp}</div>
+    <a href="index.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>
     <h1>{esc(title)}</h1>
     <div class="subtitle">{esc(subtitle)}</div>
     <div class="brand-tag">Woof Gang Bakery & Grooming</div>
