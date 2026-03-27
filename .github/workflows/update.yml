@@ -18,27 +18,51 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install httpx pandas openpyxl
-      - name: Run dashboard script
+
+      # ── Port Washington ──
+      - name: Port Washington - Executive dashboard
         env:
           FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
         run: |
           find . -name "*.pyc" -delete
           find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
           cd scripts && python run.py
-      - name: Rebuild commission dashboard
+      - name: Port Washington - Commission dashboard
         run: python3 scripts/build_commission_dashboard.py
-      - name: Fetch stock levels
+      - name: Port Washington - Fetch stock levels
         env:
           FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
         run: python3 scripts/fetch_stock.py
-      - name: Fetch brand data
+      - name: Port Washington - Fetch brand data
         env:
           FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
         run: python3 scripts/fetch_brands.py
-      - name: Generate inventory dashboard
+      - name: Port Washington - Inventory dashboard
         run: cd scripts && python generate_inventory_dashboard.py
-      - name: Generate financial dashboard
+      - name: Port Washington - Financial dashboard
         run: python3 scripts/build_financial_dashboard.py
+
+      # ── Hicksville ──
+      - name: Hicksville - Executive dashboard
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: cd scripts && python run.py hicksville
+      - name: Hicksville - Commission dashboard
+        run: python3 scripts/build_commission_dashboard.py hicksville
+      - name: Hicksville - Fetch stock levels
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: python3 scripts/fetch_stock.py hicksville
+      - name: Hicksville - Fetch brand data
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: python3 scripts/fetch_brands.py hicksville
+      - name: Hicksville - Inventory dashboard
+        run: cd scripts && python generate_inventory_dashboard.py hicksville
+      - name: Hicksville - Financial dashboard
+        run: python3 scripts/build_financial_dashboard.py hicksville
+
+      # ── Commit and push ──
       - name: Commit and push
         run: |
           git config --global user.name "github-actions[bot]"
@@ -47,9 +71,9 @@ jobs:
           git checkout origin/main -- .github/workflows/update.yml
           git add port-washington/data/
           git add port-washington/*.html
+          git add hicksville/data/
+          git add hicksville/*.html
           git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
-          # Pull latest main first, then re-generate would be ideal but
-          # for conflicts in generated HTML, just accept our freshly built version
           git pull --rebase origin main || {
             git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
             git diff --name-only --diff-filter=U | xargs -r git add

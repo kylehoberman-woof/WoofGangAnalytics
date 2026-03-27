@@ -9,7 +9,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from config import get_store, BASE_URL
 
-store = get_store("port-washington")
+store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
+store = get_store(store_name)
 data_dir = store.data_dir
 token = store.token
 location_id = store.location_id

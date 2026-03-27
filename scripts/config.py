@@ -44,7 +44,7 @@ STORES = {
         location_id=205993,
         token="E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
         start_date="2025-12-01",
-        end_date="2026-03-06",
+        end_date="2026-12-31",
         data_dir=PROJ_ROOT / "hicksville" / "data",
         output_dir=PROJ_ROOT / "hicksville",
     ),
@@ -177,9 +177,29 @@ MANAGER_START = date(2025, 3, 1)
 
 # ─── Financial Constants ────────────────────────────────────────────────────
 
-MONTHLY_RENT = 7700.0
+MONTHLY_RENT = 7700.0  # Port Washington default
 ROYALTY_RATE = 0.07
 
+# Store-specific financial constants
+STORE_RENT = {
+    "port-washington": 7700.0,
+    "hicksville": 6000.0,
+}
+
+STORE_OPEN_DATES = {
+    "port-washington": date(2024, 9, 26),
+    "hicksville": date(2025, 12, 1),
+}
+
+# Hicksville retail staff
+HICKSVILLE_RETAIL_RATES = {
+    "Hailey": 21.0,
+}
+HICKSVILLE_RETAIL_RATES.update({k: 19.0 for k in RETAIL_RATES if k not in HICKSVILLE_RETAIL_RATES})
+
+HICKSVILLE_RETAIL_NAME_MAP = {
+    "Hailey Mullen": "Hailey",  # placeholder — update with real full name
+}
 
 # ─── Pay Period Anchor ──────────────────────────────────────────────────────
 

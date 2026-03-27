@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Woof Gang Hicksville — Financial Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f4f0;color:#1a1a2e}
+.topbar{background:#C4276E;padding:18px 32px;color:white;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3);display:flex;justify-content:space-between;align-items:center}
+.topbar-title{font-size:1.1rem;font-weight:700}
+.topbar-sub{color:rgba(255,255,255,0.75);font-size:0.82rem;margin-top:2px}
+.topbar-time{font-family:'DM Mono',monospace;font-size:0.78rem;opacity:0.8}
+.tabs{background:white;border-bottom:2px solid #eee;position:sticky;top:56px;z-index:99;display:flex;padding:0 24px;flex-wrap:wrap}
+.tab{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;white-space:nowrap}
+.tab.active{color:#C4276E;border-bottom-color:#C4276E}
+.page{max-width:1400px;margin:0 auto;padding:28px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:white;border-radius:12px;padding:16px;text-align:center;border-top:3px solid #C4276E;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.kpi-val{font-size:1.5rem;font-weight:700}
+.kpi-label{font-size:0.73rem;color:#999;margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.card{background:white;border-radius:14px;padding:22px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.stitle{font-size:1.05rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.stitle::before{content:'';display:inline-block;width:4px;height:18px;background:#C4276E;border-radius:2px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.82rem}
+th{text-align:right;padding:8px 10px;color:#888;font-weight:600;border-bottom:2px solid #eee;white-space:nowrap}
+th:first-child{text-align:left}
+td.n{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.8rem}
+tr:hover td{background:#fdf0f5}
+thead th{position:sticky;top:0;background:#f8f7f4;z-index:5}
+.panel{display:none}.panel.active{display:block}
+.home-link{color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600}
+.home-link:hover{color:white}
+/* Comparison styles */
+.cmp-controls{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.cmp-controls select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.84rem}
+.cmp-controls label{font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase}
+.quick-btns{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.quick-btn{padding:6px 14px;border:1.5px solid #C4276E;border-radius:20px;background:transparent;color:#C4276E;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}
+.quick-btn:hover{background:#C4276E;color:white}
+.cmp-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f0ede8}
+.cmp-label{width:140px;font-size:0.82rem;font-weight:600;color:#555;flex-shrink:0}
+.cmp-vals{display:flex;flex:1;align-items:center;gap:8px}
+.cmp-a,.cmp-b{flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:0.95rem;font-weight:600}
+.cmp-delta{flex:1;text-align:center;font-size:0.82rem;font-weight:700;border-radius:8px;padding:4px 8px}
+.cmp-delta.pos{color:#2E7D32;background:#e8f5e9}.cmp-delta.neg{color:#e53935;background:#fce4ec}
+.cmp-hdr{display:flex;align-items:center;padding:8px 0;border-bottom:2px solid #eee;margin-bottom:4px}
+.cmp-hdr span{flex:1;text-align:center;font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase}
+.cmp-hdr span:first-child{width:140px;flex:none}
+/* Insights */
+.insight-grid{display:flex;flex-direction:column;gap:8px}
+</style>
+</head><body>
+
+<div class="topbar">
+  <div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="index.html" class="home-link">&larr; Home</a>
+      <div class="topbar-title">💰 Woof Gang Hicksville — Financial Dashboard</div>
+    </div>
+    <div class="topbar-sub">Revenue · COGS · Operating Expenses · Net Margin</div>
+  </div>
+  <div class="topbar-time">Updated March 27, 2026 at 12:58 PM ET</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('ytd',this)">2026 YTD</button>
+  <button class="tab" onclick="showTab('monthly',this)">Monthly Detail</button>
+  <button class="tab" onclick="showTab('compare',this)">Monthly Compare</button>
+</div>
+
+<div class="page">
+
+<!-- ── YTD ── -->
+<div class="panel active" id="panel-ytd">
+  <div class="kpi-grid">
+    <div class="kpi" style="border-color:#C4276E"><div class="kpi-val" style="color:#C4276E">$47,315.00</div><div class="kpi-label">Grooming Revenue</div></div>
+    <div class="kpi" style="border-color:#1B6B6B"><div class="kpi-val" style="color:#1B6B6B">$14,298.88</div><div class="kpi-label">Retail Revenue</div></div>
+    <div class="kpi" style="border-color:#1a1a2e"><div class="kpi-val" style="color:#1a1a2e">$61,613.88</div><div class="kpi-label">Total Revenue</div></div>
+    <div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-$7,520.00</div><div class="kpi-label">Grooming Discounts</div></div>
+    <div class="kpi" style="border-color:#e65100"><div class="kpi-val" style="color:#e65100">$6,100.11</div><div class="kpi-label">Retail COGS</div></div>
+    <div class="kpi" style="border-color:#1565C0"><div class="kpi-val" style="color:#1565C0">$23,657.50</div><div class="kpi-label">Groomer Commission</div></div>
+    <div class="kpi" style="border-color:#2E7D32"><div class="kpi-val" style="color:#2E7D32">$24,336.27</div><div class="kpi-label">Gross Profit</div><div style="font-size:0.78rem;color:#2E7D32;margin-top:3px;font-weight:600">39.5%</div></div>
+    <div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">$0.00</div><div class="kpi-label">Manager Salary</div></div>
+    <div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">$0.00</div><div class="kpi-label">Bather Pay</div></div>
+    <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">$272.00</div><div class="kpi-label">Retail Staff Pay</div></div>
+    <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">$4,312.98</div><div class="kpi-label">Royalties (7%)</div></div>
+    <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">$18,000.00</div><div class="kpi-label">Rent</div></div>
+    <div class="kpi" style="border-color:#2E7D32"><div class="kpi-val" style="color:#2E7D32">$1,751.29</div><div class="kpi-label">Net Margin</div><div style="font-size:0.78rem;color:#2E7D32;margin-top:3px;font-weight:600">2.8%</div></div>
+    <div class="kpi" style="border-color:#F57C00"><div class="kpi-val" style="color:#F57C00">$3,784.30</div><div class="kpi-label">Tips Collected</div></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Key Ratios</div>
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:#1565C0"><div class="kpi-val" style="color:#1565C0">50.0%</div><div class="kpi-label">Commission %</div><div style="font-size:0.78rem;color:#1565C0;margin-top:3px;font-weight:600">of grooming rev</div></div>
+      <div class="kpi" style="border-color:#1B6B6B"><div class="kpi-val" style="color:#1B6B6B">57.3%</div><div class="kpi-label">Retail Margin %</div><div style="font-size:0.78rem;color:#1B6B6B;margin-top:3px;font-weight:600">after COGS</div></div>
+      <div class="kpi" style="border-color:#7B1FA2"><div class="kpi-val" style="color:#7B1FA2">38.8%</div><div class="kpi-label">Labor Cost %</div><div style="font-size:0.78rem;color:#7B1FA2;margin-top:3px;font-weight:600">of total rev</div></div>
+      <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">29.2%</div><div class="kpi-label">Rent % of Rev</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px;font-weight:600">fixed cost</div></div>
+      <div class="kpi" style="border-color:#C4276E"><div class="kpi-val" style="color:#C4276E">$779.92</div><div class="kpi-label">Rev per Day</div><div style="font-size:0.78rem;color:#C4276E;margin-top:3px;font-weight:600">79 days open</div></div>
+      <div class="kpi" style="border-color:#2E7D32"><div class="kpi-val" style="color:#2E7D32">39.5%</div><div class="kpi-label">Gross Margin %</div><div style="font-size:0.78rem;color:#2E7D32;margin-top:3px;font-weight:600">before OpEx</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Trends &amp; Insights</div>
+    <div class="insight-grid">
+      <div style="background:#fce4ec;color:#c62828;padding:10px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px">📈 Groomer Commission up 45.4% vs 3-month avg ($6,215.00 → $9,035.00)</div>
+<div style="background:#e8f5e9;color:#2E7D32;padding:10px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px">📉 Retail COGS down 12.3% vs 3-month avg ($2,218.72 → $1,945.35)</div>
+<div style="background:#fce4ec;color:#c62828;padding:10px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px">📈 Retail Staff Pay up 319.6% vs 3-month avg ($37.80 → $158.60)</div>
+<div style="background:#fce4ec;color:#c62828;padding:10px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px">📈 Royalties up 27.4% vs 3-month avg ($1,238.07 → $1,577.68)</div>
+<div style="background:#e8f5e9;color:#2E7D32;padding:10px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px">📉 Revenue up 27.4% vs 3-month avg ($17,686.65 → $22,538.23)</div>
+<div style="background:#e3f2fd;color:#1565C0;padding:10px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px">💡 Rent is 27% of revenue — grow revenue to improve fixed cost leverage</div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Cost Breakdown</div>
+    <div style="max-width:500px;margin:0 auto"><canvas id="chart-costs"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">P&amp;L Waterfall</div>
+    <div style="max-width:800px;margin:0 auto"><canvas id="chart-waterfall" height="300"></canvas></div>
+  </div>
+</div>
+
+<!-- ── Monthly Detail ── -->
+<div class="panel" id="panel-monthly">
+  <div class="card">
+    <div class="stitle">Monthly Snapshot</div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase">Select Month</label><br>
+      <select id="month-detail-sel" onchange="updateMonthDetail()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.84rem;margin-top:4px">
+        <option value="0">Dec 2025</option>
+<option value="1">Jan 2026</option>
+<option value="2">Feb 2026</option>
+<option value="3"selected>Mar 2026</option>
+      </select>
+    </div>
+    <div class="kpi-grid" id="month-detail-kpis"></div>
+    <div class="stitle" style="margin-top:8px">Key Ratios</div>
+    <div class="kpi-grid" id="month-detail-ratios"></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Monthly P&amp;L</div>
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th style="text-align:left">Month</th>
+        <th>Groom Rev</th><th>Retail Rev</th><th>Total Rev</th>
+        <th>Discounts</th><th>Retail COGS</th><th>Commission</th><th>Gross Profit</th>
+        <th>Manager</th><th>Bather</th><th>Retail Staff</th><th>Royalties</th><th>Rent</th>
+        <th>Net Margin</th>
+      </tr></thead>
+      <tbody><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Dec 2025</td>
+      <td class="n">$8,045.00</td>
+      <td class="n">$5,939.30</td>
+      <td class="n" style="font-weight:600">$13,984.30</td>
+      <td class="n" style="color:#e53935">-$1,882.00</td>
+      <td class="n">$2,501.40</td>
+      <td class="n">$4,022.50</td>
+      <td class="n" style="font-weight:600">$5,578.40</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$978.90</td>
+      <td class="n">$6,000.00</td>
+      <td class="n" style="font-weight:700;color:#e53935">-$1,400.50<br><span style="font-size:0.72rem;font-weight:400">-10.0%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Jan 2026</td>
+      <td class="n">$12,435.00</td>
+      <td class="n">$5,756.14</td>
+      <td class="n" style="font-weight:600">$18,191.14</td>
+      <td class="n" style="color:#e53935">-$2,470.00</td>
+      <td class="n">$2,469.53</td>
+      <td class="n">$6,217.50</td>
+      <td class="n" style="font-weight:600">$7,034.11</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$113.40</td>
+      <td class="n">$1,273.38</td>
+      <td class="n">$6,000.00</td>
+      <td class="n" style="font-weight:700;color:#e53935">-$352.67<br><span style="font-size:0.72rem;font-weight:400">-1.9%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Feb 2026</td>
+      <td class="n">$16,810.00</td>
+      <td class="n">$4,074.51</td>
+      <td class="n" style="font-weight:600">$20,884.51</td>
+      <td class="n" style="color:#e53935">-$2,755.00</td>
+      <td class="n">$1,685.23</td>
+      <td class="n">$8,405.00</td>
+      <td class="n" style="font-weight:600">$8,039.28</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$1,461.92</td>
+      <td class="n">$6,000.00</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$577.36<br><span style="font-size:0.72rem;font-weight:400">2.8%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Mar 2026</td>
+      <td class="n">$18,070.00</td>
+      <td class="n">$4,468.23</td>
+      <td class="n" style="font-weight:600">$22,538.23</td>
+      <td class="n" style="color:#e53935">-$2,295.00</td>
+      <td class="n">$1,945.35</td>
+      <td class="n">$9,035.00</td>
+      <td class="n" style="font-weight:600">$9,262.88</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$158.60</td>
+      <td class="n">$1,577.68</td>
+      <td class="n">$6,000.00</td>
+      <td class="n" style="font-weight:700;color:#2E7D32">$1,526.60<br><span style="font-size:0.72rem;font-weight:400">6.8%</span></td>
+    </tr></tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Revenue vs Net Margin by Month</div>
+    <canvas id="chart-monthly" height="280"></canvas>
+  </div>
+</div>
+
+<!-- ── Monthly Compare ── -->
+<div class="panel" id="panel-compare">
+  <div class="card">
+    <div class="stitle">Month-to-Month P&amp;L Comparison</div>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="qcPrev()">vs Last Month</button>
+      <button class="quick-btn" onclick="qcYoY()">vs Same Month Last Year</button>
+    </div>
+    <div class="cmp-controls">
+      <div><label>Period A</label><br><select id="cmp-sel-a" onchange="updateCompare()"><option value="0">Dec 2025</option>
+<option value="1">Jan 2026</option>
+<option value="2">Feb 2026</option>
+<option value="3">Mar 2026</option></select></div>
+      <div style="font-weight:700;color:#999;padding-top:14px">vs</div>
+      <div><label>Period B</label><br><select id="cmp-sel-b" onchange="updateCompare()"><option value="0">Dec 2025</option>
+<option value="1">Jan 2026</option>
+<option value="2">Feb 2026</option>
+<option value="3"selected>Mar 2026</option></select></div>
+    </div>
+    <div class="cmp-hdr">
+      <span style="text-align:left">Metric</span>
+      <span id="cmp-hdr-a">Period A</span>
+      <span>Change</span>
+      <span id="cmp-hdr-b">Period B</span>
+    </div>
+    <div class="cmp-row" id="cmp-total_rev">
+      <div class="cmp-label">Total Revenue</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-total_rev-a"></div>
+        <div class="cmp-delta" id="cmp-total_rev-d"></div>
+        <div class="cmp-b" id="cmp-total_rev-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-groom_rev">
+      <div class="cmp-label">Grooming Revenue</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-groom_rev-a"></div>
+        <div class="cmp-delta" id="cmp-groom_rev-d"></div>
+        <div class="cmp-b" id="cmp-groom_rev-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-retail_rev">
+      <div class="cmp-label">Retail Revenue</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-retail_rev-a"></div>
+        <div class="cmp-delta" id="cmp-retail_rev-d"></div>
+        <div class="cmp-b" id="cmp-retail_rev-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-groom_disc">
+      <div class="cmp-label">Discounts</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-groom_disc-a"></div>
+        <div class="cmp-delta" id="cmp-groom_disc-d"></div>
+        <div class="cmp-b" id="cmp-groom_disc-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-retail_cogs">
+      <div class="cmp-label">Retail COGS</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-retail_cogs-a"></div>
+        <div class="cmp-delta" id="cmp-retail_cogs-d"></div>
+        <div class="cmp-b" id="cmp-retail_cogs-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-comm_paid">
+      <div class="cmp-label">Commission</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-comm_paid-a"></div>
+        <div class="cmp-delta" id="cmp-comm_paid-d"></div>
+        <div class="cmp-b" id="cmp-comm_paid-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-gross_profit">
+      <div class="cmp-label">Gross Profit</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-gross_profit-a"></div>
+        <div class="cmp-delta" id="cmp-gross_profit-d"></div>
+        <div class="cmp-b" id="cmp-gross_profit-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-mgr">
+      <div class="cmp-label">Manager</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-mgr-a"></div>
+        <div class="cmp-delta" id="cmp-mgr-d"></div>
+        <div class="cmp-b" id="cmp-mgr-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-bather_pay">
+      <div class="cmp-label">Bather Pay</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-bather_pay-a"></div>
+        <div class="cmp-delta" id="cmp-bather_pay-d"></div>
+        <div class="cmp-b" id="cmp-bather_pay-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-retail_pay">
+      <div class="cmp-label">Retail Staff</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-retail_pay-a"></div>
+        <div class="cmp-delta" id="cmp-retail_pay-d"></div>
+        <div class="cmp-b" id="cmp-retail_pay-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-royalties">
+      <div class="cmp-label">Royalties</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-royalties-a"></div>
+        <div class="cmp-delta" id="cmp-royalties-d"></div>
+        <div class="cmp-b" id="cmp-royalties-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-rent">
+      <div class="cmp-label">Rent</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-rent-a"></div>
+        <div class="cmp-delta" id="cmp-rent-d"></div>
+        <div class="cmp-b" id="cmp-rent-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-net_margin">
+      <div class="cmp-label">Net Margin</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-net_margin-a"></div>
+        <div class="cmp-delta" id="cmp-net_margin-d"></div>
+        <div class="cmp-b" id="cmp-net_margin-b"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <div class="stitle">Side-by-Side Comparison</div>
+    <canvas id="chart-compare" height="300"></canvas>
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center;padding:24px;font-size:0.8rem;color:#999">
+  <strong style="color:#C4276E">Woof Gang Bakery &amp; Grooming</strong> — Hicksville, NY &middot; Financial Dashboard
+</div>
+
+<script>
+var DATA = [{"label": "Dec 2025", "year": 2025, "groom_rev": 8045.0, "retail_rev": 5939.3, "total_rev": 13984.3, "groom_disc": 1882.0, "net_rev": 12102.3, "retail_cogs": 2501.4, "comm_paid": 4022.5, "gross_profit": 5578.4, "mgr": 0.0, "bather_pay": 0, "retail_pay": 0, "royalties": 978.9, "rent": 6000.0, "total_opex": 6978.9, "net_margin": -1400.5, "net_margin_pct": -10.0, "tips": 603.3, "comm_pct": 50.0, "retail_margin_pct": 57.9, "labor_pct": 28.8, "rent_pct": 42.9, "gross_margin_pct": 39.9, "days_open": 16, "rev_per_day": 874.02}, {"label": "Jan 2026", "year": 2026, "groom_rev": 12435.0, "retail_rev": 5756.14, "total_rev": 18191.14, "groom_disc": 2470.0, "net_rev": 15721.14, "retail_cogs": 2469.53, "comm_paid": 6217.5, "gross_profit": 7034.11, "mgr": 0.0, "bather_pay": 0, "retail_pay": 113.4, "royalties": 1273.38, "rent": 6000.0, "total_opex": 7386.78, "net_margin": -352.67, "net_margin_pct": -1.9, "tips": 741.75, "comm_pct": 50.0, "retail_margin_pct": 57.1, "labor_pct": 34.8, "rent_pct": 33.0, "gross_margin_pct": 38.7, "days_open": 27, "rev_per_day": 673.75}, {"label": "Feb 2026", "year": 2026, "groom_rev": 16810.0, "retail_rev": 4074.51, "total_rev": 20884.510000000002, "groom_disc": 2755.0, "net_rev": 18129.510000000002, "retail_cogs": 1685.23, "comm_paid": 8405.0, "gross_profit": 8039.28, "mgr": 0.0, "bather_pay": 0, "retail_pay": 0, "royalties": 1461.92, "rent": 6000.0, "total_opex": 7461.92, "net_margin": 577.36, "net_margin_pct": 2.8, "tips": 1488.05, "comm_pct": 50.0, "retail_margin_pct": 58.6, "labor_pct": 40.2, "rent_pct": 28.7, "gross_margin_pct": 38.5, "days_open": 26, "rev_per_day": 803.25}, {"label": "Mar 2026", "year": 2026, "groom_rev": 18070.0, "retail_rev": 4468.23, "total_rev": 22538.23, "groom_disc": 2295.0, "net_rev": 20243.23, "retail_cogs": 1945.35, "comm_paid": 9035.0, "gross_profit": 9262.88, "mgr": 0.0, "bather_pay": 0, "retail_pay": 158.6, "royalties": 1577.68, "rent": 6000.0, "total_opex": 7736.28, "net_margin": 1526.6, "net_margin_pct": 6.8, "tips": 1554.5, "comm_pct": 50.0, "retail_margin_pct": 56.5, "labor_pct": 40.8, "rent_pct": 26.6, "gross_margin_pct": 41.1, "days_open": 26, "rev_per_day": 866.86}];
+
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'compare') updateCompare();
+  if (id === 'monthly') updateMonthDetail();
+}
+
+function fc(n) { return '$' + Math.round(n).toLocaleString(); }
+
+// ── Comparison logic ──
+var CMP_KEYS = [["total_rev", "Total Revenue", true], ["groom_rev", "Grooming Revenue", true], ["retail_rev", "Retail Revenue", true], ["groom_disc", "Discounts", false], ["retail_cogs", "Retail COGS", false], ["comm_paid", "Commission", false], ["gross_profit", "Gross Profit", true], ["mgr", "Manager", false], ["bather_pay", "Bather Pay", false], ["retail_pay", "Retail Staff", false], ["royalties", "Royalties", false], ["rent", "Rent", false], ["net_margin", "Net Margin", true]];
+var cmpChartRef = null;
+
+function updateCompare() {
+  var iA = parseInt(document.getElementById('cmp-sel-a').value);
+  var iB = parseInt(document.getElementById('cmp-sel-b').value);
+  var a = DATA[iA], b = DATA[iB];
+  if (!a || !b) return;
+  document.getElementById('cmp-hdr-a').textContent = a.label;
+  document.getElementById('cmp-hdr-b').textContent = b.label;
+
+  CMP_KEYS.forEach(function(def) {
+    var key = def[0], upGood = def[2];
+    var vA = a[key] || 0, vB = b[key] || 0;
+    var delta = vB - vA;
+    var pct = vA !== 0 ? ((vB - vA) / Math.abs(vA) * 100) : 0;
+    document.getElementById('cmp-' + key + '-a').textContent = fc(vA);
+    document.getElementById('cmp-' + key + '-b').textContent = fc(vB);
+    var dEl = document.getElementById('cmp-' + key + '-d');
+    var sign = delta >= 0 ? '+' : '';
+    dEl.textContent = sign + fc(delta) + ' (' + sign + pct.toFixed(1) + '%)';
+    // For costs, down is good. For revenue/profit, up is good.
+    var isGood = upGood ? delta >= 0 : delta <= 0;
+    dEl.className = 'cmp-delta ' + (delta === 0 ? '' : isGood ? 'pos' : 'neg');
+  });
+
+  // Bar chart
+  if (cmpChartRef) cmpChartRef.destroy();
+  var chartKeys = ['total_rev','groom_rev','retail_rev','gross_profit','net_margin'];
+  var chartLabels = ['Total Rev','Groom Rev','Retail Rev','Gross Profit','Net Margin'];
+  cmpChartRef = new Chart(document.getElementById('chart-compare'), {
+    type: 'bar',
+    data: {
+      labels: chartLabels,
+      datasets: [
+        { label: a.label, data: chartKeys.map(function(k) { return a[k] || 0; }), backgroundColor: 'rgba(196,39,110,0.7)' },
+        { label: b.label, data: chartKeys.map(function(k) { return b[k] || 0; }), backgroundColor: 'rgba(27,107,107,0.7)' }
+      ]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { font: { family: "'DM Sans'" } } },
+        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + fc(ctx.raw); } } }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: { ticks: { callback: function(v) { return fc(v); } } }
+      }
+    }
+  });
+}
+
+function qcPrev() {
+  var sel = document.getElementById('cmp-sel-b');
+  var i = parseInt(sel.value);
+  if (i > 0) {
+    document.getElementById('cmp-sel-a').value = i - 1;
+    updateCompare();
+  }
+}
+
+function qcYoY() {
+  var sel = document.getElementById('cmp-sel-b');
+  var i = parseInt(sel.value);
+  var target = DATA[i].label.replace(/\d{4}/, function(y) { return parseInt(y) - 1; });
+  for (var j = 0; j < DATA.length; j++) {
+    if (DATA[j].label === target) {
+      document.getElementById('cmp-sel-a').value = j;
+      updateCompare();
+      return;
+    }
+  }
+}
+
+// Set default selection
+document.getElementById('cmp-sel-a').value = 2;
+
+// ── Monthly Detail KPIs ──
+function updateMonthDetail() {
+  var i = parseInt(document.getElementById('month-detail-sel').value);
+  var m = DATA[i];
+  if (!m) return;
+
+  function kpiHtml(label, val, color, sub) {
+    var subH = sub ? '<div style="font-size:0.78rem;color:'+color+';margin-top:3px;font-weight:600">'+sub+'</div>' : '';
+    return '<div class="kpi" style="border-color:'+color+'"><div class="kpi-val" style="color:'+color+'">'+val+'</div><div class="kpi-label">'+label+'</div>'+subH+'</div>';
+  }
+  function fp(n) { return n.toFixed(1) + '%'; }
+  var mc = m.net_margin >= 0 ? '#2E7D32' : '#e53935';
+
+  document.getElementById('month-detail-kpis').innerHTML =
+    kpiHtml('Grooming Revenue', fc(m.groom_rev), '#C4276E', '') +
+    kpiHtml('Retail Revenue', fc(m.retail_rev), '#1B6B6B', '') +
+    kpiHtml('Total Revenue', fc(m.total_rev), '#1a1a2e', '') +
+    kpiHtml('Retail COGS', fc(m.retail_cogs), '#e65100', '') +
+    kpiHtml('Commission', fc(m.comm_paid), '#1565C0', '') +
+    kpiHtml('Gross Profit', fc(m.gross_profit), '#2E7D32', fp(m.gross_margin_pct)) +
+    kpiHtml('Total OpEx', fc(m.total_opex), '#7B1FA2', '') +
+    kpiHtml('Net Margin', fc(m.net_margin), mc, fp(m.net_margin_pct)) +
+    kpiHtml('Tips', fc(m.tips), '#F57C00', '');
+
+  document.getElementById('month-detail-ratios').innerHTML =
+    kpiHtml('Commission %', fp(m.comm_pct), '#1565C0', 'of groom rev') +
+    kpiHtml('Retail Margin %', fp(m.retail_margin_pct), '#1B6B6B', 'after COGS') +
+    kpiHtml('Labor Cost %', fp(m.labor_pct), '#7B1FA2', 'of total rev') +
+    kpiHtml('Rent % of Rev', fp(m.rent_pct), '#6D4C41', 'fixed cost') +
+    kpiHtml('Rev per Day', fc(m.rev_per_day), '#C4276E', (m.days_open || 0) + ' days') +
+    kpiHtml('Gross Margin %', fp(m.gross_margin_pct), '#2E7D32', 'before OpEx');
+}
+
+// Initialize monthly detail on load
+updateMonthDetail();
+
+// ── Cost breakdown donut ──
+var costData = [
+  23657.5,
+  6100.11,
+  0.0,
+  0,
+  272.0,
+  4312.98,
+  18000.0,
+  7520.0
+];
+new Chart(document.getElementById('chart-costs'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Groomer Commission','Retail COGS','Manager','Bather Pay','Retail Staff','Royalties','Rent','Discounts'],
+    datasets: [{
+      data: costData,
+      backgroundColor: ['#1565C0','#e65100','#5C6BC0','#00796B','#6A1B9A','#AD1457','#6D4C41','#e53935']
+    }]
+  },
+  options: {
+    plugins: {
+      legend: { position: 'right', labels: { font: { family: "'DM Sans'" } } },
+      tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + fc(ctx.raw); } } }
+    }
+  }
+});
+
+// ── P&L waterfall ──
+var wf = [
+  { label: 'Groom Rev', val: 47315.0 },
+  { label: 'Retail Rev', val: 14298.88 },
+  { label: 'Discounts', val: -7520.0 },
+  { label: 'Retail COGS', val: -6100.11 },
+  { label: 'Commission', val: -23657.5 },
+  { label: 'Manager', val: -0.0 },
+  { label: 'Bather', val: -0 },
+  { label: 'Retail Staff', val: -272.0 },
+  { label: 'Royalties', val: -4312.98 },
+  { label: 'Rent', val: -18000.0 },
+];
+var running = 0;
+var wfBases = [], wfVals = [], wfColors = [];
+wf.forEach(function(w) {
+  if (w.val >= 0) {
+    wfBases.push(running);
+    wfVals.push(w.val);
+    wfColors.push('#2E7D32');
+    running += w.val;
+  } else {
+    running += w.val;
+    wfBases.push(running);
+    wfVals.push(Math.abs(w.val));
+    wfColors.push('#e53935');
+  }
+});
+wfBases.push(0);
+wfVals.push(running);
+wfColors.push(running >= 0 ? '#1B6B6B' : '#e53935');
+wf.push({ label: 'Net Margin' });
+
+new Chart(document.getElementById('chart-waterfall'), {
+  type: 'bar',
+  data: {
+    labels: wf.map(function(w) { return w.label; }),
+    datasets: [
+      { data: wfBases, backgroundColor: 'transparent', stack: 's' },
+      { data: wfVals, backgroundColor: wfColors, stack: 's' }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            if (ctx.datasetIndex === 0) return '';
+            var i = ctx.dataIndex;
+            var total = wfBases[i] + wfVals[i];
+            return ctx.label + ': ' + fc(wf[i] && wf[i].val !== undefined ? wf[i].val : total);
+          }
+        }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: "'DM Sans'", size: 11 } } },
+      y: { ticks: { callback: function(v) { return fc(v); }, font: { family: "'DM Mono'" } } }
+    }
+  }
+});
+
+// ── Monthly revenue vs margin chart ──
+var d2025 = DATA.filter(function(m) { return m.year >= 2025; });
+new Chart(document.getElementById('chart-monthly'), {
+  type: 'bar',
+  data: {
+    labels: d2025.map(function(m) { return m.label; }),
+    datasets: [
+      { label: 'Total Revenue', data: d2025.map(function(m) { return m.total_rev; }), backgroundColor: 'rgba(196,39,110,0.7)', order: 1 },
+      { label: 'Net Margin', data: d2025.map(function(m) { return m.net_margin; }), backgroundColor: d2025.map(function(m) { return m.net_margin >= 0 ? 'rgba(27,107,107,0.8)' : 'rgba(229,57,53,0.8)'; }), order: 0 }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { labels: { font: { family: "'DM Sans'" } } },
+      tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + fc(ctx.raw); } } }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: "'DM Sans'", size: 11 } } },
+      y: { ticks: { callback: function(v) { return fc(v); }, font: { family: "'DM Mono'" } } }
+    }
+  }
+});
+</script>
+</body></html>

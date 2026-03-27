@@ -15,16 +15,22 @@ from config import (
     get_store, GUARANTEES, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
     BATHER_RATE, RETAIL_RATES, RETAIL_NAME_MAP, BATHER_NAME_MAP,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
-    MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MONTHLY_RENT,
-    STORE_OPEN,
+    MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
 )
 from formatting import fc
 
 SCRIPTS_DIR = Path(__file__).parent
-_store = get_store("port-washington")
+_store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
+_store = get_store(_store_name)
+_store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 TODAY = date.today()
+
+# Store-specific financial constants
+from config import STORE_RENT, STORE_OPEN_DATES
+MONTHLY_RENT = STORE_RENT.get(_store_name, 7700.0)
+STORE_OPEN = STORE_OPEN_DATES.get(_store_name, date(2024, 9, 26))
 DAILY_RENT = MONTHLY_RENT * 12 / 365
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -153,7 +159,7 @@ while m_start <= TODAY:
     tips = round(sum(v for d, v in tips_by_day_total.items() if s <= d <= e), 2)
 
     comm_paid = groomer_commission_for_range(s, e)
-    mgr = manager_salary_for_range(m_start, m_end)
+    mgr = manager_salary_for_range(m_start, m_end) if _store_name == "port-washington" else 0.0
     bather_hrs = get_hours_from_clocks(data.get("time_clocks", []), BATHER_NAME_MAP, s, e)
     bather_pay = round(sum(h * BATHER_RATE for h in bather_hrs.values()), 2)
     retail_hrs = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s, e)
@@ -381,7 +387,7 @@ for key, label, up_is_good in CMP_KPIS:
 html = f'''<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Woof Gang Port Washington — Financial Dashboard</title>
+<title>Woof Gang {_store_display} — Financial Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
@@ -437,7 +443,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
   <div>
     <div style="display:flex;align-items:center;gap:12px">
       <a href="index.html" class="home-link">&larr; Home</a>
-      <div class="topbar-title">💰 Woof Gang Port Washington — Financial Dashboard</div>
+      <div class="topbar-title">💰 Woof Gang {_store_display} — Financial Dashboard</div>
     </div>
     <div class="topbar-sub">Revenue · COGS · Operating Expenses · Net Margin</div>
   </div>
@@ -569,7 +575,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 </div>
 
 <div style="text-align:center;padding:24px;font-size:0.8rem;color:#999">
-  <strong style="color:#C4276E">Woof Gang Bakery &amp; Grooming</strong> — Port Washington, NY &middot; Financial Dashboard
+  <strong style="color:#C4276E">Woof Gang Bakery &amp; Grooming</strong> — {_store_display}, NY &middot; Financial Dashboard
 </div>
 
 <script>
@@ -817,7 +823,8 @@ new Chart(document.getElementById('chart-monthly'), {{
 </body></html>
 '''
 
-out_path = OUTPUT_DIR / "WoofGang_PortWashington_Financial_Dashboard.html"
+_fn_store = _store_display.replace(" ", "")
+out_path = OUTPUT_DIR / f"WoofGang_{_fn_store}_Financial_Dashboard.html"
 with open(out_path, "w") as f:
     f.write(html)
 print(f"Saved: {out_path}")

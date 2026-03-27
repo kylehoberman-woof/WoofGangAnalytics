@@ -13,13 +13,16 @@ from config import (
     BATHER_RATE, RETAIL_RATES, RETAIL_NAME_MAP, BATHER_NAME_MAP,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
-    MONTHLY_RENT, ANCHOR_START, STORE_OPEN,
-    SUPABASE_URL, SUPABASE_ANON_KEY,
+    MONTHLY_RENT as _DEFAULT_RENT, ANCHOR_START, STORE_OPEN,
+    SUPABASE_URL, SUPABASE_ANON_KEY, STORE_RENT,
 )
 from formatting import fc
 
 SCRIPTS_DIR = Path(__file__).parent
-_store = get_store("port-washington")
+_store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
+_store = get_store(_store_name)
+_store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
+MONTHLY_RENT = STORE_RENT.get(_store_name, _DEFAULT_RENT)
 DATA_DIR   = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 
@@ -582,7 +585,7 @@ tr:hover td{{background:#fafaf8!important}}
 </head>
 <body>
 <div class="topbar">
-  <div><div style="display:flex;align-items:center;gap:12px"><a href="index.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600">&larr; Home</a><div class="topbar-title">💅 Woof Gang Port Washington — Groomer Commission</div></div>
+  <div><div style="display:flex;align-items:center;gap:12px"><a href="index.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600">&larr; Home</a><div class="topbar-title">💅 Woof Gang {_store_display} — Groomer Commission</div></div>
   <div class="topbar-sub">50% commission · Guarantees: Maria C $200/day · Sue M $300/day</div></div>
   <div class="topbar-date">Updated {now_et}</div>
 </div>
@@ -1277,7 +1280,8 @@ function kpiCard(label, val, color) {{
 html = html.replace("{supabase_url}", SUPABASE_URL)
 html = html.replace("{supabase_key}", SUPABASE_ANON_KEY)
 
-out_path = OUTPUT_DIR / "WoofGang_PortWashington_Commission_Dashboard.html"
+_fn_store = _store_display.replace(" ", "")
+out_path = OUTPUT_DIR / f"WoofGang_{_fn_store}_Commission_Dashboard.html"
 with open(out_path, "w") as f:
     f.write(html)
 print(f"Saved: {out_path}")

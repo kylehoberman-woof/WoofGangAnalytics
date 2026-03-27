@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Woof Gang Port Washington — Dashboards</title>
+<title>Woof Gang — Store Dashboards</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -22,6 +22,16 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
   background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;
   font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
 }
+
+.store-selector{
+  display:flex;justify-content:center;padding:16px;background:white;border-bottom:2px solid #eee;
+}
+.store-selector select{
+  padding:10px 20px;border:2px solid #C4276E;border-radius:10px;font-family:inherit;
+  font-size:1rem;font-weight:600;color:#C4276E;background:white;cursor:pointer;min-width:280px;
+  text-align:center;
+}
+.store-selector select:focus{outline:none;box-shadow:0 0 0 3px rgba(196,39,110,0.2)}
 
 .main{
   max-width:1100px;width:100%;margin:0 auto;padding:40px 24px 60px;
@@ -91,9 +101,16 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 <body>
 
 <div class="header">
-  <h1>Woof Gang Port Washington</h1>
+  <h1 id="store-title">Woof Gang Port Washington</h1>
   <p>Store Performance Dashboards</p>
   <div class="brand">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
+<div class="store-selector">
+  <select id="store-select" onchange="switchStore(this.value)">
+    <option value="port-washington">📍 Port Washington, NY</option>
+    <option value="hicksville">📍 Hicksville, NY</option>
+  </select>
 </div>
 
 <div class="main">
@@ -108,7 +125,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
         <span class="tag">Trends</span>
         <span class="tag">Comparisons</span>
       </div>
-      <a class="card-btn" href="WoofGang_PortWashington_NY_AllYears_Dashboard.html">Open Executive Dashboard</a>
+      <a class="card-btn" id="link-exec" href="WoofGang_PortWashington_NY_AllYears_Dashboard.html">Open Executive Dashboard</a>
     </div>
 
     <div class="card">
@@ -120,7 +137,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
         <span class="tag">Payroll</span>
         <span class="tag">Margin</span>
       </div>
-      <a class="card-btn" href="WoofGang_PortWashington_Commission_Dashboard.html">Open Commission Dashboard</a>
+      <a class="card-btn" id="link-comm" href="WoofGang_PortWashington_Commission_Dashboard.html">Open Commission Dashboard</a>
     </div>
 
     <div class="card">
@@ -132,7 +149,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
         <span class="tag">Reorder</span>
         <span class="tag">Vendors</span>
       </div>
-      <a class="card-btn" href="WoofGang_PortWashington_Inventory_Dashboard.html">Open Inventory Dashboard</a>
+      <a class="card-btn" id="link-inv" href="WoofGang_PortWashington_Inventory_Dashboard.html">Open Inventory Dashboard</a>
     </div>
 
     <div class="card">
@@ -144,15 +161,53 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
         <span class="tag">COGS</span>
         <span class="tag">Margin</span>
       </div>
-      <a class="card-btn" href="WoofGang_PortWashington_Financial_Dashboard.html">Open Financial Dashboard</a>
+      <a class="card-btn" id="link-fin" href="WoofGang_PortWashington_Financial_Dashboard.html">Open Financial Dashboard</a>
     </div>
 
   </div>
 </div>
 
 <div class="footer">
-  <strong>Woof Gang Bakery &amp; Grooming</strong> — Port Washington, NY &middot; Operations Intelligence
+  <strong>Woof Gang Bakery &amp; Grooming</strong> — Operations Intelligence
 </div>
+
+<script>
+var STORES = {
+  'port-washington': {
+    title: 'Woof Gang Port Washington',
+    base: '',
+    exec: 'WoofGang_PortWashington_NY_AllYears_Dashboard.html',
+    comm: 'WoofGang_PortWashington_Commission_Dashboard.html',
+    inv: 'WoofGang_PortWashington_Inventory_Dashboard.html',
+    fin: 'WoofGang_PortWashington_Financial_Dashboard.html'
+  },
+  'hicksville': {
+    title: 'Woof Gang Hicksville',
+    base: '../hicksville/',
+    exec: 'WoofGang_Hicksville_NY_AllYears_Dashboard.html',
+    comm: 'WoofGang_Hicksville_Commission_Dashboard.html',
+    inv: 'WoofGang_Hicksville_Inventory_Dashboard.html',
+    fin: 'WoofGang_Hicksville_Financial_Dashboard.html'
+  }
+};
+
+function switchStore(key) {
+  var s = STORES[key];
+  document.getElementById('store-title').textContent = s.title;
+  document.getElementById('link-exec').href = s.base + s.exec;
+  document.getElementById('link-comm').href = s.base + s.comm;
+  document.getElementById('link-inv').href = s.base + s.inv;
+  document.getElementById('link-fin').href = s.base + s.fin;
+  localStorage.setItem('selectedStore', key);
+}
+
+// Restore last selected store
+var saved = localStorage.getItem('selectedStore');
+if (saved && STORES[saved]) {
+  document.getElementById('store-select').value = saved;
+  switchStore(saved);
+}
+</script>
 
 </body>
 </html>
