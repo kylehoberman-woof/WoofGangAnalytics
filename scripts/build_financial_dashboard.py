@@ -203,6 +203,94 @@ for key in ["groom_rev", "retail_rev", "total_rev", "groom_disc", "net_rev",
 ytd_sums["net_margin_pct"] = round(ytd_sums["net_margin"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
 ytd_sums["gross_margin_pct"] = round(ytd_sums["gross_profit"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
 
+# Derived ratios
+ytd_sums["comm_pct"] = round(ytd_sums["comm_paid"] / ytd_sums["groom_rev"] * 100, 1) if ytd_sums["groom_rev"] else 0
+ytd_sums["retail_margin_pct"] = round((ytd_sums["retail_rev"] - ytd_sums["retail_cogs"]) / ytd_sums["retail_rev"] * 100, 1) if ytd_sums["retail_rev"] else 0
+total_labor = ytd_sums["comm_paid"] + ytd_sums["mgr"] + ytd_sums["bather_pay"] + ytd_sums["retail_pay"]
+ytd_sums["labor_pct"] = round(total_labor / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
+ytd_sums["rent_pct"] = round(ytd_sums["rent"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
+# Count days open (unique days with any revenue)
+all_rev_days = set(list(groom_rev_by_day.keys()) + list(retail_rev_by_day.keys()))
+ytd_days_open = len([d for d in all_rev_days if "2026-01-01" <= d <= TODAY.isoformat()])
+ytd_sums["rev_per_day"] = round(ytd_sums["total_rev"] / ytd_days_open, 2) if ytd_days_open else 0
+
+# ── Insights ─────────────────────────────────────────────────────────────────
+insights = []
+# Need at least 4 months of data for meaningful comparisons
+if len(monthly) >= 4:
+    recent = monthly[-1]  # most recent month (may be partial)
+    # Use second-to-last if current month has < 20 days of data
+    if recent == monthly[-1] and len(monthly) >= 2:
+        m_end_check = date(TODAY.year, TODAY.month, 1)
+        if (TODAY - m_end_check).days < 20 and len(monthly) >= 2:
+            recent = monthly[-2]
+    # 3-month average (excluding current partial month)
+    avg_months = monthly[-4:-1] if len(monthly) >= 4 else monthly[:-1]
+    if avg_months:
+        avg = {}
+        for key in ["groom_rev", "retail_rev", "total_rev", "retail_cogs", "comm_paid",
+                     "mgr", "bather_pay", "retail_pay", "royalties", "rent", "net_margin"]:
+            avg[key] = round(sum(m[key] for m in avg_months) / len(avg_months), 2)
+
+        # Cost change insights
+        cost_items = [
+            ("comm_paid", "Groomer Commission"),
+            ("retail_cogs", "Retail COGS"),
+            ("bather_pay", "Bather Pay"),
+            ("retail_pay", "Retail Staff Pay"),
+            ("mgr", "Manager Salary"),
+            ("royalties", "Royalties"),
+        ]
+        for key, label in cost_items:
+            if avg[key] > 0:
+                pct_change = round((recent[key] - avg[key]) / avg[key] * 100, 1)
+                if pct_change > 10:
+                    insights.append(("red", f"{label} up {pct_change}% vs 3-month avg ({fc(avg[key])} → {fc(recent[key])})"))
+                elif pct_change < -10:
+                    insights.append(("green", f"{label} down {abs(pct_change)}% vs 3-month avg ({fc(avg[key])} → {fc(recent[key])})"))
+
+        # Revenue insights
+        if avg["total_rev"] > 0:
+            rev_change = round((recent["total_rev"] - avg["total_rev"]) / avg["total_rev"] * 100, 1)
+            if rev_change > 5:
+                insights.append(("green", f"Revenue up {rev_change}% vs 3-month avg ({fc(avg['total_rev'])} → {fc(recent['total_rev'])})"))
+            elif rev_change < -5:
+                insights.append(("red", f"Revenue down {abs(rev_change)}% vs 3-month avg ({fc(avg['total_rev'])} → {fc(recent['total_rev'])})"))
+
+        # Margin trend
+        if avg["net_margin"] > 0 and recent["net_margin"] > avg["net_margin"] * 1.1:
+            insights.append(("green", f"Net margin improving — {fc(recent['net_margin'])} vs {fc(avg['net_margin'])} avg"))
+
+    # Ratio-based opportunities
+    r = recent
+    if r["groom_rev"] > 0:
+        comm_ratio = r["comm_paid"] / r["groom_rev"] * 100
+        if comm_ratio > 55:
+            insights.append(("blue", f"Commission ratio at {comm_ratio:.0f}% of grooming revenue — check guarantee usage"))
+    if r["retail_rev"] > 0:
+        retail_margin = (r["retail_rev"] - r["retail_cogs"]) / r["retail_rev"] * 100
+        if retail_margin < 40:
+            insights.append(("blue", f"Retail margin at {retail_margin:.0f}% — review product pricing or vendor costs"))
+    if r["total_rev"] > 0:
+        rent_ratio = r["rent"] / r["total_rev"] * 100
+        if rent_ratio > 15:
+            insights.append(("blue", f"Rent is {rent_ratio:.0f}% of revenue — grow revenue to improve fixed cost leverage"))
+        labor_total = r["comm_paid"] + r["mgr"] + r["bather_pay"] + r["retail_pay"]
+        labor_ratio = labor_total / r["total_rev"] * 100
+        if labor_ratio > 60:
+            insights.append(("blue", f"Total labor at {labor_ratio:.0f}% of revenue — review staffing efficiency"))
+
+# Build insights HTML
+insights_html = ""
+if insights:
+    for color, text in insights:
+        bg = {"red": "#fce4ec", "green": "#e8f5e9", "blue": "#e3f2fd"}[color]
+        fg = {"red": "#c62828", "green": "#2E7D32", "blue": "#1565C0"}[color]
+        icon = {"red": "📈", "green": "📉", "blue": "💡"}[color]
+        insights_html += f'<div style="background:{bg};color:{fg};padding:10px 16px;border-radius:10px;font-size:0.88rem;font-weight:500;display:flex;align-items:center;gap:8px">{icon} {text}</div>\n'
+else:
+    insights_html = '<div style="color:#999;font-size:0.88rem">Not enough data for trend analysis yet.</div>'
+
 # ── JSON for JS ──────────────────────────────────────────────────────────────
 import json as _j
 monthly_json = _j.dumps(monthly)
@@ -214,6 +302,10 @@ NOW_STR = _dt.now().strftime("%B %d, %Y at %I:%M %p ET").replace(" 0", " ")
 def kpi(label, value, color="#C4276E", sub=""):
     sub_html = f'<div style="font-size:0.78rem;color:{color};margin-top:3px;font-weight:600">{sub}</div>' if sub else ""
     return f'<div class="kpi" style="border-color:{color}"><div class="kpi-val" style="color:{color}">{value}</div><div class="kpi-label">{label}</div>{sub_html}</div>'
+
+def fp(n):
+    """Format percentage."""
+    return f"{n:.1f}%"
 
 # Monthly table rows
 table_rows = ""
@@ -236,6 +328,40 @@ for m in monthly:
       <td class="n" style="font-weight:700;color:{mc}">{fc(m["net_margin"])}<br><span style="font-size:0.72rem;font-weight:400">{m["net_margin_pct"]}%</span></td>
     </tr>'''
 
+# Month options for comparison dropdowns
+month_options_a = "\n".join(f'<option value="{i}">{m["label"]}</option>' for i, m in enumerate(monthly))
+month_options_b = "\n".join(f'<option value="{i}"{"selected" if i == len(monthly)-1 else ""}>{m["label"]}</option>' for i, m in enumerate(monthly))
+default_a = max(0, len(monthly) - 2)
+
+# Comparison KPI definitions
+CMP_KPIS = [
+    ("total_rev", "Total Revenue", True),
+    ("groom_rev", "Grooming Revenue", True),
+    ("retail_rev", "Retail Revenue", True),
+    ("groom_disc", "Discounts", False),
+    ("retail_cogs", "Retail COGS", False),
+    ("comm_paid", "Commission", False),
+    ("gross_profit", "Gross Profit", True),
+    ("mgr", "Manager", False),
+    ("bather_pay", "Bather Pay", False),
+    ("retail_pay", "Retail Staff", False),
+    ("royalties", "Royalties", False),
+    ("rent", "Rent", False),
+    ("net_margin", "Net Margin", True),
+]
+
+# Build comparison KPI HTML slots
+cmp_kpis_html = ""
+for key, label, up_is_good in CMP_KPIS:
+    cmp_kpis_html += f'''<div class="cmp-row" id="cmp-{key}">
+      <div class="cmp-label">{label}</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-{key}-a"></div>
+        <div class="cmp-delta" id="cmp-{key}-d"></div>
+        <div class="cmp-b" id="cmp-{key}-b"></div>
+      </div>
+    </div>\n'''
+
 html = f'''<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -249,8 +375,8 @@ body{{font-family:'DM Sans',system-ui,sans-serif;background:#f5f4f0;color:#1a1a2
 .topbar-title{{font-size:1.1rem;font-weight:700}}
 .topbar-sub{{color:rgba(255,255,255,0.75);font-size:0.82rem;margin-top:2px}}
 .topbar-time{{font-family:'DM Mono',monospace;font-size:0.78rem;opacity:0.8}}
-.tabs{{background:white;border-bottom:2px solid #eee;position:sticky;top:56px;z-index:99;display:flex;padding:0 24px}}
-.tab{{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit}}
+.tabs{{background:white;border-bottom:2px solid #eee;position:sticky;top:56px;z-index:99;display:flex;padding:0 24px;flex-wrap:wrap}}
+.tab{{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;white-space:nowrap}}
 .tab.active{{color:#C4276E;border-bottom-color:#C4276E}}
 .page{{max-width:1400px;margin:0 auto;padding:28px 24px}}
 .kpi-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}}
@@ -268,13 +394,31 @@ td.n{{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-siz
 .panel{{display:none}}.panel.active{{display:block}}
 .home-link{{color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600}}
 .home-link:hover{{color:white}}
+/* Comparison styles */
+.cmp-controls{{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}}
+.cmp-controls select{{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.84rem}}
+.cmp-controls label{{font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase}}
+.quick-btns{{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}}
+.quick-btn{{padding:6px 14px;border:1.5px solid #C4276E;border-radius:20px;background:transparent;color:#C4276E;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}}
+.quick-btn:hover{{background:#C4276E;color:white}}
+.cmp-row{{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f0ede8}}
+.cmp-label{{width:140px;font-size:0.82rem;font-weight:600;color:#555;flex-shrink:0}}
+.cmp-vals{{display:flex;flex:1;align-items:center;gap:8px}}
+.cmp-a,.cmp-b{{flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:0.95rem;font-weight:600}}
+.cmp-delta{{flex:1;text-align:center;font-size:0.82rem;font-weight:700;border-radius:8px;padding:4px 8px}}
+.cmp-delta.pos{{color:#2E7D32;background:#e8f5e9}}.cmp-delta.neg{{color:#e53935;background:#fce4ec}}
+.cmp-hdr{{display:flex;align-items:center;padding:8px 0;border-bottom:2px solid #eee;margin-bottom:4px}}
+.cmp-hdr span{{flex:1;text-align:center;font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase}}
+.cmp-hdr span:first-child{{width:140px;flex:none}}
+/* Insights */
+.insight-grid{{display:flex;flex-direction:column;gap:8px}}
 </style>
 </head><body>
 
 <div class="topbar">
   <div>
     <div style="display:flex;align-items:center;gap:12px">
-      <a href="index.html" class="home-link">← Home</a>
+      <a href="index.html" class="home-link">&larr; Home</a>
       <div class="topbar-title">💰 Woof Gang Port Washington — Financial Dashboard</div>
     </div>
     <div class="topbar-sub">Revenue · COGS · Operating Expenses · Net Margin</div>
@@ -284,7 +428,8 @@ td.n{{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-siz
 
 <div class="tabs">
   <button class="tab active" onclick="showTab('ytd',this)">2026 YTD</button>
-  <button class="tab" onclick="showTab('monthly',this)">Monthly P&L</button>
+  <button class="tab" onclick="showTab('monthly',this)">Monthly Detail</button>
+  <button class="tab" onclick="showTab('compare',this)">Monthly Compare</button>
 </div>
 
 <div class="page">
@@ -309,20 +454,39 @@ td.n{{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-siz
   </div>
 
   <div class="card">
+    <div class="stitle">Key Ratios</div>
+    <div class="kpi-grid">
+      {kpi("Commission %", fp(ytd_sums["comm_pct"]), "#1565C0", "of grooming rev")}
+      {kpi("Retail Margin %", fp(ytd_sums["retail_margin_pct"]), "#1B6B6B", "after COGS")}
+      {kpi("Labor Cost %", fp(ytd_sums["labor_pct"]), "#7B1FA2", "of total rev")}
+      {kpi("Rent % of Rev", fp(ytd_sums["rent_pct"]), "#6D4C41", "fixed cost")}
+      {kpi("Rev per Day", fc(ytd_sums["rev_per_day"]), "#C4276E", f'{ytd_days_open} days open')}
+      {kpi("Gross Margin %", fp(ytd_sums["gross_margin_pct"]), "#2E7D32", "before OpEx")}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Trends &amp; Insights</div>
+    <div class="insight-grid">
+      {insights_html}
+    </div>
+  </div>
+
+  <div class="card">
     <div class="stitle">Cost Breakdown</div>
     <div style="max-width:500px;margin:0 auto"><canvas id="chart-costs"></canvas></div>
   </div>
 
   <div class="card">
-    <div class="stitle">P&L Waterfall</div>
+    <div class="stitle">P&amp;L Waterfall</div>
     <div style="max-width:800px;margin:0 auto"><canvas id="chart-waterfall" height="300"></canvas></div>
   </div>
 </div>
 
-<!-- ── Monthly ── -->
+<!-- ── Monthly Detail ── -->
 <div class="panel" id="panel-monthly">
   <div class="card">
-    <div class="stitle">Monthly P&L</div>
+    <div class="stitle">Monthly P&amp;L</div>
     <div class="tbl-wrap">
     <table>
       <thead><tr>
@@ -343,6 +507,34 @@ td.n{{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-siz
   </div>
 </div>
 
+<!-- ── Monthly Compare ── -->
+<div class="panel" id="panel-compare">
+  <div class="card">
+    <div class="stitle">Month-to-Month P&amp;L Comparison</div>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="qcPrev()">vs Last Month</button>
+      <button class="quick-btn" onclick="qcYoY()">vs Same Month Last Year</button>
+    </div>
+    <div class="cmp-controls">
+      <div><label>Period A</label><br><select id="cmp-sel-a" onchange="updateCompare()">{month_options_a}</select></div>
+      <div style="font-weight:700;color:#999;padding-top:14px">vs</div>
+      <div><label>Period B</label><br><select id="cmp-sel-b" onchange="updateCompare()">{month_options_b}</select></div>
+    </div>
+    <div class="cmp-hdr">
+      <span style="text-align:left">Metric</span>
+      <span id="cmp-hdr-a">Period A</span>
+      <span>Change</span>
+      <span id="cmp-hdr-b">Period B</span>
+    </div>
+    {cmp_kpis_html}
+  </div>
+
+  <div class="card">
+    <div class="stitle">Side-by-Side Comparison</div>
+    <canvas id="chart-compare" height="300"></canvas>
+  </div>
+</div>
+
 </div>
 
 <div style="text-align:center;padding:24px;font-size:0.8rem;color:#999">
@@ -357,9 +549,88 @@ function showTab(id, btn) {{
   document.querySelectorAll('.tab').forEach(function(t) {{ t.classList.remove('active'); }});
   document.getElementById('panel-' + id).classList.add('active');
   btn.classList.add('active');
+  if (id === 'compare') updateCompare();
 }}
 
 function fc(n) {{ return '$' + Math.round(n).toLocaleString(); }}
+
+// ── Comparison logic ──
+var CMP_KEYS = {_j.dumps([(k, label, up_is_good) for k, label, up_is_good in CMP_KPIS])};
+var cmpChartRef = null;
+
+function updateCompare() {{
+  var iA = parseInt(document.getElementById('cmp-sel-a').value);
+  var iB = parseInt(document.getElementById('cmp-sel-b').value);
+  var a = DATA[iA], b = DATA[iB];
+  if (!a || !b) return;
+  document.getElementById('cmp-hdr-a').textContent = a.label;
+  document.getElementById('cmp-hdr-b').textContent = b.label;
+
+  CMP_KEYS.forEach(function(def) {{
+    var key = def[0], upGood = def[2];
+    var vA = a[key] || 0, vB = b[key] || 0;
+    var delta = vB - vA;
+    var pct = vA !== 0 ? ((vB - vA) / Math.abs(vA) * 100) : 0;
+    document.getElementById('cmp-' + key + '-a').textContent = fc(vA);
+    document.getElementById('cmp-' + key + '-b').textContent = fc(vB);
+    var dEl = document.getElementById('cmp-' + key + '-d');
+    var sign = delta >= 0 ? '+' : '';
+    dEl.textContent = sign + fc(delta) + ' (' + sign + pct.toFixed(1) + '%)';
+    // For costs, down is good. For revenue/profit, up is good.
+    var isGood = upGood ? delta >= 0 : delta <= 0;
+    dEl.className = 'cmp-delta ' + (delta === 0 ? '' : isGood ? 'pos' : 'neg');
+  }});
+
+  // Bar chart
+  if (cmpChartRef) cmpChartRef.destroy();
+  var chartKeys = ['total_rev','groom_rev','retail_rev','gross_profit','net_margin'];
+  var chartLabels = ['Total Rev','Groom Rev','Retail Rev','Gross Profit','Net Margin'];
+  cmpChartRef = new Chart(document.getElementById('chart-compare'), {{
+    type: 'bar',
+    data: {{
+      labels: chartLabels,
+      datasets: [
+        {{ label: a.label, data: chartKeys.map(function(k) {{ return a[k] || 0; }}), backgroundColor: 'rgba(196,39,110,0.7)' }},
+        {{ label: b.label, data: chartKeys.map(function(k) {{ return b[k] || 0; }}), backgroundColor: 'rgba(27,107,107,0.7)' }}
+      ]
+    }},
+    options: {{
+      plugins: {{
+        legend: {{ labels: {{ font: {{ family: "'DM Sans'" }} }} }},
+        tooltip: {{ callbacks: {{ label: function(ctx) {{ return ctx.dataset.label + ': ' + fc(ctx.raw); }} }} }}
+      }},
+      scales: {{
+        x: {{ grid: {{ display: false }} }},
+        y: {{ ticks: {{ callback: function(v) {{ return fc(v); }} }} }}
+      }}
+    }}
+  }});
+}}
+
+function qcPrev() {{
+  var sel = document.getElementById('cmp-sel-b');
+  var i = parseInt(sel.value);
+  if (i > 0) {{
+    document.getElementById('cmp-sel-a').value = i - 1;
+    updateCompare();
+  }}
+}}
+
+function qcYoY() {{
+  var sel = document.getElementById('cmp-sel-b');
+  var i = parseInt(sel.value);
+  var target = DATA[i].label.replace(/\\d{{4}}/, function(y) {{ return parseInt(y) - 1; }});
+  for (var j = 0; j < DATA.length; j++) {{
+    if (DATA[j].label === target) {{
+      document.getElementById('cmp-sel-a').value = j;
+      updateCompare();
+      return;
+    }}
+  }}
+}}
+
+// Set default selection
+document.getElementById('cmp-sel-a').value = {default_a};
 
 // ── Cost breakdown donut ──
 var costData = [
@@ -417,7 +688,6 @@ wf.forEach(function(w) {{
     wfColors.push('#e53935');
   }}
 }});
-// Add net margin bar
 wfBases.push(0);
 wfVals.push(running);
 wfColors.push(running >= 0 ? '#1B6B6B' : '#e53935');
@@ -454,17 +724,14 @@ new Chart(document.getElementById('chart-waterfall'), {{
 }});
 
 // ── Monthly revenue vs margin chart ──
-var labels2026 = DATA.filter(function(m) {{ return m.year >= 2025; }}).map(function(m) {{ return m.label; }});
-var revs = DATA.filter(function(m) {{ return m.year >= 2025; }}).map(function(m) {{ return m.total_rev; }});
-var margins = DATA.filter(function(m) {{ return m.year >= 2025; }}).map(function(m) {{ return m.net_margin; }});
-
+var d2025 = DATA.filter(function(m) {{ return m.year >= 2025; }});
 new Chart(document.getElementById('chart-monthly'), {{
   type: 'bar',
   data: {{
-    labels: labels2026,
+    labels: d2025.map(function(m) {{ return m.label; }}),
     datasets: [
-      {{ label: 'Total Revenue', data: revs, backgroundColor: 'rgba(196,39,110,0.7)', order: 1 }},
-      {{ label: 'Net Margin', data: margins, backgroundColor: margins.map(function(v) {{ return v >= 0 ? 'rgba(27,107,107,0.8)' : 'rgba(229,57,53,0.8)'; }}), order: 0 }}
+      {{ label: 'Total Revenue', data: d2025.map(function(m) {{ return m.total_rev; }}), backgroundColor: 'rgba(196,39,110,0.7)', order: 1 }},
+      {{ label: 'Net Margin', data: d2025.map(function(m) {{ return m.net_margin; }}), backgroundColor: d2025.map(function(m) {{ return m.net_margin >= 0 ? 'rgba(27,107,107,0.8)' : 'rgba(229,57,53,0.8)'; }}), order: 0 }}
     ]
   }},
   options: {{
