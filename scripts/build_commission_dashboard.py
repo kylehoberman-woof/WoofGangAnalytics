@@ -541,6 +541,15 @@ from zoneinfo import ZoneInfo
 et_tz = ZoneInfo("America/New_York")
 now_et = datetime.now(et_tz).strftime("%B %d, %Y at %I:%M %p ET")
 
+# Sue panel - built outside f-string to avoid backslash issues
+_sue_tab_btn = '<button class="tab" onclick="showTab(\'sue\',this)">Sue</button>' if _store_name == "port-washington" else ''
+_sue_panel = '''<!-- Sue M -->
+<div class="panel" id="panel-sue">
+  <div class="kpi-grid" id="sue-kpis"></div>
+  <div class="info-box">Sue M's weekly tips and product purchases. Employees get a <strong>20% discount</strong> - purchases are charged at <strong>80% of subtotal</strong> and deducted from tips. Net = Tips - Purchases.</div>
+  <div id="sue-weeks-container"></div>
+</div>''' if _store_name == "port-washington" else ''
+
 html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -595,7 +604,7 @@ tr:hover td{{background:#fafaf8!important}}
   <button class="tab" onclick="showTab('l30',this)">Last 30 Days</button>
   <button class="tab" onclick="showTab('pp',this)">Pay Period</button>
   <button class="tab" onclick="showTab('exec',this)">&#128200; Executive</button>
-  {'<button class="tab" onclick="showTab(\'sue\',this)">Sue</button>' if _store_name == "port-washington" else ''}
+  {_sue_tab_btn}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
@@ -703,12 +712,7 @@ tr:hover td{{background:#fafaf8!important}}
 
 </div>
 
-{"" if _store_name != "port-washington" else '''<!-- Sue M -->
-<div class="panel" id="panel-sue">
-  <div class="kpi-grid" id="sue-kpis"></div>
-  <div class="info-box">Sue M\'s weekly tips and product purchases. Employees get a <strong>20% discount</strong> - purchases are charged at <strong>80% of subtotal</strong> and deducted from tips. Net = Tips - Purchases.</div>
-  <div id="sue-weeks-container"></div>
-</div>'''}
+{_sue_panel}
 
 <div class="panel" id="panel-exec">
   <div style="padding:32px">
