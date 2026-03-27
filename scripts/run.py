@@ -670,7 +670,8 @@ function updateWeeklyDetail() { _weeklyDetailChart = _updateDetail(WEEKLY_DATA, 
 function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dcmp-detail-sel', 'dcmp', 'dailyDetailChart', _dailyDetailChart, false); }
 """
 
-    html = gd.html_head("Woof Gang Port Washington", f"Store Performance Analysis \u00b7 Sales through {through}")
+    _store_title = "Woof Gang " + ("Port Washington" if "port" in str(store.output_dir).lower() else "Hicksville")
+    html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}")
     html = html.replace("</style>", tabbed_css + "\n</style>", 1)
     html += '<div class="yr-tab-bar">\n'
     for yr in ["2024", "2025", "2026"]:
@@ -707,7 +708,8 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
     html += f'<script>\n{comparison_js}\n</script>\n'
     html += gd.HTML_FOOT
 
-    out_path = store.output_dir / "WoofGang_PortWashington_NY_AllYears_Dashboard.html"
+    _fn = "PortWashington" if "port" in str(store.output_dir).lower() else "Hicksville"
+    out_path = store.output_dir / f"WoofGang_{_fn}_NY_AllYears_Dashboard.html"
     with open(out_path, "w") as f:
         f.write(html)
     print(f"  Dashboard saved: {out_path}")
