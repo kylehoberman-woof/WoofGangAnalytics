@@ -53,6 +53,11 @@ def _compute_period_kpis(df_slice, df_orders_slice):
     groom_order_ids = set(groom["order_id"].dropna().unique()) if "order_id" in groom.columns else set()
     appointments = len(groom_order_ids)
     days_open = int(df_slice["ymd"].nunique()) if "ymd" in df_slice.columns else 1
+    # Groomer days = sum of unique groomers per day
+    groomer_days = 0
+    if "ymd" in groom.columns and "salesperson" in groom.columns:
+        for _, day_grp in groom.groupby("ymd"):
+            groomer_days += day_grp["salesperson"].nunique()
     return {
         "total_revenue": round(total_rev, 2),
         "groom_revenue": round(groom_rev, 2),
@@ -63,6 +68,7 @@ def _compute_period_kpis(df_slice, df_orders_slice):
         "unique_customers": int(df_slice["customer_id"].nunique()),
         "tips": round(to_py(df_orders_slice["tips"].sum()), 2),
         "days_open": days_open,
+        "groomer_days": groomer_days,
     }
 
 
@@ -160,6 +166,7 @@ KPI_DEFS = [
     ("unique_customers", "Unique Customers", ""),
     ("tips", "Tips", ""),
     ("days_open", "Days Open", ""),
+    ("groomer_days", "Groomer Days", "accent"),
 ]
 
 
@@ -445,7 +452,7 @@ function _proRate(periodData, maxDom, useDOM) {
     var filtered = daily.filter(function(d) { return useDOM ? d.dom <= maxDom : d.dow <= maxDom; });
     if (!filtered.length) return periodData;
     var sum = {days_open: filtered.length};
-    ['total_revenue','groom_revenue','retail_revenue','appointments','transactions','unique_customers','tips'].forEach(function(k) {
+    ['total_revenue','groom_revenue','retail_revenue','appointments','transactions','unique_customers','tips','groomer_days'].forEach(function(k) {
         sum[k] = 0;
         filtered.forEach(function(d) { sum[k] += d[k]; });
         sum[k] = Math.round(sum[k] * 100) / 100;
@@ -491,7 +498,8 @@ function _updateComparison(DATA, selA, selB, prefix, chartId, chartRef) {
         {key: 'retail_revenue', fmt: 'c'}, {key: 'appointments', fmt: 'i'},
         {key: 'transactions', fmt: 'i'}, {key: 'avg_ticket', fmt: 'c'},
         {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'},
-        {key: 'days_open', fmt: 'i'}
+        {key: 'days_open', fmt: 'i'},
+        {key: 'groomer_days', fmt: 'i'}
     ];
 
     kpis.forEach(function(kpi) {
@@ -626,7 +634,8 @@ function _updateDetail(DATA, selId, prefix, chartId, chartRef, showChart) {
         {key: 'retail_revenue', fmt: 'c'}, {key: 'appointments', fmt: 'i'},
         {key: 'transactions', fmt: 'i'}, {key: 'avg_ticket', fmt: 'c'},
         {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'},
-        {key: 'days_open', fmt: 'i'}
+        {key: 'days_open', fmt: 'i'},
+        {key: 'groomer_days', fmt: 'i'}
     ];
     kpis.forEach(function(kpi) {
         var el = document.getElementById(prefix + '-det-' + kpi.key + '-val');
