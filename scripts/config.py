@@ -127,6 +127,12 @@ GUARANTEES = {
     "Olivia M":        (200.0, "2025-05-27", "2025-08-25"),
     "Stacey W":        (200.0, "2024-10-02", "2024-12-31"),
     "Sue M":           (300.0, "2024-10-23", "2099-12-31"),  # permanent
+    # Hicksville groomers — $200/day for first 90 days
+    "Carol W":         (200.0, "2025-12-12", "2026-03-11"),
+    "Maria V":         (200.0, "2025-12-13", "2026-03-12"),
+    "Sereena C":       (200.0, "2025-12-15", "2026-03-14"),
+    "Alex  I":         (200.0, "2026-01-19", "2026-04-18"),
+    "Julia B":         (200.0, "2026-02-03", "2026-05-04"),
 }
 
 RETAIL_RATES = {
@@ -155,9 +161,10 @@ BATHER_NAME_MAP = {
 }
 
 EXCLUDE_EMPLOYEES = {
-    "Unknown", "Wgb Port Washington", "Kyle Hoberman", "Julie Schorr",
-    "Jessica G", "Angela R",                      # current bathers
-    "Isabelle O", "Brian Labianca",               # former bathers
+    "Unknown", "Wgb Port Washington", "Wgb Hicksville", "Kyle Hoberman", "Julie Schorr",
+    "Jessica G", "Angela R",                      # PW current bathers
+    "Isabelle O", "Brian Labianca",               # PW former bathers
+    "Hailey Imhof",                               # HV retail associate
     "Sitara Nagrani", "Alize James",              # former sales associates
     "Giana Golden", "Parker Spooner",             # former sales associates
     "Casey Makowski", "Christine Brower",         # current sales associates
@@ -195,10 +202,9 @@ STORE_OPEN_DATES = {
 HICKSVILLE_RETAIL_RATES = {
     "Hailey": 21.0,
 }
-HICKSVILLE_RETAIL_RATES.update({k: 19.0 for k in RETAIL_RATES if k not in HICKSVILLE_RETAIL_RATES})
 
 HICKSVILLE_RETAIL_NAME_MAP = {
-    "Hailey Mullen": "Hailey",  # placeholder — update with real full name
+    "Hailey Imhof": "Hailey",
 }
 
 # ─── Pay Period Anchor ──────────────────────────────────────────────────────
