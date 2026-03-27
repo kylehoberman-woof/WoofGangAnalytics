@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang Port Washington — Dashboards</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5;min-height:100vh;display:flex;flex-direction:column}
+
+.header{
+  background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);
+  padding:48px 32px 40px;
+  text-align:center;
+  color:white;
+}
+.header h1{font-size:2rem;font-weight:800;margin-bottom:6px;letter-spacing:-0.02em}
+.header p{font-size:1rem;opacity:0.85;font-weight:400}
+.header .brand{
+  display:inline-block;margin-top:12px;
+  background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;
+  font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
+}
+
+.main{
+  max-width:1100px;width:100%;margin:0 auto;padding:40px 24px 60px;
+  flex:1;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:24px;
+}
+
+.card{
+  background:white;border-radius:16px;padding:32px 28px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  border-left:5px solid #C4276E;
+  transition:transform 0.2s,box-shadow 0.2s;
+  display:flex;flex-direction:column;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(196,39,110,0.12)}
+
+.card:nth-child(2){border-left-color:#1B6B6B}
+.card:nth-child(3){border-left-color:#6B3520}
+
+.card-icon{font-size:2.4rem;margin-bottom:14px}
+.card-title{font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:8px}
+.card-desc{font-size:0.88rem;color:#666;line-height:1.6;margin-bottom:20px;flex:1}
+
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.tag{
+  font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:12px;
+  background:#FDF0F5;color:#C4276E;text-transform:uppercase;letter-spacing:0.04em;
+}
+.card:nth-child(2) .tag{background:#e0f2f1;color:#1B6B6B}
+.card:nth-child(3) .tag{background:#efebe9;color:#6B3520}
+
+.card-btn{
+  display:inline-block;padding:12px 28px;border-radius:10px;
+  background:#C4276E;color:white;text-decoration:none;
+  font-size:0.9rem;font-weight:600;text-align:center;
+  transition:background 0.2s,transform 0.1s;
+}
+.card-btn:hover{background:#a31f5b;transform:translateY(-1px)}
+.card:nth-child(2) .card-btn{background:#1B6B6B}
+.card:nth-child(2) .card-btn:hover{background:#145252}
+.card:nth-child(3) .card-btn{background:#6B3520}
+.card:nth-child(3) .card-btn:hover{background:#4d2717}
+
+.footer{
+  text-align:center;padding:24px;
+  font-size:0.8rem;color:#999;
+}
+.footer strong{color:#C4276E;font-weight:600}
+
+@media(max-width:700px){
+  .header{padding:32px 20px 28px}
+  .header h1{font-size:1.5rem}
+  .main{padding:24px 16px 40px}
+  .cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Woof Gang Port Washington</h1>
+  <p>Store Performance Dashboards</p>
+  <div class="brand">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
+<div class="main">
+  <div class="cards">
+
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Executive Dashboard</div>
+      <div class="card-desc">Full store performance — revenue, appointments, transactions, comparisons by month, week, and day. Pro-rate partial periods for fair comparisons.</div>
+      <div class="card-tags">
+        <span class="tag">Revenue</span>
+        <span class="tag">Trends</span>
+        <span class="tag">Comparisons</span>
+      </div>
+      <a class="card-btn" href="WoofGang_PortWashington_NY_AllYears_Dashboard.html">Open Executive Dashboard</a>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">💇</div>
+      <div class="card-title">Commission Dashboard</div>
+      <div class="card-desc">Groomer commissions, tips, guarantees, bather &amp; retail pay, manager salary, discounts, and net margin. Pay period breakdowns with daily detail.</div>
+      <div class="card-tags">
+        <span class="tag">Commission</span>
+        <span class="tag">Payroll</span>
+        <span class="tag">Margin</span>
+      </div>
+      <a class="card-btn" href="WoofGang_PortWashington_Commission_Dashboard.html">Open Commission Dashboard</a>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <div class="card-title">Inventory Dashboard</div>
+      <div class="card-desc">Stock levels, reorder recommendations, vendor analysis, out-of-stock alerts, and negative inventory tracking across all product categories.</div>
+      <div class="card-tags">
+        <span class="tag">Stock</span>
+        <span class="tag">Reorder</span>
+        <span class="tag">Vendors</span>
+      </div>
+      <a class="card-btn" href="WoofGang_PortWashington_Inventory_Dashboard.html">Open Inventory Dashboard</a>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  <strong>Woof Gang Bakery &amp; Grooming</strong> — Port Washington, NY &middot; Operations Intelligence
+</div>
+
+</body>
+</html>
