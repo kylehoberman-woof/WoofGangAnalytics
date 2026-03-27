@@ -43,7 +43,7 @@ STORES = {
         name="Woof Gang Bakery & Grooming -- Hicksville, NY (#265)",
         location_id=205993,
         token="E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
-        start_date="2025-12-01",
+        start_date="2025-12-11",
         end_date="2026-12-31",
         data_dir=PROJ_ROOT / "hicksville" / "data",
         output_dir=PROJ_ROOT / "hicksville",
@@ -188,7 +188,7 @@ STORE_RENT = {
 
 STORE_OPEN_DATES = {
     "port-washington": date(2024, 9, 26),
-    "hicksville": date(2025, 12, 1),
+    "hicksville": date(2025, 12, 11),
 }
 
 # Hicksville retail staff
