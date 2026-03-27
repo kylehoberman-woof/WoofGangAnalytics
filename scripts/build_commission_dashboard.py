@@ -22,6 +22,7 @@ SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 _store = get_store(_store_name)
 _store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
+_home_url = "index.html" if _store_name == "port-washington" else "../port-washington/index.html"
 MONTHLY_RENT = STORE_RENT.get(_store_name, _DEFAULT_RENT)
 DATA_DIR   = _store.data_dir
 OUTPUT_DIR = _store.output_dir
@@ -594,7 +595,7 @@ tr:hover td{{background:#fafaf8!important}}
 </head>
 <body>
 <div class="topbar">
-  <div><div style="display:flex;align-items:center;gap:12px"><a href="index.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600">&larr; Home</a><div class="topbar-title">💅 Woof Gang {_store_display} — Groomer Commission</div></div>
+  <div><div style="display:flex;align-items:center;gap:12px"><a href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600">&larr; Home</a><div class="topbar-title">💅 Woof Gang {_store_display} — Groomer Commission</div></div>
   <div class="topbar-sub">50% commission · Guarantees: Maria C $200/day · Sue M $300/day</div></div>
   <div class="topbar-date">Updated {now_et}</div>
 </div>

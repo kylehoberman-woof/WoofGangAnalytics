@@ -13,6 +13,7 @@ import sys as _sys
 _store_name = _sys.argv[1] if len(_sys.argv) > 1 else "port-washington"
 _store = get_store(_store_name)
 _store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
+_home_url = "index.html" if _store_name == "port-washington" else "../port-washington/index.html"
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 
@@ -364,7 +365,7 @@ html = f"""<!DOCTYPE html>
 <title>Woof Gang - Inventory Dashboard</title>
 <link href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">
 <style>{CSS}</style></head><body>
-<div class=\"hdr\"><div><div style=\"display:flex;align-items:center;gap:8px\"><a href=\"index.html\" class=\"home-link\">&larr; Home</a><h1>&#128062; Woof Gang {_store_display} - Inventory Dashboard</h1></div><p>Retail stock levels, velocity &amp; reorder analysis</p></div><div class=\"hdr-r\">Updated {now}</div></div>
+<div class=\"hdr\"><div><div style=\"display:flex;align-items:center;gap:8px\"><a href=\"{_home_url}\" class=\"home-link\">&larr; Home</a><h1>&#128062; Woof Gang {_store_display} - Inventory Dashboard</h1></div><p>Retail stock levels, velocity &amp; reorder analysis</p></div><div class=\"hdr-r\">Updated {now}</div></div>
 <div class=\"sum-row\">
   <div class=\"sc s-out\"><div class=\"v\">{out_count}</div><div class=\"l\">Out of Stock</div></div>
   <div class=\"sc s-crit\"><div class=\"v\">{critical_count}</div><div class=\"l\">Critical (1-2)</div></div>

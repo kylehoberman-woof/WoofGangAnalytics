@@ -676,7 +676,8 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
 """
 
     _store_title = "Woof Gang " + ("Port Washington" if "port" in str(store.output_dir).lower() else "Hicksville")
-    html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}")
+    _home_url = "index.html" if "port" in str(store.output_dir).lower() else "../port-washington/index.html"
+    html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url)
     html = html.replace("</style>", tabbed_css + "\n</style>", 1)
     html += '<div class="yr-tab-bar">\n'
     for yr in ["2024", "2025", "2026"]:
@@ -793,5 +794,8 @@ def main(store_name="port-washington"):
 
 
 if __name__ == "__main__":
+    # Ensure 'import run' in other modules gets this module, not a separate copy
+    # with stale PW defaults (Python treats __main__ and 'run' as different modules)
+    sys.modules['run'] = sys.modules['__main__']
     store_arg = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
     main(store_arg)

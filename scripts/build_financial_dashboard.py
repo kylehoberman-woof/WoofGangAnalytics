@@ -23,6 +23,7 @@ SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 _store = get_store(_store_name)
 _store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
+_home_url = "index.html" if _store_name == "port-washington" else "../port-washington/index.html"
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 TODAY = date.today()
@@ -442,7 +443,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 <div class="topbar">
   <div>
     <div style="display:flex;align-items:center;gap:12px">
-      <a href="index.html" class="home-link">&larr; Home</a>
+      <a href="{_home_url}" class="home-link">&larr; Home</a>
       <div class="topbar-title">💰 Woof Gang {_store_display} — Financial Dashboard</div>
     </div>
     <div class="topbar-sub">Revenue · COGS · Operating Expenses · Net Margin</div>

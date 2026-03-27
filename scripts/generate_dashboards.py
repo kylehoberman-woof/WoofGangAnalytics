@@ -368,7 +368,7 @@ td.magenta { color: """ + C['magenta'] + """; font-weight: 600; }
 """
 
 
-def html_head(title, subtitle="", timestamp=None):
+def html_head(title, subtitle="", timestamp=None, home_url="index.html"):
     if timestamp is None:
         from zoneinfo import ZoneInfo
         timestamp = datetime.now(ZoneInfo("America/New_York")).strftime("%B %d, %Y at %I:%M %p ET")
@@ -386,7 +386,7 @@ def html_head(title, subtitle="", timestamp=None):
 <body>
 <div class="header">
     <div class="header-timestamp">Updated {timestamp}</div>
-    <a href="index.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>
+    <a href="{home_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>
     <h1>{esc(title)}</h1>
     <div class="subtitle">{esc(subtitle)}</div>
     <div class="brand-tag">Woof Gang Bakery & Grooming</div>
@@ -571,9 +571,11 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
     if body_only:
         html = ""
     else:
+        _home_url = "index.html" if "port" in str(DATA_DIR).lower() else "../port-washington/index.html"
         html = html_head(
             f"Woof Gang {_store_label}",
-            f"Store Performance Analysis — {_date_range}"
+            f"Store Performance Analysis — {_date_range}",
+            home_url=_home_url,
         )
 
     # ── KPI Row 1: Core Financials ──
@@ -1969,9 +1971,11 @@ def generate_price_increase_dashboard(df, df_orders, output_path):
     breakeven_customers = int(total_custs * breakeven_churn_pct / 100)
     avg_groom_spend_per_cust = core_rev / total_custs if total_custs else 0
 
+    _home_url_pi = "index.html" if "port" in str(DATA_DIR).lower() else "../port-washington/index.html"
     html = html_head(
         "Price Increase Impact Analysis",
-        f"{STORE_NAME} — $5 Groom/Bath Increase Effective May 1"
+        f"{STORE_NAME} — $5 Groom/Bath Increase Effective May 1",
+        home_url=_home_url_pi,
     )
 
     # ── KPI Cards ──
