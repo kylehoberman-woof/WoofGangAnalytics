@@ -31,6 +31,10 @@ jobs:
         env:
           FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
         run: python3 scripts/fetch_stock.py
+      - name: Fetch brand data
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: python3 scripts/fetch_brands.py
       - name: Generate inventory dashboard
         run: cd scripts && python generate_inventory_dashboard.py
       - name: Generate financial dashboard

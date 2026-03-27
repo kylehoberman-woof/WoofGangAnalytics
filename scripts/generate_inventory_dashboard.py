@@ -18,6 +18,20 @@ with open(DATA_DIR / "all_data.json") as f:
 with open(DATA_DIR / "stock_levels.json") as f:
     stock_levels = json.load(f)
 
+# Load real brand data from FranPOS (if available)
+_brand_cache_path = DATA_DIR / "sku_brands.json"
+_brand_cache = {}
+if _brand_cache_path.exists():
+    with open(_brand_cache_path) as f:
+        _brand_cache = json.load(f)
+
+def get_vendor(sku, name):
+    """Get vendor/brand from FranPOS cache, fall back to heuristic."""
+    info = _brand_cache.get(sku)
+    if info and isinstance(info, dict) and info.get("brand"):
+        return info["brand"]
+    return detect_vendor(sku, name)
+
 order_items = all_data.get("order_items", [])
 
 sku_data = defaultdict(lambda: {"name":"","sku":"","cost":0,"revenue":0,"units":0,"months_all":set(),"vendor":""})
@@ -39,7 +53,7 @@ for item in order_items:
     d["units"] += qty
     month = str(item.get("CreatedOn",""))[:7]
     if month: d["months_all"].add(month)
-    d["vendor"] = detect_vendor(sku, name)
+    d["vendor"] = get_vendor(sku, name)
 
 results = []
 for sku, d in sku_data.items():
