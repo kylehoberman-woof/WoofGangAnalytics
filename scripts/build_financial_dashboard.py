@@ -135,6 +135,7 @@ def groomer_commission_for_range(start_str, end_str):
 
 
 # ── Monthly P&L ──────────────────────────────────────────────────────────────
+all_rev_days = set(list(groom_rev_by_day.keys()) + list(retail_rev_by_day.keys()))
 monthly = []
 m_start = date(2024, 9, 1) if STORE_OPEN.year <= 2024 else STORE_OPEN.replace(day=1)
 
@@ -166,6 +167,16 @@ while m_start <= TODAY:
     net_margin = round(gross_profit - total_opex, 2)
     net_margin_pct = round(net_margin / total_rev * 100, 1) if total_rev else 0
 
+    # Derived ratios per month
+    m_comm_pct = round(comm_paid / groom_rev * 100, 1) if groom_rev else 0
+    m_retail_margin_pct = round((retail_rev - retail_cogs) / retail_rev * 100, 1) if retail_rev else 0
+    m_labor = comm_paid + mgr + bather_pay + retail_pay
+    m_labor_pct = round(m_labor / total_rev * 100, 1) if total_rev else 0
+    m_rent_pct = round(rent / total_rev * 100, 1) if total_rev else 0
+    m_gross_margin_pct = round(gross_profit / total_rev * 100, 1) if total_rev else 0
+    # Days open in this month
+    m_days_open = len([d for d in all_rev_days if s <= d <= e])
+
     monthly.append({
         "label": m_start.strftime("%b %Y"),
         "year": m_start.year,
@@ -186,6 +197,13 @@ while m_start <= TODAY:
         "net_margin": net_margin,
         "net_margin_pct": net_margin_pct,
         "tips": tips,
+        "comm_pct": m_comm_pct,
+        "retail_margin_pct": m_retail_margin_pct,
+        "labor_pct": m_labor_pct,
+        "rent_pct": m_rent_pct,
+        "gross_margin_pct": m_gross_margin_pct,
+        "days_open": m_days_open,
+        "rev_per_day": round(total_rev / m_days_open, 2) if m_days_open else 0,
     })
 
     if m_start.month == 12:
@@ -209,8 +227,7 @@ ytd_sums["retail_margin_pct"] = round((ytd_sums["retail_rev"] - ytd_sums["retail
 total_labor = ytd_sums["comm_paid"] + ytd_sums["mgr"] + ytd_sums["bather_pay"] + ytd_sums["retail_pay"]
 ytd_sums["labor_pct"] = round(total_labor / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
 ytd_sums["rent_pct"] = round(ytd_sums["rent"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
-# Count days open (unique days with any revenue)
-all_rev_days = set(list(groom_rev_by_day.keys()) + list(retail_rev_by_day.keys()))
+# Count days open YTD
 ytd_days_open = len([d for d in all_rev_days if "2026-01-01" <= d <= TODAY.isoformat()])
 ytd_sums["rev_per_day"] = round(ytd_sums["total_rev"] / ytd_days_open, 2) if ytd_days_open else 0
 
@@ -486,6 +503,19 @@ td.n{{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-siz
 <!-- ── Monthly Detail ── -->
 <div class="panel" id="panel-monthly">
   <div class="card">
+    <div class="stitle">Monthly Snapshot</div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase">Select Month</label><br>
+      <select id="month-detail-sel" onchange="updateMonthDetail()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.84rem;margin-top:4px">
+        {month_options_b}
+      </select>
+    </div>
+    <div class="kpi-grid" id="month-detail-kpis"></div>
+    <div class="stitle" style="margin-top:8px">Key Ratios</div>
+    <div class="kpi-grid" id="month-detail-ratios"></div>
+  </div>
+
+  <div class="card">
     <div class="stitle">Monthly P&amp;L</div>
     <div class="tbl-wrap">
     <table>
@@ -550,6 +580,7 @@ function showTab(id, btn) {{
   document.getElementById('panel-' + id).classList.add('active');
   btn.classList.add('active');
   if (id === 'compare') updateCompare();
+  if (id === 'monthly') updateMonthDetail();
 }}
 
 function fc(n) {{ return '$' + Math.round(n).toLocaleString(); }}
@@ -631,6 +662,42 @@ function qcYoY() {{
 
 // Set default selection
 document.getElementById('cmp-sel-a').value = {default_a};
+
+// ── Monthly Detail KPIs ──
+function updateMonthDetail() {{
+  var i = parseInt(document.getElementById('month-detail-sel').value);
+  var m = DATA[i];
+  if (!m) return;
+
+  function kpiHtml(label, val, color, sub) {{
+    var subH = sub ? '<div style="font-size:0.78rem;color:'+color+';margin-top:3px;font-weight:600">'+sub+'</div>' : '';
+    return '<div class="kpi" style="border-color:'+color+'"><div class="kpi-val" style="color:'+color+'">'+val+'</div><div class="kpi-label">'+label+'</div>'+subH+'</div>';
+  }}
+  function fp(n) {{ return n.toFixed(1) + '%'; }}
+  var mc = m.net_margin >= 0 ? '#2E7D32' : '#e53935';
+
+  document.getElementById('month-detail-kpis').innerHTML =
+    kpiHtml('Grooming Revenue', fc(m.groom_rev), '#C4276E', '') +
+    kpiHtml('Retail Revenue', fc(m.retail_rev), '#1B6B6B', '') +
+    kpiHtml('Total Revenue', fc(m.total_rev), '#1a1a2e', '') +
+    kpiHtml('Retail COGS', fc(m.retail_cogs), '#e65100', '') +
+    kpiHtml('Commission', fc(m.comm_paid), '#1565C0', '') +
+    kpiHtml('Gross Profit', fc(m.gross_profit), '#2E7D32', fp(m.gross_margin_pct)) +
+    kpiHtml('Total OpEx', fc(m.total_opex), '#7B1FA2', '') +
+    kpiHtml('Net Margin', fc(m.net_margin), mc, fp(m.net_margin_pct)) +
+    kpiHtml('Tips', fc(m.tips), '#F57C00', '');
+
+  document.getElementById('month-detail-ratios').innerHTML =
+    kpiHtml('Commission %', fp(m.comm_pct), '#1565C0', 'of groom rev') +
+    kpiHtml('Retail Margin %', fp(m.retail_margin_pct), '#1B6B6B', 'after COGS') +
+    kpiHtml('Labor Cost %', fp(m.labor_pct), '#7B1FA2', 'of total rev') +
+    kpiHtml('Rent % of Rev', fp(m.rent_pct), '#6D4C41', 'fixed cost') +
+    kpiHtml('Rev per Day', fc(m.rev_per_day), '#C4276E', (m.days_open || 0) + ' days') +
+    kpiHtml('Gross Margin %', fp(m.gross_margin_pct), '#2E7D32', 'before OpEx');
+}}
+
+// Initialize monthly detail on load
+updateMonthDetail();
 
 // ── Cost breakdown donut ──
 var costData = [
