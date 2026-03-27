@@ -171,20 +171,35 @@ for r in results:
     est_cost = round(needed * r["cost"], 2) if r["cost"] else 0
     reorder_by_vendor[r["vendor"]].append({**r, "needed": round(needed,1), "est_cost": est_cost})
 
-reorder_rows = ""
+TH_REORDER = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th class="num">Vel/Mo</th><th class="num">Need</th><th class="num">Cost</th><th class="num">Est.$</th><th>Status</th>'
+
+reorder_html = ""
 reorder_total = 0
-for v in ["Woof Gang","PFX","Fauna","K9 Cuisine","Other"]:
+VENDOR_COLORS = {"Woof Gang":"#C4276E","PFX":"#1B6B6B","Fauna":"#6B3520"}
+# Get all vendors that have reorder items, sorted with known vendors first then alphabetical
+known_vendors = ["Woof Gang","PFX","Fauna"]
+other_vendors = sorted(set(reorder_by_vendor.keys()) - set(known_vendors))
+all_reorder_vendors = [v for v in known_vendors if v in reorder_by_vendor] + other_vendors
+for v in all_reorder_vendors:
     items = reorder_by_vendor.get(v, [])
     if not items: continue
     vtotal = sum(i["est_cost"] for i in items)
     reorder_total += vtotal
-    reorder_rows += f'<tr style="background:#f0f0f0;font-weight:bold"><td colspan="8">{v} — {len(items)} items · Est. ${vtotal:,.0f}</td></tr>'
+    # Cycle through accent colors for vendors without a fixed color
+    _fallback_colors = ["#F57C00","#455A64","#7B1FA2","#00838F","#D32F2F","#558B2F","#1565C0","#AD1457"]
+    vc = VENDOR_COLORS.get(v, _fallback_colors[hash(v) % len(_fallback_colors)])
+    rows = ""
     for i in sorted(items, key=lambda x: -x["velocity_monthly"]):
-        reorder_rows += (f'<tr data-status="{i["status"]}" data-vendor="{i["vendor"].lower()}">'
+        rows += (f'<tr data-status="{i["status"]}" data-vendor="{i["vendor"].lower()}">'
             f'<td>{i["sku"]}</td><td>{i["name"][:45]}</td>'
             f'<td class="num">{i.get("stock",0):.1f}</td><td class="num">{i["velocity_monthly"]}</td>'
             f'<td class="num">{i["needed"]}</td><td class="num">${i["cost"]:.2f}</td>'
             f'<td class="num">${i["est_cost"]:,.2f}</td><td>{badge(i["status"])}</td></tr>')
+    reorder_html += (f'<div style="background:white;border-radius:10px;border-top:4px solid {vc};padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)">'
+        f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+        f'<div style="font-weight:700;font-size:1rem;color:{vc}">{v}</div>'
+        f'<div style="font-size:0.85rem;color:#666">{len(items)} items · Est. <strong>${vtotal:,.0f}</strong></div></div>'
+        f'<div style="overflow-x:auto"><table><thead><tr>{TH_REORDER}</tr></thead><tbody>{rows}</tbody></table></div></div>')
 
 neg_rows = ""
 for r in sorted(results, key=lambda x: x.get("stock") or 0):
@@ -194,7 +209,6 @@ for r in sorted(results, key=lambda x: x.get("stock") or 0):
         f'<td class="num" style="color:red">{r.get("stock",0):.1f}</td>'
         f'<td>{r["vendor"]}</td><td class="num">{r["velocity_monthly"]}</td></tr>')
 
-TH_REORDER = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th class="num">Vel/Mo</th><th class="num">Need</th><th class="num">Cost</th><th class="num">Est.$</th><th>Status</th>'
 TH_NEG = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th>Vendor</th><th class="num">Vel/Mo</th>'
 
 CSS = """
@@ -255,12 +269,12 @@ function switchTab(t,b){ct=t;document.querySelectorAll('.tb').forEach(x=>x.class
 function setFilter(f,b){cf=f;document.querySelectorAll('.fb').forEach(x=>x.classList.remove('active'));b.classList.add('active');af();}
 function doSearch(v){cs=v.toLowerCase();af();}
 function af(){
-  var tbodyMap={top50:'b-top50',all:'b-all',nocost:'b-nocost',reorder:'b-reorder',negative:'b-negative'};
-  var id=tbodyMap[ct]||'b-top50';
-  document.querySelectorAll('#'+id+' tr').forEach(function(r){
+  var tbodyMap={top50:'b-top50',all:'b-all',nocost:'b-nocost',negative:'b-negative'};
+  var sel=ct==='reorder'?'#p-reorder tr':'#'+(tbodyMap[ct]||'b-top50')+' tr';
+  document.querySelectorAll(sel).forEach(function(r){
     var s=r.dataset.status||'',v=r.dataset.vendor||'';
     if(!s&&!v){return;}
-    var mf=cf==='all'||(['out','critical','low','ok','untracked'].includes(cf)?s===cf:v.includes(cf));
+    var mf=cf==='all'||(['out','critical','low','ok','untracked'].includes(cf)?s===cf:cf==='other'?(v&&!['woof gang','pfx','fauna'].includes(v)):v.includes(cf));
     r.classList.toggle('hidden',!(mf&&(!cs||r.textContent.toLowerCase().includes(cs))));
   });
 }
@@ -306,7 +320,7 @@ html = f"""<!DOCTYPE html>
   <div id=\"p-top50\" class=\"panel active\"><table><thead><tr>{TH}</tr></thead><tbody id=\"b-top50\">{top50_rows}</tbody></table></div>
   <div id=\"p-all\" class=\"panel\"><table><thead><tr>{TH}</tr></thead><tbody id=\"b-all\">{all_rows}</tbody></table></div>
   <div id=\"p-nocost\" class=\"panel\"><table><thead><tr>{TH2}</tr></thead><tbody id=\"b-nocost\">{nocost_rows}</tbody></table></div>
-  <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px\">Reorder Recommendations (4-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3><table><thead><tr>{TH_REORDER}</tr></thead><tbody id=\"b-reorder\">{reorder_rows}</tbody></table></div>
+  <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px 8px 16px\">Reorder Recommendations (4-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3>{reorder_html}</div>
   <div id=\"p-negative\" class=\"panel\"><table><thead><tr>{TH_NEG}</tr></thead><tbody id=\"b-negative\">{neg_rows}</tbody></table></div>
 </div>
 <script>{JS}</script></body></html>"""
