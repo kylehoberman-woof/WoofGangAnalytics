@@ -368,10 +368,11 @@ td.magenta { color: """ + C['magenta'] + """; font-weight: 600; }
 """
 
 
-def html_head(title, subtitle="", timestamp=None, home_url="index.html"):
+def html_head(title, subtitle="", timestamp=None, home_url="index.html", show_home=True):
     if timestamp is None:
         from zoneinfo import ZoneInfo
         timestamp = datetime.now(ZoneInfo("America/New_York")).strftime("%B %d, %Y at %I:%M %p ET")
+    _home_link = f'<a href="{home_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>' if show_home else ''
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -386,7 +387,7 @@ def html_head(title, subtitle="", timestamp=None, home_url="index.html"):
 <body>
 <div class="header">
     <div class="header-timestamp">Updated {timestamp}</div>
-    <a href="{home_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>
+    {_home_link}
     <h1>{esc(title)}</h1>
     <div class="subtitle">{esc(subtitle)}</div>
     <div class="brand-tag">Woof Gang Bakery & Grooming</div>
