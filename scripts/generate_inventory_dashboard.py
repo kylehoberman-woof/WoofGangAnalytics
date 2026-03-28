@@ -26,6 +26,37 @@ with open(DATA_DIR / "all_data.json") as f:
 with open(DATA_DIR / "stock_levels.json") as f:
     stock_levels = json.load(f)
 
+# Fetch pending receipts from Supabase for "Pending" column
+import httpx
+from config import SUPABASE_URL, SUPABASE_ANON_KEY
+_pending_by_sku = {}
+try:
+    _sb_headers = {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
+    }
+    _r = httpx.get(
+        f"{SUPABASE_URL}/rest/v1/invoice_scans?"
+        f"select=po_number,line_items&status=eq.pending&store_key=eq.{_store_name}",
+        headers=_sb_headers,
+        timeout=10,
+    )
+    if _r.status_code == 200:
+        for row in _r.json():
+            po = row.get("po_number") or "?"
+            for li in (row.get("line_items") or []):
+                sku = str(li.get("sku", "")).strip()
+                qty = int(li.get("quantity", 0) or 0)
+                if sku and qty > 0:
+                    if sku not in _pending_by_sku:
+                        _pending_by_sku[sku] = []
+                    _pending_by_sku[sku].append({"qty": qty, "po": po})
+        print(f"  Pending receipts: {len(_pending_by_sku)} SKUs with incoming stock")
+    else:
+        print(f"  Warning: Supabase returned {_r.status_code} for pending receipts")
+except Exception as e:
+    print(f"  Warning: Could not fetch pending receipts from Supabase: {e}")
+
 # Load real brand data from FranPOS (if available)
 _brand_cache_path = DATA_DIR / "sku_brands.json"
 _brand_cache = {}
@@ -124,6 +155,15 @@ def badge(s):
          "untracked":'<span class="badge badge-na">-</span>'}
     return m.get(s,"")
 
+def pending_cell(sku):
+    """Build the Pending column cell for a SKU."""
+    plist = _pending_by_sku.get(sku, [])
+    if not plist:
+        return '<td class="num">-</td>'
+    total = sum(p["qty"] for p in plist)
+    pos = ", ".join(set(p["po"] for p in plist))
+    return f'<td class="num"><span class="badge-pending" title="PO: {pos}">+{total}</span></td>'
+
 def make_rows(items, show_cost=True):
     rows = []
     for r in items:
@@ -141,7 +181,7 @@ def make_rows(items, show_cost=True):
             f'<tr class="row-{s}" data-status="{s}" data-vendor="{r["vendor"].lower()}">'
             f'<td>{badge(s)}</td><td class="sku-cell">{r["sku"]}</td>'
             f'<td class="name-cell">{r["name"][:48]}</td><td class="vendor-cell">{r["vendor"]}</td>'
-            f'<td class="num{neg}">{stock_str}</td><td class="num">{vel_str}</td>'
+            f'<td class="num{neg}">{stock_str}</td>{pending_cell(r["sku"])}<td class="num">{vel_str}</td>'
             f'<td class="num">{wos_str}</td>{cost_cols}'
             f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
         )
@@ -171,6 +211,7 @@ nocost_rows = "\n".join(
     f'<td>{badge(r["status"])}</td><td class="sku-cell">{r["sku"]}</td>'
     f'<td class="name-cell">{r["name"][:48]}</td><td class="vendor-cell">{r["vendor"]}</td>'
     f'<td class="num">{"" if r["stock"] is None else str(int(r["stock"]))}</td>'
+    f'{pending_cell(r["sku"])}'
     f'<td class="num">{"-" if r["velocity_monthly"] <= 0 else str(round(r["velocity_monthly"],1))}</td>'
     f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
     for r in results if not r["has_cost"]
@@ -285,6 +326,7 @@ td.vendor-cell{font-size:12px;color:var(--mu);font-weight:500;}
 .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;}
 .badge-out{background:#fee2e2;color:#dc2626;}.badge-critical{background:#ffedd5;color:#ea580c;}
 .badge-low{background:#fef9c3;color:#ca8a04;}.badge-ok{background:#dcfce7;color:#16a34a;}.badge-na{background:#f3f4f6;color:#9ca3af;}
+.badge-pending{display:inline-block;background:#FFF3E0;color:#E65100;border:1px solid #FFB74D;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap;}
 .hidden{display:none !important;}.panel{display:none;}.panel.active{display:block;}
 /* Sortable headers */
 thead th{cursor:pointer;user-select:none;position:relative;}
@@ -361,8 +403,8 @@ document.querySelectorAll('.vendor-hdr').forEach(function(hdr){
 });
 """
 
-TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
-TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Revenue</th>"
+TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
+TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Revenue</th>"
 
 html = f"""<!DOCTYPE html>
 <html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">

@@ -88,7 +88,7 @@ C = {
 # ─── Supabase (Override Storage) ───────────────────────────────────────────
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://bqzinttbjeeaybywhhet.supabase.co")
-SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "sb_publishable_J-0b5wB84dbLQ5sRErwEAw_1qaX5ZX-")
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ")
 
 
 # ─── API Configuration ──────────────────────────────────────────────────────
