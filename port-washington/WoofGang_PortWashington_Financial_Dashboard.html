@@ -2,15 +2,15 @@
 <html lang="en"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Woof Gang Port Washington — Financial Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',system-ui,sans-serif;background:#f5f4f0;color:#1a1a2e}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f4f0;color:#1a1a2e}
 .topbar{background:#C4276E;padding:18px 32px;color:white;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3);display:flex;justify-content:space-between;align-items:center}
 .topbar-title{font-size:1.1rem;font-weight:700}
 .topbar-sub{color:rgba(255,255,255,0.75);font-size:0.82rem;margin-top:2px}
-.topbar-time{font-family:'DM Mono',monospace;font-size:0.78rem;opacity:0.8}
+.topbar-time{font-size:0.78rem;opacity:0.8}
 .tabs{background:white;border-bottom:2px solid #eee;position:sticky;top:56px;z-index:99;display:flex;padding:0 24px;flex-wrap:wrap}
 .tab{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;white-space:nowrap}
 .tab.active{color:#C4276E;border-bottom-color:#C4276E}
@@ -48,20 +48,26 @@ thead th{position:sticky;top:0;background:#f8f7f4;z-index:5}
 .cmp-hdr{display:flex;align-items:center;padding:8px 0;border-bottom:2px solid #eee;margin-bottom:4px}
 .cmp-hdr span{flex:1;text-align:center;font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase}
 .cmp-hdr span:first-child{width:140px;flex:none}
+/* Header */
+.header{background:linear-gradient(135deg,#1B6B6B 0%,#6B3520 100%);color:white;padding:40px 0 30px;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(196,39,110,0.15) 0%,transparent 50%)}
+.header h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px}
+.header .subtitle{font-size:1rem;font-weight:400;opacity:0.9;position:relative}
+.header .brand-tag{display:inline-block;background:#C4276E;color:white;padding:4px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:12px;position:relative}
 /* Insights */
 .insight-grid{display:flex;flex-direction:column;gap:8px}
 </style>
 </head><body>
 
+<div class="header">
+    <h1>Woof Gang Port Washington</h1>
+    <div class="subtitle">Financial Dashboard</div>
+    <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
 <div class="topbar">
-  <div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <a href="index.html" class="home-link">&larr; Home</a>
-      <div class="topbar-title">💰 Woof Gang Port Washington — Financial Dashboard</div>
-    </div>
-    <div class="topbar-sub">Revenue · COGS · Operating Expenses · Net Margin</div>
-  </div>
-  <div class="topbar-time">Updated March 27, 2026 at 11:08 PM ET</div>
+  <a href="index.html" class="home-link">&larr; Home</a>
+  <div class="topbar-time">Updated March 27, 2026 at 10:04 PM ET</div>
 </div>
 
 <div class="tabs">
