@@ -549,10 +549,19 @@ function renderItems() {
       '</div>' +
       '<div id="edit-' + id + '" class="hidden">' +
         '<div class="edit-qty-row">' +
-          '<input type="number" class="edit-qty-input" id="qty-input-' + id + '" value="' + (cur !== '–' ? cur : 0) + '" min="0">' +
-          (unit ? '<span style="font-size:0.82rem;color:#888">' + unit + '</span>' : '') +
-          '<button class="btn-save" onclick="saveQty(\'' + id + '\')">Save</button>' +
-          '<button class="btn-cancel" onclick="cancelEdit(\'' + id + '\')">Cancel</button>' +
+          '<div style="display:flex;flex-direction:column;gap:2px">' +
+            '<label style="font-size:0.68rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em">Current Qty</label>' +
+            '<input type="number" class="edit-qty-input" id="qty-input-' + id + '" value="' + (cur !== '–' ? cur : 0) + '" min="0">' +
+          '</div>' +
+          (unit ? '<span style="font-size:0.82rem;color:#888;align-self:flex-end;padding-bottom:4px">' + unit + '</span>' : '') +
+          '<div style="display:flex;flex-direction:column;gap:2px">' +
+            '<label style="font-size:0.68rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em">Min Level</label>' +
+            '<input type="number" class="edit-qty-input" id="min-input-' + id + '" value="' + (min !== null ? min : 0) + '" min="0" style="border-color:#888">' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:4px;align-self:flex-end">' +
+            '<button class="btn-save" onclick="saveQty(\'' + id + '\')">Save</button>' +
+            '<button class="btn-cancel" onclick="cancelEdit(\'' + id + '\')">Cancel</button>' +
+          '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -576,14 +585,17 @@ function cancelEdit(id) {
 }
 function saveQty(id) {
   var val = +document.getElementById('qty-input-' + id).value;
+  var minVal = +document.getElementById('min-input-' + id).value;
   if (isNaN(val) || val < 0) { showToast('Invalid quantity', 'error'); return; }
+  if (isNaN(minVal) || minVal < 0) { showToast('Invalid min level', 'error'); return; }
   var rec = records.find(function(r){ return r.id === id; });
-  patchRecord(id, { 'Current Quantity': val }, rec ? rec._store : 'port-washington')
+  var patch = { 'Current Quantity': val, 'Reorder Level': minVal };
+  patchRecord(id, patch, rec ? rec._store : 'port-washington')
     .then(function() {
-      if (rec) rec.fields['Current Quantity'] = val;
+      if (rec) { rec.fields['Current Quantity'] = val; rec.fields['Reorder Level'] = minVal; }
       renderStats();
       renderItems();
-      showToast('Quantity updated');
+      showToast('Updated');
     })
     .catch(function(e) {
       console.error(e);
