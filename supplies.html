@@ -278,6 +278,13 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 <script>
 /* ── Config ───────────────────────────────────── */
 var AT_URL  = 'https://api.airtable.com/v0';
+var DEFAULTS = {
+  token:   'patts33VfcDa5gDGS.f853fdcfcbf3d32ee7798c91e9af73486389f1511000ac677be56f61749278b9',
+  pwBase:  'appVnzUFW0Yv43xe6',
+  hvBase:  'appDWS8jBdNIpVq04',
+  pwTable: 'tbl7Qz3jurzRrHFen',
+  hvTable: 'tbl7Qz3jurzRrHFen',
+};
 var config  = { token: '', pwBase: '', hvBase: '', pwTable: 'tbl7Qz3jurzRrHFen', hvTable: 'tbl7Qz3jurzRrHFen' };
 var records = []; // array of {id, fields, _store}
 
@@ -292,11 +299,11 @@ function showToast(msg, type) {
 
 /* ── Settings ─────────────────────────────────── */
 function loadConfig() {
-  config.token   = localStorage.getItem('wg_at_token')    || '';
-  config.pwBase  = localStorage.getItem('wg_at_pw_base')  || '';
-  config.hvBase  = localStorage.getItem('wg_at_hv_base')  || '';
-  config.pwTable = localStorage.getItem('wg_at_pw_table') || 'tbl7Qz3jurzRrHFen';
-  config.hvTable = localStorage.getItem('wg_at_hv_table') || 'tbl7Qz3jurzRrHFen';
+  config.token   = localStorage.getItem('wg_at_token')    || DEFAULTS.token;
+  config.pwBase  = localStorage.getItem('wg_at_pw_base')  || DEFAULTS.pwBase;
+  config.hvBase  = localStorage.getItem('wg_at_hv_base')  || DEFAULTS.hvBase;
+  config.pwTable = localStorage.getItem('wg_at_pw_table') || DEFAULTS.pwTable;
+  config.hvTable = localStorage.getItem('wg_at_hv_table') || DEFAULTS.hvTable;
 }
 function saveSettings() {
   var token   = document.getElementById('s-token').value.trim();
@@ -647,18 +654,13 @@ function handleAdd() {
 
 /* ── Init ─────────────────────────────────────── */
 loadConfig();
-if (config.token && (config.pwBase || config.hvBase)) {
-  document.getElementById('setup-panel').classList.add('hidden');
-  document.getElementById('dashboard').classList.remove('hidden');
-  var pwLink = document.getElementById('at-link-pw');
-  var hvLink = document.getElementById('at-link-hv');
-  if (config.pwBase) { pwLink.href = 'https://airtable.com/' + config.pwBase; } else { pwLink.style.display = 'none'; }
-  if (config.hvBase) { hvLink.href = 'https://airtable.com/' + config.hvBase; } else { hvLink.style.display = 'none'; }
-  loadItems();
-} else {
-  document.getElementById('setup-panel').classList.remove('hidden');
-  document.getElementById('dashboard').classList.add('hidden');
-}
+document.getElementById('setup-panel').classList.add('hidden');
+document.getElementById('dashboard').classList.remove('hidden');
+var pwLink = document.getElementById('at-link-pw');
+var hvLink = document.getElementById('at-link-hv');
+if (config.pwBase) { pwLink.href = 'https://airtable.com/' + config.pwBase; } else { pwLink.style.display = 'none'; }
+if (config.hvBase) { hvLink.href = 'https://airtable.com/' + config.hvBase; } else { hvLink.style.display = 'none'; }
+loadItems();
 
 </script>
 </body>
