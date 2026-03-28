@@ -294,6 +294,8 @@ def extract_all_data(store):
                                "locationId": location_id},
                               token=token)
                 records = tc if isinstance(tc, list) else tc.get("data", [])
+                # Filter by CompanyId — FranPOS locationId param doesn't reliably filter
+                records = [r for r in records if r.get("CompanyId") == location_id]
                 all_clocks.extend(records)
                 print(f"  Clocks {current.strftime('%b')}: {len(records)} records")
             except Exception as e:
@@ -362,6 +364,8 @@ def extract_all_data(store):
                            "locationId": location_id},
                           token=token)
             records = tc if isinstance(tc, list) else tc.get("data", [])
+            # Filter by CompanyId — FranPOS locationId param doesn't reliably filter
+            records = [r for r in records if r.get("CompanyId") == location_id]
             all_clocks.extend(records)
             print(f"  Clocks {current.strftime('%b')}: {len(records)} records")
         except Exception as e:
