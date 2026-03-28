@@ -238,6 +238,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 .header h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px;color:white}
 .header .subtitle{font-size:1rem;font-weight:400;opacity:0.9;position:relative}
 .header .brand-tag{display:inline-block;background:#C4276E;color:white;padding:4px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:12px;position:relative}
+.header-timestamp{position:absolute;top:12px;right:20px;font-size:0.78rem;opacity:0.85;font-weight:400;z-index:1}
 .topbar{background:#C4276E;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3)}
 .sum-row{display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border-bottom:1px solid var(--bd);}
 .sc{padding:18px 20px;border-right:1px solid var(--bd);text-align:center;}
@@ -364,8 +365,8 @@ html = f"""<!DOCTYPE html>
 <title>Woof Gang - Inventory Dashboard</title>
 <link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap\" rel=\"stylesheet\">
 <style>{CSS}</style></head><body>
-<div class=\"header\"><h1>Woof Gang {_store_display}</h1><div class=\"subtitle\">Inventory Dashboard</div><div class=\"brand-tag\">Woof Gang Bakery &amp; Grooming</div></div>
-<div class=\"topbar\"><a href=\"{_home_url}\" style=\"color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600\">&larr; Home</a><div style=\"color:rgba(255,255,255,0.85);font-size:0.82rem\">Updated {now}</div></div>
+<div class=\"header\"><div class=\"header-timestamp\">Updated {now}</div><h1>Woof Gang {_store_display}</h1><div class=\"subtitle\">Inventory Dashboard</div><div class=\"brand-tag\">Woof Gang Bakery &amp; Grooming</div></div>
+<div class=\"topbar\"><a href=\"{_home_url}\" style=\"color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600\">&larr; Home</a></div>
 <div class=\"sum-row\">
   <div class=\"sc s-out\"><div class=\"v\">{out_count}</div><div class=\"l\">Out of Stock</div></div>
   <div class=\"sc s-crit\"><div class=\"v\">{critical_count}</div><div class=\"l\">Critical (1-2)</div></div>
