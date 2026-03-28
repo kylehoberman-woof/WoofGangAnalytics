@@ -62,6 +62,10 @@ jobs:
       - name: Hicksville - Financial dashboard
         run: python3 scripts/build_financial_dashboard.py hicksville
 
+      # ── Cross-Store ──
+      - name: Cross-Store Comparison
+        run: python3 scripts/build_crossstore_dashboard.py
+
       # ── Commit and push ──
       - name: Commit and push
         run: |
