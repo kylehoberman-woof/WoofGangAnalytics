@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — Time Off Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:36px 32px 32px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px;transition:background 0.2s}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.header h1{font-size:1.8rem;font-weight:800;margin-bottom:4px;letter-spacing:-0.02em}
+.header p{font-size:0.9rem;opacity:0.85}
+.brand{display:inline-block;margin-top:10px;background:rgba(255,255,255,0.15);padding:3px 14px;border-radius:20px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+.store-tabs{display:flex;justify-content:center;gap:8px;padding:14px 16px;background:white;border-bottom:2px solid #eee;flex-wrap:wrap}
+.tab{padding:7px 20px;border:2px solid #ddd;border-radius:24px;font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;background:white;color:#666;transition:all 0.2s}
+.tab:hover{border-color:#C4276E;color:#C4276E}
+.tab.active{background:#C4276E;color:white;border-color:#C4276E}
+.main{max-width:1100px;margin:0 auto;padding:32px 24px 60px}
+.summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:16px;margin-bottom:28px}
+.sc{background:white;border-radius:12px;padding:20px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;border-top:4px solid #C4276E}
+.sc:nth-child(2){border-top-color:#1B6B6B}.sc:nth-child(3){border-top-color:#6B3520}.sc:nth-child(4){border-top-color:#F9A825}
+.sc-val{font-size:2.2rem;font-weight:800;color:#C4276E;line-height:1}
+.sc:nth-child(2) .sc-val{color:#1B6B6B}.sc:nth-child(3) .sc-val{color:#6B3520}.sc:nth-child(4) .sc-val{color:#F9A825}
+.sc-label{font-size:0.74rem;font-weight:700;color:#888;margin-top:6px;text-transform:uppercase;letter-spacing:0.04em}
+.card{background:white;border-radius:16px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:24px}
+.card-title{font-size:1.05rem;font-weight:700;color:#1a1a2e;margin-bottom:20px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;align-items:end}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.04em}
+.fg select,.fg input,.fg textarea{padding:9px 10px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;color:#1a1a2e;transition:border-color 0.2s;background:white;-webkit-appearance:none}
+.fg select:focus,.fg input:focus,.fg textarea:focus{outline:none;border-color:#C4276E;box-shadow:0 0 0 3px rgba(196,39,110,0.08)}
+.fg textarea{resize:vertical;min-height:68px}
+.span-full{grid-column:1/-1}
+.btn-primary{padding:10px 24px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.btn-primary:hover{background:#a31f5b;transform:translateY(-1px)}
+.btn-primary:disabled{background:#ccc;transform:none;cursor:not-allowed}
+.list-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.view-btns{display:flex;gap:6px}
+.vbtn{padding:6px 14px;border:2px solid #ddd;border-radius:6px;font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;background:white;color:#666;transition:all 0.2s}
+.vbtn.active{background:#1B6B6B;color:white;border-color:#1B6B6B}
+.vbtn:not(.active):hover{border-color:#1B6B6B;color:#1B6B6B}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filter-sel{padding:7px 10px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.82rem;color:#1a1a2e;cursor:pointer;background:white;-webkit-appearance:none}
+.filter-sel:focus{outline:none;border-color:#C4276E}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 12px;text-align:left;font-size:0.72rem;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid #eee;white-space:nowrap}
+td{padding:11px 12px;font-size:0.86rem;vertical-align:middle;border-bottom:1px solid #f4f4f4}
+tr:hover td{background:#fef7fa}
+.empty{text-align:center;padding:40px 20px;color:#aaa;font-size:0.9rem;line-height:1.8}
+.badge{display:inline-block;padding:3px 8px;border-radius:8px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.b-pw{background:#FDF0F5;color:#C4276E}.b-hv{background:#e0f2f1;color:#1B6B6B}
+.b-pto{background:#FDF0F5;color:#C4276E}.b-sick{background:#fce4ec;color:#c62828}
+.b-personal{background:#e0f2f1;color:#1B6B6B}.b-vacation{background:#e8f5e9;color:#2E7D32}
+.b-approved{background:#e8f5e9;color:#2E7D32}.b-pending{background:#fff8e1;color:#b8880a}.b-denied{background:#fce4ec;color:#c62828}
+.btn-sm{padding:4px 9px;border-radius:5px;font-family:inherit;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s;border:1px solid #ddd;background:white;color:#666;margin-right:3px}
+.btn-sm:hover{background:#f0f0f0}
+.btn-del:hover{background:#fce4ec;color:#c62828;border-color:#e8a0a0}
+.btn-approve:hover{background:#e8f5e9;color:#2E7D32;border-color:#a0d0a0}
+.row-active{background:#fffbee}
+.row-past{opacity:0.65}
+/* Calendar */
+.cal-nav{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.cal-arrow{padding:5px 14px;border:2px solid #ddd;border-radius:6px;cursor:pointer;font-size:1rem;background:white;transition:border-color 0.2s;font-family:inherit}
+.cal-arrow:hover{border-color:#C4276E}
+.cal-title{font-size:1.1rem;font-weight:700;min-width:150px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#e0e0e0;border-radius:8px;overflow:hidden}
+.cal-dow{background:#f8f9fa;padding:8px 4px;text-align:center;font-size:0.7rem;font-weight:700;color:#888;text-transform:uppercase}
+.cal-cell{background:white;min-height:80px;padding:5px 6px}
+.cal-cell.other-month{background:#fafafa;opacity:0.5}
+.cal-cell.today-cell{background:#fff8f9}
+.cal-num{font-size:0.78rem;font-weight:600;color:#aaa;margin-bottom:3px;line-height:1.8}
+.cal-num.today-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#C4276E;color:white;border-radius:50%;font-size:0.7rem;margin-bottom:4px}
+.cal-chip{font-size:0.63rem;font-weight:600;padding:1px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:1.5}
+.chip-pto{background:#FDF0F5;color:#C4276E}.chip-sick{background:#fce4ec;color:#c62828}
+.chip-personal{background:#e0f2f1;color:#1B6B6B}.chip-vacation{background:#e8f5e9;color:#2E7D32}
+/* Setup notice */
+.notice{background:#fff8e1;border:2px solid #F9A825;border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:0.88rem;line-height:1.7;color:#7a5c00}
+.notice code{background:#f0e8c0;padding:1px 5px;border-radius:4px;font-size:0.82rem}
+.notice pre{background:#f0e8c0;padding:12px;border-radius:6px;font-size:0.75rem;line-height:1.6;overflow-x:auto;margin-top:8px;white-space:pre-wrap}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;color:white;font-weight:700;font-size:0.88rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);z-index:999;transition:opacity 0.4s;pointer-events:none}
+.toast.hidden{opacity:0}.toast.success{background:#2E7D32}.toast.error{background:#c62828}
+.hidden{display:none!important}
+@media(max-width:700px){
+  .header{padding:24px 16px 20px}
+  .back-link{position:static;transform:none;display:inline-block;margin-bottom:10px;font-size:0.75rem}
+  .main{padding:20px 12px 40px}
+  .form-grid{grid-template-columns:1fr 1fr}
+  .cal-cell{min-height:55px}
+  .cal-chip{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="back-link">&#8592; Owner Portal</a>
+  <h1>&#128197; Time Off Tracker</h1>
+  <p>Manage employee PTO, sick days, and schedule absences</p>
+  <div class="brand">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
+<div class="store-tabs">
+  <button class="tab active" onclick="setStore('all')">All Stores</button>
+  <button class="tab" onclick="setStore('port-washington')">Port Washington</button>
+  <button class="tab" onclick="setStore('hicksville')">Hicksville</button>
+</div>
+
+<div class="main">
+
+  <div id="setup-notice" class="notice hidden">
+    <strong>&#9888; One-time Supabase setup required.</strong> Run the following SQL in your
+    <a href="https://supabase.com/dashboard" target="_blank" style="color:#C4276E">Supabase dashboard</a>
+    &rarr; SQL Editor, then refresh this page:<br>
+    <pre>CREATE TABLE time_off (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamptz DEFAULT now(),
+  store_key text NOT NULL,
+  employee_name text NOT NULL,
+  start_date date NOT NULL,
+  end_date date NOT NULL,
+  type text NOT NULL DEFAULT 'PTO',
+  notes text,
+  status text NOT NULL DEFAULT 'approved'
+);
+ALTER TABLE time_off ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</pre>
+  </div>
+
+  <div class="summary-cards">
+    <div class="sc"><div class="sc-val" id="stat-today">–</div><div class="sc-label">Off Today</div></div>
+    <div class="sc"><div class="sc-val" id="stat-week">–</div><div class="sc-label">Off This Week</div></div>
+    <div class="sc"><div class="sc-val" id="stat-month">–</div><div class="sc-label">This Month</div></div>
+    <div class="sc"><div class="sc-val" id="stat-pending">–</div><div class="sc-label">Pending Approval</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">&#43; Add Time Off</div>
+    <form id="add-form" class="form-grid" onsubmit="handleSubmit(event)">
+      <div class="fg">
+        <label>Store *</label>
+        <select id="f-store" required onchange="updateEmployees()">
+          <option value="">— Select —</option>
+          <option value="port-washington">Port Washington</option>
+          <option value="hicksville">Hicksville</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Employee *</label>
+        <select id="f-employee" required>
+          <option value="">— Select Store First —</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Start Date *</label>
+        <input type="date" id="f-start" required>
+      </div>
+      <div class="fg">
+        <label>End Date *</label>
+        <input type="date" id="f-end" required>
+      </div>
+      <div class="fg">
+        <label>Type</label>
+        <select id="f-type">
+          <option value="PTO">PTO</option>
+          <option value="Vacation">Vacation</option>
+          <option value="Sick">Sick Day</option>
+          <option value="Personal">Personal</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Status</label>
+        <select id="f-status">
+          <option value="approved">Approved</option>
+          <option value="pending">Pending</option>
+          <option value="denied">Denied</option>
+        </select>
+      </div>
+      <div class="fg span-full">
+        <label>Notes (optional)</label>
+        <textarea id="f-notes" placeholder="e.g. Doctor appointment, planned vacation..."></textarea>
+      </div>
+      <div class="fg span-full" style="display:flex;justify-content:flex-end">
+        <button type="submit" class="btn-primary" id="submit-btn">+ Add Time Off</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="list-toolbar">
+      <div style="font-size:1.05rem;font-weight:700">Time Off Requests</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div class="filters">
+          <select class="filter-sel" id="filter-type" onchange="renderAll()">
+            <option value="">All Types</option>
+            <option value="PTO">PTO</option>
+            <option value="Vacation">Vacation</option>
+            <option value="Sick">Sick Day</option>
+            <option value="Personal">Personal</option>
+          </select>
+          <select class="filter-sel" id="filter-status" onchange="renderAll()">
+            <option value="">All Statuses</option>
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+            <option value="denied">Denied</option>
+          </select>
+        </div>
+        <div class="view-btns">
+          <button class="vbtn active" id="vbtn-list" onclick="setView('list')">&#9776; List</button>
+          <button class="vbtn" id="vbtn-cal" onclick="setView('calendar')">&#128197; Calendar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="list-view"><div class="empty">Loading&hellip;</div></div>
+
+    <div id="cal-view" class="hidden">
+      <div class="cal-nav">
+        <button class="cal-arrow" onclick="calShift(-1)">&#8592;</button>
+        <div class="cal-title" id="cal-title"></div>
+        <button class="cal-arrow" onclick="calShift(1)">&#8594;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+/* ── Config ───────────────────────────────────── */
+var SB_URL  = 'https://bqzinttbjeeaybywhhet.supabase.co';
+var SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SB_HDR  = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+
+/* ── Employee lists ───────────────────────────── */
+var EMPLOYEES = {
+  'port-washington': [
+    'Cindy Szczudlo',
+    'Ashley Fribbley','Danielle L','Ingrid R','Jackie G.','Joi Ockimey',
+    'Joant C','Joyce P','Maria C','Marie D.','Olivia M','Stacey W','Sue M',
+    'Casey Makowski','Christine Brower',
+    'Angela R','Brian Labianca','Isabelle O','Jessica G'
+  ],
+  'hicksville': [
+    'Alex I','Carol W','Julia B','Maria V','Sereena C',
+    'Christine Brower','Christina Ramkissoon','Hailey Imhof',
+    'Naomi Dutes','Nicole Alarcon','Sophia Kurkowski'
+  ]
+};
+
+/* ── State ────────────────────────────────────── */
+var records = [];
+var storeFilter = 'all';
+var currentView = 'list';
+var calYear, calMonth;
+var NOW = new Date();
+calYear  = NOW.getFullYear();
+calMonth = NOW.getMonth();
+
+/* ── Helpers ──────────────────────────────────── */
+var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function todayStr() {
+  return NOW.toISOString().slice(0,10);
+}
+function fmtDate(d) {
+  if (!d) return '';
+  var p = d.split('-');
+  return MONTHS_SHORT[+p[1]-1] + ' ' + +p[2] + ', ' + p[0];
+}
+function daysBetween(a, b) {
+  return Math.max(1, Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 86400000) + 1);
+}
+function storeName(k) { return k === 'port-washington' ? 'Port Washington' : 'Hicksville'; }
+function typeBadge(t) {
+  var m = {PTO:'pto',Sick:'sick',Personal:'personal',Vacation:'vacation'};
+  return '<span class="badge b-'+(m[t]||'pto')+'">'+t+'</span>';
+}
+function storeBadge(k) {
+  return '<span class="badge '+(k==='port-washington'?'b-pw':'b-hv')+'">'+(k==='port-washington'?'PW':'HV')+'</span>';
+}
+function statusBadge(s) { return '<span class="badge b-'+s+'">'+s+'</span>'; }
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast '+(type||'success');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.classList.add('hidden'); }, 2800);
+}
+
+/* ── Supabase API ─────────────────────────────── */
+function sbFetch(path, opts) {
+  return fetch(SB_URL + path, Object.assign({ headers: SB_HDR }, opts));
+}
+
+function loadRecords() {
+  sbFetch('/rest/v1/time_off?select=*&order=start_date.desc')
+    .then(function(r) {
+      if (r.status === 404 || r.status === 400) {
+        return r.text().then(function(txt) {
+          if (txt.indexOf('does not exist') !== -1 || txt.indexOf('relation') !== -1) {
+            document.getElementById('setup-notice').classList.remove('hidden');
+            records = [];
+            renderAll();
+          } else {
+            throw new Error(txt);
+          }
+        });
+      }
+      if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+      return r.json().then(function(data) {
+        records = data;
+        renderAll();
+      });
+    })
+    .catch(function(e) {
+      console.error(e);
+      document.getElementById('list-view').innerHTML = '<div class="empty" style="color:#c62828">Error loading data. See console for details.</div>';
+    });
+}
+
+function addRecord(data) {
+  return sbFetch('/rest/v1/time_off', {
+    method: 'POST',
+    headers: Object.assign({}, SB_HDR, { 'Prefer': 'return=representation' }),
+    body: JSON.stringify(data)
+  }).then(function(r) {
+    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+    return r.json().then(function(arr){ return arr[0]; });
+  });
+}
+
+function deleteRecord(id) {
+  return sbFetch('/rest/v1/time_off?id=eq.'+id, { method: 'DELETE' })
+    .then(function(r) {
+      if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+    });
+}
+
+function patchRecord(id, data) {
+  return sbFetch('/rest/v1/time_off?id=eq.'+id, {
+    method: 'PATCH',
+    headers: Object.assign({}, SB_HDR, { 'Prefer': 'return=representation' }),
+    body: JSON.stringify(data)
+  }).then(function(r) {
+    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+  });
+}
+
+/* ── Form ─────────────────────────────────────── */
+function updateEmployees() {
+  var store = document.getElementById('f-store').value;
+  var sel   = document.getElementById('f-employee');
+  if (!store) {
+    sel.innerHTML = '<option value="">— Select Store First —</option>';
+    return;
+  }
+  var emps = EMPLOYEES[store] || [];
+  sel.innerHTML = '<option value="">— Select Employee —</option>' +
+    emps.map(function(e){ return '<option value="'+e+'">'+e+'</option>'; }).join('');
+}
+
+function handleSubmit(e) {
+  e.preventDefault();
+  var store    = document.getElementById('f-store').value;
+  var employee = document.getElementById('f-employee').value;
+  var start    = document.getElementById('f-start').value;
+  var end      = document.getElementById('f-end').value;
+  var type     = document.getElementById('f-type').value;
+  var notes    = document.getElementById('f-notes').value.trim();
+  var status   = document.getElementById('f-status').value;
+
+  if (end < start) { showToast('End date must be on or after start date', 'error'); return; }
+
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  addRecord({ store_key: store, employee_name: employee, start_date: start, end_date: end, type: type, notes: notes||null, status: status })
+    .then(function(rec) {
+      records.unshift(rec);
+      renderAll();
+      document.getElementById('add-form').reset();
+      // Re-apply store default if tab is filtered
+      if (storeFilter !== 'all') {
+        document.getElementById('f-store').value = storeFilter;
+        updateEmployees();
+      }
+      showToast('Time off added');
+    })
+    .catch(function(err) {
+      console.error(err);
+      showToast('Failed to save — see console', 'error');
+    })
+    .finally(function() {
+      btn.disabled = false; btn.textContent = '+ Add Time Off';
+    });
+}
+
+/* ── Filters ──────────────────────────────────── */
+function getFiltered() {
+  var tf = document.getElementById('filter-type').value;
+  var sf = document.getElementById('filter-status').value;
+  return records.filter(function(r) {
+    if (storeFilter !== 'all' && r.store_key !== storeFilter) return false;
+    if (tf && r.type !== tf) return false;
+    if (sf && r.status !== sf) return false;
+    return true;
+  });
+}
+
+/* ── Stats ────────────────────────────────────── */
+function renderStats() {
+  var today = todayStr();
+  var dow   = NOW.getDay();
+  var ws    = new Date(NOW); ws.setDate(NOW.getDate() - dow);
+  var we    = new Date(ws);  we.setDate(ws.getDate() + 6);
+  var wsStr = ws.toISOString().slice(0,10);
+  var weStr = we.toISOString().slice(0,10);
+  var mStr  = today.slice(0,7);
+
+  var src = storeFilter === 'all' ? records : records.filter(function(r){ return r.store_key === storeFilter; });
+
+  var offToday = (function(){
+    var s = {};
+    src.filter(function(r){ return r.start_date <= today && r.end_date >= today && r.status !== 'denied'; })
+       .forEach(function(r){ s[r.employee_name] = 1; });
+    return Object.keys(s).length;
+  })();
+  var offWeek = (function(){
+    var s = {};
+    src.filter(function(r){ return r.start_date <= weStr && r.end_date >= wsStr && r.status !== 'denied'; })
+       .forEach(function(r){ s[r.employee_name] = 1; });
+    return Object.keys(s).length;
+  })();
+  var thisMonth = src.filter(function(r){ return r.start_date.slice(0,7) === mStr || r.end_date.slice(0,7) === mStr; }).length;
+  var pending   = src.filter(function(r){ return r.status === 'pending'; }).length;
+
+  document.getElementById('stat-today').textContent   = offToday;
+  document.getElementById('stat-week').textContent    = offWeek;
+  document.getElementById('stat-month').textContent   = thisMonth;
+  document.getElementById('stat-pending').textContent = pending;
+}
+
+/* ── List ─────────────────────────────────────── */
+function renderList() {
+  var filtered = getFiltered();
+  var el = document.getElementById('list-view');
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="empty">No time off requests found.</div>';
+    return;
+  }
+  var today = todayStr();
+  var upcoming = filtered.filter(function(r){ return r.end_date >= today; })
+    .sort(function(a,b){ return a.start_date.localeCompare(b.start_date); });
+  var past = filtered.filter(function(r){ return r.end_date < today; })
+    .sort(function(a,b){ return b.start_date.localeCompare(a.start_date); });
+  var sorted = upcoming.concat(past);
+
+  var html = '<div class="tbl-wrap"><table><thead><tr>' +
+    '<th>Employee</th><th>Store</th><th>From</th><th>To</th>' +
+    '<th>Days</th><th>Type</th><th>Status</th><th>Notes</th><th>Actions</th>' +
+    '</tr></thead><tbody>';
+
+  sorted.forEach(function(r) {
+    var isActive = r.start_date <= today && r.end_date >= today;
+    var isPast   = r.end_date < today;
+    var days     = daysBetween(r.start_date, r.end_date);
+    var rowClass = isActive && r.status !== 'denied' ? ' class="row-active"' : (isPast ? ' class="row-past"' : '');
+    html += '<tr'+rowClass+'>' +
+      '<td style="font-weight:600">'+r.employee_name+'</td>' +
+      '<td>'+storeBadge(r.store_key)+'</td>' +
+      '<td>'+fmtDate(r.start_date)+'</td>' +
+      '<td>'+fmtDate(r.end_date)+'</td>' +
+      '<td style="font-weight:700;color:#C4276E">'+days+'d</td>' +
+      '<td>'+typeBadge(r.type)+'</td>' +
+      '<td>'+statusBadge(r.status)+'</td>' +
+      '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#777">'+(r.notes||'–')+'</td>' +
+      '<td>' +
+        (r.status !== 'approved' ? '<button class="btn-sm btn-approve" onclick="doApprove(\''+r.id+'\')">&#10003; Approve</button>' : '') +
+        '<button class="btn-sm btn-del" onclick="doDelete(\''+r.id+'\')">&#10005;</button>' +
+      '</td>' +
+      '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+function doDelete(id) {
+  var rec = records.find(function(r){ return r.id === id; });
+  if (!confirm('Delete time off for ' + (rec ? rec.employee_name : 'this record') + '?')) return;
+  deleteRecord(id)
+    .then(function() {
+      records = records.filter(function(r){ return r.id !== id; });
+      renderAll();
+      showToast('Record deleted');
+    })
+    .catch(function(e) {
+      console.error(e);
+      showToast('Delete failed', 'error');
+    });
+}
+
+function doApprove(id) {
+  patchRecord(id, { status: 'approved' })
+    .then(function() {
+      var rec = records.find(function(r){ return r.id === id; });
+      if (rec) rec.status = 'approved';
+      renderAll();
+      showToast('Approved');
+    })
+    .catch(function(e) {
+      console.error(e);
+      showToast('Update failed', 'error');
+    });
+}
+
+/* ── Calendar ─────────────────────────────────── */
+function calShift(n) {
+  calMonth += n;
+  if (calMonth > 11) { calMonth = 0;  calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('cal-title').textContent = MONTHS[calMonth] + ' ' + calYear;
+  var today    = todayStr();
+  var filtered = getFiltered().filter(function(r){ return r.status !== 'denied'; });
+
+  // Build a map: dateStr → [{name, type}]
+  var dayMap = {};
+  filtered.forEach(function(r) {
+    var cur = new Date(r.start_date + 'T00:00:00');
+    var end = new Date(r.end_date   + 'T00:00:00');
+    while (cur <= end) {
+      var key = cur.toISOString().slice(0,10);
+      if (!dayMap[key]) dayMap[key] = [];
+      dayMap[key].push({ name: r.employee_name, type: r.type });
+      cur.setDate(cur.getDate() + 1);
+    }
+  });
+
+  var DOWS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var html = DOWS.map(function(d){ return '<div class="cal-dow">'+d+'</div>'; }).join('');
+
+  var firstDay = new Date(calYear, calMonth, 1);
+  var lastDay  = new Date(calYear, calMonth + 1, 0);
+  var startDow = firstDay.getDay();
+
+  // Prev-month filler
+  for (var i = 0; i < startDow; i++) {
+    var pd = new Date(calYear, calMonth, i - startDow + 1);
+    html += '<div class="cal-cell other-month"><div class="cal-num">'+pd.getDate()+'</div></div>';
+  }
+
+  // Current month
+  for (var d = 1; d <= lastDay.getDate(); d++) {
+    var ds   = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var isTd = ds === today;
+    var ents = dayMap[ds] || [];
+    var numEl = isTd
+      ? '<div class="cal-num today-num">'+d+'</div>'
+      : '<div class="cal-num">'+d+'</div>';
+    var chips = ents.slice(0,3).map(function(e){
+      var cls = 'chip-' + e.type.toLowerCase().replace(' day','');
+      var short = e.name.split(' ')[0];
+      return '<span class="cal-chip '+cls+'" title="'+e.name+' ('+e.type+')">'+short+'</span>';
+    }).join('');
+    var more = ents.length > 3 ? '<span style="font-size:0.62rem;color:#aaa">+' + (ents.length-3) + ' more</span>' : '';
+    html += '<div class="cal-cell'+(isTd?' today-cell':'')+'">'+numEl+chips+more+'</div>';
+  }
+
+  // Next-month filler
+  var lastDow = lastDay.getDay();
+  if (lastDow < 6) {
+    for (var j = 1; j <= 6 - lastDow; j++) {
+      html += '<div class="cal-cell other-month"><div class="cal-num">'+j+'</div></div>';
+    }
+  }
+
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+/* ── View / Store setters ─────────────────────── */
+function setView(v) {
+  currentView = v;
+  document.getElementById('vbtn-list').classList.toggle('active', v === 'list');
+  document.getElementById('vbtn-cal').classList.toggle('active', v === 'calendar');
+  document.getElementById('list-view').classList.toggle('hidden', v !== 'list');
+  document.getElementById('cal-view').classList.toggle('hidden', v !== 'calendar');
+  if (v === 'calendar') renderCalendar();
+}
+
+function setStore(s) {
+  storeFilter = s;
+  document.querySelectorAll('.tab').forEach(function(t, i){
+    t.classList.toggle('active', ['all','port-washington','hicksville'][i] === s);
+  });
+  // Pre-fill store in form
+  if (s !== 'all') {
+    document.getElementById('f-store').value = s;
+    updateEmployees();
+  } else {
+    document.getElementById('f-store').value = '';
+    updateEmployees();
+  }
+  renderAll();
+}
+
+function renderAll() {
+  renderStats();
+  if (currentView === 'list') renderList();
+  else renderCalendar();
+}
+
+/* ── Init ─────────────────────────────────────── */
+(function() {
+  var t = todayStr();
+  document.getElementById('f-start').value = t;
+  document.getElementById('f-end').value   = t;
+  loadRecords();
+})();
+</script>
+</body>
+</html>
