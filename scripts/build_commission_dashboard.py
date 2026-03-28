@@ -24,7 +24,7 @@ SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 _store = get_store(_store_name)
 _store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
-_home_url = "index.html" if _store_name == "port-washington" else "../port-washington/index.html"
+_home_url = "../index.html"
 _other_store = "Hicksville" if _store_name == "port-washington" else "Port Washington"
 _other_dir = "../hicksville" if _store_name == "port-washington" else "../port-washington"
 _other_fn = "Hicksville" if _store_name == "port-washington" else "PortWashington"

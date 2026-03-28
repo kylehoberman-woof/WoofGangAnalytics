@@ -454,7 +454,7 @@ body{{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
 </div>
 <div style="background:#C4276E;padding:12px 32px;display:flex;align-items:center;position:sticky;top:0;z-index:101;box-shadow:0 2px 12px rgba(196,39,110,0.3)">
-  <a href="index.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>
+  <a href="../index.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>
 </div>
 <div class="tab-bar">
   <button class="tab active" onclick="showTab('monthly',this)">Monthly</button>

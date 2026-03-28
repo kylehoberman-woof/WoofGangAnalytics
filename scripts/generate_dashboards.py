@@ -573,7 +573,7 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
     if body_only:
         html = ""
     else:
-        _home_url = "index.html" if "port" in str(DATA_DIR).lower() else "../port-washington/index.html"
+        _home_url = "../index.html"
         html = html_head(
             f"Woof Gang {_store_label}",
             f"Store Performance Analysis — {_date_range}",
@@ -1973,7 +1973,7 @@ def generate_price_increase_dashboard(df, df_orders, output_path):
     breakeven_customers = int(total_custs * breakeven_churn_pct / 100)
     avg_groom_spend_per_cust = core_rev / total_custs if total_custs else 0
 
-    _home_url_pi = "index.html" if "port" in str(DATA_DIR).lower() else "../port-washington/index.html"
+    _home_url_pi = "../index.html"
     html = html_head(
         "Price Increase Impact Analysis",
         f"{STORE_NAME} — $5 Groom/Bath Increase Effective May 1",

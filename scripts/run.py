@@ -681,7 +681,7 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
 
     _is_pw = "port" in str(store.output_dir).lower()
     _store_title = "Woof Gang " + ("Port Washington" if _is_pw else "Hicksville")
-    _home_url = "index.html" if _is_pw else "../port-washington/index.html"
+    _home_url = "../index.html"
     _other_fn = "Hicksville" if _is_pw else "PortWashington"
     _other_dir = "../hicksville" if _is_pw else "../port-washington"
     _other_name = "Hicksville" if _is_pw else "Port Washington"
