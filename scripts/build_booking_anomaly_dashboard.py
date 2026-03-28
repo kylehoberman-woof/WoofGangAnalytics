@@ -651,11 +651,11 @@ function makeRow(a, isAckedRow) {{
   var lastDisplay = (a.last_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + a.last_size_short;
   var flagsHtml = a.flags.map(function(f) {{ return flagBadge(f, a.flag_details); }}).join(' ');
   var actionBtn = isAckedRow
-    ? '<button class="unack-btn" onclick="unack(\'' + a.cid + '\')">↩ Undo</button>'
-    : '<button class="ack-btn" onclick="ack(\'' + a.cid + '\')">&#x2713; Ack</button>';
+    ? '<button class="unack-btn" onclick="unack(\\'' + a.cid + '\\')">↩ Undo</button>'
+    : '<button class="ack-btn" onclick="ack(\\'' + a.cid + '\\')">&#x2713; Ack</button>';
   var cidShort = a.cid.length > 8 ? '#…' + a.cid.slice(-6) : '#' + a.cid;
   return '<tr>' +
-    '<td><a class="cid-link" href="#" onclick="openModal(\'' + a.cid + '\');return false;">' + cidShort + '</a></td>' +
+    '<td><a class="cid-link" href="#" onclick="openModal(\\'' + a.cid + '\\');return false;">' + cidShort + '</a></td>' +
     '<td class="n">' + a.visit_count + '</td>' +
     '<td>' + histDisplay + '</td>' +
     '<td>' + lastDisplay + '</td>' +
