@@ -56,6 +56,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 .card:nth-child(2){border-left-color:#1B6B6B}
 .card:nth-child(3){border-left-color:#6B3520}
 .card:nth-child(4){border-left-color:#2E7D32}
+.card:nth-child(6){border-left-color:#AD1457}
 
 .card-icon{font-size:2.4rem;margin-bottom:14px}
 .card-title{font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:8px}
@@ -83,6 +84,9 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 .card:nth-child(3) .card-btn:hover{background:#4d2717}
 .card:nth-child(4) .card-btn{background:#2E7D32}
 .card:nth-child(4) .card-btn:hover{background:#1b5e20}
+.card:nth-child(6) .card-btn{background:#AD1457}
+.card:nth-child(6) .card-btn:hover{background:#880e4f}
+.card:nth-child(6) .tag{background:#fce4ec;color:#AD1457}
 
 .footer{
   text-align:center;padding:24px;
@@ -176,6 +180,18 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
       <a class="card-btn" href="WoofGang_CrossStore_Comparison.html">Open Cross-Store Comparison</a>
     </div>
 
+    <div class="card">
+      <div class="card-icon">&#x26A0;&#xFE0F;</div>
+      <div class="card-title">Booking Anomalies</div>
+      <div class="card-desc">Flags customers whose recent groom differs from their history — wrong breed type (General vs Poodle-Doodle), wrong size, or unexpected service change. Review and acknowledge.</div>
+      <div class="card-tags">
+        <span class="tag">Breed</span>
+        <span class="tag">Size</span>
+        <span class="tag">Errors</span>
+      </div>
+      <a class="card-btn" id="link-anomaly" href="WoofGang_PortWashington_BookingAnomalies.html">Open Booking Anomalies</a>
+    </div>
+
   </div>
 </div>
 
@@ -191,7 +207,8 @@ var STORES = {
     exec: 'WoofGang_PortWashington_NY_AllYears_Dashboard.html',
     comm: 'WoofGang_PortWashington_Commission_Dashboard.html',
     inv: 'WoofGang_PortWashington_Inventory_Dashboard.html',
-    fin: 'WoofGang_PortWashington_Financial_Dashboard.html'
+    fin: 'WoofGang_PortWashington_Financial_Dashboard.html',
+    anomaly: 'WoofGang_PortWashington_BookingAnomalies.html'
   },
   'hicksville': {
     title: 'Woof Gang Hicksville',
@@ -199,7 +216,8 @@ var STORES = {
     exec: 'WoofGang_Hicksville_NY_AllYears_Dashboard.html',
     comm: 'WoofGang_Hicksville_Commission_Dashboard.html',
     inv: 'WoofGang_Hicksville_Inventory_Dashboard.html',
-    fin: 'WoofGang_Hicksville_Financial_Dashboard.html'
+    fin: 'WoofGang_Hicksville_Financial_Dashboard.html',
+    anomaly: 'WoofGang_Hicksville_BookingAnomalies.html'
   }
 };
 
@@ -210,6 +228,7 @@ function switchStore(key) {
   document.getElementById('link-comm').href = s.base + s.comm;
   document.getElementById('link-inv').href = s.base + s.inv;
   document.getElementById('link-fin').href = s.base + s.fin;
+  document.getElementById('link-anomaly').href = s.base + s.anomaly;
   localStorage.setItem('selectedStore', key);
 }
 

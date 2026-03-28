@@ -66,6 +66,12 @@ jobs:
       - name: Cross-Store Comparison
         run: python3 scripts/build_crossstore_dashboard.py
 
+      # ── Booking Anomalies ──
+      - name: Port Washington - Booking Anomalies
+        run: python3 scripts/build_booking_anomaly_dashboard.py
+      - name: Hicksville - Booking Anomalies
+        run: python3 scripts/build_booking_anomaly_dashboard.py hicksville
+
       # ── Commit and push ──
       - name: Commit and push
         run: |
