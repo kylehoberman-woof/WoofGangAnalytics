@@ -142,14 +142,22 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         <small>Generate at <strong>airtable.com/account</strong> → Personal access tokens → Create token (scope: data.records:read, data.records:write)</small>
       </div>
       <div class="fg">
-        <label>Base ID</label>
-        <input type="text" id="s-base" placeholder="appXXXXXXXXXXXXXX" autocomplete="off">
-        <small>Found in your Airtable base URL: airtable.com/<strong>appXXX</strong>/...</small>
+        <label>Port Washington — Base ID</label>
+        <input type="text" id="s-pw-base" placeholder="appXXXXXXXXXXXXXX" autocomplete="off">
+        <small>From PW Airtable URL: airtable.com/<strong>appXXX</strong>/...</small>
       </div>
       <div class="fg">
-        <label>Table Name</label>
-        <input type="text" id="s-table" value="Supplies">
-        <small>Exact name of the table in your base (default: Supplies)</small>
+        <label>Port Washington — Table Name</label>
+        <input type="text" id="s-pw-table" value="Supplies">
+      </div>
+      <div class="fg">
+        <label>Hicksville — Base ID</label>
+        <input type="text" id="s-hv-base" placeholder="appXXXXXXXXXXXXXX" autocomplete="off">
+        <small>From HV Airtable URL: airtable.com/<strong>appXXX</strong>/...</small>
+      </div>
+      <div class="fg">
+        <label>Hicksville — Table Name</label>
+        <input type="text" id="s-hv-table" value="Supplies">
       </div>
       <div class="fg">
         <label>Expected Field Names</label>
@@ -202,10 +210,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         </div>
         <div class="fg">
           <label>Store</label>
-          <select id="a-store">
-            <option value="Both">Both</option>
-            <option value="Port Washington">Port Washington</option>
-            <option value="Hicksville">Hicksville</option>
+          <select id="a-store" required>
+            <option value="">— Select Store —</option>
+            <option value="port-washington">Port Washington</option>
+            <option value="hicksville">Hicksville</option>
           </select>
         </div>
         <div class="fg">
@@ -263,7 +271,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
       </div>
       <div class="toolbar-actions">
         <button class="btn-add" onclick="toggleAddForm(true)">+ Add Item</button>
-        <a id="at-link" href="#" target="_blank" class="btn-airtable">&#128279; Open Airtable</a>
+        <a id="at-link-pw" href="#" target="_blank" class="btn-airtable">&#128279; PW Airtable</a>
+        <a id="at-link-hv" href="#" target="_blank" class="btn-airtable">&#128279; HV Airtable</a>
         <button class="btn-secondary" onclick="loadItems()">&#8635; Refresh</button>
       </div>
     </div>
@@ -278,8 +287,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 <script>
 /* ── Config ───────────────────────────────────── */
 var AT_URL  = 'https://api.airtable.com/v0';
-var config  = { token: '', base: '', table: 'Supplies' };
-var records = []; // array of {id, fields}
+var config  = { token: '', pwBase: '', hvBase: '', pwTable: 'Supplies', hvTable: 'Supplies' };
+var records = []; // array of {id, fields, _store}
 
 /* ── Toast ────────────────────────────────────── */
 function showToast(msg, type) {
@@ -292,24 +301,32 @@ function showToast(msg, type) {
 
 /* ── Settings ─────────────────────────────────── */
 function loadConfig() {
-  config.token = localStorage.getItem('wg_at_token') || '';
-  config.base  = localStorage.getItem('wg_at_base')  || '';
-  config.table = localStorage.getItem('wg_at_table') || 'Supplies';
+  config.token   = localStorage.getItem('wg_at_token')    || '';
+  config.pwBase  = localStorage.getItem('wg_at_pw_base')  || '';
+  config.hvBase  = localStorage.getItem('wg_at_hv_base')  || '';
+  config.pwTable = localStorage.getItem('wg_at_pw_table') || 'Supplies';
+  config.hvTable = localStorage.getItem('wg_at_hv_table') || 'Supplies';
 }
 function saveSettings() {
-  var token = document.getElementById('s-token').value.trim();
-  var base  = document.getElementById('s-base').value.trim();
-  var table = document.getElementById('s-table').value.trim() || 'Supplies';
-  if (!token || !base) {
-    showToast('Token and Base ID are required', 'error');
+  var token   = document.getElementById('s-token').value.trim();
+  var pwBase  = document.getElementById('s-pw-base').value.trim();
+  var hvBase  = document.getElementById('s-hv-base').value.trim();
+  var pwTable = document.getElementById('s-pw-table').value.trim() || 'Supplies';
+  var hvTable = document.getElementById('s-hv-table').value.trim() || 'Supplies';
+  if (!token || (!pwBase && !hvBase)) {
+    showToast('Token and at least one Base ID are required', 'error');
     return;
   }
-  localStorage.setItem('wg_at_token', token);
-  localStorage.setItem('wg_at_base',  base);
-  localStorage.setItem('wg_at_table', table);
-  config.token = token;
-  config.base  = base;
-  config.table = table;
+  localStorage.setItem('wg_at_token',    token);
+  localStorage.setItem('wg_at_pw_base',  pwBase);
+  localStorage.setItem('wg_at_hv_base',  hvBase);
+  localStorage.setItem('wg_at_pw_table', pwTable);
+  localStorage.setItem('wg_at_hv_table', hvTable);
+  config.token   = token;
+  config.pwBase  = pwBase;
+  config.hvBase  = hvBase;
+  config.pwTable = pwTable;
+  config.hvTable = hvTable;
   hideSettings();
   loadItems();
 }
@@ -317,12 +334,14 @@ function showSettings() {
   document.getElementById('setup-panel').classList.remove('hidden');
   document.getElementById('dashboard').classList.add('hidden');
   document.getElementById('skip-btn').style.display = config.token ? '' : 'none';
-  document.getElementById('s-token').value = config.token;
-  document.getElementById('s-base').value  = config.base;
-  document.getElementById('s-table').value = config.table;
+  document.getElementById('s-token').value   = config.token;
+  document.getElementById('s-pw-base').value = config.pwBase;
+  document.getElementById('s-hv-base').value = config.hvBase;
+  document.getElementById('s-pw-table').value = config.pwTable;
+  document.getElementById('s-hv-table').value = config.hvTable;
 }
 function hideSettings() {
-  if (!config.token) return; // can't hide without credentials
+  if (!config.token) return;
   document.getElementById('setup-panel').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
 }
@@ -331,44 +350,61 @@ function hideSettings() {
 function atHeaders() {
   return { 'Authorization': 'Bearer ' + config.token, 'Content-Type': 'application/json' };
 }
-function atBase() {
-  return AT_URL + '/' + encodeURIComponent(config.base) + '/' + encodeURIComponent(config.table);
+function atBaseUrl(store) {
+  var base  = store === 'hicksville' ? config.hvBase  : config.pwBase;
+  var table = store === 'hicksville' ? config.hvTable : config.pwTable;
+  return AT_URL + '/' + encodeURIComponent(base) + '/' + encodeURIComponent(table);
 }
 
-function fetchAllRecords(offset, accumulated) {
+function fetchAllFromBase(store, offset, accumulated) {
   accumulated = accumulated || [];
-  var url = atBase() + '?view=Grid+view' + (offset ? '&offset=' + offset : '');
+  var url = atBaseUrl(store) + '?view=Grid+view' + (offset ? '&offset=' + offset : '');
   return fetch(url, { headers: atHeaders() })
     .then(function(r) {
       if (!r.ok) return r.json().then(function(e){ throw new Error(e.error ? e.error.message : JSON.stringify(e)); });
       return r.json();
     })
     .then(function(data) {
-      var all = accumulated.concat(data.records || []);
-      if (data.offset) return fetchAllRecords(data.offset, all);
+      var recs = (data.records || []).map(function(r){ r._store = store; return r; });
+      var all  = accumulated.concat(recs);
+      if (data.offset) return fetchAllFromBase(store, data.offset, all);
       return all;
     });
 }
 
 function loadItems() {
   document.getElementById('items-container').innerHTML = '<div class="empty">Loading&hellip;</div>';
-  fetchAllRecords()
-    .then(function(recs) {
-      records = recs;
+  var sf = document.getElementById('filter-store').value;
+  var promises = [];
+  if (sf === 'hicksville') {
+    if (config.hvBase) promises.push(fetchAllFromBase('hicksville'));
+  } else if (sf === 'port-washington') {
+    if (config.pwBase) promises.push(fetchAllFromBase('port-washington'));
+  } else {
+    if (config.pwBase) promises.push(fetchAllFromBase('port-washington'));
+    if (config.hvBase) promises.push(fetchAllFromBase('hicksville'));
+  }
+  if (promises.length === 0) {
+    document.getElementById('items-container').innerHTML =
+      '<div class="empty">No base configured for this store. <button class="btn-secondary" onclick="showSettings()">&#9881; Settings</button></div>';
+    return;
+  }
+  Promise.all(promises)
+    .then(function(results) {
+      records = results.reduce(function(a, b){ return a.concat(b); }, []);
       renderStats();
       renderItems();
     })
     .catch(function(e) {
       console.error(e);
-      var msg = e.message || String(e);
       document.getElementById('items-container').innerHTML =
-        '<div class="empty" style="color:#c62828">&#9888; Error loading Airtable: ' + msg + '<br><br>' +
+        '<div class="empty" style="color:#c62828">&#9888; Error: ' + (e.message || e) + '<br><br>' +
         '<button class="btn-secondary" onclick="showSettings()">&#9881; Check Settings</button></div>';
     });
 }
 
-function patchRecord(id, fields) {
-  return fetch(atBase() + '/' + id, {
+function patchRecord(id, fields, store) {
+  return fetch(atBaseUrl(store) + '/' + id, {
     method: 'PATCH',
     headers: atHeaders(),
     body: JSON.stringify({ fields: fields })
@@ -378,8 +414,8 @@ function patchRecord(id, fields) {
   });
 }
 
-function createRecord(fields) {
-  return fetch(atBase(), {
+function createRecord(fields, store) {
+  return fetch(atBaseUrl(store), {
     method: 'POST',
     headers: atHeaders(),
     body: JSON.stringify({ fields: fields })
@@ -389,8 +425,8 @@ function createRecord(fields) {
   });
 }
 
-function deleteRecord(id) {
-  return fetch(atBase() + '/' + id, { method: 'DELETE', headers: atHeaders() })
+function deleteRecord(id, store) {
+  return fetch(atBaseUrl(store) + '/' + id, { method: 'DELETE', headers: atHeaders() })
     .then(function(r) {
       if (!r.ok) return r.json().then(function(e){ throw new Error(e.error ? e.error.message : JSON.stringify(e)); });
     });
@@ -411,10 +447,9 @@ function statusChip(s) {
   return '<span class="status-chip chip-' + s + '">' + (labels[s]||s) + '</span>';
 }
 function storeBadge(s) {
-  if (s === 'Port Washington') return '<span class="badge b-pw">PW</span>';
-  if (s === 'Hicksville')      return '<span class="badge b-hv">HV</span>';
-  if (s === 'Both')            return '<span class="badge b-both">Both</span>';
-  return s ? '<span class="badge b-cat">' + s + '</span>' : '';
+  if (s === 'port-washington') return '<span class="badge b-pw">PW</span>';
+  if (s === 'hicksville')      return '<span class="badge b-hv">HV</span>';
+  return '';
 }
 function fmtDate(d) {
   if (!d) return '';
@@ -426,7 +461,7 @@ function fmtDate(d) {
 /* ── Stats ────────────────────────────────────── */
 function renderStats() {
   var sf    = document.getElementById('filter-store').value;
-  var src   = records.filter(function(r){ return !sf || r.fields['Store'] === sf || r.fields['Store'] === 'Both'; });
+  var src   = records.filter(function(r){ return !sf || r._store === sf; });
   var total = src.length;
   var ok    = src.filter(function(r){ return getStatus(r.fields) === 'ok'; }).length;
   var low   = src.filter(function(r){ var s = getStatus(r.fields); return s === 'low'; }).length;
@@ -444,9 +479,9 @@ function getFiltered() {
   var stf = document.getElementById('filter-status').value;
   return records.filter(function(r) {
     var f = r.fields;
-    if (sf  && f['Store'] !== sf && f['Store'] !== 'Both') return false;
-    if (cf  && (f['Category']||'').indexOf(cf) === -1)     return false;
-    if (stf && getStatus(f) !== stf)                       return false;
+    if (sf  && r._store !== sf)                        return false;
+    if (cf  && (f['Category']||'').indexOf(cf) === -1) return false;
+    if (stf && getStatus(f) !== stf)                   return false;
     return true;
   });
 }
@@ -479,7 +514,7 @@ function renderItems() {
     var min = f['Min Qty']     != null ? +f['Min Qty']     : null;
     var unit    = f['Unit'] || '';
     var cat     = f['Category'] || '';
-    var store   = f['Store'] || '';
+    var store   = rec._store;
     var ordered = f['Last Ordered'] ? fmtDate(f['Last Ordered']) : null;
     var link    = f['Order Link'] || '';
     var notes   = f['Notes'] || '';
@@ -549,9 +584,9 @@ function cancelEdit(id) {
 function saveQty(id) {
   var val = +document.getElementById('qty-input-' + id).value;
   if (isNaN(val) || val < 0) { showToast('Invalid quantity', 'error'); return; }
-  patchRecord(id, { 'Current Qty': val })
-    .then(function(updated) {
-      var rec = records.find(function(r){ return r.id === id; });
+  var rec = records.find(function(r){ return r.id === id; });
+  patchRecord(id, { 'Current Qty': val }, rec ? rec._store : 'port-washington')
+    .then(function() {
       if (rec) rec.fields['Current Qty'] = val;
       renderStats();
       renderItems();
@@ -566,9 +601,9 @@ function saveQty(id) {
 /* ── Mark ordered ─────────────────────────────── */
 function markOrdered(id) {
   var today = new Date().toISOString().slice(0,10);
-  patchRecord(id, { 'Last Ordered': today })
+  var rec = records.find(function(r){ return r.id === id; });
+  patchRecord(id, { 'Last Ordered': today }, rec ? rec._store : 'port-washington')
     .then(function() {
-      var rec = records.find(function(r){ return r.id === id; });
       if (rec) rec.fields['Last Ordered'] = today;
       renderItems();
       showToast('Marked as ordered today');
@@ -584,7 +619,7 @@ function doDelete(id) {
   var rec = records.find(function(r){ return r.id === id; });
   var name = rec ? (rec.fields['Name'] || 'this item') : 'this item';
   if (!confirm('Delete "' + name + '" from supplies? This cannot be undone.')) return;
-  deleteRecord(id)
+  deleteRecord(id, rec ? rec._store : 'port-washington')
     .then(function() {
       records = records.filter(function(r){ return r.id !== id; });
       renderStats();
@@ -603,33 +638,34 @@ function toggleAddForm(show) {
   if (show) document.getElementById('a-name').focus();
 }
 function handleAdd() {
-  var name = document.getElementById('a-name').value.trim();
-  if (!name) { showToast('Item name is required', 'error'); return; }
+  var name  = document.getElementById('a-name').value.trim();
+  var store = document.getElementById('a-store').value;
+  if (!name)  { showToast('Item name is required', 'error'); return; }
+  if (!store) { showToast('Store is required', 'error'); return; }
   var fields = {
     'Name':        name,
-    'Category':    document.getElementById('a-cat').value   || undefined,
-    'Store':       document.getElementById('a-store').value || undefined,
+    'Category':    document.getElementById('a-cat').value.trim()    || undefined,
     'Current Qty': +document.getElementById('a-qty').value,
     'Unit':        document.getElementById('a-unit').value.trim()   || undefined,
     'Min Qty':     +document.getElementById('a-minqty').value       || undefined,
     'Order Link':  document.getElementById('a-link').value.trim()   || undefined,
     'Notes':       document.getElementById('a-notes').value.trim()  || undefined
   };
-  // Remove undefined fields
   Object.keys(fields).forEach(function(k){ if (fields[k] === undefined) delete fields[k]; });
 
   var btn = document.getElementById('add-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
-  createRecord(fields)
+  createRecord(fields, store)
     .then(function(rec) {
+      rec._store = store;
       records.unshift(rec);
       renderStats();
       renderItems();
       toggleAddForm(false);
-      // Reset form
       ['a-name','a-qty','a-unit','a-minqty','a-link','a-notes'].forEach(function(id){
         document.getElementById(id).value = id === 'a-qty' || id === 'a-minqty' ? '0' : '';
       });
+      document.getElementById('a-store').value = '';
       showToast('Item added');
     })
     .catch(function(e) {
@@ -643,20 +679,21 @@ function handleAdd() {
 
 /* ── Init ─────────────────────────────────────── */
 loadConfig();
-if (config.token && config.base) {
+if (config.token && (config.pwBase || config.hvBase)) {
   document.getElementById('setup-panel').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
-  // Set Airtable link
-  document.getElementById('at-link').href = 'https://airtable.com/' + config.base;
+  var pwLink = document.getElementById('at-link-pw');
+  var hvLink = document.getElementById('at-link-hv');
+  if (config.pwBase) { pwLink.href = 'https://airtable.com/' + config.pwBase; } else { pwLink.style.display = 'none'; }
+  if (config.hvBase) { hvLink.href = 'https://airtable.com/' + config.hvBase; } else { hvLink.style.display = 'none'; }
   loadItems();
 } else {
-  // Show setup panel
   document.getElementById('setup-panel').classList.remove('hidden');
   document.getElementById('dashboard').classList.add('hidden');
 }
 
-// Hook filter-store to also update Airtable link and reload stats
-document.getElementById('filter-store').addEventListener('change', function(){ renderStats(); });
+// Reload when store filter changes (fetches from appropriate base)
+document.getElementById('filter-store').addEventListener('change', function(){ loadItems(); });
 </script>
 </body>
 </html>
