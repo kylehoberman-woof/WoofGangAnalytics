@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import (
     get_store, GUARANTEES, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
     BATHER_RATE, RETAIL_RATES, RETAIL_NAME_MAP, BATHER_NAME_MAP,
+    HICKSVILLE_RETAIL_RATES, HICKSVILLE_RETAIL_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
     MONTHLY_RENT as _DEFAULT_RENT, ANCHOR_START, STORE_OPEN,
@@ -24,6 +25,13 @@ _store = get_store(_store_name)
 _store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
 _home_url = "index.html" if _store_name == "port-washington" else "../port-washington/index.html"
 MONTHLY_RENT = STORE_RENT.get(_store_name, _DEFAULT_RENT)
+
+# Store-specific employee maps
+if _store_name == "hicksville":
+    RETAIL_NAME_MAP = HICKSVILLE_RETAIL_NAME_MAP
+    RETAIL_RATES = HICKSVILLE_RETAIL_RATES
+    BATHER_NAME_MAP = HICKSVILLE_BATHER_NAME_MAP
+
 DATA_DIR   = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 
@@ -264,7 +272,10 @@ def manager_salary_for_range(start, end):
         })
     return round(total + bonus, 2), old_days, new_days, daily_rows, bonus
 
-ytd_manager, ytd_mgr_old_days, ytd_mgr_new_days, ytd_mgr_daily, ytd_mgr_bonus = manager_salary_for_range(ytd_start, TODAY)
+if _store_name == "port-washington":
+    ytd_manager, ytd_mgr_old_days, ytd_mgr_new_days, ytd_mgr_daily, ytd_mgr_bonus = manager_salary_for_range(ytd_start, TODAY)
+else:
+    ytd_manager, ytd_mgr_old_days, ytd_mgr_new_days, ytd_mgr_daily, ytd_mgr_bonus = 0, 0, 0, [], 0
 
 # YTD bather & retail pay from time clocks
 ytd_bather_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), BATHER_NAME_MAP, ytd_start.strftime("%Y-%m-%d"), TODAY.strftime("%Y-%m-%d"))
@@ -287,7 +298,7 @@ while m_start <= TODAY:
     m_rev += m_bather
     m_paid = sum(d["paid"] for d in m_groomer_data.values())
     m_tips = sum(d["tips"] for d in m_groomer_data.values())
-    m_mgr, _, _, _, _ = manager_salary_for_range(m_start, m_end)
+    m_mgr, _, _, _, _ = manager_salary_for_range(m_start, m_end) if _store_name == "port-washington" else (0, 0, 0, [], 0)
     m_days = sum(1 for n in range((m_end - m_start).days + 1)
                  if (m_start + timedelta(days=n)).weekday() < 5)
     m_rent = MONTHLY_RENT  # flat monthly rent
@@ -398,7 +409,10 @@ for i, (s, e) in enumerate(pay_periods):
     for g in groomers:
         d = period_summary(g, s, e)
         pp_data[f"pp_{i}"][g] = d
-    mgr_pay, mgr_old, mgr_new, mgr_daily, mgr_bonus = manager_salary_for_range(s, e)
+    if _store_name == "port-washington":
+        mgr_pay, mgr_old, mgr_new, mgr_daily, mgr_bonus = manager_salary_for_range(s, e)
+    else:
+        mgr_pay, mgr_old, mgr_new, mgr_daily, mgr_bonus = 0, 0, 0, [], 0
     pp_data[f"pp_{i}"]["_manager_salary"] = mgr_pay
     pp_data[f"pp_{i}"]["_manager_old_days"] = mgr_old
     pp_data[f"pp_{i}"]["_manager_new_days"] = mgr_new
@@ -551,6 +565,40 @@ _sue_panel = '''<!-- Sue M -->
   <div id="sue-weeks-container"></div>
 </div>''' if _store_name == "port-washington" else ''
 
+if _store_name == "port-washington":
+    _mgr_bonus_kpi = f"<div class='kpi' style='border-color:#E91E63;flex:1;min-width:120px'><div class='kpi-val' style='color:#E91E63;font-size:1.4rem'>{fc(ytd_mgr_bonus)}</div><div class='kpi-label'>Bonus (Mar 1)</div></div>" if ytd_mgr_bonus else ""
+    _mgr_daily_rows = "".join(
+        f'<tr><td style="font-size:0.84rem">{r["date"]}</td>'
+        f'<td style="font-size:0.84rem;color:#888">{datetime.strptime(r["date"],"%Y-%m-%d").strftime("%a")}</td>'
+        f'<td style="text-align:right;font-size:0.84rem">{"$65,000" if r["rate"]==65000 else "$67,000"}'
+        f'<span style="font-size:0.72rem;color:#5C6BC0;margin-left:4px">{"↑ raised" if r["date"]=="2026-03-01" else ""}</span></td>'
+        f'<td style="text-align:right;font-weight:600;color:#5C6BC0">{fc(r["pay"])}</td>'
+        f'<td style="text-align:right;font-weight:700;color:#E91E63">{fc(r["bonus"]) if r["bonus"] else "—"}</td></tr>'
+        for r in ytd_mgr_daily
+    )
+    _mgr_ytd_card = f"""<div class="card">
+    <div class="stitle">Manager Salary — Cindy Szczudlo</div>
+    <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap">
+      <div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">{fc(ytd_manager)}</div><div class="kpi-label">YTD Total</div></div>
+      <div class="kpi" style="border-color:#7986CB;flex:1;min-width:120px"><div class="kpi-val" style="color:#7986CB;font-size:1.4rem">{ytd_mgr_old_days}</div><div class="kpi-label">Days @ $65k</div></div>
+      <div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">{ytd_mgr_new_days}</div><div class="kpi-label">Days @ $67k</div></div>
+      {_mgr_bonus_kpi}
+      <div class="kpi" style="border-color:#9FA8DA;flex:1;min-width:120px"><div class="kpi-val" style="color:#9FA8DA;font-size:1.4rem">{fc(65000/260)}</div><div class="kpi-label">Old Rate/Day</div></div>
+      <div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">{fc(67000/260)}</div><div class="kpi-label">New Rate/Day</div></div>
+    </div>
+    <button class="toggle-btn" onclick="toggleDetail('cindy-ytd-detail',this)">▼ Show daily breakdown</button>
+    <div class="detail-section" id="cindy-ytd-detail">
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th>Date</th><th>Day</th><th style="text-align:right">Annual Rate</th><th style="text-align:right">Daily Pay</th><th style="text-align:right">Bonus</th>
+        </tr></thead>
+        <tbody>{_mgr_daily_rows}</tbody>
+      </table></div>
+    </div>
+  </div>"""
+else:
+    _mgr_ytd_card = ""
+
 html = f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -622,7 +670,7 @@ tr:hover td{{background:#fafaf8!important}}
     <div class="kpi blue"><div class="kpi-val">{fc(ytd_total["paid"])}</div><div class="kpi-label">Commission Paid</div></div>
     <div class="kpi orange"><div class="kpi-val">{fc(ytd_total["tips"])}</div><div class="kpi-label">Tips</div></div>
     <div class="kpi green"><div class="kpi-val">{fc(ytd_total["total"])}</div><div class="kpi-label">Total Groomer Pay</div></div>
-    <div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">{fc(ytd_manager)}</div><div class="kpi-label">Manager Salary</div><div style="font-size:0.78rem;color:#5C6BC0;margin-top:3px">from Feb 23</div></div>
+    {"" if _store_name != "port-washington" else '<div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">' + fc(ytd_manager) + '</div><div class="kpi-label">Manager Salary</div><div style="font-size:0.78rem;color:#5C6BC0;margin-top:3px">from Feb 23</div></div>'}
     <div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">{fc(ytd_bather_pay)}</div><div class="kpi-label">Bather Pay</div></div>
     <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">{fc(ytd_retail_pay)}</div><div class="kpi-label">Retail Staff Pay</div></div>
     <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">{fc(ytd_total["rev"] * 0.07)}</div><div class="kpi-label">Royalties (7%)</div></div>
@@ -639,28 +687,7 @@ tr:hover td{{background:#fafaf8!important}}
       <div class="tbl-wrap"><table>{TABLE_HEADER}<tbody>{ytd_daily}</tbody></table></div>
     </div>
   </div>
-  <div class="card">
-    <div class="stitle">Manager Salary — Cindy Szczudlo</div>
-    <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap">
-      <div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">{fc(ytd_manager)}</div><div class="kpi-label">YTD Total</div></div>
-      <div class="kpi" style="border-color:#7986CB;flex:1;min-width:120px"><div class="kpi-val" style="color:#7986CB;font-size:1.4rem">{ytd_mgr_old_days}</div><div class="kpi-label">Days @ $65k</div></div>
-      <div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">{ytd_mgr_new_days}</div><div class="kpi-label">Days @ $67k</div></div>
-      {"<div class='kpi' style='border-color:#E91E63;flex:1;min-width:120px'><div class='kpi-val' style='color:#E91E63;font-size:1.4rem'>" + fc(ytd_mgr_bonus) + "</div><div class='kpi-label'>Bonus (Mar 1)</div></div>" if ytd_mgr_bonus else ""}
-      <div class="kpi" style="border-color:#9FA8DA;flex:1;min-width:120px"><div class="kpi-val" style="color:#9FA8DA;font-size:1.4rem">{fc(65000/260)}</div><div class="kpi-label">Old Rate/Day</div></div>
-      <div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">{fc(67000/260)}</div><div class="kpi-label">New Rate/Day</div></div>
-    </div>
-    <button class="toggle-btn" onclick="toggleDetail('cindy-ytd-detail',this)">▼ Show daily breakdown</button>
-    <div class="detail-section" id="cindy-ytd-detail">
-      <div class="tbl-wrap"><table>
-        <thead><tr>
-          <th>Date</th><th>Day</th><th style="text-align:right">Annual Rate</th><th style="text-align:right">Daily Pay</th><th style="text-align:right">Bonus</th>
-        </tr></thead>
-        <tbody>
-          {"".join(f'<tr><td style="font-size:0.84rem">{r["date"]}</td><td style="font-size:0.84rem;color:#888">{datetime.strptime(r["date"],"%Y-%m-%d").strftime("%a")}</td><td style="text-align:right;font-size:0.84rem">{("$65,000" if r["rate"]==65000 else "$67,000")}<span style="font-size:0.72rem;color:#5C6BC0;margin-left:4px">{"↑ raised" if r["date"]=="2026-03-01" else ""}</span></td><td style="text-align:right;font-weight:600;color:#5C6BC0">{fc(r["pay"])}</td><td style="text-align:right;font-weight:700;color:#E91E63">{fc(r["bonus"]) if r["bonus"] else "—"}</td></tr>' for r in ytd_mgr_daily)}
-        </tbody>
-      </table></div>
-    </div>
-  </div>
+  {_mgr_ytd_card}
 </div>
 
 <!-- ── Last 30 Days ── -->
@@ -1195,7 +1222,7 @@ function renderExec() {{
     kpiCard('2026 YTD Revenue', fc(ytdRev), '#C4276E') +
     kpiCard('Groomer Commission', fc(ytdPaid), '#1565c0') +
     kpiCard('Bather Pay', fc(ytdBather), '#00796B') +
-    kpiCard('Manager + Retail Staff', fc(ytdMgr + ytdRetail), '#7B1FA2') +
+    kpiCard(ytdMgr > 0 ? 'Manager + Retail Staff' : 'Retail Staff Pay', fc(ytdMgr + ytdRetail), '#7B1FA2') +
     kpiCard('Royalties (7%)', fc(ytdRoyalties), '#AD1457') +
     kpiCard('Rent', fc(ytdRent), '#6D4C41') +
     kpiCard('Net Margin', fc(ytdMargin) + ' ('+ytdMarginPct+'%)', parseFloat(ytdMarginPct) >= 0 ? '#558B2F' : '#e53935');

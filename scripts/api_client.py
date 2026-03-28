@@ -290,7 +290,8 @@ def extract_all_data(store):
             ed = window_end.strftime("%Y-%m-%dT23:59:59")
             try:
                 tc = api_post("api/report/timeClocks",
-                              {"startDate": sd, "endDate": ed, "pageIndex": 0, "pageSize": 200},
+                              {"startDate": sd, "endDate": ed, "pageIndex": 0, "pageSize": 200,
+                               "locationId": location_id},
                               token=token)
                 records = tc if isinstance(tc, list) else tc.get("data", [])
                 all_clocks.extend(records)
@@ -357,7 +358,8 @@ def extract_all_data(store):
         ed = window_end.strftime("%Y-%m-%dT23:59:59")
         try:
             tc = api_post("api/report/timeClocks",
-                          {"startDate": sd, "endDate": ed, "pageIndex": 0, "pageSize": 200},
+                          {"startDate": sd, "endDate": ed, "pageIndex": 0, "pageSize": 200,
+                           "locationId": location_id},
                           token=token)
             records = tc if isinstance(tc, list) else tc.get("data", [])
             all_clocks.extend(records)

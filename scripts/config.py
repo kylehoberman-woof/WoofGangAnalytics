@@ -203,12 +203,24 @@ STORE_OPEN_DATES = {
 
 # Hicksville retail staff
 HICKSVILLE_RETAIL_RATES = {
-    "Hailey": 21.0,
+    "Hailey": 21.0,     # $/hr — current
+    "Chris": 20.0,      # $/hr — shared with PW (partial hours)
+    "Sophia": 19.0,     # $/hr — fired
+    "Naomi": 19.0,      # $/hr — fired
+    "Nicole": 19.0,     # $/hr — fired
+    "Christina": 19.0,  # $/hr — fired
 }
 
 HICKSVILLE_RETAIL_NAME_MAP = {
     "Hailey Imhof": "Hailey",
+    "Christine Brower": "Chris",
+    "Sophia Kurkowski": "Sophia",
+    "Naomi Dutes": "Naomi",
+    "Nicole Alarcon": "Nicole",
+    "Christina Ramkissoon": "Christina",
 }
+
+HICKSVILLE_BATHER_NAME_MAP = {}  # Hicksville has no bathers
 
 # ─── Pay Period Anchor ──────────────────────────────────────────────────────
 
