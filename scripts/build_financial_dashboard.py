@@ -17,7 +17,7 @@ from config import (
     HICKSVILLE_RETAIL_RATES, HICKSVILLE_RETAIL_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
-    get_royalty_rate,
+    get_royalty_rate, get_monthly_rent,
 )
 from formatting import fc
 
@@ -179,7 +179,7 @@ while m_start <= TODAY:
     retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in retail_hrs.items()), 2)
     _royalty_rate = get_royalty_rate(_store_name, m_start)
     royalties = round(total_rev * _royalty_rate, 2)
-    rent = MONTHLY_RENT  # flat $7,700/month regardless of days
+    rent = get_monthly_rent(_store_name, m_start)
 
     gross_profit = round(net_rev - retail_cogs - comm_paid, 2)
     total_opex = round(mgr + bather_pay + retail_pay + royalties + rent, 2)

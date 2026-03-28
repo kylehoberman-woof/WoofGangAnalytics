@@ -16,7 +16,7 @@ from config import (
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
     MONTHLY_RENT as _DEFAULT_RENT, ANCHOR_START, STORE_OPEN,
     SUPABASE_URL, SUPABASE_ANON_KEY, STORE_RENT, PAY_PERIOD_CONFIG,
-    STORE_OPEN_DATES, get_royalty_rate,
+    STORE_OPEN_DATES, get_royalty_rate, get_monthly_rent,
 )
 from formatting import fc
 
@@ -249,10 +249,9 @@ ytd_bather_rev = sum(v for d, v in groom_by_day.get("_bather_revenue", {}).items
                      if ytd_start.isoformat() <= d <= TODAY.isoformat())
 ytd_total["rev"] += ytd_bather_rev
 
-DAILY_RENT   = MONTHLY_RENT * 12 / 365  # kept for pay period calc
 ytd_days_count = (TODAY - ytd_start).days + 1
 ytd_months = TODAY.month  # number of months in YTD (Jan=1, Feb=2, etc.)
-ytd_rent = MONTHLY_RENT * ytd_months
+# ytd_rent computed after monthly_data is built (uses tiered rates)
 
 def manager_salary_for_range(start, end):
     """Returns (total_pay, old_days, new_days, daily_rows, bonus) accounting for salary change and bonus."""
@@ -311,7 +310,7 @@ while m_start <= TODAY:
     m_mgr, _, _, _, _ = manager_salary_for_range(m_start, m_end) if _store_name == "port-washington" else (0, 0, 0, [], 0)
     m_days = sum(1 for n in range((m_end - m_start).days + 1)
                  if (m_start + timedelta(days=n)).weekday() < 5)
-    m_rent = MONTHLY_RENT  # flat monthly rent
+    m_rent = get_monthly_rent(_store_name, m_start)
     m_royalties = round(m_rev * get_royalty_rate(_store_name, m_start), 2)
     # Bather pay for this month from time clocks
     s_str = m_start.strftime("%Y-%m-%d")
@@ -352,8 +351,9 @@ while m_start <= TODAY:
 import json as _json2
 monthly_json = _json2.dumps(monthly_data)
 
-# YTD royalties from monthly data (uses tiered rates)
+# YTD royalties and rent from monthly data (uses tiered rates)
 ytd_royalties = sum(m["royalties"] for m in monthly_data if m["year"] == 2026)
+ytd_rent = sum(m["rent"] for m in monthly_data if m["year"] == 2026)
 
 # Last 30 days
 l30_start = TODAY - timedelta(days=29)
@@ -427,6 +427,7 @@ for i, (s, e) in enumerate(pay_periods):
     else:
         mgr_pay, mgr_old, mgr_new, mgr_daily, mgr_bonus = 0, 0, 0, [], 0
     pp_data[f"pp_{i}"]["_royalty_rate"] = get_royalty_rate(_store_name, s)
+    pp_data[f"pp_{i}"]["_monthly_rent"] = get_monthly_rent(_store_name, s)
     pp_data[f"pp_{i}"]["_manager_salary"] = mgr_pay
     pp_data[f"pp_{i}"]["_manager_old_days"] = mgr_old
     pp_data[f"pp_{i}"]["_manager_new_days"] = mgr_new
@@ -986,7 +987,7 @@ function renderPayPeriod(ppId) {{
   }});
   totRev += (data._bather_rev || 0);
   var totRoyalties = totRev * (data._royalty_rate || 0.07);
-  var DAILY_RENT = {MONTHLY_RENT} * 12 / 365;
+  var DAILY_RENT = (data._monthly_rent || {MONTHLY_RENT}) * 12 / 365;
   var PP_LENGTH = {PAY_PERIOD_CONFIG.get(_store_name, PAY_PERIOD_CONFIG["port-washington"])["length_days"]};
   var totRent = DAILY_RENT * PP_LENGTH;
   var totManager = data._manager_salary || 0;

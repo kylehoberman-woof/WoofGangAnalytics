@@ -227,9 +227,40 @@ def get_royalty_rate(store_name, month_date):
 
 # Store-specific financial constants
 STORE_RENT = {
-    "port-washington": 7700.0,
-    "hicksville": 6000.0,
+    "port-washington": 7724.0,   # Legacy flat (use get_monthly_rent for accurate tiered)
+    "hicksville": 6056.07,
 }
+
+# Rent schedules: list of (start_date, monthly_rent) — sorted chronologically
+STORE_RENT_SCHEDULE = {
+    "port-washington": [
+        (date(2024, 9, 27), 7560.00),   # Year 1
+        (date(2025, 9, 27), 7724.00),   # Year 2
+    ],
+    "hicksville": [
+        (date(2025, 12, 11), 6056.07),  # Year 1
+    ],
+}
+
+
+def get_monthly_rent(store_name, month_date):
+    """Get monthly rent for a given month based on the lease schedule.
+
+    Uses the rent rate in effect at the start of the given month.
+    Returns the monthly rent amount.
+    """
+    schedule = STORE_RENT_SCHEDULE.get(store_name, [])
+    if not schedule:
+        return STORE_RENT.get(store_name, 7700.0)
+
+    # Find the most recent rate that's <= month_date
+    rent = schedule[0][1]  # default to first rate
+    for start, rate in schedule:
+        if month_date >= start:
+            rent = rate
+        else:
+            break
+    return rent
 
 STORE_OPEN_DATES = {
     "port-washington": date(2024, 9, 26),
