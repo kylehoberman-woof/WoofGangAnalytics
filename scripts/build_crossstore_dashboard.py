@@ -71,19 +71,20 @@ hv_daily = build_daily_comparison_data(hv_df, hv_orders)
 # ── Merge into cross-store datasets with prefixed keys ────────────────────────
 
 def merge_comparison_data(pw_data, hv_data):
-    """Merge two stores' comparison data into a single dataset with prefixed keys."""
+    """Merge two stores' comparison data into a single dataset with prefixed keys.
+    Each period gets an 'idx' (0-based index from store opening) for 'same stage' matching."""
     merged = {"periods": [], "data": {}}
 
-    # Add PW periods
-    for p in pw_data["periods"]:
+    # Add PW periods — original data is oldest-first, idx=0 = first month open
+    for i, p in enumerate(pw_data["periods"]):
         key = f"pw-{p['key']}"
-        merged["periods"].append({"key": key, "label": f"PW \u2022 {p['label']}"})
+        merged["periods"].append({"key": key, "label": f"PW \u2022 {p['label']}", "store": "pw", "idx": i})
         merged["data"][key] = pw_data["data"][p["key"]]
 
-    # Add HV periods
-    for p in hv_data["periods"]:
+    # Add HV periods — idx=0 = first month open
+    for i, p in enumerate(hv_data["periods"]):
         key = f"hv-{p['key']}"
-        merged["periods"].append({"key": key, "label": f"HV \u2022 {p['label']}"})
+        merged["periods"].append({"key": key, "label": f"HV \u2022 {p['label']}", "store": "hv", "idx": i})
         merged["data"][key] = hv_data["data"][p["key"]]
 
     return merged
@@ -130,6 +131,7 @@ def build_comparison_panel(prefix, data, default_a, default_b, update_fn, title,
     # Quick buttons
     quick_html = f'''<div class="quick-btns">
         <button class="quick-btn" onclick="_qcSameperiod('{prefix}')">Same Period</button>
+        <button class="quick-btn" onclick="_qcSamestage('{prefix}')" title="Compare stores at the same point in their lifecycle (e.g. Month 3 of each store)">Same Stage</button>
     </div>'''
 
     # KPI cards
@@ -363,6 +365,49 @@ function _qcSameperiod(prefix) {{
             break;
         }}
     }}
+    if (prefix === 'xcmp') updateXMonthly();
+    else if (prefix === 'xwcmp') updateXWeekly();
+    else updateXDaily();
+}}
+
+// Quick button: match the other store's same stage (e.g. Month 3 of each store)
+function _qcSamestage(prefix) {{
+    var DATA = prefix === 'xcmp' ? MONTHLY_DATA : (prefix === 'xwcmp' ? WEEKLY_DATA : DAILY_DATA);
+    var selB = document.getElementById(prefix + '-selB');
+    var keyB = selB.value;
+    var selA = document.getElementById(prefix + '-selA');
+
+    // Find the idx of selected period B
+    var idxB = -1;
+    var storeB = '';
+    for (var i = 0; i < DATA.periods.length; i++) {{
+        if (DATA.periods[i].key === keyB) {{
+            idxB = DATA.periods[i].idx;
+            storeB = DATA.periods[i].store;
+            break;
+        }}
+    }}
+    if (idxB < 0) return;
+
+    // Find opposite store's period with the same idx
+    var targetStore = storeB === 'pw' ? 'hv' : 'pw';
+    var targetKey = null;
+    for (var j = 0; j < DATA.periods.length; j++) {{
+        if (DATA.periods[j].store === targetStore && DATA.periods[j].idx === idxB) {{
+            targetKey = DATA.periods[j].key;
+            break;
+        }}
+    }}
+    if (!targetKey) return;
+
+    // Set selector A to the matching stage
+    for (var k = 0; k < selA.options.length; k++) {{
+        if (selA.options[k].value === targetKey) {{
+            selA.selectedIndex = k;
+            break;
+        }}
+    }}
+
     if (prefix === 'xcmp') updateXMonthly();
     else if (prefix === 'xwcmp') updateXWeekly();
     else updateXDaily();
