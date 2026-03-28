@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import (
     get_store, GUARANTEES, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
     BATHER_RATE, RETAIL_RATES, RETAIL_NAME_MAP, BATHER_NAME_MAP,
+    HICKSVILLE_RETAIL_RATES, HICKSVILLE_RETAIL_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
 )
@@ -36,6 +37,12 @@ TODAY = date.today()
 from config import STORE_RENT, STORE_OPEN_DATES
 MONTHLY_RENT = STORE_RENT.get(_store_name, 7700.0)
 STORE_OPEN = STORE_OPEN_DATES.get(_store_name, date(2024, 9, 26))
+
+# Store-specific employee maps
+if _store_name == "hicksville":
+    RETAIL_NAME_MAP = HICKSVILLE_RETAIL_NAME_MAP
+    RETAIL_RATES = HICKSVILLE_RETAIL_RATES
+    BATHER_NAME_MAP = HICKSVILLE_BATHER_NAME_MAP
 DAILY_RENT = MONTHLY_RENT * 12 / 365
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
