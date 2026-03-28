@@ -147,8 +147,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         <small>From PW Airtable URL: airtable.com/<strong>appXXX</strong>/...</small>
       </div>
       <div class="fg">
-        <label>Port Washington — Table Name</label>
-        <input type="text" id="s-pw-table" value="Supplies">
+        <label>Port Washington — Table ID or Name</label>
+        <input type="text" id="s-pw-table" value="tbl7Qz3jurzRrHFen">
+        <small>Table ID from URL (tbl...) or display name. Default works for both stores.</small>
       </div>
       <div class="fg">
         <label>Hicksville — Base ID</label>
@@ -156,18 +157,17 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         <small>From HV Airtable URL: airtable.com/<strong>appXXX</strong>/...</small>
       </div>
       <div class="fg">
-        <label>Hicksville — Table Name</label>
-        <input type="text" id="s-hv-table" value="Supplies">
+        <label>Hicksville — Table ID or Name</label>
+        <input type="text" id="s-hv-table" value="tbl7Qz3jurzRrHFen">
       </div>
       <div class="fg">
-        <label>Expected Field Names</label>
+        <label>Airtable Field Names (read-only reference)</label>
         <div class="schema-box">
-          Create a table in Airtable with these exact field names:<br>
-          <strong>Name</strong> (Single line text) &bull; <strong>Category</strong> (Single select) &bull;
-          <strong>Store</strong> (Single select: Port Washington, Hicksville, Both) &bull;
-          <strong>Current Qty</strong> (Number) &bull; <strong>Unit</strong> (Single line text) &bull;
-          <strong>Min Qty</strong> (Number) &bull; <strong>Last Ordered</strong> (Date) &bull;
-          <strong>Order Link</strong> (URL) &bull; <strong>Notes</strong> (Long text)
+          Fields detected in your Airtable bases:<br>
+          <strong>Item Name</strong> (text) &bull; <strong>Category</strong> (select) &bull;
+          <strong>Current Quantity</strong> (number) &bull; <strong>Reorder Level</strong> (number) &bull;
+          <strong>Unit</strong> (text) &bull; <strong>Last Updated</strong> (auto timestamp) &bull;
+          <strong>Alert Sent</strong> (checkbox)
         </div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -225,16 +225,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
           <input type="text" id="a-unit" placeholder="rolls, boxes…">
         </div>
         <div class="fg">
-          <label>Min Qty (reorder at)</label>
+          <label>Reorder Level</label>
           <input type="number" id="a-minqty" min="0" value="0">
-        </div>
-        <div class="fg span-full">
-          <label>Order Link (optional)</label>
-          <input type="url" id="a-link" placeholder="https://amazon.com/...">
-        </div>
-        <div class="fg span-full">
-          <label>Notes (optional)</label>
-          <input type="text" id="a-notes" placeholder="Brand preference, supplier, etc.">
         </div>
         <div class="fg span-full" style="display:flex;gap:10px;justify-content:flex-end">
           <button class="btn-secondary" onclick="toggleAddForm(false)">Cancel</button>
@@ -245,11 +237,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 
     <div class="toolbar">
       <div class="filters">
-        <select class="filter-sel" id="filter-store" onchange="renderItems()">
+        <select class="filter-sel" id="filter-store" onchange="loadItems()">
           <option value="">All Stores</option>
-          <option value="Port Washington">Port Washington</option>
-          <option value="Hicksville">Hicksville</option>
-          <option value="Both">Both Stores</option>
+          <option value="port-washington">Port Washington</option>
+          <option value="hicksville">Hicksville</option>
         </select>
         <select class="filter-sel" id="filter-cat" onchange="renderItems()">
           <option value="">All Categories</option>
@@ -287,7 +278,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 <script>
 /* ── Config ───────────────────────────────────── */
 var AT_URL  = 'https://api.airtable.com/v0';
-var config  = { token: '', pwBase: '', hvBase: '', pwTable: 'Supplies', hvTable: 'Supplies' };
+var config  = { token: '', pwBase: '', hvBase: '', pwTable: 'tbl7Qz3jurzRrHFen', hvTable: 'tbl7Qz3jurzRrHFen' };
 var records = []; // array of {id, fields, _store}
 
 /* ── Toast ────────────────────────────────────── */
@@ -304,15 +295,15 @@ function loadConfig() {
   config.token   = localStorage.getItem('wg_at_token')    || '';
   config.pwBase  = localStorage.getItem('wg_at_pw_base')  || '';
   config.hvBase  = localStorage.getItem('wg_at_hv_base')  || '';
-  config.pwTable = localStorage.getItem('wg_at_pw_table') || 'Supplies';
-  config.hvTable = localStorage.getItem('wg_at_hv_table') || 'Supplies';
+  config.pwTable = localStorage.getItem('wg_at_pw_table') || 'tbl7Qz3jurzRrHFen';
+  config.hvTable = localStorage.getItem('wg_at_hv_table') || 'tbl7Qz3jurzRrHFen';
 }
 function saveSettings() {
   var token   = document.getElementById('s-token').value.trim();
   var pwBase  = document.getElementById('s-pw-base').value.trim();
   var hvBase  = document.getElementById('s-hv-base').value.trim();
-  var pwTable = document.getElementById('s-pw-table').value.trim() || 'Supplies';
-  var hvTable = document.getElementById('s-hv-table').value.trim() || 'Supplies';
+  var pwTable = document.getElementById('s-pw-table').value.trim() || 'tbl7Qz3jurzRrHFen';
+  var hvTable = document.getElementById('s-hv-table').value.trim() || 'tbl7Qz3jurzRrHFen';
   if (!token || (!pwBase && !hvBase)) {
     showToast('Token and at least one Base ID are required', 'error');
     return;
@@ -434,8 +425,8 @@ function deleteRecord(id, store) {
 
 /* ── Status helpers ───────────────────────────── */
 function getStatus(f) {
-  var cur = f['Current Qty'] != null ? +f['Current Qty'] : null;
-  var min = f['Min Qty']     != null ? +f['Min Qty']     : null;
+  var cur = f['Current Quantity'] != null ? +f['Current Quantity'] : null;
+  var min = f['Reorder Level']    != null ? +f['Reorder Level']    : null;
   if (cur === null) return 'ok';
   if (cur === 0)   return 'out';
   if (min > 0 && cur <= min)         return 'order';
@@ -502,7 +493,7 @@ function renderItems() {
     var sa = sOrder[getStatus(a.fields)] || 3;
     var sb = sOrder[getStatus(b.fields)] || 3;
     if (sa !== sb) return sa - sb;
-    return (a.fields['Name']||'').localeCompare(b.fields['Name']||'');
+    return (a.fields['Item Name']||'').localeCompare(b.fields['Item Name']||'');
   });
 
   var html = '<div class="items-grid">';
@@ -510,14 +501,12 @@ function renderItems() {
     var f   = rec.fields;
     var id  = rec.id;
     var st  = getStatus(f);
-    var cur = f['Current Qty'] != null ? +f['Current Qty'] : '–';
-    var min = f['Min Qty']     != null ? +f['Min Qty']     : null;
+    var cur = f['Current Quantity'] != null ? +f['Current Quantity'] : '–';
+    var min = f['Reorder Level']    != null ? +f['Reorder Level']    : null;
     var unit    = f['Unit'] || '';
     var cat     = f['Category'] || '';
     var store   = rec._store;
-    var ordered = f['Last Ordered'] ? fmtDate(f['Last Ordered']) : null;
-    var link    = f['Order Link'] || '';
-    var notes   = f['Notes'] || '';
+    var updated = f['Last Updated'] ? fmtDate(f['Last Updated']) : null;
 
     // Progress bar fill %
     var fillPct  = 0;
@@ -531,7 +520,7 @@ function renderItems() {
 
     html += '<div class="item-card status-' + st + '" id="card-' + id + '">' +
       '<div class="item-top">' +
-        '<div class="item-name">' + (f['Name']||'Untitled') + '</div>' +
+        '<div class="item-name">' + (f['Item Name']||'Untitled') + '</div>' +
         statusChip(st) +
       '</div>' +
       '<div class="item-badges">' +
@@ -545,13 +534,10 @@ function renderItems() {
       '</div>' +
       (min > 0 ? '<div class="qty-bar"><div class="qty-fill ' + fillCls + '" style="width:' + fillPct + '%"></div></div>' : '') +
       '<div class="item-meta">' +
-        (ordered ? '&#128197; Last ordered: ' + ordered + '<br>' : '') +
-        (notes   ? '<span style="color:#aaa">' + notes + '</span>' : '') +
+        (updated ? '&#128197; Updated: ' + updated : '') +
       '</div>' +
       '<div class="item-actions" id="actions-' + id + '">' +
         '<button class="btn-sm" onclick="startEdit(\'' + id + '\',' + (cur !== '–' ? cur : 0) + ')">&#9998; Update Qty</button>' +
-        '<button class="btn-sm btn-ordered" onclick="markOrdered(\'' + id + '\')">&#10003; Mark Ordered</button>' +
-        (link ? '<a href="' + link + '" target="_blank" class="btn-sm btn-order">&#128722; Order</a>' : '') +
         '<button class="btn-sm btn-order" onclick="doDelete(\'' + id + '\')" style="margin-left:auto">&#10005;</button>' +
       '</div>' +
       '<div id="edit-' + id + '" class="hidden">' +
@@ -585,9 +571,9 @@ function saveQty(id) {
   var val = +document.getElementById('qty-input-' + id).value;
   if (isNaN(val) || val < 0) { showToast('Invalid quantity', 'error'); return; }
   var rec = records.find(function(r){ return r.id === id; });
-  patchRecord(id, { 'Current Qty': val }, rec ? rec._store : 'port-washington')
+  patchRecord(id, { 'Current Quantity': val }, rec ? rec._store : 'port-washington')
     .then(function() {
-      if (rec) rec.fields['Current Qty'] = val;
+      if (rec) rec.fields['Current Quantity'] = val;
       renderStats();
       renderItems();
       showToast('Quantity updated');
@@ -598,26 +584,10 @@ function saveQty(id) {
     });
 }
 
-/* ── Mark ordered ─────────────────────────────── */
-function markOrdered(id) {
-  var today = new Date().toISOString().slice(0,10);
-  var rec = records.find(function(r){ return r.id === id; });
-  patchRecord(id, { 'Last Ordered': today }, rec ? rec._store : 'port-washington')
-    .then(function() {
-      if (rec) rec.fields['Last Ordered'] = today;
-      renderItems();
-      showToast('Marked as ordered today');
-    })
-    .catch(function(e) {
-      console.error(e);
-      showToast('Update failed — ' + e.message, 'error');
-    });
-}
-
 /* ── Delete ───────────────────────────────────── */
 function doDelete(id) {
   var rec = records.find(function(r){ return r.id === id; });
-  var name = rec ? (rec.fields['Name'] || 'this item') : 'this item';
+  var name = rec ? (rec.fields['Item Name'] || 'this item') : 'this item';
   if (!confirm('Delete "' + name + '" from supplies? This cannot be undone.')) return;
   deleteRecord(id, rec ? rec._store : 'port-washington')
     .then(function() {
@@ -643,13 +613,11 @@ function handleAdd() {
   if (!name)  { showToast('Item name is required', 'error'); return; }
   if (!store) { showToast('Store is required', 'error'); return; }
   var fields = {
-    'Name':        name,
-    'Category':    document.getElementById('a-cat').value.trim()    || undefined,
-    'Current Qty': +document.getElementById('a-qty').value,
-    'Unit':        document.getElementById('a-unit').value.trim()   || undefined,
-    'Min Qty':     +document.getElementById('a-minqty').value       || undefined,
-    'Order Link':  document.getElementById('a-link').value.trim()   || undefined,
-    'Notes':       document.getElementById('a-notes').value.trim()  || undefined
+    'Item Name':        name,
+    'Category':         document.getElementById('a-cat').value.trim()  || undefined,
+    'Current Quantity': +document.getElementById('a-qty').value,
+    'Unit':             document.getElementById('a-unit').value.trim() || undefined,
+    'Reorder Level':    +document.getElementById('a-minqty').value     || undefined,
   };
   Object.keys(fields).forEach(function(k){ if (fields[k] === undefined) delete fields[k]; });
 
@@ -662,7 +630,7 @@ function handleAdd() {
       renderStats();
       renderItems();
       toggleAddForm(false);
-      ['a-name','a-qty','a-unit','a-minqty','a-link','a-notes'].forEach(function(id){
+      ['a-name','a-qty','a-unit','a-minqty'].forEach(function(id){
         document.getElementById(id).value = id === 'a-qty' || id === 'a-minqty' ? '0' : '';
       });
       document.getElementById('a-store').value = '';
@@ -692,8 +660,6 @@ if (config.token && (config.pwBase || config.hvBase)) {
   document.getElementById('dashboard').classList.add('hidden');
 }
 
-// Reload when store filter changes (fetches from appropriate base)
-document.getElementById('filter-store').addEventListener('change', function(){ loadItems(); });
 </script>
 </body>
 </html>
