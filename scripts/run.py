@@ -406,24 +406,28 @@ def generate_dashboard(store):
 .prorate-toggle input { accent-color: #C4276E; width: 16px; height: 16px; cursor: pointer; }
 .prorate-toggle:hover span { color: #C4276E; }
 """
-    tabbed_js = """
-var _chartsInited = {};
-function showYear(yr) {
-    document.querySelectorAll('.yr-panel').forEach(function(p) { p.style.display = 'none'; });
-    document.querySelectorAll('.yr-tab').forEach(function(t) { t.classList.remove('active'); });
+    _year_strs = [str(y) for y in available_years]
+    _default_year = _year_strs[-1] if len(_year_strs) == 1 else (_year_strs[-2] if len(_year_strs) >= 2 else _year_strs[0])
+    _init_chart_checks = "\n".join(
+        f"        if (yr === '{y}' && typeof initCharts_{y} === 'function') initCharts_{y}();"
+        for y in _year_strs
+    )
+    tabbed_js = f"""
+var _chartsInited = {{}};
+function showYear(yr) {{
+    document.querySelectorAll('.yr-panel').forEach(function(p) {{ p.style.display = 'none'; }});
+    document.querySelectorAll('.yr-tab').forEach(function(t) {{ t.classList.remove('active'); }});
     document.getElementById('panel-' + yr).style.display = 'block';
     document.getElementById('tab-' + yr).classList.add('active');
-    if (!_chartsInited[yr]) {
+    if (!_chartsInited[yr]) {{
         _chartsInited[yr] = true;
-        if (yr === '2024' && typeof initCharts_2024 === 'function') initCharts_2024();
-        if (yr === '2025' && typeof initCharts_2025 === 'function') initCharts_2025();
-        if (yr === '2026' && typeof initCharts_2026 === 'function') initCharts_2026();
+{_init_chart_checks}
         if (yr === 'monthly') updateMonthlyDetail();
         if (yr === 'weekly') updateWeeklyDetail();
         if (yr === 'daily') updateDailyDetail();
-    }
-}
-window.addEventListener('DOMContentLoaded', function() { showYear('2025'); });
+    }}
+}}
+window.addEventListener('DOMContentLoaded', function() {{ showYear('{_default_year}'); }});
 """
 
     # Build comparison data for all three tabs
@@ -680,16 +684,16 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
     html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url)
     html = html.replace("</style>", tabbed_css + "\n</style>", 1)
     html += '<div class="yr-tab-bar">\n'
-    for yr in ["2024", "2025", "2026"]:
-        active = "active" if yr == "2025" else ""
+    for yr in _year_strs:
+        active = "active" if yr == _default_year else ""
         html += f'  <button class="yr-tab {active}" onclick="showYear(\'{yr}\')" id="tab-{yr}">{YEAR_LABELS[yr]}</button>\n'
     html += '  <button class="yr-tab" onclick="showYear(\'monthly\')" id="tab-monthly">Monthly</button>\n'
     html += '  <button class="yr-tab" onclick="showYear(\'weekly\')" id="tab-weekly">Weekly</button>\n'
     html += '  <button class="yr-tab" onclick="showYear(\'daily\')" id="tab-daily">Daily</button>\n'
     html += '</div>\n'
 
-    for yr in ["2024", "2025", "2026"]:
-        display = "block" if yr == "2025" else "none"
+    for yr in _year_strs:
+        display = "block" if yr == _default_year else "none"
         html += f'<div class="yr-panel" id="panel-{yr}" style="display:{display}">\n'
         body = bodies[yr]
         def _wrap(m, _yr=yr):
