@@ -683,9 +683,8 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
     _home_url = "index.html" if "port" in str(store.output_dir).lower() else "../port-washington/index.html"
     html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url, show_home=False)
     html = html.replace("</style>", tabbed_css + "\n</style>", 1)
-    html += f'<div style="background:#C4276E;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:101;box-shadow:0 2px 12px rgba(196,39,110,0.3)">\n'
+    html += f'<div style="background:#C4276E;padding:12px 32px;display:flex;align-items:center;position:sticky;top:0;z-index:101;box-shadow:0 2px 12px rgba(196,39,110,0.3)">\n'
     html += f'  <a href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>\n'
-    html += f'  <div style="color:rgba(255,255,255,0.85);font-size:0.82rem">Updated {through}</div>\n'
     html += '</div>\n'
     html += '<div class="yr-tab-bar">\n'
     for yr in _year_strs:
