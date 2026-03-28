@@ -684,6 +684,7 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
     html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url)
     html = html.replace("</style>", tabbed_css + "\n</style>", 1)
     html += '<div class="yr-tab-bar">\n'
+    html += f'  <a href="{_home_url}" class="yr-tab" style="text-decoration:none;color:rgba(255,255,255,0.7);margin-right:8px">← Home</a>\n'
     for yr in _year_strs:
         active = "active" if yr == _default_year else ""
         html += f'  <button class="yr-tab {active}" onclick="showYear(\'{yr}\')" id="tab-{yr}">{YEAR_LABELS[yr]}</button>\n'
