@@ -17,6 +17,7 @@ from config import (
     HICKSVILLE_RETAIL_RATES, HICKSVILLE_RETAIL_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
+    get_royalty_rate,
 )
 from formatting import fc
 
@@ -176,7 +177,8 @@ while m_start <= TODAY:
     bather_pay = round(sum(h * BATHER_RATE for h in bather_hrs.values()), 2)
     retail_hrs = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s, e)
     retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in retail_hrs.items()), 2)
-    royalties = round(total_rev * 0.07, 2)
+    _royalty_rate = get_royalty_rate(_store_name, m_start)
+    royalties = round(total_rev * _royalty_rate, 2)
     rent = MONTHLY_RENT  # flat $7,700/month regardless of days
 
     gross_profit = round(net_rev - retail_cogs - comm_paid, 2)
@@ -490,7 +492,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
     {kpi("Manager Salary", fc(ytd_sums["mgr"]), "#5C6BC0")}
     {kpi("Bather Pay", fc(ytd_sums["bather_pay"]), "#00796B")}
     {kpi("Retail Staff Pay", fc(ytd_sums["retail_pay"]), "#6A1B9A")}
-    {kpi("Royalties (7%)", fc(ytd_sums["royalties"]), "#AD1457")}
+    {kpi("Royalties + Marketing", fc(ytd_sums["royalties"]), "#AD1457")}
     {kpi("Rent", fc(ytd_sums["rent"]), "#6D4C41")}
     {kpi("Net Margin", fc(ytd_sums["net_margin"]), "#2E7D32" if ytd_sums["net_margin"] >= 0 else "#e53935", f'{ytd_sums["net_margin_pct"]}%')}
     {kpi("Tips Collected", fc(ytd_sums["tips"]), "#F57C00")}

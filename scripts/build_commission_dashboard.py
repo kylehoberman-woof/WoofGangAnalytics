@@ -16,7 +16,7 @@ from config import (
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
     MONTHLY_RENT as _DEFAULT_RENT, ANCHOR_START, STORE_OPEN,
     SUPABASE_URL, SUPABASE_ANON_KEY, STORE_RENT, PAY_PERIOD_CONFIG,
-    STORE_OPEN_DATES,
+    STORE_OPEN_DATES, get_royalty_rate,
 )
 from formatting import fc
 
@@ -312,7 +312,7 @@ while m_start <= TODAY:
     m_days = sum(1 for n in range((m_end - m_start).days + 1)
                  if (m_start + timedelta(days=n)).weekday() < 5)
     m_rent = MONTHLY_RENT  # flat monthly rent
-    m_royalties = round(m_rev * 0.07, 2)
+    m_royalties = round(m_rev * get_royalty_rate(_store_name, m_start), 2)
     # Bather pay for this month from time clocks
     s_str = m_start.strftime("%Y-%m-%d")
     e_str = m_end.strftime("%Y-%m-%d")
@@ -351,6 +351,9 @@ while m_start <= TODAY:
 
 import json as _json2
 monthly_json = _json2.dumps(monthly_data)
+
+# YTD royalties from monthly data (uses tiered rates)
+ytd_royalties = sum(m["royalties"] for m in monthly_data if m["year"] == 2026)
 
 # Last 30 days
 l30_start = TODAY - timedelta(days=29)
@@ -423,6 +426,7 @@ for i, (s, e) in enumerate(pay_periods):
         mgr_pay, mgr_old, mgr_new, mgr_daily, mgr_bonus = manager_salary_for_range(s, e)
     else:
         mgr_pay, mgr_old, mgr_new, mgr_daily, mgr_bonus = 0, 0, 0, [], 0
+    pp_data[f"pp_{i}"]["_royalty_rate"] = get_royalty_rate(_store_name, s)
     pp_data[f"pp_{i}"]["_manager_salary"] = mgr_pay
     pp_data[f"pp_{i}"]["_manager_old_days"] = mgr_old
     pp_data[f"pp_{i}"]["_manager_new_days"] = mgr_new
@@ -693,9 +697,9 @@ tr:hover td{{background:#fafaf8!important}}
     {"" if _store_name != "port-washington" else '<div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">' + fc(ytd_manager) + '</div><div class="kpi-label">Manager Salary</div><div style="font-size:0.78rem;color:#5C6BC0;margin-top:3px">from Feb 23</div></div>'}
     <div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">{fc(ytd_bather_pay)}</div><div class="kpi-label">Bather Pay</div></div>
     <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">{fc(ytd_retail_pay)}</div><div class="kpi-label">Retail Staff Pay</div></div>
-    <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">{fc(ytd_total["rev"] * 0.07)}</div><div class="kpi-label">Royalties (7%)</div></div>
+    <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">{fc(ytd_royalties)}</div><div class="kpi-label">Royalties + Marketing</div></div>
     <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">{fc(ytd_rent)}</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">{ytd_days_count} days</div></div>
-    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_total["rev"] * 0.07 - ytd_rent)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_total["rev"] * 0.07 - ytd_rent) / (ytd_total["rev"] or 1) * 100:.1f}%</div></div>
+    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_royalties - ytd_rent)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_royalties - ytd_rent) / (ytd_total["rev"] or 1) * 100:.1f}%</div></div>
     <div class="kpi grey"><div class="kpi-val">{int(ytd_total["guar_days"])}</div><div class="kpi-label">Guarantee Days</div></div>
   </div>
   <div class="info-box">Commission = 50% of daily grooming revenue. All groomers (except Kimberly) receive a <strong>$200/day guarantee</strong> for their first 90 days (Sue M: $300/day). Paid whichever is higher. Tips assigned to the groomer who performed the service.</div>
@@ -981,7 +985,7 @@ function renderPayPeriod(ppId) {{
     totGuar += d.guar_days;
   }});
   totRev += (data._bather_rev || 0);
-  var totRoyalties = totRev * 0.07;
+  var totRoyalties = totRev * (data._royalty_rate || 0.07);
   var DAILY_RENT = {MONTHLY_RENT} * 12 / 365;
   var PP_LENGTH = {PAY_PERIOD_CONFIG.get(_store_name, PAY_PERIOD_CONFIG["port-washington"])["length_days"]};
   var totRent = DAILY_RENT * PP_LENGTH;
@@ -1005,7 +1009,7 @@ function renderPayPeriod(ppId) {{
     (totManager ? '<div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">'+fc(totManager)+'</div><div class="kpi-label">Manager Salary</div></div>' : '')+
     (totBatherPay ? '<div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">'+fc(totBatherPay)+'</div><div class="kpi-label">Bather Pay</div></div>' : '')+
     (totRetailPay ? '<div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">'+fc(totRetailPay)+'</div><div class="kpi-label">Retail Staff Pay</div></div>' : '')+
-    '<div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">'+fc(totRoyalties)+'</div><div class="kpi-label">Royalties (7%)</div></div>'+
+    '<div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">'+fc(totRoyalties)+'</div><div class="kpi-label">Royalties + Marketing</div></div>'+
     '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totRent)+'</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">'+PP_LENGTH+' days</div></div>'+
     '<div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">'+fc(totMargin)+'</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">'+totMarginPct+'%</div></div>'+
     '<div class="kpi grey"><div class="kpi-val">'+totGuar+'</div><div class="kpi-label">Guarantee Days</div></div>';
@@ -1244,7 +1248,7 @@ function renderExec() {{
     kpiCard('Groomer Commission', fc(ytdPaid), '#1565c0') +
     kpiCard('Bather Pay', fc(ytdBather), '#00796B') +
     kpiCard(ytdMgr > 0 ? 'Manager + Retail Staff' : 'Retail Staff Pay', fc(ytdMgr + ytdRetail), '#7B1FA2') +
-    kpiCard('Royalties (7%)', fc(ytdRoyalties), '#AD1457') +
+    kpiCard('Royalties + Marketing', fc(ytdRoyalties), '#AD1457') +
     kpiCard('Rent', fc(ytdRent), '#6D4C41') +
     kpiCard('Net Margin', fc(ytdMargin) + ' ('+ytdMarginPct+'%)', parseFloat(ytdMarginPct) >= 0 ? '#558B2F' : '#e53935');
 

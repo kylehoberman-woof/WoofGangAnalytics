@@ -188,7 +188,42 @@ MANAGER_START = date(2025, 3, 1)
 # ─── Financial Constants ────────────────────────────────────────────────────
 
 MONTHLY_RENT = 7700.0  # Port Washington default
-ROYALTY_RATE = 0.07
+ROYALTY_RATE = 0.07     # Legacy flat rate (use get_royalty_rate() for accurate tiered rate)
+
+
+def get_royalty_rate(store_name, month_date):
+    """Get combined royalty + marketing fee rate for a given month.
+
+    Per multi-store franchise agreement:
+    Royalty: 5% (months 1-12), 6% (months 13-24), 7% (month 25+)
+    Marketing: 1% (months 1-24), 2% (month 25+)
+    Combined: 6% (months 1-12), 7% (months 13-24), 9% (month 25+)
+
+    month_date: date or first day of the month to calculate for
+    Returns: float (e.g., 0.06 for 6%)
+    """
+    open_date = STORE_OPEN_DATES.get(store_name, date(2024, 9, 26))
+    # Count complete calendar months since opening
+    # Opening month = month 0, first complete month after = month 1
+    months_since = (month_date.year - open_date.year) * 12 + (month_date.month - open_date.month)
+    if months_since < 0:
+        months_since = 0
+
+    # Royalty tiers (opening month + 12 complete months = months 0-12)
+    if months_since <= 12:
+        royalty = 0.05
+    elif months_since <= 24:
+        royalty = 0.06
+    else:
+        royalty = 0.07
+
+    # Marketing tiers (opening month + 24 complete months = months 0-24)
+    if months_since <= 24:
+        marketing = 0.01
+    else:
+        marketing = 0.02
+
+    return royalty + marketing
 
 # Store-specific financial constants
 STORE_RENT = {
