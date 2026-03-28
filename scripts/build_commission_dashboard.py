@@ -610,13 +610,13 @@ html = f'''<!DOCTYPE html>
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Woof Gang Commission · Port Washington</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{font-family:"DM Sans",sans-serif;background:#f5f4f0;color:#1a1a1a}}
+body{{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f4f0;color:#1a1a1a}}
 .topbar{{background:#C4276E;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3)}}
 .topbar-title{{color:white;font-size:1.1rem;font-weight:700}}.topbar-sub{{color:rgba(255,255,255,0.75);font-size:0.82rem;margin-top:2px}}
-.topbar-date{{color:rgba(255,255,255,0.85);font-size:0.82rem;font-family:"DM Mono",monospace}}
+.topbar-date{{color:rgba(255,255,255,0.85);font-size:0.82rem}}
 .tab-bar{{background:white;border-bottom:2px solid #eee;padding:0 32px;display:flex;gap:4px;position:sticky;top:57px;z-index:99;align-items:center}}
 .tab{{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;font-family:inherit;margin-bottom:-2px;white-space:nowrap}}
 .tab:hover{{color:#C4276E}}.tab.active{{color:#C4276E;border-bottom-color:#C4276E}}
@@ -643,14 +643,23 @@ tr:hover td{{background:#fafaf8!important}}
 .toggle-btn:hover{{text-decoration:underline}}
 .detail-section{{display:none;margin-top:16px;border-top:1px solid #eee;padding-top:16px}}
 .info-box{{background:#f0f7ff;border-left:4px solid #1976D2;border-radius:8px;padding:12px 16px;margin-bottom:18px;font-size:0.85rem;line-height:1.6}}
+.header{{background:linear-gradient(135deg,#1B6B6B 0%,#6B3520 100%);color:white;padding:40px 0 30px;text-align:center;position:relative;overflow:hidden}}
+.header::before{{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(196,39,110,0.15) 0%,transparent 50%)}}
+.header h1{{font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px}}
+.header .subtitle{{font-size:1rem;font-weight:400;opacity:0.9;position:relative}}
+.header .brand-tag{{display:inline-block;background:#C4276E;color:white;padding:4px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:12px;position:relative}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
+<div class="header">
+    <h1>Woof Gang {_store_display}</h1>
+    <div class="subtitle">Groomer Commission Dashboard</div>
+    <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
+</div>
 <div class="topbar">
-  <div><div style="display:flex;align-items:center;gap:12px"><a href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600">&larr; Home</a><div class="topbar-title">💅 Woof Gang {_store_display} — Groomer Commission</div></div>
-  <div class="topbar-sub">50% commission · Guarantees: Maria C $200/day · Sue M $300/day</div></div>
+  <a href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>
   <div class="topbar-date">Updated {now_et}</div>
 </div>
 

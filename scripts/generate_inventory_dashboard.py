@@ -232,11 +232,13 @@ TH_NEG = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th>Vendor</th><
 CSS = """
 :root{--m:#C4276E;--ml:#FDF0F5;--t:#1B6B6B;--br:#6B3520;--dk:#1a1a2e;--md:#2d2d44;--tx:#1f2937;--mu:#6b7280;--bd:#e5e7eb;--bg:#f8f9fb;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);}
-.hdr{background:var(--m);padding:28px 40px 24px;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--m);}
-.hdr h1{font-size:20px;font-weight:800;color:#fff;}
-.hdr p{font-size:12px;color:rgba(255,255,255,.55);margin-top:4px;}
-.hdr-r{font-size:11px;color:rgba(255,255,255,.4);text-align:right;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--tx);}
+.header{background:linear-gradient(135deg,#1B6B6B 0%,#6B3520 100%);color:white;padding:40px 0 30px;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(196,39,110,0.15) 0%,transparent 50%)}
+.header h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px;color:white}
+.header .subtitle{font-size:1rem;font-weight:400;opacity:0.9;position:relative}
+.header .brand-tag{display:inline-block;background:#C4276E;color:white;padding:4px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:12px;position:relative}
+.topbar{background:#C4276E;padding:12px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3)}
 .sum-row{display:grid;grid-template-columns:repeat(5,1fr);background:#fff;border-bottom:1px solid var(--bd);}
 .sc{padding:18px 20px;border-right:1px solid var(--bd);text-align:center;}
 .sc:last-child{border-right:none;}
@@ -254,12 +256,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);}
 .sl{display:block;font-size:10px;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-top:1px;}
 .va{display:block;margin-top:8px;font-size:11px;font-weight:600;color:#ea580c;}
 .ctrl{padding:20px 40px 0;display:flex;gap:0;align-items:center;border-bottom:2px solid var(--bd);background:#fff;margin-top:20px;}
-.tb{padding:10px 18px;border:none;background:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--mu);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tb{padding:10px 18px;border:none;background:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--mu);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
 .tb.active{color:var(--m);border-bottom-color:var(--m);}
 .filters{padding:14px 40px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#fff;border-bottom:1px solid var(--bd);}
-.fb{padding:5px 14px;border-radius:20px;border:1.5px solid var(--bd);background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--mu);transition:all .15s;}
+.fb{padding:5px 14px;border-radius:20px;border:1.5px solid var(--bd);background:#fff;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--mu);transition:all .15s;}
 .fb.active,.fb:hover{border-color:var(--m);background:var(--m);color:#fff;}
-.sb{margin-left:auto;padding:6px 14px;border:1.5px solid var(--bd);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;width:200px;outline:none;}
+.sb{margin-left:auto;padding:6px 14px;border:1.5px solid var(--bd);border-radius:20px;font-family:'Inter',sans-serif;font-size:12px;width:200px;outline:none;}
 .sb:focus{border-color:var(--m);}
 .tw{margin:0 40px 40px;background:#fff;border-radius:0 0 12px 12px;box-shadow:0 2px 12px rgba(0,0,0,.05);overflow:hidden;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -292,9 +294,6 @@ thead th{position:sticky;top:0;z-index:10;}
 .vendor-hdr:hover{opacity:0.85;}
 .vendor-hdr .collapse-arrow{transition:transform 0.2s;display:inline-block;margin-right:6px;font-size:0.8rem;}
 .vendor-hdr.collapsed .collapse-arrow{transform:rotate(-90deg);}
-/* Home link */
-.home-link{color:rgba(255,255,255,.7);text-decoration:none;font-size:12px;font-weight:600;margin-right:12px;}
-.home-link:hover{color:#fff;}
 """
 
 JS = """
@@ -363,9 +362,10 @@ TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num
 html = f"""<!DOCTYPE html>
 <html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">
 <title>Woof Gang - Inventory Dashboard</title>
-<link href=\"https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap\" rel=\"stylesheet\">
+<link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap\" rel=\"stylesheet\">
 <style>{CSS}</style></head><body>
-<div class=\"hdr\"><div><div style=\"display:flex;align-items:center;gap:8px\"><a href=\"{_home_url}\" class=\"home-link\">&larr; Home</a><h1>&#128062; Woof Gang {_store_display} - Inventory Dashboard</h1></div><p>Retail stock levels, velocity &amp; reorder analysis</p></div><div class=\"hdr-r\">Updated {now}</div></div>
+<div class=\"header\"><h1>Woof Gang {_store_display}</h1><div class=\"subtitle\">Inventory Dashboard</div><div class=\"brand-tag\">Woof Gang Bakery &amp; Grooming</div></div>
+<div class=\"topbar\"><a href=\"{_home_url}\" style=\"color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600\">&larr; Home</a><div style=\"color:rgba(255,255,255,0.85);font-size:0.82rem\">Updated {now}</div></div>
 <div class=\"sum-row\">
   <div class=\"sc s-out\"><div class=\"v\">{out_count}</div><div class=\"l\">Out of Stock</div></div>
   <div class=\"sc s-crit\"><div class=\"v\">{critical_count}</div><div class=\"l\">Critical (1-2)</div></div>
