@@ -294,8 +294,9 @@ def extract_all_data(store):
                                "locationId": location_id},
                               token=token)
                 records = tc if isinstance(tc, list) else tc.get("data", [])
-                # Filter by CompanyId — FranPOS locationId param doesn't reliably filter
-                records = [r for r in records if r.get("CompanyId") == location_id]
+                # Note: CompanyId filter removed — some HV retail staff (Hailey, Christina,
+                # Chris) are registered under PW's CompanyId in FranPOS. Commission dashboards
+                # correctly scope by employee name maps per store instead.
                 all_clocks.extend(records)
                 print(f"  Clocks {current.strftime('%b')}: {len(records)} records")
             except Exception as e:
@@ -364,8 +365,7 @@ def extract_all_data(store):
                            "locationId": location_id},
                           token=token)
             records = tc if isinstance(tc, list) else tc.get("data", [])
-            # Filter by CompanyId — FranPOS locationId param doesn't reliably filter
-            records = [r for r in records if r.get("CompanyId") == location_id]
+            # Note: CompanyId filter removed — see incremental path comment above
             all_clocks.extend(records)
             print(f"  Clocks {current.strftime('%b')}: {len(records)} records")
         except Exception as e:
