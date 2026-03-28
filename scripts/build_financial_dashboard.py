@@ -24,6 +24,10 @@ _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 _store = get_store(_store_name)
 _store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
 _home_url = "index.html" if _store_name == "port-washington" else "../port-washington/index.html"
+_other_store = "Hicksville" if _store_name == "port-washington" else "Port Washington"
+_other_dir = "../hicksville" if _store_name == "port-washington" else "../port-washington"
+_other_fn = "Hicksville" if _store_name == "port-washington" else "PortWashington"
+_switch_url = f"{_other_dir}/WoofGang_{_other_fn}_Financial_Dashboard.html"
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 TODAY = date.today()
@@ -448,7 +452,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 </head><body>
 
 <div class="header">
-    <div class="header-timestamp">Updated {NOW_STR}</div>
+    <div class="header-timestamp">Updated {NOW_STR}<br><a href="{_switch_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; {_other_store}</a></div>
     <h1>Woof Gang {_store_display}</h1>
     <div class="subtitle">Financial Dashboard</div>
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>

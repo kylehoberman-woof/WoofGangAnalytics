@@ -14,6 +14,10 @@ _store_name = _sys.argv[1] if len(_sys.argv) > 1 else "port-washington"
 _store = get_store(_store_name)
 _store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
 _home_url = "index.html" if _store_name == "port-washington" else "../port-washington/index.html"
+_other_store = "Hicksville" if _store_name == "port-washington" else "Port Washington"
+_other_dir = "../hicksville" if _store_name == "port-washington" else "../port-washington"
+_other_fn = "Hicksville" if _store_name == "port-washington" else "PortWashington"
+_switch_url = f"{_other_dir}/WoofGang_{_other_fn}_Inventory_Dashboard.html"
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 
@@ -365,7 +369,7 @@ html = f"""<!DOCTYPE html>
 <title>Woof Gang - Inventory Dashboard</title>
 <link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap\" rel=\"stylesheet\">
 <style>{CSS}</style></head><body>
-<div class=\"header\"><div class=\"header-timestamp\">Updated {now}</div><h1>Woof Gang {_store_display}</h1><div class=\"subtitle\">Inventory Dashboard</div><div class=\"brand-tag\">Woof Gang Bakery &amp; Grooming</div></div>
+<div class=\"header\"><div class=\"header-timestamp\">Updated {now}<br><a href=\"{_switch_url}\" style=\"color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem\">&#x21C4; {_other_store}</a></div><h1>Woof Gang {_store_display}</h1><div class=\"subtitle\">Inventory Dashboard</div><div class=\"brand-tag\">Woof Gang Bakery &amp; Grooming</div></div>
 <div class=\"topbar\"><a href=\"{_home_url}\" style=\"color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600\">&larr; Home</a></div>
 <div class=\"sum-row\">
   <div class=\"sc s-out\"><div class=\"v\">{out_count}</div><div class=\"l\">Out of Stock</div></div>
