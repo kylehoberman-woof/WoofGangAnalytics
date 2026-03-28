@@ -222,10 +222,22 @@ HICKSVILLE_RETAIL_NAME_MAP = {
 
 HICKSVILLE_BATHER_NAME_MAP = {}  # Hicksville has no bathers
 
-# ─── Pay Period Anchor ──────────────────────────────────────────────────────
+# ─── Pay Period Configuration ─────────────────────────────────────────────
 
-ANCHOR_START = date(2026, 2, 23)
+ANCHOR_START = date(2026, 2, 23)   # PW: Monday anchor (bi-weekly Mon–Sun)
 STORE_OPEN = date(2024, 9, 26)
+
+# Store-specific pay period settings
+PAY_PERIOD_CONFIG = {
+    "port-washington": {
+        "length_days": 14,           # bi-weekly
+        "anchor": date(2026, 2, 23), # Monday
+    },
+    "hicksville": {
+        "length_days": 7,            # weekly
+        "anchor": date(2026, 3, 28), # Saturday (Sat–Fri periods)
+    },
+}
 
 
 # ─── Known Closures ─────────────────────────────────────────────────────────

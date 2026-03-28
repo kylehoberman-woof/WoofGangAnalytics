@@ -15,7 +15,8 @@ from config import (
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
     MONTHLY_RENT as _DEFAULT_RENT, ANCHOR_START, STORE_OPEN,
-    SUPABASE_URL, SUPABASE_ANON_KEY, STORE_RENT,
+    SUPABASE_URL, SUPABASE_ANON_KEY, STORE_RENT, PAY_PERIOD_CONFIG,
+    STORE_OPEN_DATES,
 )
 from formatting import fc
 
@@ -157,21 +158,26 @@ for oid, tip in tips_by_order.items():
 
 groomers = sorted(g for g in groom_by_day.keys() if not g.startswith("_"))
 
-# ── Pay periods: bi-weekly Mon–Sun, anchor = Feb 23 2026 ─────────────────────
+# ── Pay periods: store-specific (PW=bi-weekly Mon–Sun, HV=weekly Sat–Fri) ───
 TODAY        = date.today()
 
 def build_pay_periods():
+    pp_cfg = PAY_PERIOD_CONFIG.get(_store_name, PAY_PERIOD_CONFIG["port-washington"])
+    length = pp_cfg["length_days"]
+    anchor = pp_cfg["anchor"]
+    store_open = STORE_OPEN_DATES.get(_store_name, STORE_OPEN)
+
     periods = []
-    start = ANCHOR_START
+    start = anchor
     # Go back to store open
-    while start > STORE_OPEN:
-        start -= timedelta(days=14)
+    while start > store_open:
+        start -= timedelta(days=length)
     # Build forward
     while start <= TODAY:
-        end = start + timedelta(days=13)
-        if end >= STORE_OPEN and start <= TODAY:
-            periods.append((start, end))  # show full 14-day period, data capped by TODAY naturally
-        start += timedelta(days=14)
+        end = start + timedelta(days=length - 1)
+        if end >= store_open and start <= TODAY:
+            periods.append((start, end))
+        start += timedelta(days=length)
     return list(reversed(periods))  # most recent first
 
 pay_periods = build_pay_periods()
@@ -962,8 +968,9 @@ function renderPayPeriod(ppId) {{
   }});
   totRev += (data._bather_rev || 0);
   var totRoyalties = totRev * 0.07;
-  var DAILY_RENT = 7700.0 * 12 / 365;
-  var totRent = DAILY_RENT * 14;
+  var DAILY_RENT = {MONTHLY_RENT} * 12 / 365;
+  var PP_LENGTH = {PAY_PERIOD_CONFIG.get(_store_name, PAY_PERIOD_CONFIG["port-washington"])["length_days"]};
+  var totRent = DAILY_RENT * PP_LENGTH;
   var totManager = data._manager_salary || 0;
   var batherPay = data._bather_pay || {{}};
   var batherHours = data._bather_hours || {{}};
@@ -985,7 +992,7 @@ function renderPayPeriod(ppId) {{
     (totBatherPay ? '<div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">'+fc(totBatherPay)+'</div><div class="kpi-label">Bather Pay</div></div>' : '')+
     (totRetailPay ? '<div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">'+fc(totRetailPay)+'</div><div class="kpi-label">Retail Staff Pay</div></div>' : '')+
     '<div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">'+fc(totRoyalties)+'</div><div class="kpi-label">Royalties (7%)</div></div>'+
-    '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totRent)+'</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">14 days</div></div>'+
+    '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totRent)+'</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">'+PP_LENGTH+' days</div></div>'+
     '<div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">'+fc(totMargin)+'</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">'+totMarginPct+'%</div></div>'+
     '<div class="kpi grey"><div class="kpi-val">'+totGuar+'</div><div class="kpi-label">Guarantee Days</div></div>';
 
