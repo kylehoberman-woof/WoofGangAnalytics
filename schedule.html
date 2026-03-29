@@ -170,8 +170,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 
 <div class="topbar">
   <div class="store-toggle">
-    <button id="btn-pw" onclick="setStore('port-washington')">Port Washington</button>
-    <button id="btn-hv" onclick="setStore('hicksville')">Hicksville</button>
+    <button id="btn-pw"   onclick="setStore('port-washington')">Port Washington</button>
+    <button id="btn-hv"   onclick="setStore('hicksville')">Hicksville</button>
+    <button id="btn-both" onclick="setStore('all')">Both Stores</button>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" id="tab-week"   onclick="setTab('week')">Week</button>
@@ -427,6 +428,7 @@ function fetchEmployees(){
   });
 }
 function storeEmployees(){
+  if(currentStore==='all') return employees;
   return employees.filter(function(e){return e.store===currentStore||e.store==='both';});
 }
 function empById(id){return employees.find(function(e){return e.id===id;});}
@@ -439,7 +441,8 @@ function fetchShifts(startISO, endISO){
   var cur=new Date(startISO+'T12:00:00'), end=new Date(endISO+'T12:00:00');
   while(cur<=end){shifts[toISO(cur)]=[];cur=addDays(cur,1);}
 
-  return sbGet('/schedule_shifts?store=eq.'+encodeURIComponent(currentStore)+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&select=*&order=start_time')
+  var storeQ=currentStore==='all'?'store=in.(port-washington,hicksville)':'store=eq.'+encodeURIComponent(currentStore);
+  return sbGet('/schedule_shifts?'+storeQ+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&select=*&order=start_time')
     .then(function(rows){
       (Array.isArray(rows)?rows:[]).forEach(function(s){
         var d=s.shift_date;
@@ -451,6 +454,7 @@ function fetchShifts(startISO, endISO){
 }
 
 function fetchOtherStoreShifts(startISO, endISO){
+  if(currentStore==='all') return Promise.resolve(); // both stores already fetched
   var crossEmps=employees.filter(function(e){return e.store==='both';});
   if(!crossEmps.length) return Promise.resolve();
   var otherStore=currentStore==='port-washington'?'hicksville':'port-washington';
@@ -470,7 +474,8 @@ function fetchOtherStoreShifts(startISO, endISO){
 function fetchTimeOff(startISO, endISO){
   var cur=new Date(startISO+'T12:00:00'), end=new Date(endISO+'T12:00:00');
   while(cur<=end){timeOff[toISO(cur)]=[];cur=addDays(cur,1);}
-  return sbGet('/time_off?store_key=eq.'+encodeURIComponent(currentStore)
+  var toStoreQ=currentStore==='all'?'store_key=in.(port-washington,hicksville)':'store_key=eq.'+encodeURIComponent(currentStore);
+  return sbGet('/time_off?'+toStoreQ
     +'&start_date=lte.'+endISO+'&end_date=gte.'+startISO
     +'&status=neq.Rejected&select=employee_name,type,status,start_date,end_date')
     .then(function(rows){
@@ -494,6 +499,7 @@ function setStore(key){
   localStorage.setItem('wg_sched_store',key);
   document.getElementById('btn-pw').className=key==='port-washington'?'active':'';
   document.getElementById('btn-hv').className=key==='hicksville'?'active':'';
+  document.getElementById('btn-both').className=key==='all'?'active':'';
   shifts={}; otherShifts={}; timeOff={};
   startLoad();
   fetchEmployees().then(function(){endLoad();refreshCurrent();});
@@ -558,6 +564,7 @@ function _paintWeek(ws,we,today){
   }
 
   // Grid
+  var isAllStores=currentStore==='all';
   var otherLabel=currentStore==='port-washington'?'HV':'PW';
   var otherBadgeCls=currentStore==='port-washington'?'hv':'pw';
   var html='';
@@ -585,14 +592,16 @@ function _paintWeek(ws,we,today){
       } else {
         html+='<div class="shift-card" style="border-left-color:'+e.color+'" onclick="openEditShift(\''+iso+'\',\''+s.id+'\')">';
         html+='<button class="shift-del" onclick="event.stopPropagation();quickDelShift(\''+s.id+'\',\''+iso+'\')">✕</button>';
-        html+='<div class="shift-emp">'+esc(e.name)+'</div>';
+        var sBadgeCls=s.store==='port-washington'?'pw':'hv';
+        var sBadgeLbl=s.store==='port-washington'?'PW':'HV';
+        html+='<div class="shift-emp">'+esc(e.name)+(isAllStores?'<span class="store-badge '+sBadgeCls+'">'+sBadgeLbl+'</span>':'')+'</div>';
         html+='<div class="shift-role" style="color:'+e.color+'">'+esc(ROLES[e.role]||e.role)+'</div>';
         html+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
         if(s.notes) html+='<div class="shift-note">'+esc(s.notes)+'</div>';
         html+='</div>';
       }
     });
-    html+='<button class="btn-add-shift" onclick="openAddShift(\''+iso+'\')">+ Add Shift</button>';
+    if(!isAllStores) html+='<button class="btn-add-shift" onclick="openAddShift(\''+iso+'\')">+ Add Shift</button>';
     html+='</div>';
   }
   document.getElementById('week-grid').innerHTML=html;
@@ -609,6 +618,7 @@ function filterEmpMonth(id){
    COPY LAST WEEK / FILL RECURRING
 ════════════════════════════════════════ */
 function copyLastWeek(){
+  if(currentStore==='all'){showToast('Switch to a specific store to copy shifts','error');return;}
   var today=new Date(), monday=getMonday(today);
   var thisStart=addDays(monday,weekOffset*7);
   var lastStart=addDays(thisStart,-7);
@@ -638,6 +648,7 @@ function copyLastWeek(){
 }
 
 function fillRecurring(){
+  if(currentStore==='all'){showToast('Switch to a specific store to fill shifts','error');return;}
   var today=new Date(), monday=getMonday(today);
   var ws=addDays(monday,weekOffset*7);
   var posts=[];
@@ -737,7 +748,7 @@ function toggleInactive(){
 function renderRoster(){
   var emps=storeEmployees();
   if(!showInactive) emps=emps.filter(function(e){return e.is_active!==false;});
-  document.getElementById('roster-store-label').textContent=currentStore==='port-washington'?'Port Washington':'Hicksville';
+  document.getElementById('roster-store-label').textContent=currentStore==='all'?'All Stores':currentStore==='port-washington'?'Port Washington':'Hicksville';
 
   if(!emps.length){
     document.getElementById('emp-list').innerHTML='<div style="color:#aaa;font-size:0.88rem;padding:20px 0">No employees yet — click + Add Employee.</div>';
@@ -1031,6 +1042,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeShiftM
 ════════════════════════════════════════ */
 document.getElementById('btn-pw').className=currentStore==='port-washington'?'active':'';
 document.getElementById('btn-hv').className=currentStore==='hicksville'?'active':'';
+document.getElementById('btn-both').className=currentStore==='all'?'active':'';
 startLoad();
 fetchEmployees().then(function(){
   endLoad();
