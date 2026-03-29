@@ -9,16 +9,17 @@ from datetime import datetime, date, timedelta
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config import (
-    get_store, GUARANTEES, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
-    BATHER_RATE, RETAIL_RATES, RETAIL_NAME_MAP, BATHER_NAME_MAP,
-    HICKSVILLE_RETAIL_RATES, HICKSVILLE_RETAIL_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
+    get_store, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
+    BATHER_RATE,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
     MONTHLY_RENT as _DEFAULT_RENT, ANCHOR_START, STORE_OPEN,
-    SUPABASE_URL, SUPABASE_ANON_KEY, STORE_RENT, PAY_PERIOD_CONFIG,
+    STORE_RENT, PAY_PERIOD_CONFIG,
     STORE_OPEN_DATES, get_royalty_rate, get_monthly_rent,
+    SUPABASE_URL, SUPABASE_ANON_KEY,
 )
 from formatting import fc
+from fetch_employees import get_store_pay_data
 
 SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
@@ -31,11 +32,8 @@ _other_fn = "Hicksville" if _store_name == "port-washington" else "PortWashingto
 _switch_url = f"{_other_dir}/WoofGang_{_other_fn}_Commission_Dashboard.html"
 MONTHLY_RENT = STORE_RENT.get(_store_name, _DEFAULT_RENT)
 
-# Store-specific employee maps
-if _store_name == "hicksville":
-    RETAIL_NAME_MAP = HICKSVILLE_RETAIL_NAME_MAP
-    RETAIL_RATES = HICKSVILLE_RETAIL_RATES
-    BATHER_NAME_MAP = HICKSVILLE_BATHER_NAME_MAP
+# Load employee maps/rates from Supabase (falls back to config.py if not yet populated)
+RETAIL_NAME_MAP, RETAIL_RATES, BATHER_NAME_MAP, BATHER_RATE_MAP, GUARANTEES = get_store_pay_data(_store_name)
 
 DATA_DIR   = _store.data_dir
 OUTPUT_DIR = _store.output_dir
@@ -288,7 +286,7 @@ else:
 
 # YTD bather & retail pay from time clocks
 ytd_bather_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), BATHER_NAME_MAP, ytd_start.strftime("%Y-%m-%d"), TODAY.strftime("%Y-%m-%d"))
-ytd_bather_pay = round(sum(h * BATHER_RATE for h in ytd_bather_hours.values()), 2)
+ytd_bather_pay = round(sum(h * BATHER_RATE_MAP.get(name, BATHER_RATE) for name, h in ytd_bather_hours.items()), 2)
 ytd_retail_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, ytd_start.strftime("%Y-%m-%d"), TODAY.strftime("%Y-%m-%d"))
 ytd_retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in ytd_retail_hours.items()), 2)
 
@@ -316,7 +314,7 @@ while m_start <= TODAY:
     s_str = m_start.strftime("%Y-%m-%d")
     e_str = m_end.strftime("%Y-%m-%d")
     m_bather_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), BATHER_NAME_MAP, s_str, e_str)
-    m_bather_pay = round(sum(h * BATHER_RATE for h in m_bather_hours.values()), 2)
+    m_bather_pay = round(sum(h * BATHER_RATE_MAP.get(name, BATHER_RATE) for name, h in m_bather_hours.items()), 2)
     m_retail_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s_str, e_str)
     m_retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in m_retail_hours.items()), 2)
     m_disc = round(sum(v for g in groom_disc_by_day for d, v in groom_disc_by_day[g].items()
@@ -441,7 +439,7 @@ for i, (s, e) in enumerate(pay_periods):
                         if s.isoformat() <= d <= e.isoformat())
     pp_data[f"pp_{i}"]["_bather_rev"] = pp_bather_rev
     pp_data[f"pp_{i}"]["_bather_pay"] = {
-        name: round(hrs * BATHER_RATE, 2)
+        name: round(hrs * BATHER_RATE_MAP.get(name, BATHER_RATE), 2)
         for name, hrs in bather_hours.items()
     }
     pp_data[f"pp_{i}"]["_bather_hours"] = bather_hours

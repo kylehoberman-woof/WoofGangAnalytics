@@ -106,13 +106,17 @@ FDD_GROOM_COGS_PCT = 51.5     # Grooming cost (commission/labor) as % of groom r
 
 
 # ─── Commission & Payroll ───────────────────────────────────────────────────
+# NOTE: Employee name maps, hourly rates, and guarantees are now managed in
+# Supabase (schedule_employees table) via the Staff Schedule portal.
+# fetch_employees.py loads from Supabase and falls back to the constants below
+# when employees haven't been entered yet.
 
 COMMISSION_RATE = 0.50
-BATHER_RATE = 17.0  # $/hr
+BATHER_RATE = 17.0  # $/hr — fallback if per-employee rate not set in Supabase
 
-# Guarantees: {name: (daily_rate, start_date, end_date)}
-# All groomers except Kimberly get $200/day for first 90 days.
-# Maria C ($200) and Sue M ($300) have permanent guarantees.
+# Guarantees fallback: {name: (daily_rate, start_date, end_date)}
+# These are used when Supabase has no groomer records.
+# Add new groomers via the Staff Schedule Employees tab instead of editing here.
 GUARANTEES = {
     "Ashley Fribbley": (200.0, "2024-09-27", "2024-12-26"),
     "Cindy Szczudlo":  (200.0, "2025-04-19", "2025-07-18"),
@@ -135,6 +139,7 @@ GUARANTEES = {
     "Julia B":         (200.0, "2026-02-03", "2026-05-04"),
 }
 
+# PW retail/bather fallbacks — managed in Supabase going forward
 RETAIL_RATES = {
     "Chris": 20.0,      # $/hr
     "Casey": 19.0,      # $/hr
@@ -267,7 +272,7 @@ STORE_OPEN_DATES = {
     "hicksville": date(2025, 12, 11),
 }
 
-# Hicksville retail staff
+# HV retail fallbacks — managed in Supabase going forward
 HICKSVILLE_RETAIL_RATES = {
     "Hailey": 21.0,     # $/hr — current
     "Chris": 20.0,      # $/hr — shared with PW (partial hours)

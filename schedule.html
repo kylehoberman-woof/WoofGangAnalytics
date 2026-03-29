@@ -243,26 +243,70 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
   <div class="modal">
     <h2 id="emp-modal-title">Add Employee</h2>
     <div class="form-col">
-      <div class="fg"><label>Name *</label><input type="text" id="em-name" placeholder="e.g. Cindy"></div>
-      <div class="fg">
-        <label>Role</label>
-        <select id="em-role">
-          <option value="groomer">Groomer</option>
-          <option value="bather">Bather</option>
-          <option value="retail" selected>Retail</option>
-          <option value="manager">Manager</option>
-          <option value="other">Other</option>
-        </select>
+      <div class="row2">
+        <div class="fg"><label>Name *</label><input type="text" id="em-name" placeholder="e.g. Cindy"></div>
+        <div class="fg">
+          <label>Full Name <span style="font-weight:500;color:#bbb;font-size:0.72rem">(as in FranPOS)</span></label>
+          <input type="text" id="em-fullname" placeholder="e.g. Christine Brower">
+        </div>
       </div>
-      <div class="fg">
-        <label>Store</label>
-        <select id="em-store">
-          <option value="port-washington">Port Washington</option>
-          <option value="hicksville">Hicksville</option>
-          <option value="both">Both Stores</option>
-        </select>
+      <div class="row2">
+        <div class="fg">
+          <label>Role</label>
+          <select id="em-role" onchange="onRoleChange()">
+            <option value="groomer">Groomer</option>
+            <option value="bather">Bather</option>
+            <option value="retail" selected>Retail</option>
+            <option value="manager">Manager</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Store</label>
+          <select id="em-store">
+            <option value="port-washington">Port Washington</option>
+            <option value="hicksville">Hicksville</option>
+            <option value="both">Both Stores</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg">
+          <label>Pay Type</label>
+          <select id="em-paytype" onchange="updatePayFields()">
+            <option value="hourly">Hourly</option>
+            <option value="commission">Commission</option>
+            <option value="salary">Salary</option>
+          </select>
+        </div>
+        <div class="fg" id="em-rate-group">
+          <label>Hourly Rate <span style="font-weight:500;color:#bbb;font-size:0.72rem">($/hr)</span></label>
+          <input type="number" id="em-hourlyrate" placeholder="e.g. 19.00" step="0.01" min="0">
+        </div>
+      </div>
+      <!-- Guarantee section — groomers only -->
+      <div id="em-guar-group" class="hidden">
+        <div class="fg">
+          <label>Hire Date <span style="font-weight:500;color:#bbb;font-size:0.72rem">(first day with appointments)</span></label>
+          <input type="date" id="em-hiredate">
+        </div>
+        <div class="row2">
+          <div class="fg">
+            <label>Daily Guarantee <span style="font-weight:500;color:#bbb;font-size:0.72rem">($, blank = none)</span></label>
+            <input type="number" id="em-guarrate" placeholder="200" step="0.01" min="0">
+          </div>
+          <div class="fg">
+            <label>Guarantee End <span style="font-weight:500;color:#bbb;font-size:0.72rem">(blank = 90 days)</span></label>
+            <input type="date" id="em-guarend">
+          </div>
+        </div>
       </div>
       <div class="fg"><label>Color</label><div class="color-row" id="em-colors"></div></div>
+      <div class="fg">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;font-size:0.88rem">
+          <input type="checkbox" id="em-active" checked style="width:15px;height:15px;cursor:pointer"> Active Employee
+        </label>
+      </div>
     </div>
     <div class="modal-actions" style="margin-top:20px">
       <button class="btn-m-delete hidden" id="em-delete" onclick="deleteEmployee()">Remove</button>
@@ -625,11 +669,23 @@ function renderRoster(){
 
   document.getElementById('emp-list').innerHTML=emps.map(function(e){
     var hrs=empHrs[e.id]||0;
-    return '<div class="emp-card" style="border-left-color:'+e.color+'">'+
+    var payInfo='';
+    if(e.pay_type==='commission'){
+      payInfo='Commission';
+      if(e.guarantee_daily_rate) payInfo+=' · $'+e.guarantee_daily_rate+'/day guar.';
+    } else if(e.pay_type==='salary'){
+      payInfo='Salaried';
+    } else if(e.hourly_rate){
+      payInfo='$'+e.hourly_rate+'/hr';
+    }
+    var inactive=e.is_active===false;
+    return '<div class="emp-card" style="border-left-color:'+e.color+(inactive?';opacity:0.55':'')+'">'+
       '<div class="emp-avatar" style="background:'+e.color+'">'+esc(e.name.charAt(0))+'</div>'+
-      '<div class="emp-info"><div class="emp-name">'+esc(e.name)+'</div>'+
-      '<div class="emp-meta">'+esc(ROLES[e.role]||e.role)+' &nbsp;·&nbsp; '+hrs.toFixed(1)+'h this week'+
-      (e.store==='both'?' &nbsp;·&nbsp; <strong>Both stores</strong>':'')+'</div></div>'+
+      '<div class="emp-info"><div class="emp-name">'+esc(e.name)+(inactive?' <span style="font-size:0.7rem;color:#aaa;font-weight:500">(inactive)</span>':'')+'</div>'+
+      '<div class="emp-meta">'+esc(ROLES[e.role]||e.role)+(payInfo?' &nbsp;·&nbsp; '+esc(payInfo):'')+' &nbsp;·&nbsp; '+hrs.toFixed(1)+'h this week'+
+      (e.store==='both'?' &nbsp;·&nbsp; <strong>Both stores</strong>':'')+'</div>'+
+      (e.full_name?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">FranPOS: '+esc(e.full_name)+'</div>':'')+
+      '</div>'+
       '<div class="emp-card-actions">'+
       '<button class="btn-emp-action recurring" onclick="openRecModal(\''+e.id+'\')">⟳ Default Schedule</button>'+
       '<button class="btn-emp-action" onclick="openEmpModal(\''+e.id+'\')">Edit</button>'+
@@ -720,14 +776,34 @@ function quickDelShift(id,iso){
 /* ════════════════════════════════════════
    EMPLOYEE MODAL
 ════════════════════════════════════════ */
+function onRoleChange(){
+  var role=document.getElementById('em-role').value;
+  var defaults={groomer:'commission',bather:'hourly',retail:'hourly',manager:'salary',other:'hourly'};
+  document.getElementById('em-paytype').value=defaults[role]||'hourly';
+  updatePayFields();
+}
+function updatePayFields(){
+  var pt=document.getElementById('em-paytype').value;
+  var isComm=pt==='commission';
+  document.getElementById('em-rate-group').classList.toggle('hidden',isComm);
+  document.getElementById('em-guar-group').classList.toggle('hidden',!isComm);
+}
 function openEmpModal(id){
   editEmpId=id; selectedColor=COLORS[0];
   var e=id?empById(id):null;
   document.getElementById('emp-modal-title').textContent=id?'Edit Employee':'Add Employee';
   document.getElementById('em-name').value=e?e.name:'';
+  document.getElementById('em-fullname').value=e?(e.full_name||''):'';
   document.getElementById('em-role').value=e?(e.role||'retail'):'retail';
   document.getElementById('em-store').value=e?(e.store||currentStore):currentStore;
+  document.getElementById('em-paytype').value=e?(e.pay_type||'hourly'):'hourly';
+  document.getElementById('em-hourlyrate').value=e&&e.hourly_rate?e.hourly_rate:'';
+  document.getElementById('em-hiredate').value=e?(e.hire_date||''):'';
+  document.getElementById('em-guarrate').value=e&&e.guarantee_daily_rate?e.guarantee_daily_rate:'';
+  document.getElementById('em-guarend').value=e?(e.guarantee_end_date||''):'';
+  document.getElementById('em-active').checked=e?(e.is_active!==false):true;
   if(e) selectedColor=e.color||COLORS[0];
+  updatePayFields();
   renderColorPicker();
   document.getElementById('em-delete').classList.toggle('hidden',!id);
   document.getElementById('emp-overlay').classList.remove('hidden');
@@ -744,7 +820,21 @@ function saveEmployee(){
   var name=document.getElementById('em-name').value.trim();
   if(!name){showToast('Name required','error');return;}
   var btn=document.getElementById('em-save'); btn.disabled=true; btn.textContent='Saving…';
-  var body={name:name,role:document.getElementById('em-role').value,store:document.getElementById('em-store').value,color:selectedColor};
+  var hrVal=parseFloat(document.getElementById('em-hourlyrate').value)||null;
+  var grVal=parseFloat(document.getElementById('em-guarrate').value)||null;
+  var body={
+    name:name,
+    full_name:document.getElementById('em-fullname').value.trim()||null,
+    role:document.getElementById('em-role').value,
+    store:document.getElementById('em-store').value,
+    color:selectedColor,
+    pay_type:document.getElementById('em-paytype').value,
+    hourly_rate:hrVal,
+    hire_date:document.getElementById('em-hiredate').value||null,
+    guarantee_daily_rate:grVal,
+    guarantee_end_date:document.getElementById('em-guarend').value||null,
+    is_active:document.getElementById('em-active').checked
+  };
   var p=editEmpId ? sbPatch('schedule_employees','id=eq.'+editEmpId,body) : sbPost('schedule_employees',body);
   p.then(function(result){
     btn.disabled=false; btn.textContent='Save';

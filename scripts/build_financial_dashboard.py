@@ -12,14 +12,14 @@ import calendar as _cal
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config import (
-    get_store, GUARANTEES, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
-    BATHER_RATE, RETAIL_RATES, RETAIL_NAME_MAP, BATHER_NAME_MAP,
-    HICKSVILLE_RETAIL_RATES, HICKSVILLE_RETAIL_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
+    get_store, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
+    BATHER_RATE,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
     get_royalty_rate, get_monthly_rent,
 )
 from formatting import fc
+from fetch_employees import get_store_pay_data
 
 SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
@@ -39,11 +39,8 @@ from config import STORE_RENT, STORE_OPEN_DATES
 MONTHLY_RENT = STORE_RENT.get(_store_name, 7700.0)
 STORE_OPEN = STORE_OPEN_DATES.get(_store_name, date(2024, 9, 26))
 
-# Store-specific employee maps
-if _store_name == "hicksville":
-    RETAIL_NAME_MAP = HICKSVILLE_RETAIL_NAME_MAP
-    RETAIL_RATES = HICKSVILLE_RETAIL_RATES
-    BATHER_NAME_MAP = HICKSVILLE_BATHER_NAME_MAP
+# Load employee maps/rates from Supabase (falls back to config.py if not yet populated)
+RETAIL_NAME_MAP, RETAIL_RATES, BATHER_NAME_MAP, BATHER_RATE_MAP, GUARANTEES = get_store_pay_data(_store_name)
 DAILY_RENT = MONTHLY_RENT * 12 / 365
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -174,7 +171,7 @@ while m_start <= TODAY:
     comm_paid = groomer_commission_for_range(s, e)
     mgr = manager_salary_for_range(m_start, m_end) if _store_name == "port-washington" else 0.0
     bather_hrs = get_hours_from_clocks(data.get("time_clocks", []), BATHER_NAME_MAP, s, e)
-    bather_pay = round(sum(h * BATHER_RATE for h in bather_hrs.values()), 2)
+    bather_pay = round(sum(h * BATHER_RATE_MAP.get(name, BATHER_RATE) for name, h in bather_hrs.items()), 2)
     retail_hrs = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s, e)
     retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in retail_hrs.items()), 2)
     _royalty_rate = get_royalty_rate(_store_name, m_start)
