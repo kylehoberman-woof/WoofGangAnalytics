@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "commission-dashboard",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "/Users/julieschorr/Desktop/store-analysis/port-washington"],
+      "port": 8765
+    },
+    {
+      "name": "exec-dashboard",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8766", "--directory", "/Users/julieschorr/Desktop/store-analysis/port-washington"],
+      "port": 8766
+    }
+  ,{
+      "name": "anomaly-dashboard",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8767", "--directory", "/Users/julieschorr/Desktop/store-analysis/port-washington"],
+      "port": 8767
+    }
+  ,{
+      "name": "portal",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8900", "--directory", "/Users/julieschorr/Desktop/store-analysis"],
+      "port": 8900
+    }
+  ]
+}

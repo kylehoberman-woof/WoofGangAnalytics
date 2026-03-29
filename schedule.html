@@ -9,14 +9,12 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e}
 
-/* ── Header ── */
 .header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:28px 32px 22px;text-align:center;color:white;position:relative}
 .back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px}
 .back-link:hover{background:rgba(255,255,255,0.28)}
 .header h1{font-size:1.6rem;font-weight:800;letter-spacing:-0.02em}
 .header p{font-size:0.85rem;opacity:0.85;margin-top:2px}
 
-/* ── Top controls bar ── */
 .topbar{background:white;border-bottom:2px solid #eee;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
 .store-toggle{display:flex;border:2px solid #C4276E;border-radius:8px;overflow:hidden}
 .store-toggle button{padding:6px 16px;border:none;background:white;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;color:#C4276E;transition:background 0.15s}
@@ -25,7 +23,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .tab-btn{padding:7px 18px;border:none;background:#f5f5f5;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer;color:#888;transition:all 0.15s}
 .tab-btn.active{background:#1a1a2e;color:white}
 
-/* ── Week view ── */
+/* Loading */
+.loading-bar{height:3px;background:#C4276E;position:fixed;top:0;left:0;width:0;z-index:200;transition:width 0.3s}
+.loading-bar.active{width:70%}
+.loading-bar.done{width:100%;opacity:0;transition:width 0.2s,opacity 0.4s 0.2s}
+
+/* Week view */
 .week-controls{display:flex;align-items:center;gap:10px;padding:14px 20px;background:#FDF0F5;flex-wrap:wrap}
 .week-nav-btns{display:flex;align-items:center;gap:8px}
 .nav-btn{padding:6px 14px;border:none;background:white;border-radius:8px;font-family:inherit;font-size:0.84rem;font-weight:700;cursor:pointer;color:#1a1a2e;box-shadow:0 1px 4px rgba(0,0,0,0.08);transition:background 0.15s}
@@ -37,7 +40,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .action-btn{padding:6px 14px;border:2px solid #ddd;background:white;border-radius:8px;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;color:#555;transition:all 0.15s}
 .action-btn:hover{border-color:#C4276E;color:#C4276E}
 
-.summary-bar{padding:8px 20px;background:white;border-bottom:1px solid #eee;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:0.78rem}
+.summary-bar{padding:8px 20px;background:white;border-bottom:1px solid #eee;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:0.78rem;min-height:38px}
 .summary-label{font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;font-size:0.7rem}
 .emp-pill{display:inline-flex;align-items:center;gap:5px;background:#f5f5f5;border-radius:20px;padding:3px 10px 3px 6px;font-weight:700;font-size:0.76rem;color:#1a1a2e;cursor:pointer;border:2px solid transparent;transition:border-color 0.15s}
 .emp-pill:hover{border-color:#C4276E}
@@ -61,16 +64,14 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .shift-note{font-size:0.7rem;color:#bbb;margin-top:2px}
 .shift-del{position:absolute;top:5px;right:5px;background:none;border:none;color:#ddd;cursor:pointer;font-size:0.85rem;padding:2px 5px;border-radius:4px;line-height:1;transition:color 0.15s,background 0.15s}
 .shift-del:hover{color:#c62828;background:#fce4ec}
-
 .btn-add-shift{width:100%;padding:8px;border:2px dashed #ddd;border-radius:8px;background:transparent;font-family:inherit;font-size:0.78rem;font-weight:600;color:#ccc;cursor:pointer;transition:all 0.15s}
 .btn-add-shift:hover{border-color:#C4276E;color:#C4276E;background:#fdf0f5}
 
-/* ── Month view ── */
+/* Month view */
 .month-controls{display:flex;align-items:center;gap:10px;padding:14px 20px;flex-wrap:wrap}
 .month-label{font-size:1rem;font-weight:800;min-width:160px;text-align:center}
 .emp-filter{padding:7px 12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.85rem;color:#1a1a2e;background:white;cursor:pointer}
 .emp-filter:focus{outline:none;border-color:#C4276E}
-
 .cal-grid{padding:0 16px 60px}
 .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
 .cal-dow-cell{text-align:center;font-size:0.7rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.04em;padding:6px 0}
@@ -86,11 +87,11 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .cal-chip-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.5);flex-shrink:0}
 .cal-more{font-size:0.68rem;color:#aaa;font-weight:600;margin-top:2px}
 
-/* ── Roster view ── */
+/* Roster */
 .roster-main{padding:20px;max-width:900px;margin:0 auto}
 .roster-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .roster-header h2{font-size:1.1rem;font-weight:800}
-.btn-add-emp{padding:9px 20px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;transition:background 0.2s}
+.btn-add-emp{padding:9px 20px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer}
 .btn-add-emp:hover{background:#a31f5b}
 .emp-list{display:flex;flex-direction:column;gap:10px}
 .emp-card{background:white;border-radius:12px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;border-left:5px solid #ddd}
@@ -104,7 +105,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .btn-emp-action.recurring{border-color:#1B6B6B;color:#1B6B6B}
 .btn-emp-action.recurring:hover{background:#e0f2f1}
 
-/* ── Modals ── */
+/* Modals */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
 .overlay.hidden{display:none}
 .modal{background:white;border-radius:16px;padding:28px;width:100%;max-width:440px;box-shadow:0 8px 40px rgba(0,0,0,0.15);max-height:90vh;overflow-y:auto}
@@ -113,18 +114,18 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .form-col{display:flex;flex-direction:column;gap:13px}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg label{font-size:0.7rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.04em}
-.fg input,.fg select,.fg textarea{padding:9px 11px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem;color:#1a1a2e;background:white;transition:border-color 0.2s}
-.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#C4276E}
+.fg input,.fg select{padding:9px 11px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem;color:#1a1a2e;background:white;transition:border-color 0.2s}
+.fg input:focus,.fg select:focus{outline:none;border-color:#C4276E}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .modal-actions{display:flex;gap:8px;margin-top:6px;justify-content:flex-end;align-items:center}
 .btn-m-cancel{padding:8px 18px;background:white;color:#666;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer}
-.btn-m-cancel:hover{border-color:#aaa}
 .btn-m-save{padding:8px 22px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer}
 .btn-m-save:hover{background:#a31f5b}
 .btn-m-delete{padding:8px 16px;background:white;color:#c62828;border:2px solid #e8a0a0;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;margin-right:auto}
 .btn-m-delete:hover{background:#fce4ec}
+.btn-m-save:disabled{background:#ccc;cursor:not-allowed}
 
-/* Recurring day rows */
+/* Recurring */
 .rec-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5}
 .rec-day{font-size:0.82rem;font-weight:700;width:36px;color:#555}
 .rec-toggle{width:36px;height:20px;border-radius:10px;background:#ddd;position:relative;cursor:pointer;border:none;flex-shrink:0;transition:background 0.2s}
@@ -142,14 +143,14 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .color-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color 0.15s}
 .color-swatch.selected{border-color:#1a1a2e}
 
-/* Toast */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:10px 22px;border-radius:10px;font-size:0.88rem;font-weight:600;z-index:200;opacity:1;transition:opacity 0.3s}
 .toast.hidden{opacity:0;pointer-events:none}
-
 .hidden{display:none!important}
 </style>
 </head>
 <body>
+
+<div class="loading-bar" id="loading-bar"></div>
 
 <div class="header">
   <a class="back-link" href="index.html">← Owner Portal</a>
@@ -163,33 +164,31 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
     <button id="btn-hv" onclick="setStore('hicksville')">Hicksville</button>
   </div>
   <div class="tab-bar">
-    <button class="tab-btn active" id="tab-week"  onclick="setTab('week')">Week</button>
-    <button class="tab-btn"        id="tab-month" onclick="setTab('month')">Month</button>
+    <button class="tab-btn active" id="tab-week"   onclick="setTab('week')">Week</button>
+    <button class="tab-btn"        id="tab-month"  onclick="setTab('month')">Month</button>
     <button class="tab-btn"        id="tab-roster" onclick="setTab('roster')">Employees</button>
   </div>
 </div>
 
-<!-- ═══ WEEK VIEW ═══ -->
+<!-- WEEK VIEW -->
 <div id="view-week">
   <div class="week-controls">
     <div class="week-nav-btns">
       <button class="nav-btn" onclick="shiftWeek(-1)">← Prev</button>
-      <div class="week-label" id="week-label"></div>
+      <div class="week-label" id="week-label">Loading…</div>
       <button class="nav-btn" onclick="shiftWeek(1)">Next →</button>
       <button class="nav-btn today" onclick="goToday()">Today</button>
     </div>
     <div class="week-actions">
-      <button class="action-btn" onclick="fillRecurring()" title="Fill this week from each employee's default recurring schedule">⟳ Fill Recurring</button>
-      <button class="action-btn" onclick="copyLastWeek()" title="Copy all shifts from the previous week">↩ Copy Last Week</button>
+      <button class="action-btn" onclick="fillRecurring()">⟳ Fill Recurring</button>
+      <button class="action-btn" onclick="copyLastWeek()">↩ Copy Last Week</button>
     </div>
   </div>
   <div class="summary-bar" id="week-summary"></div>
-  <div class="schedule-main">
-    <div class="week-grid" id="week-grid"></div>
-  </div>
+  <div class="schedule-main"><div class="week-grid" id="week-grid"></div></div>
 </div>
 
-<!-- ═══ MONTH VIEW ═══ -->
+<!-- MONTH VIEW -->
 <div id="view-month" class="hidden">
   <div class="month-controls">
     <div class="week-nav-btns">
@@ -208,7 +207,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
   </div>
 </div>
 
-<!-- ═══ ROSTER VIEW ═══ -->
+<!-- ROSTER VIEW -->
 <div id="view-roster" class="hidden">
   <div class="roster-main">
     <div class="roster-header">
@@ -219,73 +218,69 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
   </div>
 </div>
 
-<!-- ═══ SHIFT MODAL ═══ -->
+<!-- SHIFT MODAL -->
 <div class="overlay hidden" id="shift-overlay">
   <div class="modal">
     <h2 id="shift-modal-title">Add Shift</h2>
     <div class="form-col">
-      <div class="fg">
-        <label>Employee *</label>
-        <select id="sm-emp"></select>
-      </div>
+      <div class="fg"><label>Employee *</label><select id="sm-emp"></select></div>
       <div class="row2">
         <div class="fg"><label>Start Time</label><input type="time" id="sm-start" value="09:00"></div>
         <div class="fg"><label>End Time</label><input type="time" id="sm-end" value="17:00"></div>
       </div>
-      <div class="fg">
-        <label>Notes</label>
-        <input type="text" id="sm-notes" placeholder="e.g. half day, opening shift">
-      </div>
+      <div class="fg"><label>Notes</label><input type="text" id="sm-notes" placeholder="e.g. half day, opening shift"></div>
     </div>
     <div class="modal-actions" style="margin-top:20px">
       <button class="btn-m-delete hidden" id="sm-delete" onclick="deleteShift()">Delete</button>
       <button class="btn-m-cancel" onclick="closeShiftModal()">Cancel</button>
-      <button class="btn-m-save" onclick="saveShift()">Save Shift</button>
+      <button class="btn-m-save" id="sm-save" onclick="saveShift()">Save Shift</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ EMPLOYEE MODAL ═══ -->
+<!-- EMPLOYEE MODAL -->
 <div class="overlay hidden" id="emp-overlay">
   <div class="modal">
     <h2 id="emp-modal-title">Add Employee</h2>
     <div class="form-col">
-      <div class="fg">
-        <label>Name *</label>
-        <input type="text" id="em-name" placeholder="e.g. Cindy">
-      </div>
+      <div class="fg"><label>Name *</label><input type="text" id="em-name" placeholder="e.g. Cindy"></div>
       <div class="fg">
         <label>Role</label>
         <select id="em-role">
           <option value="groomer">Groomer</option>
           <option value="bather">Bather</option>
-          <option value="retail">Retail</option>
+          <option value="retail" selected>Retail</option>
           <option value="manager">Manager</option>
           <option value="other">Other</option>
         </select>
       </div>
       <div class="fg">
-        <label>Color</label>
-        <div class="color-row" id="em-colors"></div>
+        <label>Store</label>
+        <select id="em-store">
+          <option value="port-washington">Port Washington</option>
+          <option value="hicksville">Hicksville</option>
+          <option value="both">Both Stores</option>
+        </select>
       </div>
+      <div class="fg"><label>Color</label><div class="color-row" id="em-colors"></div></div>
     </div>
     <div class="modal-actions" style="margin-top:20px">
       <button class="btn-m-delete hidden" id="em-delete" onclick="deleteEmployee()">Remove</button>
       <button class="btn-m-cancel" onclick="closeEmpModal()">Cancel</button>
-      <button class="btn-m-save" onclick="saveEmployee()">Save</button>
+      <button class="btn-m-save" id="em-save" onclick="saveEmployee()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- ═══ RECURRING MODAL ═══ -->
+<!-- RECURRING MODAL -->
 <div class="overlay hidden" id="rec-overlay">
   <div class="modal wide">
     <h2 id="rec-modal-title">Default Schedule</h2>
-    <p style="font-size:0.82rem;color:#888;margin-bottom:16px">Set this employee's default weekly shifts. Use "Fill Recurring" in the week view to apply.</p>
+    <p style="font-size:0.82rem;color:#888;margin-bottom:16px">Set default weekly shifts. Use "Fill Recurring" in week view to apply.</p>
     <div id="rec-rows"></div>
     <div class="modal-actions" style="margin-top:20px">
       <button class="btn-m-cancel" onclick="closeRecModal()">Cancel</button>
-      <button class="btn-m-save" onclick="saveRecurring()">Save Default Schedule</button>
+      <button class="btn-m-save" id="rec-save" onclick="saveRecurring()">Save Default Schedule</button>
     </div>
   </div>
 </div>
@@ -294,94 +289,129 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 
 <script>
 /* ════════════════════════════════════════
+   SUPABASE
+════════════════════════════════════════ */
+var SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SHD = {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
+
+function sbGet(path){
+  return fetch(SB+path,{headers:SHD}).then(function(r){return r.json();});
+}
+function sbPost(table,body){
+  return fetch(SB+'/'+table,{method:'POST',headers:SHD,body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+function sbPatch(table,filter,body){
+  return fetch(SB+'/'+table+'?'+filter,{method:'PATCH',headers:SHD,body:JSON.stringify(body)}).then(function(r){return r.status===204?null:r.json();});
+}
+function sbDelete(table,filter){
+  return fetch(SB+'/'+table+'?'+filter,{method:'DELETE',headers:SHD});
+}
+
+/* ════════════════════════════════════════
    CONSTANTS
 ════════════════════════════════════════ */
-var COLORS = ['#C4276E','#1B6B6B','#2E7D32','#6B3520','#1565C0','#7B1FA2','#E65100','#00838F','#37474F','#AD1457'];
-var ROLES  = {groomer:'Groomer',bather:'Bather',retail:'Retail',manager:'Manager',other:'Other'};
-var DAY_KEYS = ['mon','tue','wed','thu','fri','sat','sun'];
-var DAY_NAMES_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-var MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var COLORS=['#C4276E','#1565C0','#7B1FA2','#6B3520','#E65100','#AD1457','#00838F','#2E7D32','#1B6B6B','#37474F'];
+var ROLES={groomer:'Groomer',bather:'Bather',retail:'Retail',manager:'Manager',other:'Other'};
+var DAY_KEYS=['mon','tue','wed','thu','fri','sat','sun'];
+var DAY_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 /* ════════════════════════════════════════
    STATE
 ════════════════════════════════════════ */
-var currentStore  = localStorage.getItem('wg_sched_store') || 'port-washington';
+var currentStore  = localStorage.getItem('wg_sched_store')||'port-washington';
 var currentTab    = 'week';
 var weekOffset    = 0;
 var monthOffset   = 0;
-var editShiftId   = null;
-var editShiftDate = null;
-var addShiftDate  = null;
-var editEmpId     = null;
-var recEmpId      = null;
-var selectedColor = COLORS[0];
+var employees     = [];   // cache from Supabase
+var shifts        = {};   // cache: ISO date → [shift, ...]
+var editShiftId   = null, editShiftDate=null, addShiftDate=null;
+var editEmpId     = null, recEmpId=null, selectedColor=COLORS[0];
 
 /* ════════════════════════════════════════
-   DATA LAYER
+   SHIFT FIELD NORMALIZERS
+   (Supabase returns start_time/end_time/emp_id)
 ════════════════════════════════════════ */
-function loadRoster() {
-  try { return JSON.parse(localStorage.getItem('wg_roster')) || {employees:[]}; } catch(e) { return {employees:[]}; }
+function sStart(s){ return (s.start_time||s.start||'').slice(0,5); }
+function sEnd(s){   return (s.end_time  ||s.end  ||'').slice(0,5); }
+function sEmpId(s){ return s.emp_id||s.empId||''; }
+function sHours(s){
+  var a=sStart(s).split(':').map(Number), b=sEnd(s).split(':').map(Number);
+  if(a.length<2||b.length<2) return 0;
+  return Math.max(0,(b[0]*60+b[1]-(a[0]*60+a[1]))/60);
 }
-function saveRoster(r) { localStorage.setItem('wg_roster', JSON.stringify(r)); }
-
-function loadSchedule() {
-  try { return JSON.parse(localStorage.getItem('wg_schedule_'+currentStore)) || {}; } catch(e) { return {}; }
-}
-function saveSchedule(d) { localStorage.setItem('wg_schedule_'+currentStore, JSON.stringify(d)); }
-
-function loadRecurring() {
-  try { return JSON.parse(localStorage.getItem('wg_recurring_'+currentStore)) || {}; } catch(e) { return {}; }
-}
-function saveRecurring2(d) { localStorage.setItem('wg_recurring_'+currentStore, JSON.stringify(d)); }
-
-function storeEmployees() {
-  return loadRoster().employees.filter(function(e){ return e.store === currentStore || e.store === 'both'; });
-}
-function empById(id) { return loadRoster().employees.find(function(e){ return e.id===id; }); }
 
 /* ════════════════════════════════════════
    DATE UTILS
 ════════════════════════════════════════ */
-function getMonday(d) {
-  var day = d.getDay();
-  var diff = day===0 ? -6 : 1-day;
-  var m = new Date(d); m.setDate(d.getDate()+diff); m.setHours(0,0,0,0); return m;
+function getMonday(d){var day=d.getDay(),diff=day===0?-6:1-day,m=new Date(d);m.setDate(d.getDate()+diff);m.setHours(0,0,0,0);return m;}
+function addDays(d,n){var r=new Date(d);r.setDate(d.getDate()+n);return r;}
+function toISO(d){return d.toISOString().slice(0,10);}
+function fmtShort(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmtTime(t){if(!t)return '';var p=t.split(':'),h=+p[0],m=p[1],ap=h>=12?'pm':'am';h=h%12||12;return h+(m!=='00'?':'+m:'')+ap;}
+
+/* ════════════════════════════════════════
+   LOADING
+════════════════════════════════════════ */
+var _loadCount=0;
+function startLoad(){_loadCount++;var b=document.getElementById('loading-bar');b.className='loading-bar active';}
+function endLoad(){_loadCount=Math.max(0,_loadCount-1);if(_loadCount===0){var b=document.getElementById('loading-bar');b.className='loading-bar done';setTimeout(function(){b.className='loading-bar';},600);}}
+
+/* ════════════════════════════════════════
+   EMPLOYEE DATA
+════════════════════════════════════════ */
+function fetchEmployees(){
+  return sbGet('/schedule_employees?order=name').then(function(rows){
+    employees=Array.isArray(rows)?rows:[];
+    return employees;
+  });
 }
-function addDays(d,n){ var r=new Date(d); r.setDate(d.getDate()+n); return r; }
-function toISO(d){ return d.toISOString().slice(0,10); }
-function fmtShort(d){ return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}); }
-function fmtTime(t){
-  if(!t) return '';
-  var p=t.split(':'), h=+p[0], m=p[1], ap=h>=12?'pm':'am';
-  h=h%12||12; return h+(m!=='00'?':'+m:'')+ap;
+function storeEmployees(){
+  return employees.filter(function(e){return e.store===currentStore||e.store==='both';});
 }
-function shiftHours(s){
-  if(!s.start||!s.end) return 0;
-  var a=s.start.split(':').map(Number), b=s.end.split(':').map(Number);
-  return Math.max(0,(b[0]*60+b[1]-(a[0]*60+a[1]))/60);
+function empById(id){return employees.find(function(e){return e.id===id;});}
+
+/* ════════════════════════════════════════
+   SHIFT DATA
+════════════════════════════════════════ */
+function fetchShifts(startISO, endISO){
+  // Clear cache for this range
+  var cur=new Date(startISO+'T12:00:00'), end=new Date(endISO+'T12:00:00');
+  while(cur<=end){shifts[toISO(cur)]=[];cur=addDays(cur,1);}
+
+  return sbGet('/schedule_shifts?store=eq.'+encodeURIComponent(currentStore)+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&select=*&order=start_time')
+    .then(function(rows){
+      (Array.isArray(rows)?rows:[]).forEach(function(s){
+        var d=s.shift_date;
+        shifts[d]=shifts[d]||[];
+        shifts[d].push(s);
+      });
+      return rows;
+    });
 }
 
 /* ════════════════════════════════════════
    STORE + TAB
 ════════════════════════════════════════ */
-function setStore(key) {
-  currentStore = key;
-  localStorage.setItem('wg_sched_store', key);
-  document.getElementById('btn-pw').className = key==='port-washington'?'active':'';
-  document.getElementById('btn-hv').className  = key==='hicksville'?'active':'';
-  refreshAll();
+function setStore(key){
+  currentStore=key;
+  localStorage.setItem('wg_sched_store',key);
+  document.getElementById('btn-pw').className=key==='port-washington'?'active':'';
+  document.getElementById('btn-hv').className=key==='hicksville'?'active':'';
+  shifts={};
+  startLoad();
+  fetchEmployees().then(function(){endLoad();refreshCurrent();});
 }
-function setTab(tab) {
-  currentTab = tab;
+function setTab(tab){
+  currentTab=tab;
   ['week','month','roster'].forEach(function(t){
-    document.getElementById('view-'+t).classList.toggle('hidden', t!==tab);
-    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('view-'+t).classList.toggle('hidden',t!==tab);
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
-  if(tab==='week')   renderWeek();
-  if(tab==='month')  renderMonth();
-  if(tab==='roster') renderRoster();
+  refreshCurrent();
 }
-function refreshAll() {
+function refreshCurrent(){
   if(currentTab==='week')   renderWeek();
   if(currentTab==='month')  renderMonth();
   if(currentTab==='roster') renderRoster();
@@ -390,58 +420,57 @@ function refreshAll() {
 /* ════════════════════════════════════════
    WEEK VIEW
 ════════════════════════════════════════ */
-function shiftWeek(d){ weekOffset+=d; renderWeek(); }
-function goToday(){ weekOffset=0; renderWeek(); }
+function shiftWeek(d){weekOffset+=d;renderWeek();}
+function goToday(){weekOffset=0;renderWeek();}
 
-function renderWeek() {
-  var today    = new Date();
-  var monday   = getMonday(today);
-  var weekStart= addDays(monday, weekOffset*7);
-  var weekEnd  = addDays(weekStart,6);
-  var todayISO = toISO(today);
-  var data     = loadSchedule();
-  var emps     = storeEmployees();
+function renderWeek(){
+  var today=new Date(), monday=getMonday(today);
+  var ws=addDays(monday,weekOffset*7), we=addDays(ws,6);
+  var sameM=ws.getMonth()===we.getMonth();
+  document.getElementById('week-label').textContent=fmtShort(ws)+' – '+(sameM?we.getDate():fmtShort(we))+', '+we.getFullYear();
+  document.getElementById('week-summary').innerHTML='<span style="font-size:0.78rem;color:#bbb">Loading…</span>';
+  document.getElementById('week-grid').innerHTML='';
 
-  // Label
-  var sameM = weekStart.getMonth()===weekEnd.getMonth();
-  document.getElementById('week-label').textContent =
-    fmtShort(weekStart)+' – '+(sameM?weekEnd.getDate():fmtShort(weekEnd))+', '+weekEnd.getFullYear();
+  startLoad();
+  fetchShifts(toISO(ws),toISO(we)).then(function(){
+    endLoad();
+    _paintWeek(ws,we,today);
+  }).catch(function(){endLoad();showToast('Failed to load shifts','error');});
+}
 
-  // Hours per emp
-  var empHrs = {};
+function _paintWeek(ws,we,today){
+  var todayISO=toISO(today);
+  var empHrs={};
   for(var i=0;i<7;i++){
-    var iso=toISO(addDays(weekStart,i));
-    (data[iso]||[]).forEach(function(s){ empHrs[s.empId]=(empHrs[s.empId]||0)+shiftHours(s); });
+    var iso=toISO(addDays(ws,i));
+    (shifts[iso]||[]).forEach(function(s){var eid=sEmpId(s);empHrs[eid]=(empHrs[eid]||0)+sHours(s);});
   }
 
-  // Summary bar
-  var sb = document.getElementById('week-summary');
-  var hrsNames = Object.keys(empHrs).sort(function(a,b){ return empHrs[b]-empHrs[a]; });
-  if(!hrsNames.length) {
-    sb.innerHTML='<span style="font-size:0.78rem;color:#bbb;font-style:italic">No shifts this week — click + Add Shift or use Fill Recurring</span>';
+  // Summary
+  var sb=document.getElementById('week-summary');
+  var names=Object.keys(empHrs).sort(function(a,b){return empHrs[b]-empHrs[a];});
+  if(!names.length){
+    sb.innerHTML='<span style="font-size:0.78rem;color:#bbb;font-style:italic">No shifts this week — click + or use Fill Recurring</span>';
   } else {
-    sb.innerHTML='<span class="summary-label">This week:</span>'+hrsNames.map(function(id){
+    sb.innerHTML='<span class="summary-label">This week:</span>'+names.map(function(id){
       var e=empById(id)||{name:id,color:'#aaa'};
-      return '<span class="emp-pill" onclick="filterEmpWeek(\''+id+'\')">'+
-        '<span class="emp-dot" style="background:'+e.color+'"></span>'+
-        esc(e.name)+' <span class="emp-hrs">'+empHrs[id].toFixed(1)+'h</span></span>';
+      return '<span class="emp-pill" onclick="filterEmpMonth(\''+id+'\')"><span class="emp-dot" style="background:'+e.color+'"></span>'+esc(e.name)+' <span class="emp-hrs">'+empHrs[id].toFixed(1)+'h</span></span>';
     }).join('');
   }
 
   // Grid
   var html='';
   for(var i=0;i<7;i++){
-    var d=addDays(weekStart,i), iso=toISO(d), isT=(iso===todayISO);
-    var shifts=(data[iso]||[]);
+    var d=addDays(ws,i), iso=toISO(d), isT=(iso===todayISO);
     html+='<div class="day-col">';
-    html+='<div class="day-hdr'+(isT?' today':'')+'"><div class="day-name">'+DAY_NAMES_SHORT[i]+'</div><div class="day-date">'+d.getDate()+'</div></div>';
-    shifts.forEach(function(s){
-      var e=empById(s.empId)||{name:'Unknown',color:'#aaa',role:'other'};
+    html+='<div class="day-hdr'+(isT?' today':'')+'"><div class="day-name">'+DAY_SHORT[i]+'</div><div class="day-date">'+d.getDate()+'</div></div>';
+    (shifts[iso]||[]).forEach(function(s){
+      var e=empById(sEmpId(s))||{name:'Unknown',color:'#aaa',role:'other'};
       html+='<div class="shift-card" style="border-left-color:'+e.color+'" onclick="openEditShift(\''+iso+'\',\''+s.id+'\')">';
-      html+='<button class="shift-del" onclick="event.stopPropagation();quickDelShift(\''+iso+'\',\''+s.id+'\')">✕</button>';
+      html+='<button class="shift-del" onclick="event.stopPropagation();quickDelShift(\''+s.id+'\',\''+iso+'\')">✕</button>';
       html+='<div class="shift-emp">'+esc(e.name)+'</div>';
       html+='<div class="shift-role" style="color:'+e.color+'">'+esc(ROLES[e.role]||e.role)+'</div>';
-      html+='<div class="shift-time">'+fmtTime(s.start)+(s.end?' – '+fmtTime(s.end):'')+'</div>';
+      html+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
       if(s.notes) html+='<div class="shift-note">'+esc(s.notes)+'</div>';
       html+='</div>';
     });
@@ -451,306 +480,291 @@ function renderWeek() {
   document.getElementById('week-grid').innerHTML=html;
 }
 
-function filterEmpWeek(id) {
-  // Jump to month view filtered to this employee
+function filterEmpMonth(id){
   setTab('month');
-  var filter = document.getElementById('month-emp-filter');
-  if(filter) filter.value = id;
+  var f=document.getElementById('month-emp-filter');
+  if(f) f.value=id;
   renderMonth();
 }
 
 /* ════════════════════════════════════════
    COPY LAST WEEK / FILL RECURRING
 ════════════════════════════════════════ */
-function copyLastWeek() {
-  var today    = new Date();
-  var monday   = getMonday(today);
-  var thisStart= addDays(monday, weekOffset*7);
-  var lastStart= addDays(thisStart,-7);
-  var data     = loadSchedule();
+function copyLastWeek(){
+  var today=new Date(), monday=getMonday(today);
+  var thisStart=addDays(monday,weekOffset*7);
+  var lastStart=addDays(thisStart,-7);
 
-  // Check if current week has shifts
-  var curHasShifts=false;
-  for(var i=0;i<7;i++){
-    var iso=toISO(addDays(thisStart,i));
-    if((data[iso]||[]).length>0){curHasShifts=true;break;}
-  }
-  if(curHasShifts && !confirm('This week already has shifts. Merge with last week\'s schedule?')) return;
+  var hasShifts=(shifts[toISO(thisStart)]||[]).length>0;
+  if(hasShifts && !confirm('This week already has shifts. Merge with last week?')) return;
 
-  var added=0;
-  for(var i=0;i<7;i++){
-    var srcISO = toISO(addDays(lastStart,i));
-    var dstISO = toISO(addDays(thisStart,i));
-    (data[srcISO]||[]).forEach(function(s){
-      data[dstISO]=data[dstISO]||[];
-      // avoid duplicates
-      var already=data[dstISO].some(function(x){ return x.empId===s.empId && x.start===s.start; });
-      if(!already){ data[dstISO].push({id:uid(),empId:s.empId,start:s.start,end:s.end,notes:s.notes}); added++; }
+  startLoad();
+  fetchShifts(toISO(lastStart),toISO(addDays(lastStart,6))).then(function(){
+    var posts=[];
+    for(var i=0;i<7;i++){
+      var srcISO=toISO(addDays(lastStart,i));
+      var dstISO=toISO(addDays(thisStart,i));
+      var existing=shifts[dstISO]||[];
+      (shifts[srcISO]||[]).forEach(function(s){
+        var dup=existing.some(function(x){return sEmpId(x)===sEmpId(s)&&sStart(x)===sStart(s);});
+        if(!dup) posts.push({emp_id:sEmpId(s),store:currentStore,shift_date:dstISO,start_time:sStart(s),end_time:sEnd(s),notes:s.notes||''});
+      });
+    }
+    if(!posts.length){endLoad();showToast('No shifts to copy');return;}
+    return Promise.all(posts.map(function(p){return sbPost('schedule_shifts',p);})).then(function(){
+      endLoad();
+      renderWeek();
+      showToast(posts.length+' shift'+(posts.length!==1?'s':'')+' copied');
     });
-  }
-  saveSchedule(data);
-  renderWeek();
-  showToast(added+' shift'+(added!==1?'s':'')+' copied from last week');
+  }).catch(function(){endLoad();showToast('Copy failed','error');});
 }
 
-function fillRecurring() {
-  var today    = new Date();
-  var monday   = getMonday(today);
-  var weekStart= addDays(monday, weekOffset*7);
-  var rec      = loadRecurring();
-  var data     = loadSchedule();
-  var added    = 0;
+function fillRecurring(){
+  var today=new Date(), monday=getMonday(today);
+  var ws=addDays(monday,weekOffset*7);
+  var posts=[];
 
-  for(var i=0;i<7;i++){
-    var iso   = toISO(addDays(weekStart,i));
-    var dayKey= DAY_KEYS[i];
-    data[iso] = data[iso]||[];
-    Object.keys(rec).forEach(function(empId){
-      var dayRec=rec[empId] && rec[empId][dayKey];
-      if(!dayRec) return;
-      var already=data[iso].some(function(s){ return s.empId===empId; });
-      if(!already){ data[iso].push({id:uid(),empId:empId,start:dayRec.start,end:dayRec.end,notes:''}); added++; }
+  storeEmployees().forEach(function(e){
+    var rec=e.recurring||{};
+    DAY_KEYS.forEach(function(key,i){
+      var r=rec[key];
+      if(!r) return;
+      var iso=toISO(addDays(ws,i));
+      var existing=shifts[iso]||[];
+      var dup=existing.some(function(x){return sEmpId(x)===e.id;});
+      if(!dup) posts.push({emp_id:e.id,store:currentStore,shift_date:iso,start_time:r.start,end_time:r.end,notes:''});
     });
-  }
-  saveSchedule(data);
-  renderWeek();
-  showToast(added+' shift'+(added!==1?'s':'')+' filled from recurring schedules');
+  });
+
+  if(!posts.length){showToast('No recurring shifts to fill');return;}
+  startLoad();
+  Promise.all(posts.map(function(p){return sbPost('schedule_shifts',p);})).then(function(){
+    endLoad();
+    renderWeek();
+    showToast(posts.length+' shift'+(posts.length!==1?'s':'')+' filled');
+  }).catch(function(){endLoad();showToast('Fill failed','error');});
 }
 
 /* ════════════════════════════════════════
    MONTH VIEW
 ════════════════════════════════════════ */
-function shiftMonth(d){ monthOffset+=d; renderMonth(); }
-function goMonthToday(){ monthOffset=0; renderMonth(); }
+function shiftMonth(d){monthOffset+=d;renderMonth();}
+function goMonthToday(){monthOffset=0;renderMonth();}
 
-function renderMonth() {
-  var today  = new Date();
-  var base   = new Date(today.getFullYear(), today.getMonth()+monthOffset, 1);
-  var year   = base.getFullYear(), month=base.getMonth();
-  var todayISO = toISO(today);
-  var filterEmp= document.getElementById('month-emp-filter')?.value || '';
+function renderMonth(){
+  var today=new Date(), base=new Date(today.getFullYear(),today.getMonth()+monthOffset,1);
+  var year=base.getFullYear(), month=base.getMonth(), todayISO=toISO(today);
+  document.getElementById('month-label').textContent=MONTHS[month]+' '+year;
 
-  document.getElementById('month-label').textContent = MONTH_NAMES[month]+' '+year;
-
-  // Populate employee filter
-  var sel=document.getElementById('month-emp-filter');
-  var prev=sel.value;
+  // Populate emp filter
+  var sel=document.getElementById('month-emp-filter'), prev=sel.value;
   sel.innerHTML='<option value="">All Employees</option>';
   storeEmployees().forEach(function(e){
     sel.innerHTML+='<option value="'+e.id+'"'+(prev===e.id?' selected':'')+'>'+esc(e.name)+'</option>';
   });
   if(prev) sel.value=prev;
-  filterEmp=sel.value;
+  var filterEmp=sel.value;
 
-  // DOW headers (Mon first)
-  var dow=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  document.getElementById('cal-dow').innerHTML=dow.map(function(d){
-    return '<div class="cal-dow-cell">'+d+'</div>';
-  }).join('');
+  var firstDay=new Date(year,month,1), lastDay=new Date(year,month+1,0);
+  var startISO=toISO(getMonday(firstDay)), endISO=toISO(addDays(getMonday(lastDay),6));
 
-  // Calendar cells
-  var firstDay=new Date(year,month,1);
-  var firstMon=getMonday(firstDay);
-  // We need enough weeks to cover the month
-  var lastDay=new Date(year,month+1,0);
-  var data=loadSchedule();
+  // DOW headers
+  document.getElementById('cal-dow').innerHTML=DAY_SHORT.map(function(d){return '<div class="cal-dow-cell">'+d+'</div>';}).join('');
 
-  var html='';
-  var cur=new Date(firstMon);
-  while(cur<=lastDay || cur.getMonth()===month){
+  startLoad();
+  fetchShifts(startISO,endISO).then(function(){
+    endLoad();
+    _paintMonth(year,month,todayISO,filterEmp);
+  }).catch(function(){endLoad();});
+}
+
+function _paintMonth(year,month,todayISO,filterEmp){
+  var today=new Date(), firstDay=new Date(year,month,1), lastDay=new Date(year,month+1,0);
+  var html='', cur=getMonday(firstDay);
+  while(cur<=lastDay||cur.getMonth()===month){
     html+='<div class="cal-week">';
     for(var d=0;d<7;d++){
-      var iso=toISO(cur);
-      var inMonth=cur.getMonth()===month;
-      var isToday=iso===todayISO;
-      var shifts=(data[iso]||[]).filter(function(s){
-        return !filterEmp || s.empId===filterEmp;
-      });
+      var iso=toISO(cur), inMonth=cur.getMonth()===month, isToday=iso===todayISO;
+      var dayShifts=(shifts[iso]||[]).filter(function(s){return !filterEmp||sEmpId(s)===filterEmp;});
       var weekOff=Math.round((getMonday(cur)-getMonday(today))/(7*86400000));
       html+='<div class="cal-day'+(inMonth?'':' other-month')+(isToday?' cal-today':'')+'" onclick="jumpToWeek('+weekOff+')">';
       html+='<div class="cal-day-num">'+cur.getDate()+'</div>';
-      var shown=0;
-      shifts.slice(0,3).forEach(function(s){
-        var e=empById(s.empId)||{name:'?',color:'#aaa'};
+      dayShifts.slice(0,3).forEach(function(s){
+        var e=empById(sEmpId(s))||{name:'?',color:'#aaa'};
         html+='<div class="cal-chip" style="background:'+e.color+'"><div class="cal-chip-dot"></div>'+esc(e.name.split(' ')[0])+'</div>';
-        shown++;
       });
-      if(shifts.length>3) html+='<div class="cal-more">+'+( shifts.length-3)+' more</div>';
+      if(dayShifts.length>3) html+='<div class="cal-more">+'+(dayShifts.length-3)+' more</div>';
       html+='</div>';
       cur=addDays(cur,1);
     }
     html+='</div>';
-    if(cur.getMonth()!==month && cur>lastDay) break;
+    if(cur.getMonth()!==month&&cur>lastDay) break;
   }
   document.getElementById('cal-weeks').innerHTML=html;
 }
 
-function jumpToWeek(offset){
-  weekOffset=offset;
-  setTab('week');
-}
+function jumpToWeek(offset){weekOffset=offset;setTab('week');}
 
 /* ════════════════════════════════════════
    ROSTER VIEW
 ════════════════════════════════════════ */
-function renderRoster() {
+function renderRoster(){
   var emps=storeEmployees();
-  document.getElementById('roster-store-label').textContent=
-    currentStore==='port-washington'?'Port Washington':'Hicksville';
+  document.getElementById('roster-store-label').textContent=currentStore==='port-washington'?'Port Washington':'Hicksville';
 
   if(!emps.length){
-    document.getElementById('emp-list').innerHTML=
-      '<div style="color:#aaa;font-size:0.88rem;padding:20px 0">No employees yet. Click + Add Employee to get started.</div>';
+    document.getElementById('emp-list').innerHTML='<div style="color:#aaa;font-size:0.88rem;padding:20px 0">No employees yet — click + Add Employee.</div>';
     return;
   }
 
-  // Hours this week
-  var data=loadSchedule();
-  var today=new Date(), monday=getMonday(today);
-  var weekStart=monday;
-  var empHrs={};
+  var today=new Date(), ws=getMonday(today), empHrs={};
   for(var i=0;i<7;i++){
-    var iso=toISO(addDays(weekStart,i));
-    (data[iso]||[]).forEach(function(s){ empHrs[s.empId]=(empHrs[s.empId]||0)+shiftHours(s); });
+    var iso=toISO(addDays(ws,i));
+    (shifts[iso]||[]).forEach(function(s){var id=sEmpId(s);empHrs[id]=(empHrs[id]||0)+sHours(s);});
   }
 
-  var html='';
-  emps.forEach(function(e){
+  document.getElementById('emp-list').innerHTML=emps.map(function(e){
     var hrs=empHrs[e.id]||0;
-    html+='<div class="emp-card" style="border-left-color:'+e.color+'">';
-    html+='<div class="emp-avatar" style="background:'+e.color+'">'+esc(e.name.charAt(0))+'</div>';
-    html+='<div class="emp-info"><div class="emp-name">'+esc(e.name)+'</div>';
-    html+='<div class="emp-meta">'+esc(ROLES[e.role]||e.role)+'&nbsp;&nbsp;·&nbsp;&nbsp;'+hrs.toFixed(1)+'h this week</div></div>';
-    html+='<div class="emp-card-actions">';
-    html+='<button class="btn-emp-action recurring" onclick="openRecModal(\''+e.id+'\')">⟳ Default Schedule</button>';
-    html+='<button class="btn-emp-action" onclick="openEmpModal(\''+e.id+'\')">Edit</button>';
-    html+='</div></div>';
-  });
-  document.getElementById('emp-list').innerHTML=html;
+    return '<div class="emp-card" style="border-left-color:'+e.color+'">'+
+      '<div class="emp-avatar" style="background:'+e.color+'">'+esc(e.name.charAt(0))+'</div>'+
+      '<div class="emp-info"><div class="emp-name">'+esc(e.name)+'</div>'+
+      '<div class="emp-meta">'+esc(ROLES[e.role]||e.role)+' &nbsp;·&nbsp; '+hrs.toFixed(1)+'h this week'+
+      (e.store==='both'?' &nbsp;·&nbsp; <strong>Both stores</strong>':'')+'</div></div>'+
+      '<div class="emp-card-actions">'+
+      '<button class="btn-emp-action recurring" onclick="openRecModal(\''+e.id+'\')">⟳ Default Schedule</button>'+
+      '<button class="btn-emp-action" onclick="openEmpModal(\''+e.id+'\')">Edit</button>'+
+      '</div></div>';
+  }).join('');
 }
 
 /* ════════════════════════════════════════
    SHIFT MODAL
 ════════════════════════════════════════ */
-function openAddShift(iso) {
-  editShiftId=null; editShiftDate=null; addShiftDate=iso;
-  var d=new Date(iso+'T12:00:00');
-  document.getElementById('shift-modal-title').textContent='Add Shift — '+fmtShort(d);
+function openAddShift(iso){
+  editShiftId=null;editShiftDate=null;addShiftDate=iso;
+  document.getElementById('shift-modal-title').textContent='Add Shift — '+fmtShort(new Date(iso+'T12:00:00'));
   populateEmpSelect(null);
   document.getElementById('sm-start').value='09:00';
   document.getElementById('sm-end').value='17:00';
   document.getElementById('sm-notes').value='';
   document.getElementById('sm-delete').classList.add('hidden');
   document.getElementById('shift-overlay').classList.remove('hidden');
+  setTimeout(function(){document.getElementById('sm-emp').focus();},50);
 }
-function openEditShift(iso,id) {
-  var data=loadSchedule();
-  var s=(data[iso]||[]).find(function(x){ return x.id===id; });
+function openEditShift(iso,id){
+  var s=(shifts[iso]||[]).find(function(x){return x.id===id;});
   if(!s) return;
-  editShiftId=id; editShiftDate=iso; addShiftDate=null;
+  editShiftId=id;editShiftDate=iso;addShiftDate=null;
   document.getElementById('shift-modal-title').textContent='Edit Shift';
-  populateEmpSelect(s.empId);
-  document.getElementById('sm-start').value=s.start||'09:00';
-  document.getElementById('sm-end').value=s.end||'17:00';
+  populateEmpSelect(sEmpId(s));
+  document.getElementById('sm-start').value=sStart(s);
+  document.getElementById('sm-end').value=sEnd(s);
   document.getElementById('sm-notes').value=s.notes||'';
   document.getElementById('sm-delete').classList.remove('hidden');
   document.getElementById('shift-overlay').classList.remove('hidden');
 }
-function populateEmpSelect(selId) {
-  var emps=storeEmployees();
+function populateEmpSelect(selId){
   var sel=document.getElementById('sm-emp');
   sel.innerHTML='<option value="">— Select employee —</option>';
-  emps.forEach(function(e){
+  storeEmployees().forEach(function(e){
     sel.innerHTML+='<option value="'+e.id+'"'+(e.id===selId?' selected':'')+'>'+esc(e.name)+' ('+esc(ROLES[e.role]||e.role)+')</option>';
   });
 }
-function closeShiftModal() {
-  document.getElementById('shift-overlay').classList.add('hidden');
-  editShiftId=editShiftDate=addShiftDate=null;
-}
-function saveShift() {
+function closeShiftModal(){document.getElementById('shift-overlay').classList.add('hidden');editShiftId=editShiftDate=addShiftDate=null;}
+function saveShift(){
   var empId=document.getElementById('sm-emp').value;
-  if(!empId){ showToast('Select an employee','error'); return; }
-  var shift={id:editShiftId||uid(), empId:empId,
-    start:document.getElementById('sm-start').value,
-    end:document.getElementById('sm-end').value,
-    notes:document.getElementById('sm-notes').value.trim()};
-  var data=loadSchedule();
+  if(!empId){showToast('Select an employee','error');return;}
+  var btn=document.getElementById('sm-save'); btn.disabled=true; btn.textContent='Saving…';
   var date=editShiftDate||addShiftDate;
-  data[date]=data[date]||[];
-  if(editShiftId){
-    var idx=data[date].findIndex(function(s){ return s.id===editShiftId; });
-    if(idx>=0) data[date][idx]=shift; else data[date].push(shift);
-  } else { data[date].push(shift); }
-  saveSchedule(data);
-  closeShiftModal();
-  renderWeek();
-  showToast('Shift saved');
+  var body={emp_id:empId,store:currentStore,shift_date:date,start_time:document.getElementById('sm-start').value,end_time:document.getElementById('sm-end').value,notes:document.getElementById('sm-notes').value.trim()};
+
+  var p = editShiftId
+    ? sbPatch('schedule_shifts','id=eq.'+editShiftId,body)
+    : sbPost('schedule_shifts',body);
+
+  p.then(function(result){
+    btn.disabled=false; btn.textContent='Save Shift';
+    // Update cache
+    shifts[date]=shifts[date]||[];
+    if(editShiftId){
+      var idx=shifts[date].findIndex(function(s){return s.id===editShiftId;});
+      var updated=Object.assign({},body,{id:editShiftId});
+      if(idx>=0) shifts[date][idx]=updated; else shifts[date].push(updated);
+    } else {
+      var row=Array.isArray(result)?result[0]:result;
+      if(row) shifts[date].push(row);
+    }
+    closeShiftModal();
+    _paintWeek(addDays(getMonday(new Date()),weekOffset*7),addDays(getMonday(new Date()),weekOffset*7+6),new Date());
+    showToast('Shift saved');
+  }).catch(function(){btn.disabled=false;btn.textContent='Save Shift';showToast('Save failed','error');});
 }
-function deleteShift() {
+function deleteShift(){
   if(!editShiftId||!editShiftDate) return;
-  var data=loadSchedule();
-  data[editShiftDate]=(data[editShiftDate]||[]).filter(function(s){ return s.id!==editShiftId; });
-  saveSchedule(data);
-  closeShiftModal();
-  renderWeek();
-  showToast('Shift deleted');
+  var id=editShiftId, date=editShiftDate;
+  sbDelete('schedule_shifts','id=eq.'+id).then(function(){
+    shifts[date]=(shifts[date]||[]).filter(function(s){return s.id!==id;});
+    closeShiftModal();
+    _paintWeek(addDays(getMonday(new Date()),weekOffset*7),addDays(getMonday(new Date()),weekOffset*7+6),new Date());
+    showToast('Shift deleted');
+  });
 }
-function quickDelShift(iso,id) {
-  var data=loadSchedule();
-  data[iso]=(data[iso]||[]).filter(function(s){ return s.id!==id; });
-  saveSchedule(data);
-  renderWeek();
-  showToast('Shift removed');
+function quickDelShift(id,iso){
+  sbDelete('schedule_shifts','id=eq.'+id).then(function(){
+    shifts[iso]=(shifts[iso]||[]).filter(function(s){return s.id!==id;});
+    _paintWeek(addDays(getMonday(new Date()),weekOffset*7),addDays(getMonday(new Date()),weekOffset*7+6),new Date());
+    showToast('Shift removed');
+  });
 }
 
 /* ════════════════════════════════════════
    EMPLOYEE MODAL
 ════════════════════════════════════════ */
-function openEmpModal(id) {
-  editEmpId=id;
-  selectedColor=COLORS[0];
+function openEmpModal(id){
+  editEmpId=id; selectedColor=COLORS[0];
   var e=id?empById(id):null;
   document.getElementById('emp-modal-title').textContent=id?'Edit Employee':'Add Employee';
   document.getElementById('em-name').value=e?e.name:'';
-  document.getElementById('em-role').value=e?e.role:'groomer';
+  document.getElementById('em-role').value=e?(e.role||'retail'):'retail';
+  document.getElementById('em-store').value=e?(e.store||currentStore):currentStore;
   if(e) selectedColor=e.color||COLORS[0];
   renderColorPicker();
   document.getElementById('em-delete').classList.toggle('hidden',!id);
   document.getElementById('emp-overlay').classList.remove('hidden');
-  setTimeout(function(){ document.getElementById('em-name').focus(); },50);
+  setTimeout(function(){document.getElementById('em-name').focus();},50);
 }
-function closeEmpModal(){ document.getElementById('emp-overlay').classList.add('hidden'); editEmpId=null; }
+function closeEmpModal(){document.getElementById('emp-overlay').classList.add('hidden');editEmpId=null;}
 function renderColorPicker(){
   document.getElementById('em-colors').innerHTML=COLORS.map(function(c){
     return '<div class="color-swatch'+(c===selectedColor?' selected':'')+'" style="background:'+c+'" onclick="pickColor(\''+c+'\')"></div>';
   }).join('');
 }
-function pickColor(c){ selectedColor=c; renderColorPicker(); }
+function pickColor(c){selectedColor=c;renderColorPicker();}
 function saveEmployee(){
   var name=document.getElementById('em-name').value.trim();
-  if(!name){ showToast('Name required','error'); return; }
-  var r=loadRoster();
-  if(editEmpId){
-    var idx=r.employees.findIndex(function(e){ return e.id===editEmpId; });
-    if(idx>=0){ r.employees[idx].name=name; r.employees[idx].role=document.getElementById('em-role').value; r.employees[idx].color=selectedColor; }
-  } else {
-    r.employees.push({id:uid(),name:name,role:document.getElementById('em-role').value,store:currentStore,color:selectedColor});
-  }
-  saveRoster(r);
-  closeEmpModal();
-  renderRoster();
-  showToast('Employee saved');
+  if(!name){showToast('Name required','error');return;}
+  var btn=document.getElementById('em-save'); btn.disabled=true; btn.textContent='Saving…';
+  var body={name:name,role:document.getElementById('em-role').value,store:document.getElementById('em-store').value,color:selectedColor};
+  var p=editEmpId ? sbPatch('schedule_employees','id=eq.'+editEmpId,body) : sbPost('schedule_employees',body);
+  p.then(function(result){
+    btn.disabled=false; btn.textContent='Save';
+    if(editEmpId){
+      var idx=employees.findIndex(function(e){return e.id===editEmpId;});
+      if(idx>=0) employees[idx]=Object.assign({},employees[idx],body);
+    } else {
+      var row=Array.isArray(result)?result[0]:result;
+      if(row) employees.push(row);
+    }
+    closeEmpModal(); renderRoster(); showToast('Employee saved');
+  }).catch(function(){btn.disabled=false;btn.textContent='Save';showToast('Save failed','error');});
 }
 function deleteEmployee(){
   if(!editEmpId) return;
-  if(!confirm('Remove this employee? Their scheduled shifts will remain.')) return;
-  var r=loadRoster();
-  r.employees=r.employees.filter(function(e){ return e.id!==editEmpId; });
-  saveRoster(r);
-  closeEmpModal();
-  renderRoster();
-  showToast('Employee removed');
+  if(!confirm('Remove this employee? Their shifts will remain.')) return;
+  sbDelete('schedule_employees','id=eq.'+editEmpId).then(function(){
+    employees=employees.filter(function(e){return e.id!==editEmpId;});
+    closeEmpModal(); renderRoster(); showToast('Employee removed');
+  });
 }
 
 /* ════════════════════════════════════════
@@ -758,67 +772,56 @@ function deleteEmployee(){
 ════════════════════════════════════════ */
 function openRecModal(id){
   recEmpId=id;
-  var e=empById(id);
+  var e=empById(id), rec=(e&&e.recurring)||{};
   document.getElementById('rec-modal-title').textContent=(e?esc(e.name):'Employee')+' — Default Schedule';
-  var rec=loadRecurring();
-  var empRec=rec[id]||{};
-  var html='';
-  DAY_KEYS.forEach(function(key,i){
-    var on=empRec[key]!=null;
-    var st=(empRec[key]&&empRec[key].start)||'09:00';
-    var en=(empRec[key]&&empRec[key].end)||'17:00';
-    html+='<div class="rec-row">';
-    html+='<div class="rec-day">'+DAY_NAMES_SHORT[i]+'</div>';
-    html+='<button class="rec-toggle'+(on?' on':'')+'" id="rt-'+key+'" onclick="toggleRecDay(\''+key+'\')"></button>';
-    if(on){
-      html+='<div class="rec-times"><input type="time" id="rs-'+key+'" value="'+st+'"><span style="font-size:0.8rem;color:#aaa">to</span><input type="time" id="re-'+key+'" value="'+en+'"></div>';
-    } else {
-      html+='<div class="rec-times"><input type="time" id="rs-'+key+'" value="'+st+'" disabled><span style="font-size:0.8rem;color:#aaa">to</span><input type="time" id="re-'+key+'" value="'+en+'" disabled></div>';
-      html+='<div class="rec-off">Day off</div>';
-    }
-    html+='</div>';
-  });
-  document.getElementById('rec-rows').innerHTML=html;
+  document.getElementById('rec-rows').innerHTML=DAY_KEYS.map(function(key,i){
+    var on=rec[key]!=null, st=(rec[key]&&rec[key].start)||'09:00', en=(rec[key]&&rec[key].end)||'17:00';
+    return '<div class="rec-row">'+
+      '<div class="rec-day">'+DAY_SHORT[i]+'</div>'+
+      '<button class="rec-toggle'+(on?' on':'')+'" id="rt-'+key+'" onclick="toggleRecDay(\''+key+'\')"></button>'+
+      '<div class="rec-times">'+
+        '<input type="time" id="rs-'+key+'" value="'+st+'"'+(on?'':' disabled')+'>'+
+        '<span style="font-size:0.8rem;color:#aaa">to</span>'+
+        '<input type="time" id="re-'+key+'" value="'+en+'"'+(on?'':' disabled')+'>'+
+      '</div>'+
+      (!on?'<div class="rec-off">Day off</div>':'')+
+      '</div>';
+  }).join('');
   document.getElementById('rec-overlay').classList.remove('hidden');
 }
 function toggleRecDay(key){
-  var btn=document.getElementById('rt-'+key);
-  var isOn=btn.classList.contains('on');
+  var btn=document.getElementById('rt-'+key), isOn=btn.classList.contains('on');
   btn.classList.toggle('on',!isOn);
   document.getElementById('rs-'+key).disabled=isOn;
   document.getElementById('re-'+key).disabled=isOn;
-  // toggle off label
-  var row=btn.closest('.rec-row');
-  var offEl=row.querySelector('.rec-off');
-  if(isOn){ if(!offEl){ var d=document.createElement('div'); d.className='rec-off'; d.textContent='Day off'; row.appendChild(d); } }
-  else { if(offEl) offEl.remove(); }
+  var row=btn.closest('.rec-row'), offEl=row.querySelector('.rec-off');
+  if(isOn){if(!offEl){var d=document.createElement('div');d.className='rec-off';d.textContent='Day off';row.appendChild(d);}}
+  else{if(offEl)offEl.remove();}
 }
-function closeRecModal(){ document.getElementById('rec-overlay').classList.add('hidden'); recEmpId=null; }
+function closeRecModal(){document.getElementById('rec-overlay').classList.add('hidden');recEmpId=null;}
 function saveRecurring(){
-  var rec=loadRecurring();
-  var empRec={};
+  var rec={};
   DAY_KEYS.forEach(function(key){
     var on=document.getElementById('rt-'+key).classList.contains('on');
-    empRec[key]=on?{start:document.getElementById('rs-'+key).value,end:document.getElementById('re-'+key).value}:null;
+    rec[key]=on?{start:document.getElementById('rs-'+key).value,end:document.getElementById('re-'+key).value}:null;
   });
-  rec[recEmpId]=empRec;
-  saveRecurring2(rec);
-  closeRecModal();
-  showToast('Default schedule saved');
+  var btn=document.getElementById('rec-save'); btn.disabled=true; btn.textContent='Saving…';
+  sbPatch('schedule_employees','id=eq.'+recEmpId,{recurring:rec}).then(function(){
+    btn.disabled=false; btn.textContent='Save Default Schedule';
+    var e=empById(recEmpId); if(e) e.recurring=rec;
+    closeRecModal(); showToast('Default schedule saved');
+  }).catch(function(){btn.disabled=false;btn.textContent='Save Default Schedule';showToast('Save failed','error');});
 }
 
 /* ════════════════════════════════════════
    UTILITIES
 ════════════════════════════════════════ */
-function uid(){ return Math.random().toString(36).slice(2,10); }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function showToast(msg,type){
   var t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast'+(type?(' '+type):'');
-  clearTimeout(t._t); t._t=setTimeout(function(){ t.classList.add('hidden'); },2600);
+  t.textContent=msg; t.className='toast'+(type?' '+type:'');
+  clearTimeout(t._t); t._t=setTimeout(function(){t.classList.add('hidden');},2600);
 }
-
-// Close on overlay click
 ['shift-overlay','emp-overlay','rec-overlay'].forEach(function(id){
   document.getElementById(id).addEventListener('click',function(e){
     if(e.target===this){
@@ -828,79 +831,18 @@ function showToast(msg,type){
     }
   });
 });
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){closeShiftModal();closeEmpModal();closeRecModal();}
-});
-
-/* ════════════════════════════════════════
-   SEED SAMPLE DATA
-════════════════════════════════════════ */
-function seed(){
-  if(localStorage.getItem('wg_sched_seeded3')) return;
-  // Clear old seed data
-  ['wg_roster','wg_schedule_port-washington','wg_schedule_hicksville',
-   'wg_recurring_port-washington','wg_recurring_hicksville'].forEach(function(k){ localStorage.removeItem(k); });
-
-  // Real staff from Woof Gang Retail Schedule
-  var roster={employees:[
-    {id:'e1',name:'Cindy',    role:'manager',store:'both',           color:'#C4276E'},
-    {id:'e2',name:'Casey',    role:'retail', store:'port-washington',color:'#1565C0'},
-    {id:'e3',name:'Chris',    role:'retail', store:'both',           color:'#7B1FA2'},
-    {id:'e4',name:'Kyle',     role:'manager',store:'port-washington',color:'#6B3520'},
-    {id:'e5',name:'Hailey',   role:'retail', store:'hicksville',     color:'#E65100'},
-    {id:'e6',name:'Sophia',   role:'retail', store:'hicksville',     color:'#AD1457'},
-    {id:'e7',name:'Naomi',    role:'retail', store:'hicksville',     color:'#00838F'},
-    {id:'e8',name:'Christina',role:'retail', store:'hicksville',     color:'#2E7D32'},
-    {id:'e9',name:'Nicole',   role:'retail', store:'hicksville',     color:'#1B6B6B'},
-  ]};
-  saveRoster(roster);
-
-  // Recurring for PW (based on Master Schedule patterns)
-  var recPW={
-    e1:{mon:{start:'08:30',end:'17:00'},tue:{start:'08:30',end:'17:00'},wed:{start:'08:30',end:'17:00'},thu:null,fri:{start:'08:30',end:'17:00'},sat:{start:'08:30',end:'17:00'},sun:null},
-    e2:{mon:{start:'08:30',end:'17:00'},tue:null,wed:{start:'08:30',end:'17:00'},thu:{start:'08:30',end:'17:00'},fri:{start:'08:30',end:'17:00'},sat:null,sun:null},
-    e3:{mon:null,tue:{start:'11:00',end:'19:00'},wed:null,thu:{start:'11:00',end:'19:00'},fri:{start:'11:00',end:'19:00'},sat:null,sun:null},
-    e4:{mon:{start:'09:00',end:'17:00'},tue:null,wed:{start:'09:00',end:'17:00'},thu:null,fri:{start:'09:00',end:'17:00'},sat:null,sun:null},
-  };
-  localStorage.setItem('wg_recurring_port-washington',JSON.stringify(recPW));
-
-  // Recurring for HV
-  var recHV={
-    e1:{mon:{start:'09:00',end:'18:00'},tue:null,wed:{start:'09:00',end:'18:00'},thu:null,fri:null,sat:{start:'09:00',end:'18:00'},sun:null},
-    e3:{mon:{start:'09:00',end:'14:30'},tue:null,wed:null,thu:{start:'09:00',end:'14:30'},fri:null,sat:null,sun:null},
-    e5:{mon:{start:'09:00',end:'18:00'},tue:{start:'09:00',end:'18:00'},wed:{start:'09:00',end:'18:00'},thu:{start:'09:00',end:'18:00'},fri:{start:'09:00',end:'18:00'},sat:null,sun:null},
-    e6:{mon:{start:'09:00',end:'18:00'},tue:null,wed:{start:'09:00',end:'18:00'},thu:{start:'09:00',end:'18:00'},fri:null,sat:{start:'09:00',end:'15:00'},sun:null},
-    e7:{mon:{start:'09:00',end:'18:00'},tue:{start:'09:00',end:'18:00'},wed:null,thu:null,fri:{start:'09:00',end:'18:00'},sat:null,sun:null},
-    e8:{mon:null,tue:{start:'09:00',end:'18:00'},wed:{start:'09:00',end:'18:00'},thu:null,fri:{start:'09:00',end:'18:00'},sat:null,sun:null},
-  };
-  localStorage.setItem('wg_recurring_hicksville',JSON.stringify(recHV));
-
-  // Pre-fill this week for both stores from recurring
-  ['port-washington','hicksville'].forEach(function(store){
-    var rec=JSON.parse(localStorage.getItem('wg_recurring_'+store))||{};
-    var today=new Date(), monday=getMonday(today), sched={};
-    Object.keys(rec).forEach(function(empId){
-      DAY_KEYS.forEach(function(key,i){
-        var r=rec[empId][key];
-        if(!r) return;
-        var iso=toISO(addDays(monday,i));
-        sched[iso]=sched[iso]||[];
-        sched[iso].push({id:uid(),empId:empId,start:r.start,end:r.end,notes:''});
-      });
-    });
-    localStorage.setItem('wg_schedule_'+store,JSON.stringify(sched));
-  });
-
-  localStorage.setItem('wg_sched_seeded3','1');
-}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeShiftModal();closeEmpModal();closeRecModal();}});
 
 /* ════════════════════════════════════════
    INIT
 ════════════════════════════════════════ */
-seed();
-document.getElementById('btn-pw').className = currentStore==='port-washington'?'active':'';
-document.getElementById('btn-hv').className  = currentStore==='hicksville'?'active':'';
-renderWeek();
+document.getElementById('btn-pw').className=currentStore==='port-washington'?'active':'';
+document.getElementById('btn-hv').className=currentStore==='hicksville'?'active':'';
+startLoad();
+fetchEmployees().then(function(){
+  endLoad();
+  renderWeek();
+});
 </script>
 </body>
 </html>
