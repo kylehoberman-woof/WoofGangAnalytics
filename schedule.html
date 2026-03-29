@@ -849,9 +849,47 @@ function fetchShiftsAllStores(startISO, endISO){
     });
 }
 
+// Store hours by day of week (0=Mon..6=Sun)
+var STORE_HOURS={
+  'port-washington':{
+    0:{open:'08:30',close:'19:00'},1:{open:'08:30',close:'19:00'},2:{open:'08:30',close:'19:00'},
+    3:{open:'08:30',close:'19:00'},4:{open:'08:30',close:'19:00'},
+    5:{open:'09:00',close:'19:00'},
+    6:{open:'10:00',close:'18:00'}
+  },
+  'hicksville':{
+    0:{open:'09:00',close:'18:00'},1:{open:'09:00',close:'18:00'},2:{open:'09:00',close:'18:00'},
+    3:{open:'09:00',close:'18:00'},4:{open:'09:00',close:'18:00'},5:{open:'09:00',close:'18:00'},
+    6:{open:'10:00',close:'17:00'}
+  }
+};
+function timeToMin(t){var p=t.split(':');return parseInt(p[0],10)*60+parseInt(p[1],10);}
+function minToTime(m){return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
+function findUncoveredHours(storeKey,dayIdx,storeShifts){
+  var hrs=STORE_HOURS[storeKey]&&STORE_HOURS[storeKey][dayIdx];
+  if(!hrs) return [];
+  var openMin=timeToMin(hrs.open), closeMin=timeToMin(hrs.close);
+  // Build covered intervals from shifts
+  var intervals=storeShifts.map(function(s){
+    var st=sStart(s), en=sEnd(s);
+    if(!st) return null;
+    var a=timeToMin(st), b=en?timeToMin(en):closeMin;
+    return {a:Math.max(a,openMin),b:Math.min(b,closeMin)};
+  }).filter(function(x){return x&&x.b>x.a;});
+  intervals.sort(function(a,b){return a.a-b.a;});
+  // Find gaps
+  var gaps=[], cursor=openMin;
+  intervals.forEach(function(iv){
+    if(iv.a>cursor) gaps.push({from:minToTime(cursor),to:minToTime(iv.a)});
+    cursor=Math.max(cursor,iv.b);
+  });
+  if(cursor<closeMin) gaps.push({from:minToTime(cursor),to:minToTime(closeMin)});
+  return gaps;
+}
+
 function _paintCoverage(ws){
   var STORES=[{key:'port-washington',label:'Port Washington',cls:'pw'},{key:'hicksville',label:'Hicksville',cls:'hv'}];
-  var gaps=[], warns=[], ptoConflicts=[];
+  var noStaffDays=[], uncoveredGaps=[], ptoConflicts=[];
 
   // Build per-day per-store data
   var days=[];
@@ -863,41 +901,51 @@ function _paintCoverage(ws){
     STORES.forEach(function(st){
       var stShifts=dayShifts.filter(function(s){return s.store===st.key;});
       var offNames=offs.filter(function(o){return o.store_key===st.key;}).map(function(o){return o.employee_name;});
-      // Check conflicts: scheduled but also has time off
       var conflicts=stShifts.filter(function(s){
         var e=empById(sEmpId(s));
         return e && offNames.some(function(n){return n===e.full_name||n===e.name;});
       });
-      var status = stShifts.length===0?'gap':stShifts.length===1?'warn':'ok';
-      if(status==='gap') gaps.push(DAY_SHORT[i]+' '+fmtShort(d)+' — '+st.label);
-      if(status==='warn') warns.push(DAY_SHORT[i]+' '+fmtShort(d)+' — '+st.label+' (1 person)');
+      // Find uncovered store hours
+      var hourGaps=findUncoveredHours(st.key,i,stShifts);
+      var hrs=STORE_HOURS[st.key]&&STORE_HOURS[st.key][i];
+      var status;
+      if(stShifts.length===0) status='gap';
+      else if(hourGaps.length>0) status='gap';
+      else status='ok';
+
+      if(stShifts.length===0) noStaffDays.push(DAY_SHORT[i]+' '+fmtShort(d)+' — '+st.label);
+      else if(hourGaps.length>0){
+        hourGaps.forEach(function(g){
+          uncoveredGaps.push(DAY_SHORT[i]+' '+fmtShort(d)+' — '+st.label+' ('+fmtTime(g.from)+'–'+fmtTime(g.to)+')');
+        });
+      }
       if(conflicts.length) ptoConflicts.push(DAY_SHORT[i]+' '+fmtShort(d)+' — '+st.label);
-      storeData[st.key]={shifts:stShifts,offNames:offNames,conflicts:conflicts,status:status};
+      storeData[st.key]={shifts:stShifts,offNames:offNames,conflicts:conflicts,status:status,hourGaps:hourGaps,hours:hrs};
     });
     days.push({d:d,iso:iso,i:i,storeData:storeData});
   }
 
   // Summary alerts
   var sumHTML='';
-  if(gaps.length){
+  if(noStaffDays.length){
     sumHTML+='<div class="cov-summary-card" style="border-left:4px solid #C62828;color:#C62828">'+
-      '🔴 <strong>'+gaps.length+' gap'+(gaps.length>1?'s':'')+' — no coverage:</strong><br>'+
-      gaps.map(function(g){return '<span style="font-weight:400">'+g+'</span>';}).join('<br>')+
+      '🔴 <strong>'+noStaffDays.length+' day'+(noStaffDays.length>1?'s':'')+' with no staff:</strong><br>'+
+      noStaffDays.map(function(g){return '<span style="font-weight:400">'+g+'</span>';}).join('<br>')+
       '</div>';
   }
-  if(warns.length){
-    sumHTML+='<div class="cov-summary-card" style="border-left:4px solid #F57F17;color:#F57F17">'+
-      '⚠️ <strong>'+warns.length+' day'+(warns.length>1?'s':'')+' with only 1 person:</strong><br>'+
-      warns.map(function(g){return '<span style="font-weight:400">'+g+'</span>';}).join('<br>')+
+  if(uncoveredGaps.length){
+    sumHTML+='<div class="cov-summary-card" style="border-left:4px solid #E65100;color:#E65100">'+
+      '🕐 <strong>'+uncoveredGaps.length+' uncovered hour'+(uncoveredGaps.length>1?'s':'')+' during store hours:</strong><br>'+
+      uncoveredGaps.map(function(g){return '<span style="font-weight:400">'+g+'</span>';}).join('<br>')+
       '</div>';
   }
   if(ptoConflicts.length){
-    sumHTML+='<div class="cov-summary-card" style="border-left:4px solid #E65100;color:#E65100">'+
+    sumHTML+='<div class="cov-summary-card" style="border-left:4px solid #F57F17;color:#F57F17">'+
       '🏖 <strong>Time-off conflicts:</strong><br>'+
       ptoConflicts.map(function(g){return '<span style="font-weight:400">'+g+'</span>';}).join('<br>')+
       '</div>';
   }
-  if(!gaps.length && !warns.length && !ptoConflicts.length){
+  if(!noStaffDays.length && !uncoveredGaps.length && !ptoConflicts.length){
     sumHTML='<div class="cov-summary-card" style="border-left:4px solid #2E7D32;color:#2E7D32">✅ <strong>Full coverage all week — no gaps!</strong></div>';
   }
   document.getElementById('cov-summary').innerHTML=sumHTML;
@@ -907,9 +955,11 @@ function _paintCoverage(ws){
     var isToday=day.iso===toISO(new Date());
     var storesHTML=STORES.map(function(st){
       var sd=day.storeData[st.key];
-      var statusLabel=sd.status==='gap'?'No Coverage':sd.status==='warn'?'Light':'Covered';
+      var statusLabel=sd.status==='gap'?'Gap':'Covered';
+      var hoursLabel=sd.hours?fmtTime(sd.hours.open)+'–'+fmtTime(sd.hours.close):'';
       var stHTML='<div class="cov-store">'+
         '<div class="cov-store-label '+st.cls+'">'+st.label+
+          (hoursLabel?' <span style="font-weight:400;color:#aaa;font-size:0.62rem;letter-spacing:0">'+hoursLabel+'</span>':'')+
           '<span class="cov-status '+sd.status+'">'+statusLabel+'</span>'+
         '</div>';
       if(sd.shifts.length===0){
@@ -923,6 +973,11 @@ function _paintCoverage(ws){
             '<span class="cov-shift-time">'+fmtTime(sStart(s))+(sEnd(s)?'–'+fmtTime(sEnd(s)):'')+'</span>'+
             '</div>';
         }).join('')+'</div>';
+      }
+      if(sd.hourGaps&&sd.hourGaps.length>0){
+        stHTML+='<div style="margin-top:4px;font-size:0.72rem;color:#C62828;font-weight:600">'+
+          sd.hourGaps.map(function(g){return '🕐 No coverage '+fmtTime(g.from)+'–'+fmtTime(g.to);}).join('<br>')+
+          '</div>';
       }
       if(sd.offNames.length){
         stHTML+='<div class="cov-pto-warn">🏖 Off: '+sd.offNames.join(', ')+'</div>';
