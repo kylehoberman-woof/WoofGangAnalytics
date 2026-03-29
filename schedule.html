@@ -220,7 +220,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
   <div class="roster-main">
     <div class="roster-header">
       <h2>Employee Roster — <span id="roster-store-label"></span></h2>
-      <button class="btn-add-emp" onclick="openEmpModal(null)">+ Add Employee</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-emp-action" id="toggle-inactive-btn" onclick="toggleInactive()" style="font-size:0.78rem;padding:6px 12px;color:#aaa;border-color:#ddd">Show inactive</button>
+        <button class="btn-add-emp" onclick="openEmpModal(null)">+ Add Employee</button>
+      </div>
     </div>
     <div class="emp-list" id="emp-list"></div>
   </div>
@@ -378,6 +381,7 @@ var monthOffset   = 0;
 var employees     = [];   // cache from Supabase
 var shifts        = {};   // cache: ISO date → [shift, ...] (current store)
 var otherShifts   = {};   // cache: ISO date → [shift, ...] (other store, cross-store employees only)
+var showInactive  = false;
 var editShiftId   = null, editShiftDate=null, addShiftDate=null;
 var editEmpId     = null, recEmpId=null, selectedColor=COLORS[0];
 
@@ -696,8 +700,17 @@ function jumpToWeek(offset){weekOffset=offset;setTab('week');}
 /* ════════════════════════════════════════
    ROSTER VIEW
 ════════════════════════════════════════ */
+function toggleInactive(){
+  showInactive=!showInactive;
+  var btn=document.getElementById('toggle-inactive-btn');
+  btn.textContent=showInactive?'Hide inactive':'Show inactive';
+  btn.style.color=showInactive?'#C4276E':'#aaa';
+  btn.style.borderColor=showInactive?'#C4276E':'#ddd';
+  renderRoster();
+}
 function renderRoster(){
   var emps=storeEmployees();
+  if(!showInactive) emps=emps.filter(function(e){return e.is_active!==false;});
   document.getElementById('roster-store-label').textContent=currentStore==='port-washington'?'Port Washington':'Hicksville';
 
   if(!emps.length){
