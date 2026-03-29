@@ -243,8 +243,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
     <div class="form-col">
       <div class="fg"><label>Employee *</label><select id="sm-emp"></select></div>
       <div class="row2">
-        <div class="fg"><label>Start Time</label><input type="time" id="sm-start" value="09:00"></div>
-        <div class="fg"><label>End Time</label><input type="time" id="sm-end" value="17:00"></div>
+        <div class="fg"><label>Start Time</label><input type="time" id="sm-start" value="09:00" step="900"></div>
+        <div class="fg"><label>End Time</label><input type="time" id="sm-end" value="17:00" step="900"></div>
       </div>
       <div class="fg"><label>Notes</label><input type="text" id="sm-notes" placeholder="e.g. half day, opening shift"></div>
     </div>
@@ -997,9 +997,9 @@ function openRecModal(id){
       '<div class="rec-day">'+DAY_SHORT[i]+'</div>'+
       '<button class="rec-toggle'+(on?' on':'')+'" id="rt-'+key+'" onclick="toggleRecDay(\''+key+'\','+isBoth+')"></button>'+
       '<div class="rec-times">'+
-        '<input type="time" id="rs-'+key+'" value="'+st+'"'+(on?'':' disabled')+'>'+
+        '<input type="time" id="rs-'+key+'" value="'+st+'" step="900"'+(on?'':' disabled')+'>'+
         '<span style="font-size:0.8rem;color:#aaa">to</span>'+
-        '<input type="time" id="re-'+key+'" value="'+en+'"'+(on?'':' disabled')+'>'+
+        '<input type="time" id="re-'+key+'" value="'+en+'" step="900"'+(on?'':' disabled')+'>'+
       '</div>'+
       storeEl+
       (!on?'<div class="rec-off">Day off</div>':'')+
