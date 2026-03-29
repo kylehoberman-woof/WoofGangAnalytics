@@ -270,7 +270,7 @@ function load(){
 }
 
 function loadEmpNames(){
-  sbGet('/schedule_employees?store=in.('+encodeURIComponent(currentStore)+',both)&order=name&select=name').then(function(rows){
+  sbGet('/schedule_employees?is_active=eq.true&store=in.('+encodeURIComponent(currentStore)+',both)&order=name&select=name').then(function(rows){
     var dl=document.getElementById('emp-list');
     dl.innerHTML=(Array.isArray(rows)?rows:[]).map(function(e){return '<option value="'+esc(e.name)+'">';}).join('');
   });
