@@ -98,6 +98,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .roster-header h2{font-size:1.1rem;font-weight:800}
 .btn-add-emp{padding:9px 20px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer}
 .btn-add-emp:hover{background:#a31f5b}
+.store-check-row{display:flex;gap:8px}
+.store-check-btn{flex:1;padding:9px 12px;border:2px solid #eee;border-radius:8px;background:white;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;color:#aaa;transition:all 0.15s;text-align:center}
+.store-check-btn.active{border-color:#C4276E;color:#C4276E;background:#FDF0F5}
 .emp-list{display:flex;flex-direction:column;gap:10px}
 .emp-card{background:white;border-radius:12px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;border-left:5px solid #ddd}
 .emp-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:800;color:white;flex-shrink:0}
@@ -267,12 +270,11 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
           </select>
         </div>
         <div class="fg">
-          <label>Store</label>
-          <select id="em-store">
-            <option value="port-washington">Port Washington</option>
-            <option value="hicksville">Hicksville</option>
-            <option value="both">Both Stores</option>
-          </select>
+          <label>Works At</label>
+          <div class="store-check-row">
+            <button type="button" class="store-check-btn" id="em-store-pw" onclick="toggleStoreBtn('pw')">Port Washington</button>
+            <button type="button" class="store-check-btn" id="em-store-hv" onclick="toggleStoreBtn('hv')">Hicksville</button>
+          </div>
         </div>
       </div>
       <div class="row2">
@@ -818,6 +820,26 @@ function quickDelShift(id,iso){
 /* ════════════════════════════════════════
    EMPLOYEE MODAL
 ════════════════════════════════════════ */
+function toggleStoreBtn(key){
+  var btn=document.getElementById('em-store-'+key);
+  var isActive=btn.classList.contains('active');
+  // Must always have at least one store selected
+  var other=key==='pw'?'hv':'pw';
+  var otherActive=document.getElementById('em-store-'+other).classList.contains('active');
+  if(isActive && !otherActive) return; // can't deselect the only one
+  btn.classList.toggle('active',!isActive);
+}
+function getStoreValue(){
+  var pw=document.getElementById('em-store-pw').classList.contains('active');
+  var hv=document.getElementById('em-store-hv').classList.contains('active');
+  if(pw && hv) return 'both';
+  if(hv) return 'hicksville';
+  return 'port-washington';
+}
+function setStoreButtons(val){
+  document.getElementById('em-store-pw').classList.toggle('active', val==='port-washington'||val==='both');
+  document.getElementById('em-store-hv').classList.toggle('active', val==='hicksville'||val==='both');
+}
 function onRoleChange(){
   var role=document.getElementById('em-role').value;
   var defaults={groomer:'commission',bather:'hourly',retail:'hourly',manager:'salary',other:'hourly'};
@@ -837,7 +859,7 @@ function openEmpModal(id){
   document.getElementById('em-name').value=e?e.name:'';
   document.getElementById('em-fullname').value=e?(e.full_name||''):'';
   document.getElementById('em-role').value=e?(e.role||'retail'):'retail';
-  document.getElementById('em-store').value=e?(e.store||currentStore):currentStore;
+  setStoreButtons(e?(e.store||currentStore):currentStore);
   document.getElementById('em-paytype').value=e?(e.pay_type||'hourly'):'hourly';
   document.getElementById('em-hourlyrate').value=e&&e.hourly_rate?e.hourly_rate:'';
   document.getElementById('em-hiredate').value=e?(e.hire_date||''):'';
@@ -868,7 +890,7 @@ function saveEmployee(){
     name:name,
     full_name:document.getElementById('em-fullname').value.trim()||null,
     role:document.getElementById('em-role').value,
-    store:document.getElementById('em-store').value,
+    store:getStoreValue(),
     color:selectedColor,
     pay_type:document.getElementById('em-paytype').value,
     hourly_rate:hrVal,
