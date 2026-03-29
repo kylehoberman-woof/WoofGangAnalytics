@@ -147,6 +147,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .rec-times input:focus{outline:none;border-color:#C4276E}
 .rec-times input:disabled{opacity:0.35;cursor:not-allowed}
 .rec-off{font-size:0.78rem;color:#bbb;font-weight:600}
+.rec-store-sel{display:flex;gap:4px;margin-left:4px}
+.rec-store-btn{padding:3px 9px;border:2px solid #eee;border-radius:6px;font-size:0.7rem;font-weight:800;cursor:pointer;background:white;color:#aaa;transition:all 0.15s}
+.rec-store-btn.active{border-color:#C4276E;background:#C4276E;color:white}
+.rec-store-btn[data-store="hicksville"].active{border-color:#1565C0;background:#1565C0}
 
 /* Color picker */
 .color-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -661,7 +665,7 @@ function fillRecurring(){
       var iso=toISO(addDays(ws,i));
       var existing=shifts[iso]||[];
       var dup=existing.some(function(x){return sEmpId(x)===e.id;});
-      if(!dup) posts.push({emp_id:e.id,store:currentStore,shift_date:iso,start_time:r.start,end_time:r.end,notes:''});
+      if(!dup) posts.push({emp_id:e.id,store:r.store||currentStore,shift_date:iso,start_time:r.start,end_time:r.end,notes:''});
     });
   });
 
@@ -977,23 +981,44 @@ function deleteEmployee(){
 function openRecModal(id){
   recEmpId=id;
   var e=empById(id), rec=(e&&e.recurring)||{};
+  var isBoth=e&&e.store==='both';
   document.getElementById('rec-modal-title').textContent=(e?esc(e.name):'Employee')+' — Default Schedule';
   document.getElementById('rec-rows').innerHTML=DAY_KEYS.map(function(key,i){
     var on=rec[key]!=null, st=(rec[key]&&rec[key].start)||'09:00', en=(rec[key]&&rec[key].end)||'17:00';
+    var dayStore=(rec[key]&&rec[key].store)||'port-washington';
+    var storeEl='';
+    if(isBoth){
+      storeEl='<div class="rec-store-sel" id="rss-'+key+'"'+(on?'':' style="display:none"')+'>'+
+        '<button type="button" class="rec-store-btn'+(dayStore==='port-washington'?' active':'')+'" data-store="port-washington" onclick="setRecStore(\''+key+'\',\'port-washington\')">PW</button>'+
+        '<button type="button" class="rec-store-btn'+(dayStore==='hicksville'?' active':'')+'" data-store="hicksville" onclick="setRecStore(\''+key+'\',\'hicksville\')">HV</button>'+
+        '</div>';
+    }
     return '<div class="rec-row">'+
       '<div class="rec-day">'+DAY_SHORT[i]+'</div>'+
-      '<button class="rec-toggle'+(on?' on':'')+'" id="rt-'+key+'" onclick="toggleRecDay(\''+key+'\')"></button>'+
+      '<button class="rec-toggle'+(on?' on':'')+'" id="rt-'+key+'" onclick="toggleRecDay(\''+key+'\','+isBoth+')"></button>'+
       '<div class="rec-times">'+
         '<input type="time" id="rs-'+key+'" value="'+st+'"'+(on?'':' disabled')+'>'+
         '<span style="font-size:0.8rem;color:#aaa">to</span>'+
         '<input type="time" id="re-'+key+'" value="'+en+'"'+(on?'':' disabled')+'>'+
       '</div>'+
+      storeEl+
       (!on?'<div class="rec-off">Day off</div>':'')+
       '</div>';
   }).join('');
   document.getElementById('rec-overlay').classList.remove('hidden');
 }
-function toggleRecDay(key){
+function setRecStore(key, store){
+  document.getElementById('rss-'+key).querySelectorAll('.rec-store-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.store===store);
+  });
+}
+function getRecStore(key){
+  var sel=document.getElementById('rss-'+key);
+  if(!sel) return null;
+  var active=sel.querySelector('.rec-store-btn.active');
+  return active?active.dataset.store:'port-washington';
+}
+function toggleRecDay(key, isBoth){
   var btn=document.getElementById('rt-'+key), isOn=btn.classList.contains('on');
   btn.classList.toggle('on',!isOn);
   document.getElementById('rs-'+key).disabled=isOn;
@@ -1001,13 +1026,21 @@ function toggleRecDay(key){
   var row=btn.closest('.rec-row'), offEl=row.querySelector('.rec-off');
   if(isOn){if(!offEl){var d=document.createElement('div');d.className='rec-off';d.textContent='Day off';row.appendChild(d);}}
   else{if(offEl)offEl.remove();}
+  if(isBoth){var storeEl=document.getElementById('rss-'+key);if(storeEl)storeEl.style.display=isOn?'none':'flex';}
 }
 function closeRecModal(){document.getElementById('rec-overlay').classList.add('hidden');recEmpId=null;}
 function saveRecurring(){
   var rec={};
+  var isBoth=(empById(recEmpId)||{}).store==='both';
   DAY_KEYS.forEach(function(key){
     var on=document.getElementById('rt-'+key).classList.contains('on');
-    rec[key]=on?{start:document.getElementById('rs-'+key).value,end:document.getElementById('re-'+key).value}:null;
+    if(on){
+      var entry={start:document.getElementById('rs-'+key).value,end:document.getElementById('re-'+key).value};
+      if(isBoth) entry.store=getRecStore(key);
+      rec[key]=entry;
+    } else {
+      rec[key]=null;
+    }
   });
   var btn=document.getElementById('rec-save'); btn.disabled=true; btn.textContent='Saving…';
   sbPatch('schedule_employees','id=eq.'+recEmpId,{recurring:rec}).then(function(){
