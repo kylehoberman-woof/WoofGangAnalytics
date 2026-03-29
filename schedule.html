@@ -67,6 +67,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .shift-role{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin:1px 0 3px}
 .shift-time{font-size:0.75rem;color:#999;font-weight:500}
 .shift-note{font-size:0.7rem;color:#bbb;margin-top:2px}
+.time-off-pill{display:flex;align-items:center;gap:5px;background:#FFF8E1;border-left:3px solid #F9A825;border-radius:6px;padding:4px 7px;font-size:0.72rem;font-weight:700;color:#6D4C41;margin-bottom:4px}
+.time-off-pill .to-type{font-weight:500;color:#A1887F;font-size:0.67rem;text-transform:uppercase;letter-spacing:0.04em}
 .shift-del{position:absolute;top:5px;right:5px;background:none;border:none;color:#ddd;cursor:pointer;font-size:0.85rem;padding:2px 5px;border-radius:4px;line-height:1;transition:color 0.15s,background 0.15s}
 .shift-del:hover{color:#c62828;background:#fce4ec}
 .btn-add-shift{width:100%;padding:8px;border:2px dashed #ddd;border-radius:8px;background:transparent;font-family:inherit;font-size:0.78rem;font-weight:600;color:#ccc;cursor:pointer;transition:all 0.15s}
@@ -382,6 +384,7 @@ var employees     = [];   // cache from Supabase
 var shifts        = {};   // cache: ISO date → [shift, ...] (current store)
 var otherShifts   = {};   // cache: ISO date → [shift, ...] (other store, cross-store employees only)
 var showInactive  = false;
+var timeOff       = {};   // cache: ISO date → [{employee_name, type, status}, ...]
 var editShiftId   = null, editShiftDate=null, addShiftDate=null;
 var editEmpId     = null, recEmpId=null, selectedColor=COLORS[0];
 
@@ -464,6 +467,25 @@ function fetchOtherStoreShifts(startISO, endISO){
     });
 }
 
+function fetchTimeOff(startISO, endISO){
+  var cur=new Date(startISO+'T12:00:00'), end=new Date(endISO+'T12:00:00');
+  while(cur<=end){timeOff[toISO(cur)]=[];cur=addDays(cur,1);}
+  return sbGet('/time_off?store_key=eq.'+encodeURIComponent(currentStore)
+    +'&start_date=lte.'+endISO+'&end_date=gte.'+startISO
+    +'&status=neq.Rejected&select=employee_name,type,status,start_date,end_date')
+    .then(function(rows){
+      (Array.isArray(rows)?rows:[]).forEach(function(r){
+        var s=new Date(r.start_date+'T12:00:00'), e=new Date(r.end_date+'T12:00:00');
+        while(s<=e){
+          var iso=toISO(s);
+          if(timeOff[iso]!==undefined) timeOff[iso].push(r);
+          s=addDays(s,1);
+        }
+      });
+    })
+    .catch(function(){});  // silently ignore if table missing
+}
+
 /* ════════════════════════════════════════
    STORE + TAB
 ════════════════════════════════════════ */
@@ -472,7 +494,7 @@ function setStore(key){
   localStorage.setItem('wg_sched_store',key);
   document.getElementById('btn-pw').className=key==='port-washington'?'active':'';
   document.getElementById('btn-hv').className=key==='hicksville'?'active':'';
-  shifts={}; otherShifts={};
+  shifts={}; otherShifts={}; timeOff={};
   startLoad();
   fetchEmployees().then(function(){endLoad();refreshCurrent();});
 }
@@ -507,7 +529,8 @@ function renderWeek(){
   startLoad();
   Promise.all([
     fetchShifts(toISO(ws),toISO(we)),
-    fetchOtherStoreShifts(toISO(ws),toISO(we))
+    fetchOtherStoreShifts(toISO(ws),toISO(we)),
+    fetchTimeOff(toISO(ws),toISO(we))
   ]).then(function(){
     endLoad();
     _paintWeek(ws,we,today);
@@ -546,6 +569,9 @@ function _paintWeek(ws,we,today){
       .sort(function(a,b){return sStart(a.s).localeCompare(sStart(b.s));});
     html+='<div class="day-col">';
     html+='<div class="day-hdr'+(isT?' today':'')+'"><div class="day-name">'+DAY_SHORT[i]+'</div><div class="day-date">'+d.getDate()+'</div></div>';
+    (timeOff[iso]||[]).forEach(function(o){
+      html+='<div class="time-off-pill">🏖 '+esc(o.employee_name)+' <span class="to-type">'+esc(o.type)+'</span></div>';
+    });
     dayShifts.forEach(function(item){
       var s=item.s, isOther=item.other;
       var e=empById(sEmpId(s))||{name:'Unknown',color:'#aaa',role:'other'};
