@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — Employee Incidents</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e}
+
+.loading-bar{height:3px;background:#C4276E;position:fixed;top:0;left:0;width:0;z-index:200;transition:width 0.3s}
+.loading-bar.active{width:70%}
+.loading-bar.done{width:100%;opacity:0;transition:width 0.2s,opacity 0.4s 0.2s}
+
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:28px 32px 22px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.header h1{font-size:1.6rem;font-weight:800;letter-spacing:-0.02em}
+.header p{font-size:0.85rem;opacity:0.85;margin-top:2px}
+
+.topbar{background:white;border-bottom:2px solid #eee;padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.store-toggle{display:flex;border:2px solid #C4276E;border-radius:8px;overflow:hidden}
+.store-toggle button{padding:6px 16px;border:none;background:white;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;color:#C4276E;transition:background 0.15s}
+.store-toggle button.active{background:#C4276E;color:white}
+.add-btn{margin-left:auto;padding:8px 18px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer;transition:background 0.15s}
+.add-btn:hover{background:#a31f5b}
+
+.filter-bar{background:white;border-bottom:1px solid #eee;padding:10px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filter-tabs{display:flex;gap:4px}
+.ftab{padding:6px 14px;border:none;background:#f5f5f5;border-radius:8px;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;color:#888;transition:all 0.15s}
+.ftab.active{background:#1a1a2e;color:white}
+.filter-select{padding:6px 12px;border:2px solid #eee;border-radius:8px;font-family:inherit;font-size:0.82rem;font-weight:600;color:#555;background:white;cursor:pointer}
+.filter-select:focus{outline:none;border-color:#C4276E}
+.resolved-toggle{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:0.82rem;font-weight:700;color:#888;cursor:pointer}
+.resolved-toggle input{cursor:pointer;width:15px;height:15px}
+
+.summary-row{display:flex;gap:16px;padding:20px 20px 0;flex-wrap:wrap}
+.stat-card{background:white;border-radius:12px;padding:16px 20px;flex:1;min-width:140px;box-shadow:0 1px 6px rgba(0,0,0,0.06);border-top:4px solid #ddd}
+.stat-card.injury{border-top-color:#E53935}
+.stat-card.disciplinary{border-top-color:#FB8C00}
+.stat-card.incident{border-top-color:#1565C0}
+.stat-card.resolved{border-top-color:#2E7D32}
+.stat-num{font-size:2rem;font-weight:800;color:#1a1a2e}
+.stat-label{font-size:0.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px}
+
+.main{padding:16px 20px 60px}
+.table-wrap{background:white;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,0.06);overflow:hidden;margin-top:16px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th{padding:11px 14px;text-align:left;font-size:0.75rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;background:#fafafa;border-bottom:2px solid #eee;white-space:nowrap}
+td{padding:12px 14px;font-size:0.88rem;border-bottom:1px solid #f0f0f0;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr.data-row:hover td{background:#fafafa;cursor:pointer}
+.empty-row td{text-align:center;color:#bbb;font-style:italic;padding:32px}
+
+.type-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.type-injury{background:#ffebee;color:#C62828}
+.type-disciplinary{background:#fff3e0;color:#E65100}
+.type-incident{background:#e3f2fd;color:#1565C0}
+
+.sev-badge{display:inline-block;padding:2px 8px;border-radius:8px;font-size:0.72rem;font-weight:700;text-transform:uppercase}
+.sev-low{background:#e8f5e9;color:#2E7D32}
+.sev-medium{background:#fff8e1;color:#F57F17}
+.sev-high{background:#ffebee;color:#B71C1C}
+
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle}
+.dot-open{background:#E53935}
+.dot-resolved{background:#2E7D32}
+
+.desc-cell{max-width:240px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.action-cell{white-space:nowrap}
+.row-btn{padding:4px 10px;border:2px solid #ddd;background:white;border-radius:6px;font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer;color:#555;transition:all 0.15s;margin-right:4px}
+.row-btn:hover{border-color:#C4276E;color:#C4276E}
+.row-btn.resolve{border-color:#2E7D32;color:#2E7D32}
+.row-btn.resolve:hover{background:#2E7D32;color:white}
+.row-btn.unresolve{border-color:#ccc;color:#aaa}
+.row-btn.unresolve:hover{border-color:#888;color:#555}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay.hidden{display:none}
+.modal{background:white;border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.modal h2{font-size:1.2rem;font-weight:800;color:#1a1a2e;margin-bottom:20px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:0}
+.form-group{margin-bottom:12px;display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:0.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em}
+.form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:2px solid #eee;border-radius:8px;font-family:inherit;font-size:0.9rem;color:#1a1a2e;transition:border-color 0.15s;background:white}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#C4276E}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-group .check-label{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:0.9rem;font-weight:600;color:#1a1a2e;padding:9px 12px;border:2px solid #eee;border-radius:8px}
+.form-group .check-label input{width:16px;height:16px;cursor:pointer}
+
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #eee}
+.btn-cancel{padding:9px 18px;border:2px solid #ddd;background:white;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;color:#888}
+.btn-cancel:hover{border-color:#aaa}
+.btn-save{padding:9px 22px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;transition:background 0.15s}
+.btn-save:hover{background:#a31f5b}
+.btn-save:disabled{background:#ccc;cursor:not-allowed}
+.btn-del{padding:9px 18px;background:#ffebee;color:#C62828;border:2px solid #ffcdd2;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;margin-right:auto}
+.btn-del:hover{background:#ffcdd2}
+.hidden{display:none!important}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:10px 22px;border-radius:10px;font-size:0.88rem;font-weight:700;z-index:300;transition:opacity 0.3s}
+.toast.hidden{opacity:0;pointer-events:none}
+.toast.error{background:#C62828}
+.toast.success{background:#2E7D32}
+
+@media(max-width:700px){
+  .summary-row{gap:10px}
+  .stat-card{min-width:calc(50% - 8px)}
+  .form-row{grid-template-columns:1fr}
+  .filter-tabs{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div id="loading-bar" class="loading-bar"></div>
+
+<div class="header">
+  <a href="index.html" class="back-link">← Home</a>
+  <h1>Employee Incidents</h1>
+  <p>Injuries, disciplinary actions &amp; incidents</p>
+</div>
+
+<div class="topbar">
+  <div class="store-toggle">
+    <button id="btn-pw" onclick="setStore('port-washington')">Port Washington</button>
+    <button id="btn-hv" onclick="setStore('hicksville')">Hicksville</button>
+  </div>
+  <button class="add-btn" onclick="openModal()">+ Log Incident</button>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-tabs">
+    <button class="ftab active" id="ftab-all" onclick="setFilter('all')">All</button>
+    <button class="ftab" id="ftab-injury" onclick="setFilter('injury')">🩹 Injuries</button>
+    <button class="ftab" id="ftab-disciplinary" onclick="setFilter('disciplinary')">📋 Disciplinary</button>
+    <button class="ftab" id="ftab-incident" onclick="setFilter('incident')">⚠️ Incidents</button>
+  </div>
+  <select class="filter-select" id="sev-filter" onchange="render()">
+    <option value="">All Severities</option>
+    <option value="high">High</option>
+    <option value="medium">Medium</option>
+    <option value="low">Low</option>
+  </select>
+  <label class="resolved-toggle">
+    <input type="checkbox" id="show-resolved" onchange="render()"> Show Resolved
+  </label>
+</div>
+
+<div class="summary-row" id="summary-row"></div>
+
+<div class="main">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Severity</th>
+          <th>Description</th>
+          <th>Follow-up</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="overlay hidden" id="overlay">
+  <div class="modal">
+    <h2 id="modal-title">Log Incident</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Employee</label>
+        <input type="text" id="f-emp" list="emp-list" placeholder="Employee name" autocomplete="off">
+        <datalist id="emp-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="f-date">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <select id="f-type">
+          <option value="injury">🩹 Injury</option>
+          <option value="disciplinary">📋 Disciplinary</option>
+          <option value="incident">⚠️ Incident</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Severity</label>
+        <select id="f-severity">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea id="f-desc" placeholder="What happened?"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Follow-up / Action Taken</label>
+      <textarea id="f-followup" placeholder="Steps taken, outcome…"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="check-label">
+        <input type="checkbox" id="f-resolved"> Mark as Resolved
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-del hidden" id="btn-del" onclick="deleteRecord()">Delete</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="btn-save" onclick="saveRecord()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+var SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SHD = {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
+
+function sbGet(p){return fetch(SB+p,{headers:SHD}).then(function(r){return r.json();});}
+function sbPost(t,b){return fetch(SB+'/'+t,{method:'POST',headers:SHD,body:JSON.stringify(b)}).then(function(r){return r.json();});}
+function sbPatch(t,f,b){return fetch(SB+'/'+t+'?'+f,{method:'PATCH',headers:SHD,body:JSON.stringify(b)}).then(function(r){return r.status===204?null:r.json();});}
+function sbDelete(t,f){return fetch(SB+'/'+t+'?'+f,{method:'DELETE',headers:SHD});}
+
+var currentStore = localStorage.getItem('wg_sched_store')||'port-washington';
+var records = [];
+var filterType = 'all';
+var editId = null;
+
+var _lc=0;
+function startLoad(){_lc++;document.getElementById('loading-bar').className='loading-bar active';}
+function endLoad(){_lc=Math.max(0,_lc-1);if(!_lc){var b=document.getElementById('loading-bar');b.className='loading-bar done';setTimeout(function(){b.className='loading-bar';},600);}}
+
+function setStore(k){
+  currentStore=k;
+  localStorage.setItem('wg_sched_store',k);
+  document.getElementById('btn-pw').className=k==='port-washington'?'active':'';
+  document.getElementById('btn-hv').className=k==='hicksville'?'active':'';
+  load();
+}
+
+function setFilter(t){
+  filterType=t;
+  ['all','injury','disciplinary','incident'].forEach(function(f){
+    document.getElementById('ftab-'+f).className='ftab'+(f===t?' active':'');
+  });
+  render();
+}
+
+function load(){
+  startLoad();
+  sbGet('/employee_incidents?store=eq.'+encodeURIComponent(currentStore)+'&order=date.desc,created_at.desc').then(function(rows){
+    records=Array.isArray(rows)?rows:[];
+    endLoad();
+    loadEmpNames();
+    render();
+  }).catch(function(){endLoad();showToast('Failed to load','error');});
+}
+
+function loadEmpNames(){
+  sbGet('/schedule_employees?store=in.('+encodeURIComponent(currentStore)+',both)&order=name&select=name').then(function(rows){
+    var dl=document.getElementById('emp-list');
+    dl.innerHTML=(Array.isArray(rows)?rows:[]).map(function(e){return '<option value="'+esc(e.name)+'">';}).join('');
+  });
+}
+
+function getFiltered(){
+  var showResolved=document.getElementById('show-resolved').checked;
+  var sevFilter=document.getElementById('sev-filter').value;
+  return records.filter(function(r){
+    if(!showResolved && r.resolved) return false;
+    if(filterType!=='all' && r.type!==filterType) return false;
+    if(sevFilter && r.severity!==sevFilter) return false;
+    return true;
+  });
+}
+
+function renderSummary(){
+  var open=records.filter(function(r){return !r.resolved;});
+  var counts={injury:0,disciplinary:0,incident:0};
+  open.forEach(function(r){if(counts[r.type]!==undefined)counts[r.type]++;});
+  var now=new Date(), mo=now.getMonth(), yr=now.getFullYear();
+  var resolvedThisMonth=records.filter(function(r){
+    if(!r.resolved)return false;
+    var d=new Date(r.date+'T12:00:00');
+    return d.getMonth()===mo && d.getFullYear()===yr;
+  }).length;
+  document.getElementById('summary-row').innerHTML=[
+    {cls:'injury',       num:counts.injury,        lbl:'Open Injuries'},
+    {cls:'disciplinary', num:counts.disciplinary,  lbl:'Disciplinary'},
+    {cls:'incident',     num:counts.incident,      lbl:'Open Incidents'},
+    {cls:'resolved',     num:resolvedThisMonth,    lbl:'Resolved This Month'}
+  ].map(function(s){
+    return '<div class="stat-card '+s.cls+'"><div class="stat-num">'+s.num+'</div><div class="stat-label">'+s.lbl+'</div></div>';
+  }).join('');
+}
+
+function render(){
+  renderSummary();
+  var rows=getFiltered();
+  var TYPE_LABEL={injury:'🩹 Injury',disciplinary:'📋 Disciplinary',incident:'⚠️ Incident'};
+  var tbody=document.getElementById('tbl-body');
+  if(!rows.length){
+    tbody.innerHTML='<tr class="empty-row"><td colspan="8">No records found</td></tr>';
+    return;
+  }
+  tbody.innerHTML=rows.map(function(r){
+    return '<tr class="data-row" onclick="openModal(\''+r.id+'\')">'
+      +'<td><strong>'+esc(r.employee_name)+'</strong></td>'
+      +'<td style="white-space:nowrap">'+fmtDate(r.date)+'</td>'
+      +'<td><span class="type-badge type-'+r.type+'">'+(TYPE_LABEL[r.type]||r.type)+'</span></td>'
+      +'<td><span class="sev-badge sev-'+r.severity+'">'+esc(r.severity)+'</span></td>'
+      +'<td class="desc-cell">'+esc(r.description||'—')+'</td>'
+      +'<td class="desc-cell" style="color:#888">'+esc(r.follow_up||'—')+'</td>'
+      +'<td style="white-space:nowrap"><span class="status-dot '+(r.resolved?'dot-resolved':'dot-open')+'"></span>'+(r.resolved?'Resolved':'Open')+'</td>'
+      +'<td class="action-cell" onclick="event.stopPropagation()">'
+        +(r.resolved
+          ?'<button class="row-btn unresolve" onclick="toggleResolved(\''+r.id+'\',false)">Reopen</button>'
+          :'<button class="row-btn resolve" onclick="toggleResolved(\''+r.id+'\',true)">Resolve</button>')
+      +'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+function fmtDate(s){
+  if(!s)return '';
+  var d=new Date(s+'T12:00:00');
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+
+function toggleResolved(id,val){
+  sbPatch('employee_incidents','id=eq.'+id,{resolved:val}).then(function(){
+    var r=records.find(function(x){return x.id===id;});
+    if(r)r.resolved=val;
+    render();
+    showToast(val?'Marked resolved':'Reopened');
+  }).catch(function(){showToast('Update failed','error');});
+}
+
+function openModal(id){
+  editId=id||null;
+  document.getElementById('modal-title').textContent=id?'Edit Incident':'Log Incident';
+  document.getElementById('btn-del').className='btn-del'+(id?'':' hidden');
+  if(id){
+    var r=records.find(function(x){return x.id===id;});
+    if(r){
+      document.getElementById('f-emp').value=r.employee_name||'';
+      document.getElementById('f-date').value=r.date||'';
+      document.getElementById('f-type').value=r.type||'incident';
+      document.getElementById('f-severity').value=r.severity||'low';
+      document.getElementById('f-desc').value=r.description||'';
+      document.getElementById('f-followup').value=r.follow_up||'';
+      document.getElementById('f-resolved').checked=!!r.resolved;
+    }
+  } else {
+    document.getElementById('f-emp').value='';
+    document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
+    document.getElementById('f-type').value='incident';
+    document.getElementById('f-severity').value='low';
+    document.getElementById('f-desc').value='';
+    document.getElementById('f-followup').value='';
+    document.getElementById('f-resolved').checked=false;
+  }
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function closeModal(){
+  document.getElementById('overlay').classList.add('hidden');
+  editId=null;
+}
+
+function saveRecord(){
+  var emp=document.getElementById('f-emp').value.trim();
+  if(!emp){showToast('Enter an employee name','error');return;}
+  var btn=document.getElementById('btn-save');
+  btn.disabled=true; btn.textContent='Saving…';
+  var body={
+    store:currentStore,
+    employee_name:emp,
+    date:document.getElementById('f-date').value,
+    type:document.getElementById('f-type').value,
+    severity:document.getElementById('f-severity').value,
+    description:document.getElementById('f-desc').value.trim(),
+    follow_up:document.getElementById('f-followup').value.trim(),
+    resolved:document.getElementById('f-resolved').checked
+  };
+  var p=editId
+    ?sbPatch('employee_incidents','id=eq.'+editId,body)
+    :sbPost('employee_incidents',body);
+  p.then(function(){
+    btn.disabled=false; btn.textContent='Save';
+    closeModal(); load();
+    showToast(editId?'Updated':'Logged');
+  }).catch(function(){
+    btn.disabled=false; btn.textContent='Save';
+    showToast('Save failed','error');
+  });
+}
+
+function deleteRecord(){
+  if(!editId||!confirm('Delete this record? This cannot be undone.'))return;
+  sbDelete('employee_incidents','id=eq.'+editId).then(function(){
+    closeModal(); load(); showToast('Deleted');
+  }).catch(function(){showToast('Delete failed','error');});
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(type?' '+type:'');
+  clearTimeout(t._t); t._t=setTimeout(function(){t.classList.add('hidden');},2600);
+}
+
+document.getElementById('overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+
+document.getElementById('btn-pw').className=currentStore==='port-washington'?'active':'';
+document.getElementById('btn-hv').className=currentStore==='hicksville'?'active':'';
+load();
+</script>
+</body>
+</html>
