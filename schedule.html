@@ -433,6 +433,27 @@ var editShiftId   = null, editShiftDate=null, addShiftDate=null;
 var editEmpId     = null, recEmpId=null, selectedColor=COLORS[0];
 
 /* ════════════════════════════════════════
+   15-MINUTE INTERVAL ENFORCEMENT
+════════════════════════════════════════ */
+function snapTo15(input){
+  var v=input.value; if(!v) return;
+  var parts=v.split(':');
+  var h=parseInt(parts[0],10), m=parseInt(parts[1],10);
+  m=Math.round(m/15)*15;
+  if(m===60){m=0;h=(h+1)%24;}
+  input.value=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+// Attach to shift modal time inputs
+document.getElementById('sm-start').addEventListener('change',function(){snapTo15(this);});
+document.getElementById('sm-end').addEventListener('change',function(){snapTo15(this);});
+// Attach to dynamically created recurring schedule inputs via event delegation
+document.addEventListener('change',function(e){
+  if(e.target&&e.target.type==='time'&&(e.target.id.startsWith('rs-')||e.target.id.startsWith('re-'))){
+    snapTo15(e.target);
+  }
+});
+
+/* ════════════════════════════════════════
    SHIFT FIELD NORMALIZERS
    (Supabase returns start_time/end_time/emp_id)
 ════════════════════════════════════════ */
