@@ -238,19 +238,25 @@ var SB_URL  = 'https://bqzinttbjeeaybywhhet.supabase.co';
 var SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
 var SB_HDR  = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
 
-/* ── Employee lists ───────────────────────────── */
-var EMPLOYEES = {
-  'port-washington': [
-    'Cindy Szczudlo',
-    'Danielle L','Ingrid R','Jackie G.','Maria C','Marie D.','Olivia M','Sue M',
-    'Casey Makowski','Christine Brower',
-    'Angela R','Jessica G'
-  ],
-  'hicksville': [
-    'Carol W','Julia B','Maria V',
-    'Christine Brower','Hailey Imhof'
-  ]
-};
+/* ── Employee lists (loaded from Supabase) ────── */
+var empsByStore = { 'port-washington': [], 'hicksville': [] };
+
+function loadEmployees() {
+  sbFetch('/rest/v1/schedule_employees?is_active=eq.true&order=name&select=name,full_name,store')
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(data){
+      empsByStore = { 'port-washington': [], 'hicksville': [] };
+      data.forEach(function(e){
+        var label = e.full_name || e.name;
+        if(e.store === 'port-washington' || e.store === 'both')
+          empsByStore['port-washington'].push(label);
+        if(e.store === 'hicksville' || e.store === 'both')
+          empsByStore['hicksville'].push(label);
+      });
+      updateEmployees();
+    })
+    .catch(function(){ /* keep empty on error */ });
+}
 
 /* ── State ────────────────────────────────────── */
 var records = [];
@@ -360,7 +366,7 @@ function updateEmployees() {
     sel.innerHTML = '<option value="">— Select Store First —</option>';
     return;
   }
-  var emps = EMPLOYEES[store] || [];
+  var emps = empsByStore[store] || [];
   sel.innerHTML = '<option value="">— Select Employee —</option>' +
     emps.map(function(e){ return '<option value="'+e+'">'+e+'</option>'; }).join('');
 }
@@ -624,6 +630,7 @@ function renderAll() {
   var t = todayStr();
   document.getElementById('f-start').value = t;
   document.getElementById('f-end').value   = t;
+  loadEmployees();
   loadRecords();
 })();
 </script>
