@@ -128,6 +128,23 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 </head>
 <body>
 
+<!-- LOGIN GATE -->
+<div id="login-gate" style="display:none;position:fixed;inset:0;z-index:9999;background:#FDF0F5;flex-direction:column;align-items:center;justify-content:center">
+  <div style="text-align:center;max-width:340px;padding:20px">
+    <div style="background:linear-gradient(135deg,#C4276E,#6B3520);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.6rem;font-weight:800;margin-bottom:6px">Woof Gang</div>
+    <div style="font-size:0.85rem;color:#888;margin-bottom:32px">Owner Portal</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px">
+      <input id="pin-1" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:56px;height:64px;text-align:center;font-size:1.8rem;font-weight:800;border:2px solid #ddd;border-radius:12px;font-family:inherit;background:white;color:#1a1a2e" autofocus>
+      <input id="pin-2" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:56px;height:64px;text-align:center;font-size:1.8rem;font-weight:800;border:2px solid #ddd;border-radius:12px;font-family:inherit;background:white;color:#1a1a2e">
+      <input id="pin-3" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:56px;height:64px;text-align:center;font-size:1.8rem;font-weight:800;border:2px solid #ddd;border-radius:12px;font-family:inherit;background:white;color:#1a1a2e">
+      <input id="pin-4" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:56px;height:64px;text-align:center;font-size:1.8rem;font-weight:800;border:2px solid #ddd;border-radius:12px;font-family:inherit;background:white;color:#1a1a2e">
+    </div>
+    <div id="pin-error" style="color:#C62828;font-size:0.82rem;font-weight:600;min-height:24px"></div>
+  </div>
+</div>
+
+<div id="app-content" style="display:none">
+
 <div class="header">
   <h1 id="store-title">Woof Gang Port Washington</h1>
   <p>Store Performance Dashboards</p>
@@ -295,7 +312,58 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
   <strong>Woof Gang Bakery &amp; Grooming</strong> — Operations Intelligence
 </div>
 
+</div><!-- /app-content -->
+
 <script>
+// ─── PIN Auth ───────────────────────────────────────────────────
+var PIN_HASH='12269c796b58fb51020e17da59733d060552b37f7916e2f97df9f9bdc0e235a0';
+async function sha256(str){
+  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+}
+function initAuth(){
+  if(sessionStorage.getItem('wg_portal_auth')==='1'){
+    document.getElementById('login-gate').style.display='none';
+    document.getElementById('app-content').style.display='block';
+    return;
+  }
+  document.getElementById('login-gate').style.display='flex';
+  var pins=[1,2,3,4].map(function(i){return document.getElementById('pin-'+i);});
+  pins.forEach(function(p,i){
+    p.value='';
+    p.addEventListener('input',function(){
+      if(p.value.length===1&&i<3) pins[i+1].focus();
+      var full=pins.map(function(x){return x.value;}).join('');
+      if(full.length===4) checkPin(full);
+    });
+    p.addEventListener('keydown',function(e){
+      if(e.key==='Backspace'&&!p.value&&i>0){pins[i-1].focus();pins[i-1].value='';}
+    });
+    p.addEventListener('paste',function(e){
+      e.preventDefault();
+      var text=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
+      text.split('').forEach(function(c,j){if(pins[j])pins[j].value=c;});
+      if(text.length===4) checkPin(text);
+      else if(text.length>0&&pins[text.length]) pins[text.length].focus();
+    });
+  });
+  pins[0].focus();
+}
+async function checkPin(pin){
+  var hash=await sha256(pin);
+  if(hash===PIN_HASH){
+    sessionStorage.setItem('wg_portal_auth','1');
+    document.getElementById('login-gate').style.display='none';
+    document.getElementById('app-content').style.display='block';
+  } else {
+    document.getElementById('pin-error').textContent='Incorrect PIN';
+    [1,2,3,4].forEach(function(i){document.getElementById('pin-'+i).value='';});
+    document.getElementById('pin-1').focus();
+    setTimeout(function(){document.getElementById('pin-error').textContent='';},2000);
+  }
+}
+initAuth();
+
 var STORES = {
   'port-washington': {
     title: 'Woof Gang Port Washington',
