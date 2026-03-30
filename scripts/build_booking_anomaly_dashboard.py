@@ -41,6 +41,70 @@ DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 NOW_STR = datetime.now(ZoneInfo("America/New_York")).strftime("%B %d, %Y at %I:%M %p ET")
 
+# ── Fetch customer names from FranPOS API ────────────────────────────────────
+
+import httpx
+import time as _time
+
+def _fetch_customer_names():
+    """Fetch customer accounts from FranPOS and build ID→name mapping."""
+    token = _store.token
+    loc = _store.location_id
+    all_customers = {}
+    from_date = "2025-04-01"
+    # Try 2026 first, then fallback to 2025
+    for fd in ["2026-01-01", "2025-04-01"]:
+        for p in range(1, 30):
+            try:
+                r = httpx.get(
+                    f"https://publicapi.franpos.com/api/datadump/v1/customers/365/{p}/{fd}/{loc}",
+                    params={"Token": token}, timeout=45,
+                )
+                if r.status_code != 200:
+                    break
+                data = r.json()
+                pages = data.get("pages", 1)
+                items = data.get("data", [])
+                for c in items:
+                    all_customers[c["CustomerId"]] = c
+                if p >= pages or not items:
+                    break
+                _time.sleep(0.3)
+            except Exception as e:
+                print(f"    Customer fetch page {p} error: {e}")
+                break
+        if all_customers:
+            break
+
+    # Build mapping: CustomerId → {pet, owner}
+    mapping = {}
+    for cid, c in all_customers.items():
+        fn = (c.get("FirstName") or "").strip()
+        ln = (c.get("LastName") or "").strip()
+        name = f"{fn} {ln}".strip()
+        parent = c.get("ParentCustomerId")
+        if parent:
+            mapping[str(cid)] = {
+                "pet": fn,
+                "owner": "",
+            }
+            owner = all_customers.get(parent)
+            if owner:
+                ofn = (owner.get("FirstName") or "").strip()
+                oln = (owner.get("LastName") or "").strip()
+                mapping[str(cid)]["owner"] = f"{ofn} {oln}".strip()
+        else:
+            mapping[str(cid)] = {"pet": "", "owner": name}
+    return mapping
+
+print("Fetching customer names from FranPOS...")
+_customer_names = _fetch_customer_names()
+print(f"  {len(_customer_names)} customer accounts loaded")
+
+def get_customer_name(cid):
+    info = _customer_names.get(str(cid), {})
+    return info.get("owner", ""), info.get("pet", "")
+
 # ── Algorithm constants ───────────────────────────────────────────────────────
 
 MIN_VISITS = 3       # min sized visits to build profile
@@ -210,8 +274,11 @@ for cid, all_visits in customer_visits.items():
             "name": v["name"][:60],  # truncate for JS safety
         })
 
+    owner_name, pet_name = get_customer_name(cid)
     anomalies.append({
         "cid": cid,
+        "customer_name": owner_name,
+        "pet_name": pet_name,
         "visit_count": len(sized_visits),
         "modal_size": modal_size,
         "modal_size_short": SIZE_SHORT.get(modal_size, modal_size),
@@ -458,7 +525,9 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
     <table>
       <thead>
         <tr>
-          <th onclick="sortBy('cid')">Customer <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('cid')">ID <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('customer_name')">Customer <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('pet_name')">Pet <span class="sort-arrow">↕</span></th>
           <th class="n" onclick="sortBy('visit_count')">Visits <span class="sort-arrow">↕</span></th>
           <th onclick="sortBy('modal_size_short')">History (Mode) <span class="sort-arrow">↕</span></th>
           <th onclick="sortBy('last_size_short')">Last Visit <span class="sort-arrow">↕</span></th>
@@ -483,7 +552,9 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
       <table>
         <thead>
           <tr>
+            <th>ID</th>
             <th>Customer</th>
+            <th>Pet</th>
             <th class="n">Visits</th>
             <th>History</th>
             <th>Last Visit</th>
@@ -656,6 +727,8 @@ function makeRow(a, isAckedRow) {{
   var cidShort = a.cid.length > 8 ? '#…' + a.cid.slice(-6) : '#' + a.cid;
   return '<tr>' +
     '<td><a class="cid-link" href="#" onclick="openModal(\\'' + a.cid + '\\');return false;">' + cidShort + '</a></td>' +
+    '<td>' + (a.customer_name || '') + '</td>' +
+    '<td>' + (a.pet_name || '') + '</td>' +
     '<td class="n">' + a.visit_count + '</td>' +
     '<td>' + histDisplay + '</td>' +
     '<td>' + lastDisplay + '</td>' +
@@ -726,6 +799,8 @@ function openModal(cid) {{
   // Profile summary
   var profHtml = '';
   if (anomaly) {{
+    if (anomaly.customer_name) profHtml += '<div class="modal-stat"><strong>' + anomaly.customer_name + '</strong><span>Customer</span></div>';
+    if (anomaly.pet_name) profHtml += '<div class="modal-stat"><strong>' + anomaly.pet_name + '</strong><span>Pet Name</span></div>';
     profHtml += '<div class="modal-stat"><strong>' + anomaly.visit_count + '</strong><span>Visits</span></div>';
     profHtml += '<div class="modal-stat"><strong>' + (anomaly.modal_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.modal_size_short + '</strong><span>Usual</span></div>';
     profHtml += '<div class="modal-stat"><strong>' + (anomaly.last_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.last_size_short + '</strong><span>Last Visit</span></div>';
