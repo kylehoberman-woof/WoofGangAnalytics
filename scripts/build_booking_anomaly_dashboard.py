@@ -192,6 +192,60 @@ for cid in customer_visits:
     customer_visits[cid].sort(key=lambda x: x["date"])
 
 
+# ── Split multi-dog accounts into separate dog clusters ──────────────────────
+# If a customer account has visits across very different sizes (e.g., SM and LG),
+# it's likely multiple dogs. We cluster by size proximity: adjacent sizes (±1 step)
+# are the same dog, distant sizes are separate dogs.
+
+def _cluster_dogs(sized_visits):
+    """Split a customer's visits into per-dog clusters based on size patterns.
+    Returns list of visit lists, one per inferred dog."""
+    if not sized_visits:
+        return []
+
+    # Count visits per size
+    size_counts = Counter(v["dog_size"] for v in sized_visits)
+    # Sort sizes by frequency (most visits first)
+    size_list = [s for s, _ in size_counts.most_common()]
+
+    if len(size_list) <= 1:
+        return [sized_visits]  # single size = single dog
+
+    # Build clusters: sizes within ±1 step of each other belong to the same dog
+    clusters = []  # list of sets of sizes
+    assigned = set()
+    for s in size_list:
+        if s in assigned or s not in SIZE_ORDER:
+            continue
+        cluster = {s}
+        assigned.add(s)
+        # Absorb adjacent sizes that are closer to this cluster than to others
+        for other in size_list:
+            if other in assigned or other not in SIZE_ORDER:
+                continue
+            if abs(SIZE_ORDER[other] - SIZE_ORDER[s]) <= 1:
+                cluster.add(other)
+                assigned.add(other)
+        clusters.append(cluster)
+
+    # Add any unassigned sizes (no SIZE_ORDER) to the largest cluster
+    unassigned = [v for v in sized_visits if v["dog_size"] not in assigned]
+    if unassigned and clusters:
+        # Attach to largest cluster
+        pass  # they'll be dropped (flat-rate items without size)
+
+    if len(clusters) <= 1:
+        return [sized_visits]  # all sizes are adjacent = single dog
+
+    # Split visits by cluster
+    result = []
+    for cluster_sizes in clusters:
+        dog_visits = [v for v in sized_visits if v["dog_size"] in cluster_sizes]
+        if dog_visits:
+            result.append(dog_visits)
+    return result
+
+
 # ── Detect anomalies ──────────────────────────────────────────────────────────
 
 today_str = date.today().isoformat()
@@ -207,91 +261,108 @@ for cid, all_visits in customer_visits.items():
     if len(sized_visits) < MIN_VISITS:
         continue
 
-    # Skip if most recent sized visit is stale
-    last = sized_visits[-1]
-    if last["date"] < cutoff_str:
-        continue
+    # Split into per-dog clusters for multi-dog accounts
+    dog_clusters = _cluster_dogs(sized_visits)
 
-    # Build profile from all visits (except last, for comparison)
-    sizes = [v["dog_size"] for v in sized_visits]
-    doodles = [v["is_doodle"] for v in sized_visits]
-    services = [v["service_type"] for v in sized_visits]
+    for dog_visits in dog_clusters:
+        if len(dog_visits) < MIN_VISITS:
+            continue
 
-    modal_size = Counter(sizes).most_common(1)[0][0]
-    doodle_count = sum(1 for d in doodles if d)
-    modal_doodle = (doodle_count / len(doodles)) > 0.5
+        dog_visits.sort(key=lambda x: x["date"])
 
-    service_counter = Counter(services)
-    modal_service = service_counter.most_common(1)[0][0]
+        # Skip if most recent visit is stale
+        last = dog_visits[-1]
+        if last["date"] < cutoff_str:
+            continue
 
-    last_size = last["dog_size"]
-    last_doodle = last["is_doodle"]
-    last_service = last["service_type"]
-    last_groomer = last["salesperson"]
-    last_price = last["price"]
+        sizes = [v["dog_size"] for v in dog_visits]
+        doodles = [v["is_doodle"] for v in dog_visits]
+        services = [v["service_type"] for v in dog_visits]
 
-    size_counts = dict(Counter(sizes))
-    service_counts = dict(Counter(services))
+        modal_size = Counter(sizes).most_common(1)[0][0]
+        doodle_count = sum(1 for d in doodles if d)
+        modal_doodle = (doodle_count / len(doodles)) > 0.5
 
-    # ── Anomaly detection ────────────────────────────────────────────────────
+        service_counter = Counter(services)
+        modal_service = service_counter.most_common(1)[0][0]
 
-    flags = []
-    flag_details = {}
+        last_size = last["dog_size"]
+        last_doodle = last["is_doodle"]
+        last_service = last["service_type"]
+        last_groomer = last["salesperson"]
+        last_price = last["price"]
 
-    # 1. Breed change: General ↔ Poodle-Doodle
-    if last_doodle != modal_doodle:
-        flags.append("breed_change")
-        flag_details["breed_change"] = {
-            "from": "Poodle-Doodle" if modal_doodle else "General",
-            "to": "Poodle-Doodle" if last_doodle else "General",
-        }
+        size_counts = dict(Counter(sizes))
+        service_counts = dict(Counter(services))
 
-    # 2. Size change: must differ by ≥1 step
-    if last_size in SIZE_ORDER and modal_size in SIZE_ORDER:
-        gap = abs(SIZE_ORDER[last_size] - SIZE_ORDER[modal_size])
-        if gap >= 1:
-            flags.append("size_change")
-            direction = "↑" if SIZE_ORDER[last_size] > SIZE_ORDER[modal_size] else "↓"
-            flag_details["size_change"] = {
-                "from": SIZE_SHORT.get(modal_size, modal_size),
-                "to": SIZE_SHORT.get(last_size, last_size),
-                "direction": direction,
-                "gap": gap,
+        # ── Anomaly detection ────────────────────────────────────────────────
+
+        flags = []
+        flag_details = {}
+
+        # 1. Breed change: General ↔ Poodle-Doodle
+        if last_doodle != modal_doodle:
+            flags.append("breed_change")
+            flag_details["breed_change"] = {
+                "from": "Poodle-Doodle" if modal_doodle else "General",
+                "to": "Poodle-Doodle" if last_doodle else "General",
             }
 
-    # 3. Service change: ≥75% of history is modal service, last visit is different
-    if last_service != modal_service:
-        modal_pct = service_counter[modal_service] / len(sized_visits)
-        if modal_pct >= SERVICE_THRESHOLD:
-            flags.append("service_change")
-            flag_details["service_change"] = {
-                "from": modal_service,
-                "to": last_service,
-            }
+        # 2. Size change: must differ by ≥1 step
+        if last_size in SIZE_ORDER and modal_size in SIZE_ORDER:
+            gap = abs(SIZE_ORDER[last_size] - SIZE_ORDER[modal_size])
+            if gap >= 1:
+                flags.append("size_change")
+                direction = "↑" if SIZE_ORDER[last_size] > SIZE_ORDER[modal_size] else "↓"
+                flag_details["size_change"] = {
+                    "from": SIZE_SHORT.get(modal_size, modal_size),
+                    "to": SIZE_SHORT.get(last_size, last_size),
+                    "direction": direction,
+                    "gap": gap,
+                }
 
-    if not flags:
-        continue
+        # 3. Service change: ≥75% of history is modal service, last visit is different
+        if last_service != modal_service:
+            modal_pct = service_counter[modal_service] / len(dog_visits)
+            if modal_pct >= SERVICE_THRESHOLD:
+                flags.append("service_change")
+                flag_details["service_change"] = {
+                    "from": modal_service,
+                    "to": last_service,
+                }
 
-    # Build full history for modal (most recent first)
-    history = []
-    for v in reversed(sized_visits):
-        history.append({
-            "date": v["date"],
-            "service": v["service_type"] or "",
-            "size": SIZE_SHORT.get(v["dog_size"], v["dog_size"] or ""),
-            "size_full": v["dog_size"] or "",
-            "doodle": v["is_doodle"],
-            "groomer": v["salesperson"],
-            "price": round(v["price"], 2),
-            "name": v["name"][:60],  # truncate for JS safety
-        })
+        if not flags:
+            continue
 
-    owner_name, pet_name = get_customer_name(cid)
-    anomalies.append({
-        "cid": cid,
-        "customer_name": owner_name,
-        "pet_name": pet_name,
-        "visit_count": len(sized_visits),
+        # Build full history (most recent first)
+        history = []
+        for v in reversed(dog_visits):
+            history.append({
+                "date": v["date"],
+                "service": v["service_type"] or "",
+                "size": SIZE_SHORT.get(v["dog_size"], v["dog_size"] or ""),
+                "size_full": v["dog_size"] or "",
+                "doodle": v["is_doodle"],
+                "groomer": v["salesperson"],
+                "price": round(v["price"], 2),
+                "name": v["name"][:60],
+            })
+
+        owner_name, pet_name = get_customer_name(cid)
+        # For multi-dog accounts, add size label to pet name to distinguish
+        dog_label = ""
+        if len(dog_clusters) > 1:
+            dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
+
+        # Use a unique key for multi-dog: cid_size
+        dog_key = cid if len(dog_clusters) == 1 else f"{cid}_{SIZE_SHORT.get(modal_size, 'X')}"
+
+        anomalies.append({
+            "cid": cid,
+            "dog_key": dog_key,
+            "customer_name": owner_name,
+            "pet_name": (pet_name + dog_label) if pet_name else dog_label.strip(" ()"),
+            "visit_count": len(dog_visits),
         "modal_size": modal_size,
         "modal_size_short": SIZE_SHORT.get(modal_size, modal_size),
         "modal_doodle": modal_doodle,
@@ -308,7 +379,7 @@ for cid, all_visits in customer_visits.items():
         "flags": flags,
         "flag_details": flag_details,
     })
-    profiles[cid] = history
+        profiles[dog_key] = history
 
 
 def _flag_severity(flags):
@@ -721,7 +792,7 @@ function getFiltered(excludeAcked) {{
     if (_days > 0 && a.last_date < cutoffStr) return false;
     if (_tab !== 'all' && a.flags.indexOf(_tab) === -1) return false;
     if (_groomer && a.last_groomer !== _groomer) return false;
-    if (excludeAcked && isAcked(a.cid)) return false;
+    if (excludeAcked && isAcked(a.dog_key || a.cid)) return false;
     return true;
   }});
 }}
@@ -733,12 +804,13 @@ function makeRow(a, isAckedRow) {{
     ' <span style="color:#aaa;font-size:0.75rem">(' + (a.size_counts[a.modal_size] || 0) + '/' + a.visit_count + ')</span>';
   var lastDisplay = (a.last_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + a.last_size_short;
   var flagsHtml = a.flags.map(function(f) {{ return flagBadge(f, a.flag_details); }}).join(' ');
+  var dk = a.dog_key || a.cid;
   var actionBtn = isAckedRow
-    ? '<button class="unack-btn" onclick="unack(\\'' + a.cid + '\\')">↩ Undo</button>'
-    : '<button class="ack-btn" onclick="ack(\\'' + a.cid + '\\')">&#x2713; Ack</button>';
+    ? '<button class="unack-btn" onclick="unack(\\'' + dk + '\\')">↩ Undo</button>'
+    : '<button class="ack-btn" onclick="ack(\\'' + dk + '\\')">&#x2713; Ack</button>';
   var cidShort = a.cid.length > 8 ? '#…' + a.cid.slice(-6) : '#' + a.cid;
   return '<tr>' +
-    '<td><a class="cid-link" href="#" onclick="openModal(\\'' + a.cid + '\\');return false;">' + cidShort + '</a></td>' +
+    '<td><a class="cid-link" href="#" onclick="openModal(\\'' + dk + '\\');return false;">' + cidShort + '</a></td>' +
     '<td>' + (a.customer_name || '') + '</td>' +
     '<td>' + (a.pet_name || '') + '</td>' +
     '<td class="n">' + a.visit_count + '</td>' +
@@ -761,7 +833,7 @@ function render() {{
     }}
     if (_tab !== 'all' && a.flags.indexOf(_tab) === -1) return false;
     if (_groomer && a.last_groomer !== _groomer) return false;
-    return isAcked(a.cid);
+    return isAcked(a.dog_key || a.cid);
   }});
 
   // Sort active
@@ -802,11 +874,12 @@ function render() {{
 }}
 
 // ── Modal ────────────────────────────────────────────────────────────────────
-function openModal(cid) {{
-  var anomaly = ANOMALIES.find(function(a) {{ return a.cid === cid; }});
-  var history = PROFILES[cid] || [];
+function openModal(dogKey) {{
+  var anomaly = ANOMALIES.find(function(a) {{ return (a.dog_key || a.cid) === dogKey; }});
+  var history = PROFILES[dogKey] || [];
+  var displayId = anomaly ? anomaly.cid : dogKey;
 
-  document.getElementById('modal-cid').textContent = cid;
+  document.getElementById('modal-cid').textContent = displayId;
 
   // Profile summary
   var profHtml = '';
