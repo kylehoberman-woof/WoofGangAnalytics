@@ -493,6 +493,8 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 .quick-btns{{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}}
 .quick-btn{{padding:6px 14px;border:1.5px solid #C4276E;border-radius:20px;background:transparent;color:#C4276E;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}}
 .quick-btn:hover{{background:#C4276E;color:white}}
+.exp-filter{{padding:5px 14px;border:2px solid #ddd;border-radius:20px;background:white;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer;color:#888;transition:all 0.15s}}
+.exp-filter.active{{border-color:#C4276E;color:#C4276E;background:#FDF0F5}}
 .cmp-row{{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f0ede8}}
 .cmp-label{{width:140px;font-size:0.82rem;font-weight:600;color:#555;flex-shrink:0}}
 .cmp-vals{{display:flex;flex:1;align-items:center;gap:8px}}
@@ -529,6 +531,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
   <button class="tab active" onclick="showTab('ytd',this)">2026 YTD</button>
   <button class="tab" onclick="showTab('monthly',this)">Monthly Detail</button>
   <button class="tab" onclick="showTab('compare',this)">Monthly Compare</button>
+  <button class="tab" onclick="showTab('expenses',this);loadExpenses()">Expenses</button>
 </div>
 
 <div class="page">
@@ -647,6 +650,51 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
   <div class="card">
     <div class="stitle">Side-by-Side Comparison</div>
     <canvas id="chart-compare" height="300"></canvas>
+  </div>
+</div>
+
+<!-- ── Expenses ── -->
+<div class="panel" id="panel-expenses">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="stitle" style="margin:0">Owner Expenses &amp; Operating Costs</div>
+      <button onclick="openExpModal()" style="padding:8px 18px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer">+ Add Expense</button>
+    </div>
+    <div id="exp-summary" style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap"></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="exp-filter active" onclick="setExpFilter('all',this)">All</button>
+      <button class="exp-filter" onclick="setExpFilter('owner',this)">Owner</button>
+      <button class="exp-filter" onclick="setExpFilter('operating',this)">Operating</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%"><thead><tr>
+        <th>Name</th><th>Category</th><th>Subcategory</th><th>Store</th><th>Type</th><th class="n">Monthly</th><th class="n">Annual Est.</th><th></th>
+      </tr></thead><tbody id="exp-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div id="exp-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;padding:20px">
+  <div style="background:white;border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.15);padding:24px">
+    <h3 id="exp-modal-title" style="font-size:1.1rem;font-weight:800;margin-bottom:16px">Add Expense</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Name *</label><input id="exp-name" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem"></div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1"><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Category *</label><select id="exp-cat" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit"><option value="owner">Owner / Personal</option><option value="operating">Operating Cost</option></select></div>
+        <div style="flex:1"><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Subcategory</label><select id="exp-sub" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit"><option value="personal">Personal</option><option value="utilities">Utilities</option><option value="insurance">Insurance</option><option value="supplies">Supplies</option><option value="maintenance">Maintenance</option><option value="marketing">Marketing</option><option value="other">Other</option></select></div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1"><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Monthly Amount *</label><input type="number" id="exp-amt" step="0.01" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem"></div>
+        <div style="flex:1"><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Type</label><select id="exp-recurring" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit"><option value="true">Monthly Recurring</option><option value="false">One-Time</option></select></div>
+      </div>
+      <div><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Notes</label><input id="exp-notes" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button id="exp-del-btn" onclick="deleteExp()" style="display:none;margin-right:auto;padding:8px 16px;background:white;border:2px solid #ffcdd2;border-radius:8px;font-family:inherit;font-weight:600;cursor:pointer;color:#C62828">Delete</button>
+      <button onclick="closeExpModal()" style="padding:8px 20px;background:white;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-weight:600;cursor:pointer;color:#888">Cancel</button>
+      <button id="exp-save-btn" onclick="saveExp()" style="padding:8px 20px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-weight:700;cursor:pointer">Save</button>
+    </div>
   </div>
 </div>
 
@@ -903,6 +951,88 @@ new Chart(document.getElementById('chart-monthly'), {{
     }}
   }}
 }});
+
+// ── Expenses Tab (Supabase-backed) ──
+var SB_URL='{SUPABASE_URL}/rest/v1';
+var SB_KEY='{SUPABASE_ANON_KEY}';
+var SB_HDR={{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'}};
+var STORE_KEY='{_store_name}';
+var expData=[],expFilter='all',expEditId=null;
+
+function sbExpGet(p){{return fetch(SB_URL+p,{{headers:SB_HDR}}).then(function(r){{return r.json();}});}}
+function sbExpPost(b){{return fetch(SB_URL+'/operating_expenses',{{method:'POST',headers:SB_HDR,body:JSON.stringify(b)}}).then(function(r){{return r.json();}});}}
+function sbExpPatch(id,b){{return fetch(SB_URL+'/operating_expenses?id=eq.'+id,{{method:'PATCH',headers:SB_HDR,body:JSON.stringify(b)}}).then(function(r){{return r.status===204?null:r.json();}});}}
+function sbExpDel(id){{return fetch(SB_URL+'/operating_expenses?id=eq.'+id,{{method:'DELETE',headers:SB_HDR}});}}
+
+function loadExpenses(){{
+  sbExpGet('/operating_expenses?store=eq.'+STORE_KEY+'&order=category,name').then(function(rows){{
+    expData=rows||[];renderExpenses();
+  }});
+}}
+
+function setExpFilter(f,btn){{
+  expFilter=f;
+  document.querySelectorAll('.exp-filter').forEach(function(b){{b.classList.remove('active');}});
+  btn.classList.add('active');
+  renderExpenses();
+}}
+
+function renderExpenses(){{
+  var filtered=expFilter==='all'?expData:expData.filter(function(e){{return e.category===expFilter;}});
+  var ownerTot=0,opTot=0;
+  expData.forEach(function(e){{if(e.category==='owner')ownerTot+=+(e.amount||0);else opTot+=+(e.amount||0);}});
+  document.getElementById('exp-summary').innerHTML=
+    '<div style="flex:1;min-width:150px;background:white;border-radius:10px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #E65100"><div style="font-size:1.3rem;font-weight:800;color:#E65100">'+fc(ownerTot)+'</div><div style="font-size:0.7rem;font-weight:700;color:#999;text-transform:uppercase">Owner / mo</div></div>'+
+    '<div style="flex:1;min-width:150px;background:white;border-radius:10px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #1565C0"><div style="font-size:1.3rem;font-weight:800;color:#1565C0">'+fc(opTot)+'</div><div style="font-size:0.7rem;font-weight:700;color:#999;text-transform:uppercase">Operating / mo</div></div>'+
+    '<div style="flex:1;min-width:150px;background:white;border-radius:10px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #6B3520"><div style="font-size:1.3rem;font-weight:800;color:#6B3520">'+fc((ownerTot+opTot)*12)+'</div><div style="font-size:0.7rem;font-weight:700;color:#999;text-transform:uppercase">Annual Est.</div></div>';
+  var tbody=document.getElementById('exp-tbody');
+  if(!filtered.length){{tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#ccc;padding:40px">No expenses</td></tr>';return;}}
+  tbody.innerHTML=filtered.map(function(e){{
+    var catLbl=e.category==='owner'?'<span style="background:#FDF0F5;color:#C4276E;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700">Owner</span>':'<span style="background:#e0f2f1;color:#1B6B6B;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700">Operating</span>';
+    var ann=e.is_recurring?(+(e.amount||0))*12:(+(e.amount||0));
+    return '<tr><td><strong>'+e.name+'</strong></td><td>'+catLbl+'</td><td>'+(e.subcategory||'')+'</td><td>'+(e.store==='port-washington'?'PW':'HV')+'</td><td style="font-size:0.78rem;color:#999">'+(e.is_recurring?'Monthly':'One-time')+'</td><td class="n">'+fc(+(e.amount||0))+'</td><td class="n">'+fc(ann)+'</td><td><button onclick="openExpModal('+e.id+')" style="background:none;border:none;color:#C4276E;cursor:pointer;font-size:0.85rem;padding:4px 8px">Edit</button></td></tr>';
+  }}).join('');
+}}
+
+function openExpModal(id){{
+  expEditId=id||null;
+  document.getElementById('exp-modal-title').textContent=id?'Edit Expense':'Add Expense';
+  document.getElementById('exp-del-btn').style.display=id?'block':'none';
+  if(id){{
+    var e=expData.find(function(x){{return x.id===id;}});
+    if(!e)return;
+    document.getElementById('exp-name').value=e.name;
+    document.getElementById('exp-cat').value=e.category;
+    document.getElementById('exp-sub').value=e.subcategory||'other';
+    document.getElementById('exp-amt').value=e.amount;
+    document.getElementById('exp-recurring').value=e.is_recurring?'true':'false';
+    document.getElementById('exp-notes').value=e.notes||'';
+  }}else{{
+    document.getElementById('exp-name').value='';
+    document.getElementById('exp-cat').value='owner';
+    document.getElementById('exp-sub').value='personal';
+    document.getElementById('exp-amt').value='';
+    document.getElementById('exp-recurring').value='true';
+    document.getElementById('exp-notes').value='';
+  }}
+  document.getElementById('exp-overlay').style.display='flex';
+}}
+function closeExpModal(){{document.getElementById('exp-overlay').style.display='none';expEditId=null;}}
+
+function saveExp(){{
+  var name=document.getElementById('exp-name').value.trim();
+  var amt=parseFloat(document.getElementById('exp-amt').value);
+  if(!name||isNaN(amt))return;
+  var body={{name:name,category:document.getElementById('exp-cat').value,subcategory:document.getElementById('exp-sub').value,store:STORE_KEY,amount:amt,is_recurring:document.getElementById('exp-recurring').value==='true',notes:document.getElementById('exp-notes').value.trim()||null}};
+  var btn=document.getElementById('exp-save-btn');btn.disabled=true;btn.textContent='Saving...';
+  var p=expEditId?sbExpPatch(expEditId,body):sbExpPost(body);
+  p.then(function(){{btn.disabled=false;btn.textContent='Save';closeExpModal();loadExpenses();}}).catch(function(){{btn.disabled=false;btn.textContent='Save';}});
+}}
+
+function deleteExp(){{
+  if(!expEditId||!confirm('Delete this expense?'))return;
+  sbExpDel(expEditId).then(function(){{closeExpModal();loadExpenses();}});
+}}
 </script>
 </body></html>
 '''
