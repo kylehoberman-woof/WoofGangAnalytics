@@ -431,9 +431,9 @@ document.addEventListener('click',function(e){
     cell.textContent=nv;
     cell.classList.add('stock-flash-ok');
     setTimeout(function(){cell.classList.remove('stock-flash-ok');},1200);
-    // Push to Franpos
+    // Push to Franpos via receiving tool proxy (avoids CORS)
     if(typeof FRANPOS_TOKEN!=='undefined'){
-      fetch(FRANPOS_URL+'/api/updateStockByProductSKU?sku='+encodeURIComponent(sku)+'&stock='+nv+'&addToStock=false&Token='+FRANPOS_TOKEN,{method:'POST'})
+      fetch('https://scanner.hoberman.io/api/set-stock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,quantity:nv,store:FRANPOS_LOC==='203698'?'port-washington':'hicksville'})})
         .then(function(r){
           if(!r.ok) throw new Error('HTTP '+r.status);
           cell.classList.remove('stock-flash-ok');
