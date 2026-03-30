@@ -47,54 +47,66 @@ import httpx
 import time as _time
 
 def _fetch_customer_names():
-    """Fetch customer accounts from FranPOS and build ID→name mapping."""
+    """Fetch all customer accounts from FranPOS and build ID→name mapping.
+    Uses Customers/ByCompany endpoint (returns all customers, ~4800 records).
+    Pets have no last name and share a phone number with the owner account.
+    """
     token = _store.token
-    loc = _store.location_id
     all_customers = {}
-    from_date = "2025-04-01"
-    # Try 2026 first, then fallback to 2025
-    for fd in ["2026-01-01", "2025-04-01"]:
-        for p in range(1, 30):
-            try:
-                r = httpx.get(
-                    f"https://publicapi.franpos.com/api/datadump/v1/customers/365/{p}/{fd}/{loc}",
-                    params={"Token": token}, timeout=45,
-                )
-                if r.status_code != 200:
-                    break
-                data = r.json()
-                pages = data.get("pages", 1)
-                items = data.get("data", [])
-                for c in items:
-                    all_customers[c["CustomerId"]] = c
-                if p >= pages or not items:
-                    break
-                _time.sleep(0.3)
-            except Exception as e:
-                print(f"    Customer fetch page {p} error: {e}")
+    for p in range(1, 120):
+        try:
+            r = httpx.get(
+                f"https://publicapi.franpos.com/api/Customers/ByCompany/{p}",
+                params={"Token": token, "startDate": "2024-01-01", "endDate": "2026-12-31"},
+                timeout=45,
+            )
+            if r.status_code != 200:
                 break
-        if all_customers:
-            break
+            data = r.json()
+            items = data.get("data", []) if isinstance(data, dict) else data
+            pages = data.get("pages", 1) if isinstance(data, dict) else 1
+            for c in items:
+                all_customers[c["CustomerId"]] = c
+            if p >= pages or not items:
+                break
+            _time.sleep(0.3)
+        except Exception as e:
+            print(f"    Customer fetch page {p} error: {e}")
+            _time.sleep(2)
+            continue
+
+    # Group by phone to find owner/pet pairs
+    # Pets: no last name. Owners: have last name. Same phone = same household.
+    by_phone = {}
+    for c in all_customers.values():
+        phone = (c.get("CellPhone") or "").strip()
+        if phone:
+            by_phone.setdefault(phone, []).append(c)
+
+    # For each phone group, find the owner (has last name) and pets (no last name)
+    pet_owner_map = {}  # pet_cid → owner_name
+    for phone, accounts in by_phone.items():
+        owners = [a for a in accounts if (a.get("LastName") or "").strip()]
+        pets = [a for a in accounts if not (a.get("LastName") or "").strip()]
+        if owners:
+            owner = owners[0]
+            owner_name = f'{(owner.get("FirstName") or "").strip()} {(owner.get("LastName") or "").strip()}'.strip()
+            for pet in pets:
+                pet_owner_map[pet["CustomerId"]] = owner_name
 
     # Build mapping: CustomerId → {pet, owner}
     mapping = {}
     for cid, c in all_customers.items():
         fn = (c.get("FirstName") or "").strip()
         ln = (c.get("LastName") or "").strip()
-        name = f"{fn} {ln}".strip()
-        parent = c.get("ParentCustomerId")
-        if parent:
-            mapping[str(cid)] = {
-                "pet": fn,
-                "owner": "",
-            }
-            owner = all_customers.get(parent)
-            if owner:
-                ofn = (owner.get("FirstName") or "").strip()
-                oln = (owner.get("LastName") or "").strip()
-                mapping[str(cid)]["owner"] = f"{ofn} {oln}".strip()
+        has_lastname = bool(ln)
+        if has_lastname:
+            # This is an owner account
+            mapping[str(cid)] = {"pet": "", "owner": f"{fn} {ln}".strip()}
         else:
-            mapping[str(cid)] = {"pet": "", "owner": name}
+            # This is a pet account
+            owner_name = pet_owner_map.get(cid, "")
+            mapping[str(cid)] = {"pet": fn, "owner": owner_name}
     return mapping
 
 print("Fetching customer names from FranPOS...")
