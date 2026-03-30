@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Schedule — Woof Gang</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;-webkit-font-smoothing:antialiased}
+.header{background:linear-gradient(135deg,#C4276E,#6B3520);padding:28px 20px;text-align:center;color:white}
+.header h1{font-size:1.4rem;font-weight:800;letter-spacing:-0.01em}
+.header p{font-size:0.82rem;opacity:0.8;margin-top:4px}
+.main{max-width:900px;margin:0 auto;padding:20px 16px 60px}
+.controls{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.nav-btn{padding:6px 14px;border:none;background:white;border-radius:8px;font-family:inherit;font-size:0.84rem;font-weight:700;cursor:pointer;color:#1a1a2e;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.nav-btn:hover{background:#f0f0f0}
+.nav-btn.today{background:#C4276E;color:white}
+.month-label{font-size:1rem;font-weight:800;color:#1a1a2e;min-width:180px;text-align:center}
+.store-info{font-size:0.75rem;font-weight:600;color:#888;text-align:center;margin-bottom:12px}
+.store-badge{display:inline-block;font-size:0.6rem;font-weight:800;padding:2px 6px;border-radius:4px;color:white;margin-left:4px}
+.store-badge.pw{background:#C4276E}
+.store-badge.hv{background:#1565C0}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-hdr{text-align:center;font-size:0.7rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;padding:8px 0}
+.cal-day{background:white;border-radius:10px;min-height:80px;padding:6px 8px;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.cal-day.empty{background:transparent;box-shadow:none}
+.cal-day.today{border:2px solid #C4276E}
+.cal-day.off-day{background:#fafafa}
+.day-num{font-size:0.78rem;font-weight:700;color:#1a1a2e;margin-bottom:4px}
+.day-num.today{color:#C4276E}
+.shift-item{background:#f0faf5;border-left:3px solid #2E7D32;border-radius:6px;padding:4px 6px;margin-bottom:3px;font-size:0.72rem}
+.shift-item.pw{border-left-color:#C4276E;background:#fdf0f5}
+.shift-item.hv{border-left-color:#1565C0;background:#e8f0fe}
+.shift-store{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:1px}
+.shift-store.pw{color:#C4276E}
+.shift-store.hv{color:#1565C0}
+.shift-time{font-weight:600;color:#333}
+.no-shift{font-size:0.68rem;color:#ccc;font-style:italic}
+.time-off-item{background:#FFF8E1;border-left:3px solid #F9A825;border-radius:6px;padding:4px 6px;margin-bottom:3px;font-size:0.72rem;font-weight:600;color:#6D4C41}
+.summary{background:white;border-radius:12px;padding:16px 20px;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,0.06)}
+.summary h3{font-size:0.85rem;font-weight:800;color:#1a1a2e;margin-bottom:8px}
+.summary-row{display:flex;justify-content:space-between;font-size:0.82rem;padding:3px 0;border-bottom:1px solid #f5f5f5}
+.summary-row:last-child{border-bottom:none}
+.summary-val{font-weight:700;color:#C4276E}
+.loading{text-align:center;padding:60px;color:#aaa;font-size:0.9rem}
+.error{text-align:center;padding:60px;color:#C62828;font-size:0.9rem;font-weight:600}
+@media(max-width:600px){
+  .cal-day{min-height:60px;padding:4px}
+  .shift-item{font-size:0.65rem;padding:3px 4px}
+  .day-num{font-size:0.7rem}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 id="emp-title">My Schedule</h1>
+  <p id="emp-subtitle">Loading...</p>
+</div>
+
+<div class="main">
+  <div class="controls">
+    <button class="nav-btn" onclick="changeMonth(-1)">&larr; Prev</button>
+    <div class="month-label" id="month-label"></div>
+    <button class="nav-btn" onclick="changeMonth(1)">Next &rarr;</button>
+    <button class="nav-btn today" onclick="goToday()">Today</button>
+  </div>
+  <div id="store-info" class="store-info"></div>
+  <div id="summary" class="summary" hidden></div>
+  <div id="calendar" class="loading">Loading schedule...</div>
+</div>
+
+<script>
+var SB='https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SHD={'apikey':SK,'Authorization':'Bearer '+SK};
+
+function sbGet(path){return fetch(SB+path,{headers:SHD}).then(function(r){return r.json();});}
+
+var monthOffset=0;
+var employee=null;
+var allShifts=[];
+var allTimeOff=[];
+
+// Parse URL params
+var params=new URLSearchParams(window.location.search);
+var empName=params.get('name')||params.get('emp')||'';
+var empId=params.get('id')||'';
+
+function init(){
+  if(!empName&&!empId){
+    document.getElementById('calendar').innerHTML='<div class="error">No employee specified.<br>Use ?name=Casey in the URL.</div>';
+    return;
+  }
+  // Find employee in Supabase
+  var query=empId?'id=eq.'+empId:'name=ilike.*'+encodeURIComponent(empName)+'*';
+  sbGet('/schedule_employees?'+query+'&limit=1').then(function(rows){
+    if(!rows||!rows.length){
+      document.getElementById('calendar').innerHTML='<div class="error">Employee "'+esc(empName||empId)+'" not found.</div>';
+      return;
+    }
+    employee=rows[0];
+    document.getElementById('emp-title').textContent=employee.name+"'s Schedule";
+    var storeName=employee.store==='port-washington'?'Port Washington':employee.store==='hicksville'?'Hicksville':'Both Stores';
+    var role=employee.role||'';
+    var ROLES={groomer:'Groomer',bather:'Bather',retail:'Retail',manager:'Manager',other:'Staff'};
+    document.getElementById('emp-subtitle').textContent=(ROLES[role]||role)+' — '+storeName;
+    document.title=employee.name+' Schedule — Woof Gang';
+    loadMonth();
+  });
+}
+
+function changeMonth(dir){monthOffset+=dir;loadMonth();}
+function goToday(){monthOffset=0;loadMonth();}
+
+function loadMonth(){
+  var today=new Date();
+  var y=today.getFullYear(), m=today.getMonth()+monthOffset;
+  while(m<0){m+=12;y--;}
+  while(m>11){m-=12;y++;}
+  var first=new Date(y,m,1);
+  var last=new Date(y,m+1,0);
+  var startISO=toISO(first), endISO=toISO(last);
+
+  document.getElementById('month-label').textContent=first.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  // Fetch shifts and time off in parallel
+  var storeQ=employee.store==='both'?'store=in.(port-washington,hicksville)':'store=eq.'+encodeURIComponent(employee.store);
+  Promise.all([
+    sbGet('/schedule_shifts?emp_id=eq.'+employee.id+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&select=*&order=shift_date,start_time'),
+    sbGet('/time_off?employee_name=eq.'+encodeURIComponent(employee.full_name||employee.name)+'&start_date=lte.'+endISO+'&end_date=gte.'+startISO+'&status=eq.approved&select=*')
+  ]).then(function(results){
+    allShifts=results[0]||[];
+    allTimeOff=results[1]||[];
+    renderCalendar(first,last);
+  }).catch(function(e){
+    document.getElementById('calendar').innerHTML='<div class="error">Failed to load schedule.</div>';
+  });
+}
+
+function renderCalendar(first,last){
+  var today=new Date();
+  var todayISO=toISO(today);
+
+  // Index shifts by date
+  var shiftsByDate={};
+  allShifts.forEach(function(s){
+    shiftsByDate[s.shift_date]=shiftsByDate[s.shift_date]||[];
+    shiftsByDate[s.shift_date].push(s);
+  });
+
+  // Index time off by date range
+  var offByDate={};
+  allTimeOff.forEach(function(o){
+    var cur=new Date(o.start_date+'T12:00:00');
+    var end=new Date(o.end_date+'T12:00:00');
+    while(cur<=end){
+      var iso=toISO(cur);
+      offByDate[iso]=offByDate[iso]||[];
+      offByDate[iso].push(o);
+      cur.setDate(cur.getDate()+1);
+    }
+  });
+
+  // Summary
+  var totalShifts=allShifts.length;
+  var totalHours=allShifts.reduce(function(sum,s){return sum+sHours(s);},0);
+  var workDays={};
+  allShifts.forEach(function(s){workDays[s.shift_date]=true;});
+  var daysWorked=Object.keys(workDays).length;
+  var daysOff=allTimeOff.reduce(function(sum,o){
+    var cur=new Date(o.start_date+'T12:00:00'),end=new Date(o.end_date+'T12:00:00'),cnt=0;
+    while(cur<=end){if(cur.getMonth()===first.getMonth()&&cur.getFullYear()===first.getFullYear())cnt++;cur.setDate(cur.getDate()+1);}
+    return sum+cnt;
+  },0);
+
+  var sumEl=document.getElementById('summary');
+  sumEl.hidden=false;
+  sumEl.innerHTML='<h3>'+first.toLocaleDateString('en-US',{month:'long'})+' Summary</h3>'+
+    '<div class="summary-row"><span>Shifts</span><span class="summary-val">'+totalShifts+'</span></div>'+
+    '<div class="summary-row"><span>Days worked</span><span class="summary-val">'+daysWorked+'</span></div>'+
+    '<div class="summary-row"><span>Total hours</span><span class="summary-val">'+totalHours.toFixed(1)+'h</span></div>'+
+    (daysOff?'<div class="summary-row"><span>Days off (approved)</span><span class="summary-val">'+daysOff+'</span></div>':'');
+
+  // Store info
+  var storeEl=document.getElementById('store-info');
+  if(employee.store==='both'){
+    storeEl.innerHTML='Works at <span class="store-badge pw">PW</span> and <span class="store-badge hv">HV</span>';
+  } else {
+    storeEl.textContent='';
+  }
+
+  // Calendar grid
+  var html='<div class="cal">';
+  // Day headers
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(function(d){
+    html+='<div class="cal-hdr">'+d+'</div>';
+  });
+
+  // Leading empty cells
+  var startDay=(first.getDay()+6)%7; // Mon=0
+  for(var i=0;i<startDay;i++) html+='<div class="cal-day empty"></div>';
+
+  // Days
+  for(var d=1;d<=last.getDate();d++){
+    var iso=first.getFullYear()+'-'+String(first.getMonth()+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var isToday=iso===todayISO;
+    var dayShifts=shiftsByDate[iso]||[];
+    var dayOff=offByDate[iso]||[];
+    var hasShift=dayShifts.length>0;
+
+    html+='<div class="cal-day'+(isToday?' today':'')+((!hasShift&&!dayOff.length)?' off-day':'')+'">';
+    html+='<div class="day-num'+(isToday?' today':'')+'">'+d+'</div>';
+
+    dayOff.forEach(function(o){
+      html+='<div class="time-off-item">🏖 '+esc(o.type)+'</div>';
+    });
+
+    if(dayShifts.length===0&&dayOff.length===0){
+      html+='<div class="no-shift">Off</div>';
+    }
+
+    dayShifts.forEach(function(s){
+      var cls=s.store==='port-washington'?'pw':'hv';
+      html+='<div class="shift-item '+cls+'">';
+      if(employee.store==='both') html+='<div class="shift-store '+cls+'">'+(s.store==='port-washington'?'PW':'HV')+'</div>';
+      html+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
+      html+='</div>';
+    });
+
+    html+='</div>';
+  }
+  html+='</div>';
+  document.getElementById('calendar').innerHTML=html;
+}
+
+// Helpers
+function toISO(d){return d.toISOString().slice(0,10);}
+function sStart(s){return(s.start_time||s.start||'').slice(0,5);}
+function sEnd(s){return(s.end_time||s.end||'').slice(0,5);}
+function sHours(s){
+  var a=sStart(s).split(':').map(Number),b=sEnd(s).split(':').map(Number);
+  if(a.length<2||b.length<2)return 0;
+  return Math.max(0,(b[0]*60+b[1]-a[0]*60-a[1])/60);
+}
+function fmtTime(t){if(!t)return'';var p=t.split(':'),h=+p[0],m=p[1],ap=h>=12?'pm':'am';h=h%12||12;return h+(m!=='00'?':'+m:'')+ap;}
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+init();
+</script>
+</body>
+</html>
