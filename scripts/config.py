@@ -322,11 +322,11 @@ KNOWN_CLOSURES = {
 
 # ─── Service / Inventory Classification ─────────────────────────────────────
 
-SERVICE_PREFIXES = ("987", "765", "543", "432", "986", "985", "984", "983", "982")
+SERVICE_PREFIXES = ("987", "765", "543", "432", "321", "986", "985", "984", "983", "982")
 SERVICE_KEYWORDS = (
     "groom", "bath", "add-on", "walk-in", "spa upgrade", "nail", "brush", "teeth",
     "deshedd", "de-shed", "full groom", "mini groom", "classic bath", "lux bath",
-    "miscellaneous", "gift card", "gratuity", "tip", "hypo allergenic",
+    "miscellaneous", "gift card", "gratuity", "tip", "hypo allergenic", "fee",
 )
 
 BAKERY_SKUS = ("000", "001", "TREAT01", "TREAT02",
