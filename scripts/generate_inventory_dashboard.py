@@ -64,12 +64,21 @@ if _brand_cache_path.exists():
     with open(_brand_cache_path) as f:
         _brand_cache = json.load(f)
 
+def _normalize_vendor(v):
+    """Merge vendor name variants into canonical names."""
+    vl = v.lower().strip()
+    # "Woof Gang Private Label", "Woof Gang Bakery", "Woof Gang" → "Woof Gang"
+    # But "WOOF" stays as its own vendor
+    if vl in ("woof gang private label", "woof gang bakery", "woof gang"):
+        return "Woof Gang"
+    return v
+
 def get_vendor(sku, name):
     """Get vendor/brand from FranPOS cache, fall back to heuristic."""
     info = _brand_cache.get(sku)
     if info and isinstance(info, dict) and info.get("brand"):
-        return info["brand"]
-    return detect_vendor(sku, name)
+        return _normalize_vendor(info["brand"])
+    return _normalize_vendor(detect_vendor(sku, name))
 
 order_items = all_data.get("order_items", [])
 
