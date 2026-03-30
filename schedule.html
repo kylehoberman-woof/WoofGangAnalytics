@@ -40,6 +40,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .week-actions{display:flex;gap:8px;margin-left:auto}
 .action-btn{padding:6px 14px;border:2px solid #ddd;background:white;border-radius:8px;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;color:#555;transition:all 0.15s}
 .action-btn:hover{border-color:#C4276E;color:#C4276E}
+.role-filter{padding:6px 12px;border:2px solid #ddd;background:white;border-radius:8px;font-family:inherit;font-size:0.8rem;font-weight:700;color:#555;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23999' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.role-filter:focus{outline:none;border-color:#C4276E}
 
 .summary-bar{padding:8px 20px;background:white;border-bottom:1px solid #eee;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:0.78rem;min-height:38px}
 .summary-label{font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.05em;font-size:0.7rem}
@@ -224,6 +226,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
       <button class="nav-btn today" onclick="goToday()">Today</button>
     </div>
     <div class="week-actions">
+      <select id="role-filter" class="role-filter" onchange="repaintWeek()">
+        <option value="">All Roles</option>
+        <option value="groomer">Groomers</option>
+        <option value="bather">Bathers</option>
+        <option value="retail">Retail & Managers</option>
+      </select>
       <button class="action-btn" onclick="fillRecurring()">⟳ Fill Recurring</button>
       <button class="action-btn" onclick="copyLastWeek()">↩ Copy Last Week</button>
     </div>
@@ -633,21 +641,38 @@ function renderWeek(){
   }).catch(function(){endLoad();showToast('Failed to load shifts','error');});
 }
 
+// Repaint without re-fetching (used by role filter)
+function repaintWeek(){
+  var today=new Date(), monday=getMonday(today);
+  var ws=addDays(monday,weekOffset*7), we=addDays(ws,6);
+  _paintWeek(ws,we,today);
+}
+
 function _paintWeek(ws,we,today){
+  var roleFilter=document.getElementById('role-filter').value;
+  function matchesRole(empRole){
+    if(!roleFilter) return true;
+    if(roleFilter==='retail') return empRole==='retail'||empRole==='manager';
+    return empRole===roleFilter;
+  }
   var todayISO=toISO(today);
   var empHrs={};
   for(var i=0;i<7;i++){
     var iso=toISO(addDays(ws,i));
-    (shifts[iso]||[]).forEach(function(s){var eid=sEmpId(s);empHrs[eid]=(empHrs[eid]||0)+sHours(s);});
+    (shifts[iso]||[]).forEach(function(s){
+      if(roleFilter){var e=empById(sEmpId(s));if(!e||!matchesRole(e.role)) return;}
+      var eid=sEmpId(s);empHrs[eid]=(empHrs[eid]||0)+sHours(s);
+    });
   }
 
   // Summary
   var sb=document.getElementById('week-summary');
   var names=Object.keys(empHrs).sort(function(a,b){return empHrs[b]-empHrs[a];});
+  var filterLabel=roleFilter?(' — '+ROLES[roleFilter]):'';
   if(!names.length){
-    sb.innerHTML='<span style="font-size:0.78rem;color:#bbb;font-style:italic">No shifts this week — click + or use Fill Recurring</span>';
+    sb.innerHTML='<span style="font-size:0.78rem;color:#bbb;font-style:italic">'+(roleFilter?'No '+ROLES[roleFilter].toLowerCase()+' shifts this week':'No shifts this week — click + or use Fill Recurring')+'</span>';
   } else {
-    sb.innerHTML='<span class="summary-label">This week:</span>'+names.map(function(id){
+    sb.innerHTML='<span class="summary-label">This week'+filterLabel+':</span>'+names.map(function(id){
       var e=empById(id)||{name:id,color:'#aaa'};
       return '<span class="emp-pill" onclick="filterEmpMonth(\''+id+'\')"><span class="emp-dot" style="background:'+e.color+'"></span>'+esc(e.name)+' <span class="emp-hrs">'+empHrs[id].toFixed(1)+'h</span></span>';
     }).join('');
@@ -671,10 +696,15 @@ function _paintWeek(ws,we,today){
 
   // Helper to render shift cards for a store section
   function renderStoreSection(day,st){
-    var storeShifts=day.allShifts.filter(function(s){return s.store===st.key;})
-      .sort(function(a,b){return sStart(a).localeCompare(sStart(b));});
+    var storeShifts=day.allShifts.filter(function(s){
+      if(s.store!==st.key) return false;
+      if(roleFilter){var e=empById(sEmpId(s));if(!e||!matchesRole(e.role)) return false;}
+      return true;
+    }).sort(function(a,b){return sStart(a).localeCompare(sStart(b));});
     var crossShifts=[];
-    if(!isAllStores && st.key===otherStoreKey) crossShifts=day.allOther;
+    if(!isAllStores && st.key===otherStoreKey){
+      crossShifts=roleFilter?day.allOther.filter(function(s){var e=empById(sEmpId(s));return e&&matchesRole(e.role);}):day.allOther;
+    }
 
     var h='<div class="day-store-section '+st.cls+'">';
     h+='<div class="day-store-label '+st.cls+'">'+st.label+'</div>';
