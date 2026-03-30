@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>if(sessionStorage.getItem('wg_portal_auth')!=='1')window.location.href='index.html';</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — Owner Expenses & Operating Costs</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e}
+.loading-bar{height:3px;background:#C4276E;position:fixed;top:0;left:0;width:0;z-index:200;transition:width 0.3s}
+.loading-bar.active{width:70%}.loading-bar.done{width:100%;opacity:0;transition:width 0.2s,opacity 0.4s 0.2s}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:28px 32px 22px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.header h1{font-size:1.6rem;font-weight:800;letter-spacing:-0.02em}
+.header p{font-size:0.85rem;opacity:0.85;margin-top:2px}
+.topbar{background:white;border-bottom:2px solid #eee;padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:50}
+.store-toggle{display:flex;border:2px solid #C4276E;border-radius:8px;overflow:hidden}
+.store-toggle button{padding:6px 16px;border:none;background:white;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;color:#C4276E;transition:background 0.15s}
+.store-toggle button.active{background:#C4276E;color:white}
+.add-btn{margin-left:auto;padding:8px 18px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer;transition:background 0.15s}
+.add-btn:hover{background:#a31f5b}
+.filter-bar{background:white;border-bottom:1px solid #eee;padding:10px 20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filter-btn{padding:5px 14px;border:2px solid #ddd;border-radius:20px;background:white;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer;color:#888;transition:all 0.15s}
+.filter-btn.active{border-color:#C4276E;color:#C4276E;background:#FDF0F5}
+.summary{padding:16px 20px;display:flex;gap:14px;flex-wrap:wrap}
+.sum-card{flex:1;min-width:180px;background:white;border-radius:12px;padding:16px 20px;box-shadow:0 1px 6px rgba(0,0,0,0.06);border-left:4px solid #C4276E}
+.sum-card .val{font-size:1.5rem;font-weight:800;color:#C4276E}
+.sum-card .lbl{font-size:0.72rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px}
+.sum-card.op{border-left-color:#1B6B6B}.sum-card.op .val{color:#1B6B6B}
+.sum-card.total{border-left-color:#6B3520}.sum-card.total .val{color:#6B3520}
+.main{padding:16px 20px 60px}
+table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.06)}
+thead{background:#fafafa}
+th{padding:10px 14px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#999;text-align:left;border-bottom:2px solid #eee}
+td{padding:10px 14px;font-size:0.85rem;border-bottom:1px solid #f5f5f5}
+tr:hover{background:#fdf0f5}
+tr:last-child td{border-bottom:none}
+.n{text-align:right;font-weight:600}
+.cat-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.cat-owner{background:#FDF0F5;color:#C4276E}.cat-operating{background:#e0f2f1;color:#1B6B6B}
+.store-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:0.62rem;font-weight:800;color:white;letter-spacing:0.04em}
+.store-pw{background:#C4276E}.store-hv{background:#1565C0}
+.recurring-badge{font-size:0.68rem;color:#999}
+.edit-btn{background:none;border:none;cursor:pointer;font-size:0.85rem;padding:4px 8px;border-radius:4px;color:#C4276E;transition:background 0.15s}
+.edit-btn:hover{background:#FDF0F5}
+.del-btn{background:none;border:none;cursor:pointer;font-size:0.85rem;padding:4px 8px;border-radius:4px;color:#ccc;transition:all 0.15s}
+.del-btn:hover{color:#C62828;background:#ffebee}
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.overlay.hidden{display:none}
+.modal{background:white;border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.modal-hdr{padding:20px 24px 12px;border-bottom:1px solid #eee}
+.modal-hdr h2{font-size:1.2rem;font-weight:800}
+.modal-body{padding:16px 24px}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#999;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem;color:#1a1a2e;background:white}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#C4276E}
+.fg textarea{resize:vertical;min-height:60px}
+.row2{display:flex;gap:12px}.row2>.fg{flex:1}
+.modal-actions{padding:12px 24px 20px;display:flex;justify-content:flex-end;gap:8px}
+.btn-save{padding:10px 24px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer}
+.btn-save:hover{background:#a31f5b}.btn-save:disabled{opacity:0.5}
+.btn-cancel{padding:10px 20px;background:white;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;color:#888}
+.btn-cancel:hover{border-color:#999}
+.btn-delete{padding:10px 20px;background:white;border:2px solid #ffcdd2;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;color:#C62828;margin-right:auto}
+.btn-delete:hover{background:#ffebee}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 24px;border-radius:10px;font-weight:700;font-size:0.85rem;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none;color:white}
+.toast.ok{background:#2E7D32;opacity:1}.toast.err{background:#C62828;opacity:1}
+.override-section{margin-top:8px}
+.override-row{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.override-row input{width:100px;padding:5px 8px;font-size:0.82rem}
+.override-row .amt{width:80px}
+.override-add{font-size:0.78rem;color:#C4276E;cursor:pointer;font-weight:600;border:none;background:none;padding:4px 0}
+.override-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.85rem}
+.override-del:hover{color:#C62828}
+@media(max-width:600px){.topbar{flex-direction:column;align-items:stretch}.add-btn{width:100%}.summary{flex-direction:column}.row2{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="loading-bar" id="loadbar"></div>
+
+<div class="header">
+  <a class="back-link" href="index.html">&larr; Owner Portal</a>
+  <h1>Owner Expenses & Operating Costs</h1>
+  <p>Manage recurring and one-time business expenses</p>
+</div>
+
+<div class="topbar">
+  <div class="store-toggle">
+    <button onclick="setStore('port-washington')" id="btn-pw">Port Washington</button>
+    <button onclick="setStore('hicksville')" id="btn-hv">Hicksville</button>
+    <button onclick="setStore('all')" id="btn-all">All</button>
+  </div>
+  <div class="filter-bar" style="border:none;padding:0">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('owner',this)">Owner</button>
+    <button class="filter-btn" onclick="setFilter('operating',this)">Operating</button>
+  </div>
+  <button class="add-btn" onclick="openModal()">+ Add Expense</button>
+</div>
+
+<div class="summary" id="summary"></div>
+
+<div class="main">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Subcategory</th>
+        <th>Store</th>
+        <th>Type</th>
+        <th class="n">Monthly Amount</th>
+        <th class="n">Annual Est.</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<!-- MODAL -->
+<div class="overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-hdr"><h2 id="modal-title">Add Expense</h2></div>
+    <div class="modal-body">
+      <div class="fg"><label>Expense Name *</label><input type="text" id="m-name" placeholder="e.g., Volkswagen Car Lease"></div>
+      <div class="row2">
+        <div class="fg"><label>Category *</label>
+          <select id="m-category">
+            <option value="owner">Owner / Personal</option>
+            <option value="operating">Operating Cost</option>
+          </select>
+        </div>
+        <div class="fg"><label>Subcategory</label>
+          <select id="m-subcategory">
+            <option value="personal">Personal</option>
+            <option value="utilities">Utilities</option>
+            <option value="insurance">Insurance</option>
+            <option value="supplies">Supplies</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="marketing">Marketing</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Store *</label>
+          <select id="m-store">
+            <option value="port-washington">Port Washington</option>
+            <option value="hicksville">Hicksville</option>
+          </select>
+        </div>
+        <div class="fg"><label>Monthly Amount *</label><input type="number" id="m-amount" step="0.01" placeholder="0.00"></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Type</label>
+          <select id="m-recurring" onchange="toggleOneTime()">
+            <option value="true">Monthly Recurring</option>
+            <option value="false">One-Time</option>
+          </select>
+        </div>
+        <div class="fg" id="fg-onetime" style="display:none"><label>One-Time Date</label><input type="date" id="m-onetime-date"></div>
+      </div>
+      <div class="row2">
+        <div class="fg"><label>Start Date</label><input type="date" id="m-start" value="2024-01-01"></div>
+        <div class="fg"><label>End Date (leave blank if ongoing)</label><input type="date" id="m-end"></div>
+      </div>
+      <div class="fg"><label>Notes</label><textarea id="m-notes" placeholder="Optional notes..."></textarea></div>
+      <div class="fg">
+        <label>Monthly Overrides <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#bbb">(for seasonal variation)</span></label>
+        <div id="overrides-list"></div>
+        <button class="override-add" type="button" onclick="addOverride()">+ Add Month Override</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-delete hidden" id="btn-del" onclick="deleteExpense()">Delete</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="btn-save" onclick="saveExpense()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SB='https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SHD={'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
+function sbGet(p){return fetch(SB+p,{headers:SHD}).then(function(r){return r.json();});}
+function sbPost(t,b){return fetch(SB+'/'+t,{method:'POST',headers:SHD,body:JSON.stringify(b)}).then(function(r){return r.json();});}
+function sbPatch(t,f,b){return fetch(SB+'/'+t+'?'+f,{method:'PATCH',headers:SHD,body:JSON.stringify(b)}).then(function(r){return r.status===204?null:r.json();});}
+function sbDelete(t,f){return fetch(SB+'/'+t+'?'+f,{method:'DELETE',headers:SHD});}
+
+var currentStore=localStorage.getItem('wg_sched_store')||'port-washington';
+var currentFilter='all';
+var expenses=[];
+var editId=null;
+
+function startLoad(){document.getElementById('loadbar').className='loading-bar active';}
+function endLoad(){var b=document.getElementById('loadbar');b.className='loading-bar done';setTimeout(function(){b.className='loading-bar';},500);}
+function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'ok');setTimeout(function(){t.className='toast';},2600);}
+function fc(v){return '$'+Number(v||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function setStore(k){
+  currentStore=k;
+  document.getElementById('btn-pw').className=k==='port-washington'?'active':'';
+  document.getElementById('btn-hv').className=k==='hicksville'?'active':'';
+  document.getElementById('btn-all').className=k==='all'?'active':'';
+  load();
+}
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  render();
+}
+
+function load(){
+  startLoad();
+  var q='/operating_expenses?order=category,name';
+  if(currentStore!=='all') q+='&store=eq.'+encodeURIComponent(currentStore);
+  sbGet(q).then(function(rows){
+    expenses=rows||[];
+    endLoad();
+    render();
+  }).catch(function(){endLoad();showToast('Failed to load','err');});
+}
+
+function getMonthlyAmount(exp){
+  if(!exp.is_recurring) return exp.amount||0;
+  return exp.amount||0;
+}
+
+function getAnnualEstimate(exp){
+  if(!exp.is_recurring){
+    return exp.amount||0;
+  }
+  var base=(exp.amount||0)*12;
+  var overrides=exp.monthly_overrides||{};
+  var keys=Object.keys(overrides);
+  if(!keys.length) return base;
+  // Adjust: replace default months with overrides
+  var total=0;
+  for(var m=1;m<=12;m++){
+    var key='2026-'+String(m).padStart(2,'0');
+    total+=(overrides[key]!==undefined?overrides[key]:exp.amount)||0;
+  }
+  return total;
+}
+
+function render(){
+  var filtered=expenses;
+  if(currentFilter!=='all') filtered=expenses.filter(function(e){return e.category===currentFilter;});
+
+  // Summary
+  var ownerTotal=0, opTotal=0;
+  expenses.forEach(function(e){
+    var amt=getMonthlyAmount(e);
+    if(e.category==='owner') ownerTotal+=amt;
+    else opTotal+=amt;
+  });
+  document.getElementById('summary').innerHTML=
+    '<div class="sum-card"><div class="val">'+fc(ownerTotal)+'</div><div class="lbl">Owner Expenses / mo</div></div>'+
+    '<div class="sum-card op"><div class="val">'+fc(opTotal)+'</div><div class="lbl">Operating Costs / mo</div></div>'+
+    '<div class="sum-card total"><div class="val">'+fc(ownerTotal+opTotal)+'</div><div class="lbl">Total / mo</div></div>'+
+    '<div class="sum-card total"><div class="val">'+fc((ownerTotal+opTotal)*12)+'</div><div class="lbl">Annual Est.</div></div>';
+
+  // Table
+  var tbody=document.getElementById('tbody');
+  if(!filtered.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#ccc;padding:40px">No expenses found</td></tr>';
+    return;
+  }
+  tbody.innerHTML=filtered.map(function(e){
+    var catCls=e.category==='owner'?'cat-owner':'cat-operating';
+    var catLabel=e.category==='owner'?'Owner':'Operating';
+    var storeCls=e.store==='port-washington'?'store-pw':'store-hv';
+    var storeLabel=e.store==='port-washington'?'PW':'HV';
+    var typeLabel=e.is_recurring?'<span class="recurring-badge">Monthly</span>':'<span class="recurring-badge">One-time'+(e.one_time_date?' ('+e.one_time_date+')':'')+'</span>';
+    var monthly=getMonthlyAmount(e);
+    var annual=getAnnualEstimate(e);
+    var hasOverrides=e.monthly_overrides&&Object.keys(e.monthly_overrides).length>0;
+    return '<tr>'+
+      '<td><strong>'+esc(e.name)+'</strong>'+(hasOverrides?' <span style="color:#F9A825;font-size:0.7rem" title="Has monthly overrides">⚡</span>':'')+'</td>'+
+      '<td><span class="cat-badge '+catCls+'">'+catLabel+'</span></td>'+
+      '<td>'+esc(e.subcategory||'')+'</td>'+
+      '<td><span class="store-badge '+storeCls+'">'+storeLabel+'</span></td>'+
+      '<td>'+typeLabel+'</td>'+
+      '<td class="n">'+fc(monthly)+'</td>'+
+      '<td class="n">'+fc(annual)+'</td>'+
+      '<td><button class="edit-btn" onclick="openModal('+e.id+')">Edit</button><button class="del-btn" onclick="confirmDelete('+e.id+')">✕</button></td>'+
+      '</tr>';
+  }).join('');
+}
+
+// ── Modal ──
+function toggleOneTime(){
+  var isOneTime=document.getElementById('m-recurring').value==='false';
+  document.getElementById('fg-onetime').style.display=isOneTime?'block':'none';
+}
+
+function addOverride(month,amount){
+  var list=document.getElementById('overrides-list');
+  var row=document.createElement('div');
+  row.className='override-row';
+  row.innerHTML='<input type="month" class="ov-month" value="'+(month||'')+'">'+'<input type="number" class="ov-amt amt" step="0.01" placeholder="Amount" value="'+(amount||'')+'">'+'<button class="override-del" onclick="this.parentElement.remove()">&times;</button>';
+  list.appendChild(row);
+}
+
+function getOverrides(){
+  var result={};
+  document.querySelectorAll('.override-row').forEach(function(row){
+    var month=row.querySelector('.ov-month').value;
+    var amt=parseFloat(row.querySelector('.ov-amt').value);
+    if(month&&!isNaN(amt)) result[month]=amt;
+  });
+  return result;
+}
+
+function openModal(id){
+  editId=id||null;
+  document.getElementById('modal-title').textContent=id?'Edit Expense':'Add Expense';
+  document.getElementById('btn-del').classList.toggle('hidden',!id);
+  document.getElementById('overrides-list').innerHTML='';
+
+  if(id){
+    var e=expenses.find(function(x){return x.id===id;});
+    if(!e) return;
+    document.getElementById('m-name').value=e.name;
+    document.getElementById('m-category').value=e.category;
+    document.getElementById('m-subcategory').value=e.subcategory||'other';
+    document.getElementById('m-store').value=e.store;
+    document.getElementById('m-amount').value=e.amount;
+    document.getElementById('m-recurring').value=e.is_recurring?'true':'false';
+    document.getElementById('m-onetime-date').value=e.one_time_date||'';
+    document.getElementById('m-start').value=e.start_date||'2024-01-01';
+    document.getElementById('m-end').value=e.end_date||'';
+    document.getElementById('m-notes').value=e.notes||'';
+    var ov=e.monthly_overrides||{};
+    Object.keys(ov).sort().forEach(function(k){addOverride(k,ov[k]);});
+    toggleOneTime();
+  } else {
+    document.getElementById('m-name').value='';
+    document.getElementById('m-category').value='owner';
+    document.getElementById('m-subcategory').value='personal';
+    document.getElementById('m-store').value=currentStore==='all'?'port-washington':currentStore;
+    document.getElementById('m-amount').value='';
+    document.getElementById('m-recurring').value='true';
+    document.getElementById('m-onetime-date').value='';
+    document.getElementById('m-start').value='2024-01-01';
+    document.getElementById('m-end').value='';
+    document.getElementById('m-notes').value='';
+    toggleOneTime();
+  }
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.add('hidden');editId=null;}
+
+function saveExpense(){
+  var name=document.getElementById('m-name').value.trim();
+  var amount=parseFloat(document.getElementById('m-amount').value);
+  if(!name){showToast('Name is required','err');return;}
+  if(isNaN(amount)){showToast('Amount is required','err');return;}
+
+  var body={
+    name:name,
+    category:document.getElementById('m-category').value,
+    subcategory:document.getElementById('m-subcategory').value,
+    store:document.getElementById('m-store').value,
+    amount:amount,
+    is_recurring:document.getElementById('m-recurring').value==='true',
+    one_time_date:document.getElementById('m-recurring').value==='false'?document.getElementById('m-onetime-date').value||null:null,
+    start_date:document.getElementById('m-start').value||null,
+    end_date:document.getElementById('m-end').value||null,
+    notes:document.getElementById('m-notes').value.trim()||null,
+    monthly_overrides:getOverrides()
+  };
+
+  var btn=document.getElementById('btn-save');
+  btn.disabled=true;btn.textContent='Saving...';
+
+  var p=editId
+    ?sbPatch('operating_expenses','id=eq.'+editId,body)
+    :sbPost('operating_expenses',body);
+
+  p.then(function(){
+    btn.disabled=false;btn.textContent='Save';
+    closeModal();
+    showToast(editId?'Expense updated':'Expense added');
+    load();
+  }).catch(function(){
+    btn.disabled=false;btn.textContent='Save';
+    showToast('Save failed','err');
+  });
+}
+
+function confirmDelete(id){
+  if(!confirm('Delete this expense?')) return;
+  deleteExpenseById(id);
+}
+function deleteExpense(){
+  if(!editId) return;
+  if(!confirm('Delete this expense?')) return;
+  deleteExpenseById(editId);
+}
+function deleteExpenseById(id){
+  sbDelete('operating_expenses','id=eq.'+id).then(function(){
+    closeModal();
+    showToast('Expense deleted');
+    load();
+  }).catch(function(){showToast('Delete failed','err');});
+}
+
+// Init
+setStore(currentStore);
+</script>
+</body>
+</html>

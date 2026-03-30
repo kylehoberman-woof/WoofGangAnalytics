@@ -43,6 +43,56 @@ STORE_OPEN = STORE_OPEN_DATES.get(_store_name, date(2024, 9, 26))
 RETAIL_NAME_MAP, RETAIL_RATES, BATHER_NAME_MAP, BATHER_RATE_MAP, GUARANTEES = get_store_pay_data(_store_name)
 DAILY_RENT = MONTHLY_RENT * 12 / 365
 
+# ── Fetch operating expenses from Supabase ────────────────────────────────────
+import httpx as _httpx
+from config import SUPABASE_URL, SUPABASE_ANON_KEY
+
+_expense_records = []
+try:
+    _sb_headers = {"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}"}
+    _r = _httpx.get(
+        f"{SUPABASE_URL}/rest/v1/operating_expenses?store=eq.{_store_name}&order=category,name",
+        headers=_sb_headers, timeout=10,
+    )
+    if _r.status_code == 200:
+        _expense_records = _r.json()
+        print(f"  Operating expenses: {len(_expense_records)} records for {_store_name}")
+except Exception as _e:
+    print(f"  Operating expenses fetch failed: {_e}")
+
+def get_monthly_expenses(month_date):
+    """Calculate total owner expenses and operating costs for a given month.
+    Returns (owner_total, operating_total, detail_dict)."""
+    month_key = month_date.strftime("%Y-%m")
+    owner = 0.0
+    operating = 0.0
+    for exp in _expense_records:
+        # Check date range
+        start = exp.get("start_date")
+        end = exp.get("end_date")
+        if start and month_key < start[:7]:
+            continue
+        if end and month_key > end[:7]:
+            continue
+        # One-time: only count in the specific month
+        if not exp.get("is_recurring", True):
+            ot_date = exp.get("one_time_date", "")
+            if not ot_date or ot_date[:7] != month_key:
+                continue
+            amt = float(exp.get("amount") or 0)
+        else:
+            # Check for monthly override
+            overrides = exp.get("monthly_overrides") or {}
+            if month_key in overrides:
+                amt = float(overrides[month_key])
+            else:
+                amt = float(exp.get("amount") or 0)
+        if exp.get("category") == "owner":
+            owner += amt
+        else:
+            operating += amt
+    return round(owner, 2), round(operating, 2)
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 def get_hours_from_clocks(clocks, name_map, period_start, period_end):
@@ -177,9 +227,10 @@ while m_start <= TODAY:
     _royalty_rate = get_royalty_rate(_store_name, m_start)
     royalties = round(total_rev * _royalty_rate, 2)
     rent = get_monthly_rent(_store_name, m_start)
+    owner_exp, operating_exp = get_monthly_expenses(m_start)
 
     gross_profit = round(net_rev - retail_cogs - comm_paid, 2)
-    total_opex = round(mgr + bather_pay + retail_pay + royalties + rent, 2)
+    total_opex = round(mgr + bather_pay + retail_pay + royalties + rent + owner_exp + operating_exp, 2)
     net_margin = round(gross_profit - total_opex, 2)
     net_margin_pct = round(net_margin / total_rev * 100, 1) if total_rev else 0
 
@@ -209,6 +260,8 @@ while m_start <= TODAY:
         "retail_pay": retail_pay,
         "royalties": royalties,
         "rent": rent,
+        "owner_exp": owner_exp,
+        "operating_exp": operating_exp,
         "total_opex": total_opex,
         "net_margin": net_margin,
         "net_margin_pct": net_margin_pct,
@@ -232,7 +285,7 @@ ytd = [m for m in monthly if m["year"] == 2026]
 ytd_sums = {}
 for key in ["groom_rev", "retail_rev", "total_rev", "groom_disc", "net_rev",
             "retail_cogs", "comm_paid", "gross_profit", "mgr", "bather_pay",
-            "retail_pay", "royalties", "rent", "total_opex", "net_margin", "tips"]:
+            "retail_pay", "royalties", "rent", "owner_exp", "operating_exp", "total_opex", "net_margin", "tips"]:
     ytd_sums[key] = round(sum(m[key] for m in ytd), 2)
 ytd_sums["net_margin_pct"] = round(ytd_sums["net_margin"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
 ytd_sums["gross_margin_pct"] = round(ytd_sums["gross_profit"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
@@ -358,6 +411,8 @@ for m in monthly:
       <td class="n">{fc(m["retail_pay"])}</td>
       <td class="n">{fc(m["royalties"])}</td>
       <td class="n">{fc(m["rent"])}</td>
+      <td class="n" style="color:#E65100">{fc(m["owner_exp"])}</td>
+      <td class="n" style="color:#1565C0">{fc(m["operating_exp"])}</td>
       <td class="n" style="font-weight:700;color:{mc}">{fc(m["net_margin"])}<br><span style="font-size:0.72rem;font-weight:400">{m["net_margin_pct"]}%</span></td>
     </tr>'''
 
@@ -380,6 +435,8 @@ CMP_KPIS = [
     ("retail_pay", "Retail Staff", False),
     ("royalties", "Royalties", False),
     ("rent", "Rent", False),
+    ("owner_exp", "Owner Expenses", False),
+    ("operating_exp", "Operating Costs", False),
     ("net_margin", "Net Margin", True),
 ]
 
@@ -491,6 +548,8 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
     {kpi("Retail Staff Pay", fc(ytd_sums["retail_pay"]), "#6A1B9A")}
     {kpi("Royalties + Marketing", fc(ytd_sums["royalties"]), "#AD1457")}
     {kpi("Rent", fc(ytd_sums["rent"]), "#6D4C41")}
+    {kpi("Owner Expenses", fc(ytd_sums["owner_exp"]), "#E65100")}
+    {kpi("Operating Costs", fc(ytd_sums["operating_exp"]), "#1565C0")}
     {kpi("Net Margin", fc(ytd_sums["net_margin"]), "#2E7D32" if ytd_sums["net_margin"] >= 0 else "#e53935", f'{ytd_sums["net_margin_pct"]}%')}
     {kpi("Tips Collected", fc(ytd_sums["tips"]), "#F57C00")}
   </div>
@@ -549,6 +608,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
         <th>Groom Rev</th><th>Retail Rev</th><th>Total Rev</th>
         <th>Discounts</th><th>Retail COGS</th><th>Commission</th><th>Gross Profit</th>
         <th>Manager</th><th>Bather</th><th>Retail Staff</th><th>Royalties</th><th>Rent</th>
+        <th>Owner Exp</th><th>Oper. Costs</th>
         <th>Net Margin</th>
       </tr></thead>
       <tbody>{table_rows}</tbody>
@@ -708,6 +768,8 @@ function updateMonthDetail() {{
     kpiHtml('Retail COGS', fc(m.retail_cogs), '#e65100', '') +
     kpiHtml('Commission', fc(m.comm_paid), '#1565C0', '') +
     kpiHtml('Gross Profit', fc(m.gross_profit), '#2E7D32', fp(m.gross_margin_pct)) +
+    kpiHtml('Owner Expenses', fc(m.owner_exp||0), '#E65100', '') +
+    kpiHtml('Operating Costs', fc(m.operating_exp||0), '#1565C0', '') +
     kpiHtml('Total OpEx', fc(m.total_opex), '#7B1FA2', '') +
     kpiHtml('Net Margin', fc(m.net_margin), mc, fp(m.net_margin_pct)) +
     kpiHtml('Tips', fc(m.tips), '#F57C00', '');
@@ -733,15 +795,17 @@ var costData = [
   {ytd_sums["retail_pay"]},
   {ytd_sums["royalties"]},
   {ytd_sums["rent"]},
+  {ytd_sums["owner_exp"]},
+  {ytd_sums["operating_exp"]},
   {ytd_sums["groom_disc"]}
 ];
 new Chart(document.getElementById('chart-costs'), {{
   type: 'doughnut',
   data: {{
-    labels: ['Groomer Commission','Retail COGS','Manager','Bather Pay','Retail Staff','Royalties','Rent','Discounts'],
+    labels: ['Groomer Commission','Retail COGS','Manager','Bather Pay','Retail Staff','Royalties','Rent','Owner Expenses','Operating Costs','Discounts'],
     datasets: [{{
       data: costData,
-      backgroundColor: ['#1565C0','#e65100','#5C6BC0','#00796B','#6A1B9A','#AD1457','#6D4C41','#e53935']
+      backgroundColor: ['#1565C0','#e65100','#5C6BC0','#00796B','#6A1B9A','#AD1457','#6D4C41','#E65100','#0277BD','#e53935']
     }}]
   }},
   options: {{
@@ -764,6 +828,8 @@ var wf = [
   {{ label: 'Retail Staff', val: -{ytd_sums["retail_pay"]} }},
   {{ label: 'Royalties', val: -{ytd_sums["royalties"]} }},
   {{ label: 'Rent', val: -{ytd_sums["rent"]} }},
+  {{ label: 'Owner Exp', val: -{ytd_sums["owner_exp"]} }},
+  {{ label: 'Oper. Costs', val: -{ytd_sums["operating_exp"]} }},
 ];
 var running = 0;
 var wfBases = [], wfVals = [], wfColors = [];
