@@ -49,8 +49,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .emp-hrs{font-weight:500;color:#888;font-size:0.72rem}
 
 .schedule-main{padding:16px 16px 60px;overflow-x:auto}
-.week-grid{display:grid;grid-template-columns:repeat(7,minmax(130px,1fr));gap:10px;min-width:910px}
-.day-col{display:flex;flex-direction:column;gap:6px}
+.week-grid{display:grid;grid-template-columns:repeat(7,minmax(130px,1fr));gap:6px 10px;min-width:910px;align-items:start}
+.day-col-hdr{} /* header cells placed directly in grid */
 .day-hdr{background:white;border-radius:10px;padding:10px 12px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-top:3px solid #eee}
 .day-hdr.today{border-top-color:#C4276E}
 .day-name{font-size:0.7rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.06em}
@@ -74,6 +74,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .shift-del:hover{color:#c62828;background:#fce4ec}
 .btn-add-shift{width:100%;padding:8px;border:2px dashed #ddd;border-radius:8px;background:transparent;font-family:inherit;font-size:0.78rem;font-weight:600;color:#ccc;cursor:pointer;transition:all 0.15s}
 .btn-add-shift:hover{border-color:#C4276E;color:#C4276E;background:#fdf0f5}
+.day-store-section{background:#fafafa;border-radius:8px;padding:6px 6px 8px;display:flex;flex-direction:column;gap:4px}
+.day-store-section.pw{border-top:3px solid #C4276E}
+.day-store-section.hv{border-top:3px solid #1565C0}
+.day-store-label{font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;padding:0 4px 2px}
+.day-store-label.pw{color:#C4276E}
+.day-store-label.hv{color:#1565C0}
 
 /* Month view */
 .month-controls{display:flex;align-items:center;gap:10px;padding:14px 20px;flex-wrap:wrap}
@@ -647,47 +653,73 @@ function _paintWeek(ws,we,today){
     }).join('');
   }
 
-  // Grid
+  // Grid — output in row order so CSS grid aligns sections across days
   var isAllStores=currentStore==='all';
-  var otherLabel=currentStore==='port-washington'?'HV':'PW';
-  var otherBadgeCls=currentStore==='port-washington'?'hv':'pw';
-  var html='';
+  var STORE_SECTIONS=[
+    {key:'port-washington',label:'Port Washington',cls:'pw'},
+    {key:'hicksville',label:'Hicksville',cls:'hv'}
+  ];
+  var sectionsToShow=isAllStores?STORE_SECTIONS:STORE_SECTIONS.filter(function(st){return st.key===currentStore;});
+  var otherStoreKey=currentStore==='port-washington'?'hicksville':'port-washington';
+
+  // Pre-compute day data
+  var dayData=[];
   for(var i=0;i<7;i++){
     var d=addDays(ws,i), iso=toISO(d), isT=(iso===todayISO);
-    // Merge current-store and other-store shifts, sorted by start time
-    var dayShifts=(shifts[iso]||[]).map(function(s){return {s:s,other:false};})
-      .concat((otherShifts[iso]||[]).map(function(s){return {s:s,other:true};}))
-      .sort(function(a,b){return sStart(a.s).localeCompare(sStart(b.s));});
-    html+='<div class="day-col">';
-    html+='<div class="day-hdr'+(isT?' today':'')+'"><div class="day-name">'+DAY_SHORT[i]+'</div><div class="day-date">'+d.getDate()+'</div></div>';
-    (timeOff[iso]||[]).forEach(function(o){
-      html+='<div class="time-off-pill">🏖 '+esc(o.employee_name)+' <span class="to-type">'+esc(o.type)+'</span></div>';
-    });
-    dayShifts.forEach(function(item){
-      var s=item.s, isOther=item.other;
-      var e=empById(sEmpId(s))||{name:'Unknown',color:'#aaa',role:'other'};
-      if(isOther){
-        html+='<div class="shift-card other-store" style="border-left-color:'+e.color+'" title="'+esc(e.name)+' is at '+otherLabel+' this shift">';
-        html+='<div class="shift-emp">'+esc(e.name)+'<span class="store-badge '+otherBadgeCls+'">'+otherLabel+'</span></div>';
-        html+='<div class="shift-role" style="color:'+e.color+'">'+esc(ROLES[e.role]||e.role)+'</div>';
-        html+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
-        if(s.notes) html+='<div class="shift-note">'+esc(s.notes)+'</div>';
-        html+='</div>';
-      } else {
-        html+='<div class="shift-card" style="border-left-color:'+e.color+'" onclick="openEditShift(\''+iso+'\',\''+s.id+'\')">';
-        html+='<button class="shift-del" onclick="event.stopPropagation();quickDelShift(\''+s.id+'\',\''+iso+'\')">✕</button>';
-        var sBadgeCls=s.store==='port-washington'?'pw':'hv';
-        var sBadgeLbl=s.store==='port-washington'?'PW':'HV';
-        html+='<div class="shift-emp">'+esc(e.name)+(isAllStores?'<span class="store-badge '+sBadgeCls+'">'+sBadgeLbl+'</span>':'')+'</div>';
-        html+='<div class="shift-role" style="color:'+e.color+'">'+esc(ROLES[e.role]||e.role)+'</div>';
-        html+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
-        if(s.notes) html+='<div class="shift-note">'+esc(s.notes)+'</div>';
-        html+='</div>';
-      }
-    });
-    if(!isAllStores) html+='<button class="btn-add-shift" onclick="openAddShift(\''+iso+'\')">+ Add Shift</button>';
-    html+='</div>';
+    dayData.push({d:d,iso:iso,isT:isT,i:i,allShifts:shifts[iso]||[],allOther:otherShifts[iso]||[],offs:timeOff[iso]||[]});
   }
+
+  // Helper to render shift cards for a store section
+  function renderStoreSection(day,st){
+    var storeShifts=day.allShifts.filter(function(s){return s.store===st.key;})
+      .sort(function(a,b){return sStart(a).localeCompare(sStart(b));});
+    var crossShifts=[];
+    if(!isAllStores && st.key===otherStoreKey) crossShifts=day.allOther;
+
+    var h='<div class="day-store-section '+st.cls+'">';
+    h+='<div class="day-store-label '+st.cls+'">'+st.label+'</div>';
+
+    if(storeShifts.length===0 && crossShifts.length===0){
+      h+='<div style="font-size:0.72rem;color:#ccc;font-style:italic;padding:4px">No shifts</div>';
+    }
+    storeShifts.forEach(function(s){
+      var e=empById(sEmpId(s))||{name:'Unknown',color:'#aaa',role:'other'};
+      h+='<div class="shift-card" style="border-left-color:'+e.color+'" onclick="openEditShift(\''+day.iso+'\',\''+s.id+'\')">';
+      h+='<button class="shift-del" onclick="event.stopPropagation();quickDelShift(\''+s.id+'\',\''+day.iso+'\')">✕</button>';
+      h+='<div class="shift-emp">'+esc(e.name)+'</div>';
+      h+='<div class="shift-role" style="color:'+e.color+'">'+esc(ROLES[e.role]||e.role)+'</div>';
+      h+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
+      if(s.notes) h+='<div class="shift-note">'+esc(s.notes)+'</div>';
+      h+='</div>';
+    });
+    crossShifts.forEach(function(s){
+      var e=empById(sEmpId(s))||{name:'Unknown',color:'#aaa',role:'other'};
+      var badgeLbl=s.store==='port-washington'?'PW':'HV';
+      var badgeCls=s.store==='port-washington'?'pw':'hv';
+      h+='<div class="shift-card other-store" style="border-left-color:'+e.color+'" title="'+esc(e.name)+' is at '+badgeLbl+' this shift">';
+      h+='<div class="shift-emp">'+esc(e.name)+'<span class="store-badge '+badgeCls+'">'+badgeLbl+'</span></div>';
+      h+='<div class="shift-role" style="color:'+e.color+'">'+esc(ROLES[e.role]||e.role)+'</div>';
+      h+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
+      h+='</div>';
+    });
+    h+='<button class="btn-add-shift" onclick="openAddShift(\''+day.iso+'\',\''+st.key+'\')">+ Add</button>';
+    h+='</div>';
+    return h;
+  }
+
+  var html='';
+  // Row 1: Day headers (Mon–Sun)
+  dayData.forEach(function(day){
+    html+='<div class="day-hdr'+(day.isT?' today':'')+'"><div class="day-name">'+DAY_SHORT[day.i]+'</div><div class="day-date">'+day.d.getDate()+'</div></div>';
+  });
+
+  // Row 2+: One row per store section
+  sectionsToShow.forEach(function(st){
+    dayData.forEach(function(day){
+      html+=renderStoreSection(day,st);
+    });
+  });
+
   document.getElementById('week-grid').innerHTML=html;
 }
 
@@ -1050,10 +1082,12 @@ function renderRoster(){
 /* ════════════════════════════════════════
    SHIFT MODAL
 ════════════════════════════════════════ */
-function openAddShift(iso){
-  editShiftId=null;editShiftDate=null;addShiftDate=iso;
-  document.getElementById('shift-modal-title').textContent='Add Shift — '+fmtShort(new Date(iso+'T12:00:00'));
-  populateEmpSelect(null);
+var addShiftStore=null;
+function openAddShift(iso,store){
+  editShiftId=null;editShiftDate=null;addShiftDate=iso;addShiftStore=store||currentStore;
+  var storeName=addShiftStore==='port-washington'?'PW':'HV';
+  document.getElementById('shift-modal-title').textContent='Add Shift — '+storeName+' — '+fmtShort(new Date(iso+'T12:00:00'));
+  populateEmpSelect(null,addShiftStore);
   document.getElementById('sm-start').value='09:00';
   document.getElementById('sm-end').value='17:00';
   document.getElementById('sm-notes').value='';
@@ -1064,29 +1098,34 @@ function openAddShift(iso){
 function openEditShift(iso,id){
   var s=(shifts[iso]||[]).find(function(x){return x.id===id;});
   if(!s) return;
-  editShiftId=id;editShiftDate=iso;addShiftDate=null;
-  document.getElementById('shift-modal-title').textContent='Edit Shift';
-  populateEmpSelect(sEmpId(s));
+  editShiftId=id;editShiftDate=iso;addShiftDate=null;addShiftStore=s.store||currentStore;
+  var storeName=addShiftStore==='port-washington'?'PW':'HV';
+  document.getElementById('shift-modal-title').textContent='Edit Shift — '+storeName;
+  populateEmpSelect(sEmpId(s),addShiftStore);
   document.getElementById('sm-start').value=sStart(s);
   document.getElementById('sm-end').value=sEnd(s);
   document.getElementById('sm-notes').value=s.notes||'';
   document.getElementById('sm-delete').classList.remove('hidden');
   document.getElementById('shift-overlay').classList.remove('hidden');
 }
-function populateEmpSelect(selId){
+function populateEmpSelect(selId,forStore){
   var sel=document.getElementById('sm-emp');
   sel.innerHTML='<option value="">— Select employee —</option>';
-  storeEmployees().forEach(function(e){
+  var store=forStore||currentStore;
+  var emps=(store==='all')?employees:employees.filter(function(e){return e.store===store||e.store==='both';});
+  emps.forEach(function(e){
     sel.innerHTML+='<option value="'+e.id+'"'+(e.id===selId?' selected':'')+'>'+esc(e.name)+' ('+esc(ROLES[e.role]||e.role)+')</option>';
   });
 }
-function closeShiftModal(){document.getElementById('shift-overlay').classList.add('hidden');editShiftId=editShiftDate=addShiftDate=null;}
+function closeShiftModal(){document.getElementById('shift-overlay').classList.add('hidden');editShiftId=editShiftDate=addShiftDate=null;addShiftStore=null;}
 function saveShift(){
   var empId=document.getElementById('sm-emp').value;
   if(!empId){showToast('Select an employee','error');return;}
   var btn=document.getElementById('sm-save'); btn.disabled=true; btn.textContent='Saving…';
   var date=editShiftDate||addShiftDate;
-  var body={emp_id:empId,store:currentStore,shift_date:date,start_time:document.getElementById('sm-start').value,end_time:document.getElementById('sm-end').value,notes:document.getElementById('sm-notes').value.trim()};
+  var shiftStore=addShiftStore||currentStore;
+  if(shiftStore==='all') shiftStore='port-washington';
+  var body={emp_id:empId,store:shiftStore,shift_date:date,start_time:document.getElementById('sm-start').value,end_time:document.getElementById('sm-end').value,notes:document.getElementById('sm-notes').value.trim()};
 
   var p = editShiftId
     ? sbPatch('schedule_shifts','id=eq.'+editShiftId,body)
