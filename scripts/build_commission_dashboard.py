@@ -87,6 +87,9 @@ if True:
             or sku.startswith("INTERNET-703") # online add-ons
             or sku == "002"          # service
             or sku == "991674465"    # mini groom flat price
+            or sku == "617956234"    # Cat Grooming (HV)
+            or sku == "341112490"    # Cat Groom haircut only (PW)
+            or sku == "830648726"    # Cat Nail Trim (PW)
         )
         if is_groom_sku:
             if person not in EXCLUDE:
