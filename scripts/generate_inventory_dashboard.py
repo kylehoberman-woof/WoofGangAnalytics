@@ -109,6 +109,8 @@ for sku, d in sku_data.items():
         "velocity_monthly":round(vel_monthly,2),"weeks_of_supply":wos,"vendor":d["vendor"]})
 
 from datetime import timedelta
+
+# Include any SKU with non-zero stock, plus any SKU active in last 90 days
 cutoff_90 = (datetime.today() - timedelta(days=90)).strftime("%Y-%m-%d")
 active_skus = set()
 for item in order_items:
@@ -117,8 +119,7 @@ for item in order_items:
     if sku and date >= cutoff_90:
         active_skus.add(sku)
 
-# Only keep SKUs active in last 90 days
-results = [r for r in results if r["sku"] in active_skus]
+results = [r for r in results if r["sku"] in active_skus or (r["stock"] is not None and r["stock"] != 0)]
 results.sort(key=lambda x: x["revenue"], reverse=True)
 
 def categorize(r):
