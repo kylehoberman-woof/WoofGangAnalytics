@@ -181,7 +181,7 @@ def make_rows(items, show_cost=True):
             f'<tr class="row-{s}" data-status="{s}" data-vendor="{r["vendor"].lower()}">'
             f'<td>{badge(s)}</td><td class="sku-cell">{r["sku"]}</td>'
             f'<td class="name-cell">{r["name"][:48]}</td><td class="vendor-cell">{r["vendor"]}</td>'
-            f'<td class="num{neg}">{stock_str}</td>{pending_cell(r["sku"])}<td class="num">{vel_str}</td>'
+            f'<td class="num stock-edit{neg}" data-sku="{r["sku"]}">{stock_str}</td>{pending_cell(r["sku"])}<td class="num">{vel_str}</td>'
             f'<td class="num">{wos_str}</td>{cost_cols}'
             f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
         )
@@ -210,7 +210,7 @@ nocost_rows = "\n".join(
     f'<tr class="row-{r["status"]}" data-status="{r["status"]}" data-vendor="{r["vendor"].lower()}">'
     f'<td>{badge(r["status"])}</td><td class="sku-cell">{r["sku"]}</td>'
     f'<td class="name-cell">{r["name"][:48]}</td><td class="vendor-cell">{r["vendor"]}</td>'
-    f'<td class="num">{"" if r["stock"] is None else str(int(r["stock"]))}</td>'
+    f'<td class="num stock-edit" data-sku="{r["sku"]}">{"" if r["stock"] is None else str(int(r["stock"]))}</td>'
     f'{pending_cell(r["sku"])}'
     f'<td class="num">{"-" if r["velocity_monthly"] <= 0 else str(round(r["velocity_monthly"],1))}</td>'
     f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
@@ -269,7 +269,7 @@ for r in sorted(results, key=lambda x: x.get("stock") or 0):
     if (r.get("stock") or 0) >= 0: continue
     neg_rows += (f'<tr data-status="{r["status"]}" data-vendor="{r["vendor"].lower()}">'
         f'<td>{r["sku"]}</td><td>{r["name"][:45]}</td>'
-        f'<td class="num" style="color:red">{r.get("stock",0):.1f}</td>'
+        f'<td class="num stock-edit" style="color:red" data-sku="{r["sku"]}">{r.get("stock",0):.1f}</td>'
         f'<td>{r["vendor"]}</td><td class="num">{r["velocity_monthly"]}</td></tr>')
 
 TH_NEG = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th>Vendor</th><th class="num">Vel/Mo</th>'
@@ -341,6 +341,13 @@ thead th{position:sticky;top:0;z-index:10;}
 .vendor-hdr:hover{opacity:0.85;}
 .vendor-hdr .collapse-arrow{transition:transform 0.2s;display:inline-block;margin-right:6px;font-size:0.8rem;}
 .vendor-hdr.collapsed .collapse-arrow{transform:rotate(-90deg);}
+.stock-edit{cursor:pointer;position:relative;transition:background 0.2s;}
+.stock-edit:hover{background:rgba(196,39,110,0.06);border-radius:4px;}
+.stock-edit input{width:60px;padding:2px 4px;border:2px solid #C4276E;border-radius:4px;font-family:inherit;font-size:inherit;text-align:right;color:#1a1a2e;background:#fff;outline:none;}
+@keyframes flashGreen{0%{background:#c8e6c9}100%{background:transparent}}
+@keyframes flashRed{0%{background:#ffcdd2}100%{background:transparent}}
+.stock-flash-ok{animation:flashGreen 1.2s ease-out;}
+.stock-flash-err{animation:flashRed 1.2s ease-out;}
 """
 
 JS = """
@@ -401,6 +408,51 @@ document.querySelectorAll('.vendor-hdr').forEach(function(hdr){
     }
   });
 });
+
+// ── Inline Stock Editing ──
+document.addEventListener('click',function(e){
+  var cell=e.target.closest('.stock-edit');
+  if(!cell||cell.querySelector('input')) return;
+  var sku=cell.dataset.sku;
+  if(!sku) return;
+  var oldVal=cell.textContent.trim();
+  var numVal=parseFloat(oldVal.replace(/[^\\d.-]/g,''));
+  if(isNaN(numVal)) numVal=0;
+  var inp=document.createElement('input');
+  inp.type='number';inp.value=numVal;inp.step='1';
+  cell.textContent='';cell.appendChild(inp);
+  inp.focus();inp.select();
+  function cancel(){cell.textContent=oldVal;}
+  function save(){
+    var nv=parseFloat(inp.value);
+    if(isNaN(nv)){cancel();return;}
+    if(nv===numVal){cancel();return;}
+    cell.textContent=nv;
+    cell.classList.add('stock-flash-ok');
+    setTimeout(function(){cell.classList.remove('stock-flash-ok');},1200);
+    // Push to Franpos
+    if(typeof FRANPOS_TOKEN!=='undefined'){
+      fetch(FRANPOS_URL+'/api/updateStockByProductSKU?sku='+encodeURIComponent(sku)+'&stock='+nv+'&addToStock=false&Token='+FRANPOS_TOKEN,{method:'POST'})
+        .then(function(r){
+          if(!r.ok) throw new Error('HTTP '+r.status);
+          cell.classList.remove('stock-flash-ok');
+          cell.classList.add('stock-flash-ok');
+          cell.title='Updated to '+nv;
+        })
+        .catch(function(err){
+          cell.classList.remove('stock-flash-ok');
+          cell.classList.add('stock-flash-err');
+          cell.title='Update failed: '+err.message;
+          setTimeout(function(){cell.classList.remove('stock-flash-err');},1200);
+        });
+    }
+  }
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();save();}
+    if(e.key==='Escape'){e.preventDefault();cancel();}
+  });
+  inp.addEventListener('blur',function(){save();});
+});
 """
 
 TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
@@ -447,7 +499,7 @@ html = f"""<!DOCTYPE html>
   <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px 8px 16px\">Reorder Recommendations (4-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3>{reorder_html}</div>
   <div id=\"p-negative\" class=\"panel\"><table><thead><tr>{TH_NEG}</tr></thead><tbody id=\"b-negative\">{neg_rows}</tbody></table></div>
 </div>
-<script>{JS}</script></body></html>"""
+<script>const FRANPOS_TOKEN="{_store.token}";const FRANPOS_LOC="{_store.location_id}";const FRANPOS_URL="https://publicapi.franpos.com";{JS}</script></body></html>"""
 
 _fn_store = _store_display.replace(" ", "")
 out_path = OUTPUT_DIR / f"WoofGang_{_fn_store}_Inventory_Dashboard.html"
