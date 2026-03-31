@@ -576,7 +576,7 @@ function fetchTimeOff(startISO, endISO){
   var toStoreQ=currentStore==='all'?'store_key=in.(port-washington,hicksville)':'store_key=eq.'+encodeURIComponent(currentStore);
   return sbGet('/time_off?'+toStoreQ
     +'&start_date=lte.'+endISO+'&end_date=gte.'+startISO
-    +'&status=neq.Rejected&select=employee_name,type,status,start_date,end_date')
+    +'&status=neq.Rejected&select=employee_name,type,status,start_date,end_date,store_key')
     .then(function(rows){
       (Array.isArray(rows)?rows:[]).forEach(function(r){
         var s=new Date(r.start_date+'T12:00:00'), e=new Date(r.end_date+'T12:00:00');
@@ -710,6 +710,12 @@ function _paintWeek(ws,we,today){
 
     var h='<div class="day-store-section '+st.cls+'">';
     h+='<div class="day-store-label '+st.cls+'">'+st.label+'</div>';
+
+    // Time-off pills for this store on this day
+    var storeOffs=(day.offs||[]).filter(function(o){return o.store_key===st.key;});
+    storeOffs.forEach(function(o){
+      h+='<div class="time-off-pill">🏖 '+esc(o.employee_name)+' <span class="to-type">'+esc(o.type||'off')+'</span></div>';
+    });
 
     if(storeShifts.length===0 && crossShifts.length===0){
       h+='<div style="font-size:0.72rem;color:#ccc;font-style:italic;padding:4px">No shifts</div>';
