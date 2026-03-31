@@ -85,12 +85,16 @@ def _fetch_customer_names():
 
     # For each phone group, find the owner (has last name) and pets (no last name)
     pet_owner_map = {}  # pet_cid → owner_name
+    owner_pets_map = {}  # owner_cid → [pet_name, ...]
     for phone, accounts in by_phone.items():
         owners = [a for a in accounts if (a.get("LastName") or "").strip()]
         pets = [a for a in accounts if not (a.get("LastName") or "").strip()]
         if owners:
             owner = owners[0]
             owner_name = f'{(owner.get("FirstName") or "").strip()} {(owner.get("LastName") or "").strip()}'.strip()
+            pet_names = list(dict.fromkeys(((p.get("FirstName") or "").strip()) for p in pets if (p.get("FirstName") or "").strip()))
+            for o in owners:
+                owner_pets_map[o["CustomerId"]] = pet_names
             for pet in pets:
                 pet_owner_map[pet["CustomerId"]] = owner_name
 
@@ -101,17 +105,33 @@ def _fetch_customer_names():
         ln = (c.get("LastName") or "").strip()
         has_lastname = bool(ln)
         if has_lastname:
-            # This is an owner account
-            mapping[str(cid)] = {"pet": "", "owner": f"{fn} {ln}".strip()}
+            # This is an owner account — look up their pet(s) via phone
+            pet_list = owner_pets_map.get(cid, [])
+            mapping[str(cid)] = {"pet": ", ".join(pet_list), "owner": f"{fn} {ln}".strip()}
         else:
             # This is a pet account
             owner_name = pet_owner_map.get(cid, "")
             mapping[str(cid)] = {"pet": fn, "owner": owner_name}
     return mapping
 
+_NAMES_CACHE = DATA_DIR / "customer_names.json"
+
 print("Fetching customer names from FranPOS...")
 _customer_names = _fetch_customer_names()
-print(f"  {len(_customer_names)} customer accounts loaded")
+print(f"  {len(_customer_names)} customer accounts loaded from API")
+
+# Save cache if we got a good result; fall back to cache if API returned few/no results
+if len(_customer_names) > 100:
+    with open(_NAMES_CACHE, "w") as f:
+        json.dump(_customer_names, f, indent=2)
+    print(f"  Saved to {_NAMES_CACHE}")
+elif _NAMES_CACHE.exists():
+    with open(_NAMES_CACHE) as f:
+        cached = json.load(f)
+    # Merge: API results override cache, but keep cached entries not in API
+    merged = {**cached, **_customer_names}
+    _customer_names = merged
+    print(f"  Merged with cache: {len(_customer_names)} total")
 
 def get_customer_name(cid):
     info = _customer_names.get(str(cid), {})
@@ -348,11 +368,20 @@ for cid, all_visits in customer_visits.items():
                 "name": v["name"][:60],
             })
 
-        owner_name, pet_name = get_customer_name(cid)
-        # For multi-dog accounts, add size label to pet name to distinguish
-        dog_label = ""
-        if len(dog_clusters) > 1:
+        owner_name, all_pet_names = get_customer_name(cid)
+        # For multi-dog accounts, try to assign individual pet names to each cluster
+        pet_names_list = [n.strip() for n in all_pet_names.split(",") if n.strip()] if all_pet_names else []
+        if len(dog_clusters) > 1 and len(pet_names_list) >= len(dog_clusters):
+            # Match pet names to clusters by order (cluster index = dog index)
+            cluster_idx = dog_clusters.index(dog_visits)
+            display_pet = pet_names_list[cluster_idx] if cluster_idx < len(pet_names_list) else ""
             dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
+            pet_name = (display_pet + dog_label) if display_pet else dog_label.strip(" ()")
+        elif len(dog_clusters) > 1:
+            dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
+            pet_name = (all_pet_names + dog_label) if all_pet_names else dog_label.strip(" ()")
+        else:
+            pet_name = all_pet_names
 
         # Use a unique key for multi-dog: cid_size
         dog_key = cid if len(dog_clusters) == 1 else f"{cid}_{SIZE_SHORT.get(modal_size, 'X')}"
@@ -361,7 +390,7 @@ for cid, all_visits in customer_visits.items():
             "cid": cid,
             "dog_key": dog_key,
             "customer_name": owner_name,
-            "pet_name": (pet_name + dog_label) if pet_name else dog_label.strip(" ()"),
+            "pet_name": pet_name,
             "visit_count": len(dog_visits),
         "modal_size": modal_size,
         "modal_size_short": SIZE_SHORT.get(modal_size, modal_size),
