@@ -16,7 +16,7 @@ from config import (
     MONTHLY_RENT as _DEFAULT_RENT, ANCHOR_START, STORE_OPEN,
     STORE_RENT, PAY_PERIOD_CONFIG,
     STORE_OPEN_DATES, get_royalty_rate, get_monthly_rent,
-    SUPABASE_URL, SUPABASE_ANON_KEY,
+    SUPABASE_URL, SUPABASE_ANON_KEY, PORTAL_BACK_JS,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data
@@ -671,7 +671,7 @@ tr:hover td{{background:#fafaf8!important}}
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
 </div>
 <div class="topbar">
-  <a href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>
+  <a id="portal-back" href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>{PORTAL_BACK_JS}
 </div>
 
 <div class="tab-bar">

@@ -120,7 +120,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 <body>
 
 <div class="header">
-  <a href="index.html" class="back-link">&#8592; Owner Portal</a>
+  <a href="index.html" class="back-link" id="portal-back">&#8592; Portal</a><script>!function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.textContent='\u2190 Manager Portal';}else if(l==='store'){a.href='store.html';a.textContent='\u2190 Store Portal';}else{a.textContent='\u2190 Owner Portal';}}();</script>
   <h1>&#129529; Store Supplies</h1>
   <p>Track office, cleaning, and operational supplies across both stores</p>
   <div class="brand">Woof Gang Bakery &amp; Grooming</div>

@@ -16,7 +16,7 @@ from config import (
     BATHER_RATE,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
-    get_royalty_rate, get_monthly_rent,
+    get_royalty_rate, get_monthly_rent, PORTAL_BACK_JS,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data
@@ -524,7 +524,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 </div>
 
 <div class="topbar">
-  <a href="{_home_url}" class="home-link">&larr; Home</a>
+  <a id="portal-back" href="{_home_url}" class="home-link">&larr; Home</a>{PORTAL_BACK_JS}
 </div>
 
 <div class="tabs">

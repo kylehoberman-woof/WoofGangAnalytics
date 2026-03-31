@@ -117,7 +117,7 @@ tr.data-row:hover td{background:#fafafa;cursor:pointer}
 <div id="loading-bar" class="loading-bar"></div>
 
 <div class="header">
-  <a href="index.html" class="back-link">← Home</a>
+  <a href="index.html" class="back-link" id="portal-back">← Portal</a><script>!function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.textContent='\u2190 Manager Portal';}else if(l==='store'){a.href='store.html';a.textContent='\u2190 Store Portal';}else{a.textContent='\u2190 Owner Portal';}}();</script>
   <h1>Employee Incidents</h1>
   <p>Injuries, disciplinary actions &amp; incidents</p>
 </div>

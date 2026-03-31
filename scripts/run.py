@@ -22,7 +22,7 @@ from config import (
     get_store, BASE_URL, UNTRACKED_SKUS,
     # Re-export for backward compatibility with scripts that import from run
     C, PAW_MAGENTA, TEDDY_BROWN, LIGHT_PINK, DARK_TEAL, WHITE, LIGHT_GRAY,
-    FDD_RETAIL_COGS_PCT, FDD_GROOM_COGS_PCT,
+    FDD_RETAIL_COGS_PCT, FDD_GROOM_COGS_PCT, PORTAL_BACK_JS,
 )
 from classifier import classify_item
 from api_client import extract_all_data, extract_full_catalog
@@ -689,7 +689,7 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
     html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url, show_home=False, store_switch=_switch)
     html = html.replace("</style>", tabbed_css + "\n</style>", 1)
     html += f'<div style="background:#C4276E;padding:12px 32px;display:flex;align-items:center;position:sticky;top:0;z-index:101;box-shadow:0 2px 12px rgba(196,39,110,0.3)">\n'
-    html += f'  <a href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>\n'
+    html += f'  <a id="portal-back" href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>{PORTAL_BACK_JS}\n'
     html += '</div>\n'
     html += '<div class="yr-tab-bar">\n'
     for yr in _year_strs:

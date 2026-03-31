@@ -197,7 +197,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 <div class="loading-bar" id="loading-bar"></div>
 
 <div class="header">
-  <a class="back-link" href="index.html">← Owner Portal</a>
+  <a class="back-link" id="portal-back" href="index.html">← Portal</a><script>!function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.textContent='\u2190 Manager Portal';}else if(l==='store'){a.href='store.html';a.textContent='\u2190 Store Portal';}else{a.textContent='\u2190 Owner Portal';}}();</script>
   <h1>📅 Staff Schedule</h1>
   <p>Weekly &amp; monthly shift management</p>
 </div>

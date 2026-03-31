@@ -22,7 +22,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).parent))
 
 from classifier import classify_item
-from config import get_store, STORE_OPEN_DATES
+from config import get_store, STORE_OPEN_DATES, PORTAL_BACK_JS
 from formatting import esc
 
 # ── Store setup ───────────────────────────────────────────────────────────────
@@ -623,7 +623,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
 </div>
 
 <div class="topbar">
-  <a href="{esc(_home_url)}" class="home-link">&larr; Home</a>
+  <a id="portal-back" href="{esc(_home_url)}" class="home-link">&larr; Home</a>{PORTAL_BACK_JS}
   <span class="topbar-center">Booking Anomalies</span>
   <span class="topbar-right">{n_total} anomalies detected</span>
 </div>
