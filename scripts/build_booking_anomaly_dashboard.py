@@ -166,8 +166,26 @@ print(f"Loading data for {_store_display}...")
 with open(DATA_DIR / "all_data.json") as f:
     raw_data = json.load(f)
 
+# ── Load appointments for pet-level mapping ──────────────────────────────────
+# Appointments use the PET's CustomerID; order items use the OWNER's CustomerID.
+# By linking via OrderId, we can map each transaction to the specific pet.
+_appt_file = DATA_DIR / "appointments.json"
+_order_to_pet = {}  # OrderId → pet CustomerID
+if _appt_file.exists():
+    with open(_appt_file) as f:
+        _appointments = json.load(f)
+    for appt in _appointments:
+        oid = appt.get("OrderId")
+        pet_cid = appt.get("CustomerID")
+        if oid and pet_cid:
+            _order_to_pet[oid] = str(pet_cid)
+    print(f"  Loaded {len(_appointments)} appointments ({len(_order_to_pet)} with OrderId→pet mapping)")
+else:
+    print("  No appointments.json found — using owner-level grouping")
+
 print(f"  Processing {len(raw_data.get('order_items', []))} order items...")
 
+_pet_mapped = 0
 groom_records = []
 for item in raw_data.get("order_items", []):
     name = item.get("Name", "") or ""
@@ -188,8 +206,16 @@ for item in raw_data.get("order_items", []):
 
     price = float(item.get("Price") or 0) * float(item.get("Quantity") or 1)
 
+    # Try to resolve to pet CID via appointment mapping
+    order_id = item.get("OrderId")
+    pet_cid = _order_to_pet.get(order_id) if order_id else None
+    grouping_cid = pet_cid if pet_cid else str(cid)
+    if pet_cid:
+        _pet_mapped += 1
+
     groom_records.append({
-        "customer_id": str(cid),
+        "customer_id": grouping_cid,
+        "owner_cid": str(cid),
         "date": created,
         "dog_size": cls["dog_size"],
         "is_doodle": cls["is_doodle"],
@@ -199,7 +225,7 @@ for item in raw_data.get("order_items", []):
         "name": name,
     })
 
-print(f"  Found {len(groom_records)} core grooming items across customers.")
+print(f"  Found {len(groom_records)} core grooming items ({_pet_mapped} mapped to pet accounts)")
 
 
 # ── Build customer visit history ──────────────────────────────────────────────
@@ -368,26 +394,37 @@ for cid, all_visits in customer_visits.items():
                 "name": v["name"][:60],
             })
 
-        owner_name, all_pet_names = get_customer_name(cid)
-        # For multi-dog accounts, try to assign individual pet names to each cluster
-        pet_names_list = [n.strip() for n in all_pet_names.split(",") if n.strip()] if all_pet_names else []
-        if len(dog_clusters) > 1 and len(pet_names_list) >= len(dog_clusters):
-            # Match pet names to clusters by order (cluster index = dog index)
-            cluster_idx = dog_clusters.index(dog_visits)
-            display_pet = pet_names_list[cluster_idx] if cluster_idx < len(pet_names_list) else ""
-            dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
-            pet_name = (display_pet + dog_label) if display_pet else dog_label.strip(" ()")
-        elif len(dog_clusters) > 1:
-            dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
-            pet_name = (all_pet_names + dog_label) if all_pet_names else dog_label.strip(" ()")
-        else:
-            pet_name = all_pet_names
+        # Resolve names — check if this CID is a pet account or owner account
+        owner_name, pet_name_from_lookup = get_customer_name(cid)
+        # Also check owner CID from the first visit (in case CID is pet-level)
+        owner_cid = dog_visits[0].get("owner_cid", cid)
+        if not owner_name and owner_cid != cid:
+            owner_name, _ = get_customer_name(owner_cid)
 
-        # Use a unique key for multi-dog: cid_size
+        # If CID is a pet account, pet_name_from_lookup is the pet's own name
+        # If CID is an owner account, pet_name_from_lookup is comma-separated list of all pets
+        if pet_name_from_lookup and "," not in pet_name_from_lookup:
+            # Single pet name — use directly
+            pet_name = pet_name_from_lookup
+        elif len(dog_clusters) > 1:
+            # Multi-dog owner: try to assign pet names to clusters
+            pet_names_list = [n.strip() for n in pet_name_from_lookup.split(",") if n.strip()] if pet_name_from_lookup else []
+            if len(pet_names_list) >= len(dog_clusters):
+                cluster_idx = dog_clusters.index(dog_visits)
+                display_pet = pet_names_list[cluster_idx] if cluster_idx < len(pet_names_list) else ""
+                dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
+                pet_name = (display_pet + dog_label) if display_pet else dog_label.strip(" ()")
+            else:
+                dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
+                pet_name = (pet_name_from_lookup + dog_label) if pet_name_from_lookup else dog_label.strip(" ()")
+        else:
+            pet_name = pet_name_from_lookup
+
+        # Use a unique key: pet CID if available, else owner CID + size for multi-dog
         dog_key = cid if len(dog_clusters) == 1 else f"{cid}_{SIZE_SHORT.get(modal_size, 'X')}"
 
         anomalies.append({
-            "cid": cid,
+            "cid": owner_cid if owner_cid != cid else cid,
             "dog_key": dog_key,
             "customer_name": owner_name,
             "pet_name": pet_name,

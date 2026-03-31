@@ -66,6 +66,16 @@ jobs:
       - name: Cross-Store Comparison
         run: python3 scripts/build_crossstore_dashboard.py
 
+      # ── Appointments (for pet-level anomaly tracking) ──
+      - name: Port Washington - Fetch appointments
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: python3 scripts/fetch_appointments.py
+      - name: Hicksville - Fetch appointments
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: python3 scripts/fetch_appointments.py hicksville
+
       # ── Booking Anomalies ──
       - name: Port Washington - Booking Anomalies
         run: python3 scripts/build_booking_anomaly_dashboard.py
