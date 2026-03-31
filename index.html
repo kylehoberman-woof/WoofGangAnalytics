@@ -335,6 +335,7 @@ async function sha256(str){
 }
 function initAuth(){
   if(sessionStorage.getItem('wg_portal_auth')==='1'){
+    sessionStorage.setItem('wg_portal_level','owner');
     document.getElementById('login-gate').style.display='none';
     document.getElementById('app-content').style.display='block';
     return;
