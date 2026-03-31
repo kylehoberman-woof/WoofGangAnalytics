@@ -233,6 +233,7 @@ nocost_rows = "\n".join(
     f'<td class="num stock-edit" data-sku="{r["sku"]}">{"" if r["stock"] is None else str(int(r["stock"]))}</td>'
     f'{pending_cell(r["sku"])}'
     f'<td class="num">{"-" if r["velocity_monthly"] <= 0 else str(round(r["velocity_monthly"],1))}</td>'
+    f'<td class="num cost-edit" data-sku="{r["sku"]}">-</td>'
     f'<td class="num">{"${:.2f}".format(r["retail_price"]) if r["retail_price"] > 0 else "-"}</td>'
     f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
     for r in results if not r["has_cost"]
@@ -370,6 +371,9 @@ thead th{position:sticky;top:0;z-index:10;}
 @keyframes flashRed{0%{background:#ffcdd2}100%{background:transparent}}
 .stock-flash-ok{animation:flashGreen 1.2s ease-out;}
 .stock-flash-err{animation:flashRed 1.2s ease-out;}
+.cost-edit{cursor:pointer;position:relative;transition:background 0.2s;color:#7c3aed;font-weight:600;}
+.cost-edit:hover{background:rgba(124,58,237,0.06);border-radius:4px;}
+.cost-edit input{width:70px;padding:2px 4px;border:2px solid #7c3aed;border-radius:4px;font-family:inherit;font-size:inherit;text-align:right;color:#1a1a2e;background:#fff;outline:none;}
 """
 
 JS = """
@@ -475,10 +479,51 @@ document.addEventListener('click',function(e){
   });
   inp.addEventListener('blur',function(){save();});
 });
+
+// ── Inline cost editing (Missing Cost tab) ──
+document.addEventListener('click',function(e){
+  var cell=e.target.closest('.cost-edit');
+  if(!cell||cell.querySelector('input')) return;
+  var sku=cell.dataset.sku;
+  if(!sku) return;
+  var oldVal=cell.textContent.trim();
+  var numVal=parseFloat(oldVal.replace(/[^\\d.-]/g,''));
+  if(isNaN(numVal)) numVal='';
+  var inp=document.createElement('input');
+  inp.type='number';inp.value=numVal;inp.step='0.01';inp.placeholder='0.00';
+  cell.textContent='';cell.appendChild(inp);
+  inp.focus();inp.select();
+  function cancel(){cell.textContent=oldVal;}
+  function save(){
+    var nv=parseFloat(inp.value);
+    if(isNaN(nv)||nv<=0){cancel();return;}
+    cell.textContent='$'+nv.toFixed(2);
+    cell.classList.add('stock-flash-ok');
+    setTimeout(function(){cell.classList.remove('stock-flash-ok');},1200);
+    fetch('https://scanner.hoberman.io/api/set-cost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,cost:nv,store:FRANPOS_LOC==='203698'?'port-washington':'hicksville'})})
+      .then(function(r){
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        cell.classList.remove('stock-flash-ok');
+        cell.classList.add('stock-flash-ok');
+        cell.title='Cost updated to $'+nv.toFixed(2);
+      })
+      .catch(function(err){
+        cell.classList.remove('stock-flash-ok');
+        cell.classList.add('stock-flash-err');
+        cell.title='Update failed: '+err.message;
+        setTimeout(function(){cell.classList.remove('stock-flash-err');},1200);
+      });
+  }
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();save();}
+    if(e.key==='Escape'){e.preventDefault();cancel();}
+  });
+  inp.addEventListener('blur',function(){save();});
+});
 """
 
 TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
-TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Price</th><th class=\"num\">Revenue</th>"
+TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Revenue</th>"
 
 html = f"""<!DOCTYPE html>
 <html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">
