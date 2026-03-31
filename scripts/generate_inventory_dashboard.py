@@ -80,6 +80,13 @@ def get_vendor(sku, name):
         return _normalize_vendor(info["brand"])
     return _normalize_vendor(detect_vendor(sku, name))
 
+def get_retail_price(sku):
+    """Get listed retail price from FranPOS product cache."""
+    info = _brand_cache.get(sku)
+    if info and isinstance(info, dict):
+        return info.get("retail_price") or 0
+    return 0
+
 order_items = all_data.get("order_items", [])
 
 sku_data = defaultdict(lambda: {"name":"","sku":"","cost":0,"revenue":0,"units":0,"months_all":set(),"vendor":""})
@@ -113,8 +120,9 @@ for sku, d in sku_data.items():
     has_cost = d["cost"] > 0
     avg_price = d["revenue"] / d["units"] if d["units"] > 0 else 0
     margin = ((avg_price - d["cost"]) / avg_price * 100) if has_cost and avg_price > 0 else None
+    retail_price = get_retail_price(sku) or round(avg_price, 2)
     results.append({"sku":sku,"name":d["name"] or sku,"stock":stock,"revenue":d["revenue"],
-        "units":d["units"],"cost":d["cost"],"has_cost":has_cost,"margin":margin,
+        "units":d["units"],"cost":d["cost"],"has_cost":has_cost,"margin":margin,"retail_price":retail_price,
         "velocity_monthly":round(vel_monthly,2),"weeks_of_supply":wos,"vendor":d["vendor"]})
 
 from datetime import timedelta
@@ -185,8 +193,9 @@ def make_rows(items, show_cost=True):
         wos_str = f"{wos:.1f}" if wos is not None and wos >= 0 else "-"
         vel_str = f"{r['velocity_monthly']:.1f}" if r["velocity_monthly"] > 0 else "-"
         cost_str = f"${r['cost']:.2f}" if r["has_cost"] else '<span class="no-cost">No cost</span>'
+        price_str = f"${r['retail_price']:.2f}" if r["retail_price"] > 0 else "-"
         margin_str = f"{r['margin']:.0f}%" if r["margin"] is not None else "-"
-        cost_cols = f'<td class="num">{cost_str}</td><td class="num">{margin_str}</td>' if show_cost else ""
+        cost_cols = f'<td class="num">{cost_str}</td><td class="num">{price_str}</td><td class="num">{margin_str}</td>' if show_cost else ""
         rows.append(
             f'<tr class="row-{s}" data-status="{s}" data-vendor="{r["vendor"].lower()}">'
             f'<td>{badge(s)}</td><td class="sku-cell">{r["sku"]}</td>'
@@ -223,6 +232,7 @@ nocost_rows = "\n".join(
     f'<td class="num stock-edit" data-sku="{r["sku"]}">{"" if r["stock"] is None else str(int(r["stock"]))}</td>'
     f'{pending_cell(r["sku"])}'
     f'<td class="num">{"-" if r["velocity_monthly"] <= 0 else str(round(r["velocity_monthly"],1))}</td>'
+    f'<td class="num">{"${:.2f}".format(r["retail_price"]) if r["retail_price"] > 0 else "-"}</td>'
     f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
     for r in results if not r["has_cost"]
 )
@@ -244,7 +254,7 @@ for r in results:
     est_cost = round(needed * r["cost"], 2) if r["cost"] else 0
     reorder_by_vendor[r["vendor"]].append({**r, "needed": round(needed,1), "est_cost": est_cost})
 
-TH_REORDER = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th class="num">Vel/Mo</th><th class="num">Need</th><th class="num">Cost</th><th class="num">Est.$</th><th>Status</th>'
+TH_REORDER = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th class="num">Vel/Mo</th><th class="num">Need</th><th class="num">Cost</th><th class="num">Price</th><th class="num">Est.$</th><th>Status</th>'
 
 reorder_html = ""
 reorder_total = 0
@@ -267,6 +277,7 @@ for v in all_reorder_vendors:
             f'<td>{i["sku"]}</td><td>{i["name"][:45]}</td>'
             f'<td class="num">{i.get("stock",0):.1f}</td><td class="num">{i["velocity_monthly"]}</td>'
             f'<td class="num">{i["needed"]}</td><td class="num">${i["cost"]:.2f}</td>'
+            f'<td class="num">${i["retail_price"]:.2f}</td>'
             f'<td class="num">${i["est_cost"]:,.2f}</td><td>{badge(i["status"])}</td></tr>')
     reorder_html += (f'<div style="background:white;border-radius:10px;border-top:4px solid {vc};padding:16px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)">'
         f'<div class="vendor-hdr" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
@@ -465,8 +476,8 @@ document.addEventListener('click',function(e){
 });
 """
 
-TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
-TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Revenue</th>"
+TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
+TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Price</th><th class=\"num\">Revenue</th>"
 
 html = f"""<!DOCTYPE html>
 <html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">

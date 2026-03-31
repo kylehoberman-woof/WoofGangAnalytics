@@ -31,9 +31,9 @@ for item in all_data["order_items"]:
     if len(sku) > 2:
         skus.add(sku)
 
-# Filter to SKUs not yet in cache
-new_skus = [s for s in sorted(skus) if s not in cache]
-print(f"Total SKUs: {len(skus)} | Cached: {len(cache)} | To fetch: {len(new_skus)}")
+# Filter to SKUs not yet in cache OR missing retail_price field
+new_skus = [s for s in sorted(skus) if s not in cache or (isinstance(cache.get(s), dict) and "retail_price" not in cache[s])]
+print(f"Total SKUs: {len(skus)} | Cached: {len(cache)} | To fetch: {len(new_skus)} (includes missing retail_price)")
 
 # Fetch brand for each new SKU
 fetched = 0
@@ -50,11 +50,15 @@ for i, sku in enumerate(new_skus):
             if isinstance(prod, dict):
                 brand = prod.get("BrandName") or ""
                 category = prod.get("CategoryBreadCrumb") or ""
+                retail_price = prod.get("Price")
+                cost_price = prod.get("Cost")
                 cache[sku] = {
                     "brand": brand,
                     "category": category,
                     "manufacturer_id": prod.get("ManufacturerId"),
                     "brand_id": prod.get("BrandId"),
+                    "retail_price": float(retail_price) if retail_price else None,
+                    "cost_price": float(cost_price) if cost_price else None,
                 }
                 fetched += 1
             else:
