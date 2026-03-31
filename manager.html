@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Woof Gang — Store Dashboards</title>
+<title>Woof Gang — Manager Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -53,11 +53,6 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 }
 .card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(196,39,110,0.12)}
 
-.card:nth-child(2){border-left-color:#1B6B6B}
-.card:nth-child(3){border-left-color:#6B3520}
-.card:nth-child(4){border-left-color:#2E7D32}
-.card:nth-child(6){border-left-color:#AD1457}
-
 .card-icon{font-size:2.4rem;margin-bottom:14px}
 .card-title{font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:8px}
 .card-desc{font-size:0.88rem;color:#666;line-height:1.6;margin-bottom:20px;flex:1}
@@ -67,9 +62,6 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
   font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:12px;
   background:#FDF0F5;color:#C4276E;text-transform:uppercase;letter-spacing:0.04em;
 }
-.card:nth-child(2) .tag{background:#e0f2f1;color:#1B6B6B}
-.card:nth-child(4) .tag{background:#e8f5e9;color:#2E7D32}
-.card:nth-child(3) .tag{background:#efebe9;color:#6B3520}
 
 .card-btn{
   display:inline-block;padding:12px 28px;border-radius:10px;
@@ -78,39 +70,52 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
   transition:background 0.2s,transform 0.1s;
 }
 .card-btn:hover{background:#a31f5b;transform:translateY(-1px)}
-.card:nth-child(2) .card-btn{background:#1B6B6B}
-.card:nth-child(2) .card-btn:hover{background:#145252}
-.card:nth-child(3) .card-btn{background:#6B3520}
-.card:nth-child(3) .card-btn:hover{background:#4d2717}
-.card:nth-child(4) .card-btn{background:#2E7D32}
-.card:nth-child(4) .card-btn:hover{background:#1b5e20}
-.card:nth-child(6) .card-btn{background:#AD1457}
-.card:nth-child(6) .card-btn:hover{background:#880e4f}
-.card:nth-child(6) .tag{background:#fce4ec;color:#AD1457}
-.card:nth-child(7){border-left-color:#1B6B6B}
-.card:nth-child(7) .card-btn{background:#1B6B6B}
-.card:nth-child(7) .card-btn:hover{background:#145252}
-.card:nth-child(7) .tag{background:#e0f2f1;color:#1B6B6B}
-.card:nth-child(8){border-left-color:#C4276E}
-.card:nth-child(8) .card-btn{background:#C4276E}
-.card:nth-child(8) .card-btn:hover{background:#a31f5b}
-.card:nth-child(8) .tag{background:#FDF0F5;color:#C4276E}
-.card:nth-child(9){border-left-color:#2E7D32}
-.card:nth-child(9) .card-btn{background:#2E7D32}
-.card:nth-child(9) .card-btn:hover{background:#1b5e20}
-.card:nth-child(9) .tag{background:#e8f5e9;color:#2E7D32}
-.card:nth-child(10){border-left-color:#1565C0}
-.card:nth-child(10) .card-btn{background:#1565C0}
-.card:nth-child(10) .card-btn:hover{background:#0d47a1}
-.card:nth-child(10) .tag{background:#e3f2fd;color:#1565C0}
-.card:nth-child(11){border-left-color:#E53935}
-.card:nth-child(11) .card-btn{background:#E53935}
-.card:nth-child(11) .card-btn:hover{background:#b71c1c}
-.card:nth-child(11) .tag{background:#ffebee;color:#C62828}
-.card:nth-child(12){border-left-color:#FB8C00}
-.card:nth-child(12) .card-btn{background:#FB8C00}
-.card:nth-child(12) .card-btn:hover{background:#e65100}
-.card:nth-child(12) .tag{background:#fff3e0;color:#E65100}
+
+/* Card accent colors */
+.card:nth-child(2){border-left-color:#6B3520}
+.card:nth-child(2) .card-btn{background:#6B3520}
+.card:nth-child(2) .card-btn:hover{background:#4d2717}
+.card:nth-child(2) .tag{background:#efebe9;color:#6B3520}
+
+.card:nth-child(3){border-left-color:#C4276E}
+.card:nth-child(3) .card-btn{background:#C4276E}
+.card:nth-child(3) .card-btn:hover{background:#a31f5b}
+.card:nth-child(3) .tag{background:#FDF0F5;color:#C4276E}
+
+.card:nth-child(4){border-left-color:#AD1457}
+.card:nth-child(4) .card-btn{background:#AD1457}
+.card:nth-child(4) .card-btn:hover{background:#880e4f}
+.card:nth-child(4) .tag{background:#fce4ec;color:#AD1457}
+
+.card:nth-child(5){border-left-color:#1B6B6B}
+.card:nth-child(5) .card-btn{background:#1B6B6B}
+.card:nth-child(5) .card-btn:hover{background:#145252}
+.card:nth-child(5) .tag{background:#e0f2f1;color:#1B6B6B}
+
+.card:nth-child(6){border-left-color:#C4276E}
+.card:nth-child(6) .card-btn{background:#C4276E}
+.card:nth-child(6) .card-btn:hover{background:#a31f5b}
+.card:nth-child(6) .tag{background:#FDF0F5;color:#C4276E}
+
+.card:nth-child(7){border-left-color:#2E7D32}
+.card:nth-child(7) .card-btn{background:#2E7D32}
+.card:nth-child(7) .card-btn:hover{background:#1b5e20}
+.card:nth-child(7) .tag{background:#e8f5e9;color:#2E7D32}
+
+.card:nth-child(8){border-left-color:#1565C0}
+.card:nth-child(8) .card-btn{background:#1565C0}
+.card:nth-child(8) .card-btn:hover{background:#0d47a1}
+.card:nth-child(8) .tag{background:#e3f2fd;color:#1565C0}
+
+.card:nth-child(9){border-left-color:#E53935}
+.card:nth-child(9) .card-btn{background:#E53935}
+.card:nth-child(9) .card-btn:hover{background:#b71c1c}
+.card:nth-child(9) .tag{background:#ffebee;color:#C62828}
+
+.card:nth-child(10){border-left-color:#FB8C00}
+.card:nth-child(10) .card-btn{background:#FB8C00}
+.card:nth-child(10) .card-btn:hover{background:#e65100}
+.card:nth-child(10) .tag{background:#fff3e0;color:#E65100}
 
 .footer{
   text-align:center;padding:24px;
@@ -132,7 +137,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 <div id="login-gate" style="display:none;position:fixed;inset:0;z-index:9999;background:#FDF0F5;flex-direction:column;align-items:center;justify-content:center">
   <div style="text-align:center;max-width:340px;padding:20px">
     <div style="background:linear-gradient(135deg,#C4276E,#6B3520);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.6rem;font-weight:800;margin-bottom:6px">Woof Gang</div>
-    <div style="font-size:0.85rem;color:#888;margin-bottom:32px">Owner Portal</div>
+    <div style="font-size:0.85rem;color:#888;margin-bottom:32px">Manager Portal</div>
     <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px">
       <input id="pin-1" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:56px;height:64px;text-align:center;font-size:1.8rem;font-weight:800;border:2px solid #ddd;border-radius:12px;font-family:inherit;background:white;color:#1a1a2e" autofocus>
       <input id="pin-2" type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:56px;height:64px;text-align:center;font-size:1.8rem;font-weight:800;border:2px solid #ddd;border-radius:12px;font-family:inherit;background:white;color:#1a1a2e">
@@ -147,14 +152,14 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 
 <div class="header">
   <h1 id="store-title">Woof Gang Port Washington</h1>
-  <p>Store Performance Dashboards</p>
+  <p>Manager Dashboard</p>
   <div class="brand">Woof Gang Bakery &amp; Grooming</div>
 </div>
 
 <div class="store-selector">
   <select id="store-select" onchange="switchStore(this.value)">
-    <option value="port-washington">📍 Port Washington, NY</option>
-    <option value="hicksville">📍 Hicksville, NY</option>
+    <option value="port-washington">&#128205; Port Washington, NY</option>
+    <option value="hicksville">&#128205; Hicksville, NY</option>
   </select>
 </div>
 
@@ -162,7 +167,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
   <div class="cards">
 
     <div class="card">
-      <div class="card-icon">📊</div>
+      <div class="card-icon">&#128202;</div>
       <div class="card-title">Executive Dashboard</div>
       <div class="card-desc">Full store performance — revenue, appointments, transactions, comparisons by month, week, and day. Pro-rate partial periods for fair comparisons.</div>
       <div class="card-tags">
@@ -174,19 +179,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
     </div>
 
     <div class="card">
-      <div class="card-icon">💇</div>
-      <div class="card-title">Commission Dashboard</div>
-      <div class="card-desc">Groomer commissions, tips, guarantees, bather &amp; retail pay, manager salary, discounts, and net margin. Pay period breakdowns with daily detail.</div>
-      <div class="card-tags">
-        <span class="tag">Commission</span>
-        <span class="tag">Payroll</span>
-        <span class="tag">Margin</span>
-      </div>
-      <a class="card-btn" id="link-comm" href="port-washington/WoofGang_PortWashington_Commission_Dashboard.html">Open Commission Dashboard</a>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">📦</div>
+      <div class="card-icon">&#128230;</div>
       <div class="card-title">Inventory Dashboard</div>
       <div class="card-desc">Stock levels, reorder recommendations, vendor analysis, out-of-stock alerts, and negative inventory tracking across all product categories.</div>
       <div class="card-tags">
@@ -195,18 +188,6 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
         <span class="tag">Vendors</span>
       </div>
       <a class="card-btn" id="link-inv" href="port-washington/WoofGang_PortWashington_Inventory_Dashboard.html">Open Inventory Dashboard</a>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">💰</div>
-      <div class="card-title">Financial Dashboard</div>
-      <div class="card-desc">Full P&amp;L — grooming &amp; retail revenue, COGS, operating expenses (commission, labor, rent, royalties), gross profit, and net margin. Monthly and YTD views.</div>
-      <div class="card-tags">
-        <span class="tag">P&amp;L</span>
-        <span class="tag">COGS</span>
-        <span class="tag">Margin</span>
-      </div>
-      <a class="card-btn" id="link-fin" href="port-washington/WoofGang_PortWashington_Financial_Dashboard.html">Open Financial Dashboard</a>
     </div>
 
     <div class="card">
@@ -234,7 +215,7 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
     </div>
 
     <div class="card">
-      <div class="card-icon">📋</div>
+      <div class="card-icon">&#128203;</div>
       <div class="card-title">Receiving Tool</div>
       <div class="card-desc">Scan invoices with AI, verify received quantities, and push stock updates to Franpos. Two-phase PO workflow — owner scans, associate receives.</div>
       <div class="card-tags">
@@ -305,36 +286,24 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
       <a class="card-btn" href="complaints.html">Open Customer Complaints</a>
     </div>
 
-    <div class="card">
-      <div class="card-icon">&#128176;</div>
-      <div class="card-title">Owner Expenses</div>
-      <div class="card-desc">Manage owner personal expenses and store operating costs. Recurring and one-time expenses tracked monthly with seasonal overrides. Feeds into the financial dashboard P&amp;L.</div>
-      <div class="card-tags">
-        <span class="tag">Expenses</span>
-        <span class="tag">Operating</span>
-        <span class="tag">P&amp;L</span>
-      </div>
-      <a class="card-btn" href="expenses.html">Open Owner Expenses</a>
-    </div>
-
   </div>
 </div>
 
 <div class="footer">
-  <strong>Woof Gang Bakery &amp; Grooming</strong> — Operations Intelligence
+  <strong>Woof Gang Bakery &amp; Grooming</strong> — Manager Portal
 </div>
 
 </div><!-- /app-content -->
 
 <script>
 // ─── PIN Auth ───────────────────────────────────────────────────
-var PIN_HASH='12269c796b58fb51020e17da59733d060552b37f7916e2f97df9f9bdc0e235a0';
+var PIN_HASH='2aaad41b89dfad19e5668918018ae02695d7710bcbe5f2dc689234e8da492de3';
 async function sha256(str){
   var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
 }
 function initAuth(){
-  if(sessionStorage.getItem('wg_portal_auth')==='1'){
+  if(sessionStorage.getItem('wg_portal_auth')==='1'&&sessionStorage.getItem('wg_portal_level')==='manager'){
     document.getElementById('login-gate').style.display='none';
     document.getElementById('app-content').style.display='block';
     return;
@@ -365,7 +334,7 @@ async function checkPin(pin){
   var hash=await sha256(pin);
   if(hash===PIN_HASH){
     sessionStorage.setItem('wg_portal_auth','1');
-    sessionStorage.setItem('wg_portal_level','owner');
+    sessionStorage.setItem('wg_portal_level','manager');
     document.getElementById('login-gate').style.display='none';
     document.getElementById('app-content').style.display='block';
   } else {
@@ -382,9 +351,7 @@ var STORES = {
     title: 'Woof Gang Port Washington',
     base: 'port-washington/',
     exec: 'WoofGang_PortWashington_NY_AllYears_Dashboard.html',
-    comm: 'WoofGang_PortWashington_Commission_Dashboard.html',
     inv: 'WoofGang_PortWashington_Inventory_Dashboard.html',
-    fin: 'WoofGang_PortWashington_Financial_Dashboard.html',
     cross: 'WoofGang_CrossStore_Comparison.html',
     anomaly: 'WoofGang_PortWashington_BookingAnomalies.html'
   },
@@ -392,9 +359,7 @@ var STORES = {
     title: 'Woof Gang Hicksville',
     base: 'hicksville/',
     exec: 'WoofGang_Hicksville_NY_AllYears_Dashboard.html',
-    comm: 'WoofGang_Hicksville_Commission_Dashboard.html',
     inv: 'WoofGang_Hicksville_Inventory_Dashboard.html',
-    fin: 'WoofGang_Hicksville_Financial_Dashboard.html',
     cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
     anomaly: 'WoofGang_Hicksville_BookingAnomalies.html'
   }
@@ -404,9 +369,7 @@ function switchStore(key) {
   var s = STORES[key];
   document.getElementById('store-title').textContent = s.title;
   document.getElementById('link-exec').href = s.base + s.exec;
-  document.getElementById('link-comm').href = s.base + s.comm;
   document.getElementById('link-inv').href = s.base + s.inv;
-  document.getElementById('link-fin').href = s.base + s.fin;
   document.getElementById('link-cross').href = s.base + s.cross;
   document.getElementById('link-anomaly').href = s.base + s.anomaly;
   localStorage.setItem('selectedStore', key);

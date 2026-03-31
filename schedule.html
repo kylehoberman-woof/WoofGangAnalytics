@@ -341,7 +341,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
           </div>
         </div>
       </div>
-      <div class="row2">
+      <div class="row2" id="em-pay-row">
         <div class="fg">
           <label>Pay Type</label>
           <select id="em-paytype" onchange="updatePayFields()">
@@ -406,6 +406,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 /* ════════════════════════════════════════
    SUPABASE
 ════════════════════════════════════════ */
+var portalLevel = sessionStorage.getItem('wg_portal_level') || 'owner';
+
 var SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
 var SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
 var SHD = {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
@@ -1086,13 +1088,15 @@ function renderRoster(){
   document.getElementById('emp-list').innerHTML=emps.map(function(e){
     var hrs=empHrs[e.id]||0;
     var payInfo='';
-    if(e.pay_type==='commission'){
-      payInfo='Commission';
-      if(e.guarantee_daily_rate) payInfo+=' · $'+e.guarantee_daily_rate+'/day guar.';
-    } else if(e.pay_type==='salary'){
-      payInfo='Salaried';
-    } else if(e.hourly_rate){
-      payInfo='$'+e.hourly_rate+'/hr';
+    if(portalLevel!=='store'){
+      if(e.pay_type==='commission'){
+        payInfo='Commission';
+        if(e.guarantee_daily_rate) payInfo+=' · $'+e.guarantee_daily_rate+'/day guar.';
+      } else if(e.pay_type==='salary'){
+        payInfo='Salaried';
+      } else if(e.hourly_rate){
+        payInfo='$'+e.hourly_rate+'/hr';
+      }
     }
     var inactive=e.is_active===false;
     return '<div class="emp-card" style="border-left-color:'+e.color+(inactive?';opacity:0.55':'')+'">'+
@@ -1249,6 +1253,8 @@ function openEmpModal(id){
   updatePayFields();
   renderColorPicker();
   document.getElementById('em-delete').classList.toggle('hidden',!id);
+  document.getElementById('em-pay-row').style.display=portalLevel==='store'?'none':'';
+  document.getElementById('em-guar-group').style.display=portalLevel==='store'?'none':'';
   document.getElementById('emp-overlay').classList.remove('hidden');
   setTimeout(function(){document.getElementById('em-name').focus();},50);
 }
