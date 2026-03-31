@@ -60,10 +60,10 @@ def extract_paginated(endpoint_template, start, end, label="data", id_field="Ord
         fetch_end = window_end + timedelta(days=ET_BUFFER_DAYS)
         days = (fetch_end - fetch_start).days + 1
         from_date = fetch_start.strftime("%Y-%m-%d")
-        page = 1
+        page = 0
         total_pages = 1
 
-        while page <= total_pages:
+        while page < total_pages:
             endpoint = endpoint_template.format(
                 days=days, page=page, from_date=from_date, location_id=location_id
             )
@@ -151,11 +151,11 @@ def _gap_detection(data, start_date, location_id, token):
     for gap_date in gap_dates:
         gdt = datetime.strptime(gap_date, "%Y-%m-%d")
         fs = (gdt - timedelta(days=2)).strftime("%Y-%m-%d")
-        page = 1
+        page = 0
         tp = 1
         found = []
         seen = set()
-        while page <= tp:
+        while page < tp:
             ep = f"api/datadump/v2/orderitems/7/{page}/{fs}/{location_id}"
             try:
                 res = api_get(ep, token=token)
@@ -404,7 +404,7 @@ def extract_full_catalog(store):
     location_id = store.location_id
     all_products = []
     seen = set()
-    page = 1
+    page = 0
     while True:
         try:
             data = api_get("getProductServicesByCompany", {

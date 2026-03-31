@@ -69,10 +69,10 @@ for window_start, window_end in windows:
     days = (fetch_end - fetch_start).days + 1
     from_date = fetch_start.strftime("%Y-%m-%d")
 
-    page = 1
+    page = 0
     total_pages = 1
 
-    while page <= total_pages:
+    while page < total_pages:
         # Try endpoints until one works
         endpoints_to_try = [working_endpoint] if working_endpoint else ENDPOINTS
 

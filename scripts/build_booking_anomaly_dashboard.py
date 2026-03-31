@@ -53,7 +53,7 @@ def _fetch_customer_names():
     """
     token = _store.token
     all_customers = {}
-    for p in range(1, 120):
+    for p in range(0, 120):
         try:
             r = httpx.get(
                 f"https://publicapi.franpos.com/api/Customers/ByCompany/{p}",
