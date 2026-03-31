@@ -50,6 +50,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
   .shift-item{font-size:0.65rem;padding:3px 4px}
   .day-num{font-size:0.7rem}
 }
+/* Store holidays */
+.cal-day.holiday{background:#FFF5F5;border:2px solid #FFCDD2}
+.holiday-label{font-size:0.65rem;font-weight:700;color:#C62828;background:#FFEBEE;border-radius:4px;padding:2px 5px;margin-bottom:2px}
+.holiday-closed-label{font-size:0.62rem;font-weight:800;color:#C62828;text-transform:uppercase;letter-spacing:0.06em}
 </style>
 </head>
 <body>
@@ -77,6 +81,28 @@ var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ
 var SHD={'apikey':SK,'Authorization':'Bearer '+SK};
 
 function sbGet(path){return fetch(SB+path,{headers:SHD}).then(function(r){return r.json();});}
+
+/* Store holidays */
+function getHolidays(year){
+  var h={};
+  h[year+'-01-01']="New Year's Day";
+  h[year+'-07-04']='Independence Day';
+  h[year+'-12-25']='Christmas Day';
+  var mem=new Date(year,4,31);
+  while(mem.getDay()!==1) mem.setDate(mem.getDate()-1);
+  h[toISO(mem)]='Memorial Day';
+  var lab=new Date(year,8,1);
+  while(lab.getDay()!==1) lab.setDate(lab.getDate()+1);
+  h[toISO(lab)]='Labor Day';
+  var tg=new Date(year,10,1);
+  while(tg.getDay()!==4) tg.setDate(tg.getDate()+1);
+  tg.setDate(tg.getDate()+21);
+  h[toISO(tg)]='Thanksgiving';
+  return h;
+}
+var _holCache={};
+function getHoliday(iso){var y=iso.slice(0,4);if(!_holCache[y])_holCache[y]=getHolidays(+y);return _holCache[y][iso]||null;}
+function isHoliday(iso){return !!getHoliday(iso);}
 
 var monthOffset=0;
 var employee=null;
@@ -210,24 +236,30 @@ function renderCalendar(first,last){
     var dayOff=offByDate[iso]||[];
     var hasShift=dayShifts.length>0;
 
-    html+='<div class="cal-day'+(isToday?' today':'')+((!hasShift&&!dayOff.length)?' off-day':'')+'">';
+    var hol=getHoliday(iso);
+    html+='<div class="cal-day'+(isToday?' today':'')+(hol?' holiday':((!hasShift&&!dayOff.length)?' off-day':''))+'">';
     html+='<div class="day-num'+(isToday?' today':'')+'">'+d+'</div>';
 
-    dayOff.forEach(function(o){
-      html+='<div class="time-off-item">🏖 '+esc(o.type)+'</div>';
-    });
+    if(hol){
+      html+='<div class="holiday-label">'+esc(hol)+'</div>';
+      html+='<div class="holiday-closed-label">Closed</div>';
+    } else {
+      dayOff.forEach(function(o){
+        html+='<div class="time-off-item">🏖 '+esc(o.type)+'</div>';
+      });
 
-    if(dayShifts.length===0&&dayOff.length===0){
-      html+='<div class="no-shift">Off</div>';
+      if(dayShifts.length===0&&dayOff.length===0){
+        html+='<div class="no-shift">Off</div>';
+      }
+
+      dayShifts.forEach(function(s){
+        var cls=s.store==='port-washington'?'pw':'hv';
+        html+='<div class="shift-item '+cls+'">';
+        if(employee.store==='both') html+='<div class="shift-store '+cls+'">'+(s.store==='port-washington'?'PW':'HV')+'</div>';
+        html+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
+        html+='</div>';
+      });
     }
-
-    dayShifts.forEach(function(s){
-      var cls=s.store==='port-washington'?'pw':'hv';
-      html+='<div class="shift-item '+cls+'">';
-      if(employee.store==='both') html+='<div class="shift-store '+cls+'">'+(s.store==='port-washington'?'PW':'HV')+'</div>';
-      html+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
-      html+='</div>';
-    });
 
     html+='</div>';
   }

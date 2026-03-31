@@ -190,6 +190,18 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:10px 22px;border-radius:10px;font-size:0.88rem;font-weight:600;z-index:200;opacity:1;transition:opacity 0.3s}
 .toast.hidden{opacity:0;pointer-events:none}
 .hidden{display:none!important}
+
+/* Store holidays */
+.day-hdr.holiday{border-top-color:#C62828;background:#FFF5F5}
+.day-hdr.holiday .day-name{color:#C62828}
+.holiday-banner{background:linear-gradient(135deg,#C62828,#B71C1C);color:white;text-align:center;border-radius:8px;padding:12px 8px;font-size:0.78rem;font-weight:700;letter-spacing:0.02em}
+.holiday-banner .holiday-icon{font-size:1.1rem;display:block;margin-bottom:2px}
+.holiday-banner .holiday-name{display:block;margin-bottom:2px}
+.holiday-banner .holiday-closed{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;opacity:0.85;font-weight:800}
+.cal-day.holiday{background:#FFF5F5;border-color:#FFCDD2}
+.cal-holiday-label{font-size:0.62rem;font-weight:700;color:#C62828;background:#FFEBEE;border-radius:4px;padding:1px 4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cov-day.holiday .cov-day-hdr{background:#FFF5F5}
+.cov-holiday-label{font-size:0.72rem;font-weight:700;color:#C62828;padding:12px 16px;text-align:center}
 </style>
 </head>
 <body>
@@ -435,6 +447,34 @@ var DAY_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 /* ════════════════════════════════════════
+   STORE HOLIDAYS (both stores closed)
+════════════════════════════════════════ */
+function getHolidays(year){
+  var h={};
+  h[year+'-01-01']="New Year's Day";
+  h[year+'-07-04']='Independence Day';
+  h[year+'-12-25']='Christmas Day';
+  // Memorial Day — last Monday in May
+  var mem=new Date(year,4,31);
+  while(mem.getDay()!==1) mem.setDate(mem.getDate()-1);
+  h[toISO(mem)]='Memorial Day';
+  // Labor Day — first Monday in September
+  var lab=new Date(year,8,1);
+  while(lab.getDay()!==1) lab.setDate(lab.getDate()+1);
+  h[toISO(lab)]='Labor Day';
+  // Thanksgiving — fourth Thursday in November
+  var tg=new Date(year,10,1);
+  while(tg.getDay()!==4) tg.setDate(tg.getDate()+1);
+  tg.setDate(tg.getDate()+21);
+  h[toISO(tg)]='Thanksgiving';
+  return h;
+}
+var _holCache={};
+function getHoliday(iso){var y=iso.slice(0,4);if(!_holCache[y])_holCache[y]=getHolidays(+y);return _holCache[y][iso]||null;}
+function isHoliday(iso){return !!getHoliday(iso);}
+function holidayIcon(name){return({'New Year\'s Day':'\uD83C\uDF86','Memorial Day':'\uD83C\uDDFA\uD83C\uDDF8','Independence Day':'\uD83C\uDF86','Labor Day':'\uD83C\uDDFA\uD83C\uDDF8','Thanksgiving':'\uD83E\uDD83','Christmas Day':'\uD83C\uDF84'})[name]||'\uD83C\uDFE0';}
+
+/* ════════════════════════════════════════
    STATE
 ════════════════════════════════════════ */
 var currentStore  = localStorage.getItem('wg_sched_store')||'port-washington';
@@ -661,6 +701,7 @@ function _paintWeek(ws,we,today){
   var empHrs={};
   for(var i=0;i<7;i++){
     var iso=toISO(addDays(ws,i));
+    if(isHoliday(iso)) continue;
     (shifts[iso]||[]).forEach(function(s){
       if(roleFilter){var e=empById(sEmpId(s));if(!e||!matchesRole(e.role)) return;}
       var eid=sEmpId(s);empHrs[eid]=(empHrs[eid]||0)+sHours(s);
@@ -748,13 +789,21 @@ function _paintWeek(ws,we,today){
   var html='';
   // Row 1: Day headers (Mon–Sun)
   dayData.forEach(function(day){
-    html+='<div class="day-hdr'+(day.isT?' today':'')+'"><div class="day-name">'+DAY_SHORT[day.i]+'</div><div class="day-date">'+day.d.getDate()+'</div></div>';
+    var hol=getHoliday(day.iso);
+    html+='<div class="day-hdr'+(day.isT?' today':'')+(hol?' holiday':'')+'"><div class="day-name">'+DAY_SHORT[day.i]+'</div><div class="day-date">'+day.d.getDate()+'</div></div>';
   });
 
   // Row 2+: One row per store section
-  sectionsToShow.forEach(function(st){
+  sectionsToShow.forEach(function(st,stIdx){
     dayData.forEach(function(day){
-      html+=renderStoreSection(day,st);
+      var hol=getHoliday(day.iso);
+      if(hol && stIdx===0){
+        html+='<div class="holiday-banner"><span class="holiday-icon">'+holidayIcon(hol)+'</span><span class="holiday-name">'+esc(hol)+'</span><span class="holiday-closed">Closed</span></div>';
+      } else if(hol){
+        html+='<div></div>';
+      } else {
+        html+=renderStoreSection(day,st);
+      }
     });
   });
 
@@ -786,6 +835,7 @@ function copyLastWeek(){
     for(var i=0;i<7;i++){
       var srcISO=toISO(addDays(lastStart,i));
       var dstISO=toISO(addDays(thisStart,i));
+      if(isHoliday(dstISO)) continue;
       var existing=shifts[dstISO]||[];
       (shifts[srcISO]||[]).forEach(function(s){
         var dup=existing.some(function(x){return sEmpId(x)===sEmpId(s)&&sStart(x)===sStart(s);});
@@ -813,6 +863,7 @@ function fillRecurring(){
       var r=rec[key];
       if(!r) return;
       var iso=toISO(addDays(ws,i));
+      if(isHoliday(iso)) return;
       var existing=shifts[iso]||[];
       var dup=existing.some(function(x){return sEmpId(x)===e.id;});
       if(!dup) posts.push({emp_id:e.id,store:r.store||currentStore,shift_date:iso,start_time:r.start,end_time:r.end,notes:''});
@@ -870,13 +921,19 @@ function _paintMonth(year,month,todayISO,filterEmp){
       var iso=toISO(cur), inMonth=cur.getMonth()===month, isToday=iso===todayISO;
       var dayShifts=(shifts[iso]||[]).filter(function(s){return !filterEmp||sEmpId(s)===filterEmp;});
       var weekOff=Math.round((getMonday(cur)-getMonday(today))/(7*86400000));
-      html+='<div class="cal-day'+(inMonth?'':' other-month')+(isToday?' cal-today':'')+'" onclick="jumpToWeek('+weekOff+')">';
+      var hol=getHoliday(iso);
+      html+='<div class="cal-day'+(inMonth?'':' other-month')+(isToday?' cal-today':'')+(hol?' holiday':'')+'" onclick="jumpToWeek('+weekOff+')">';
       html+='<div class="cal-day-num">'+cur.getDate()+'</div>';
-      dayShifts.slice(0,3).forEach(function(s){
-        var e=empById(sEmpId(s))||{name:'?',color:'#aaa'};
-        html+='<div class="cal-chip" style="background:'+e.color+'"><div class="cal-chip-dot"></div>'+esc(e.name.split(' ')[0])+'</div>';
-      });
-      if(dayShifts.length>3) html+='<div class="cal-more">+'+(dayShifts.length-3)+' more</div>';
+      if(hol){
+        html+='<div class="cal-holiday-label">'+esc(hol)+'</div>';
+        html+='<div style="font-size:0.62rem;color:#C62828;font-weight:600">Closed</div>';
+      } else {
+        dayShifts.slice(0,3).forEach(function(s){
+          var e=empById(sEmpId(s))||{name:'?',color:'#aaa'};
+          html+='<div class="cal-chip" style="background:'+e.color+'"><div class="cal-chip-dot"></div>'+esc(e.name.split(' ')[0])+'</div>';
+        });
+        if(dayShifts.length>3) html+='<div class="cal-more">+'+(dayShifts.length-3)+' more</div>';
+      }
       html+='</div>';
       cur=addDays(cur,1);
     }
@@ -969,7 +1026,12 @@ function _paintCoverage(ws){
     var dayShifts=shifts[iso]||[];
     var offs=timeOff[iso]||[];
     var storeData={};
+    var hol=getHoliday(iso);
     STORES.forEach(function(st){
+      if(hol){
+        storeData[st.key]={shifts:[],offNames:[],conflicts:[],status:'holiday',hourGaps:[],hours:null,holiday:hol};
+        return;
+      }
       var stShifts=dayShifts.filter(function(s){return s.store===st.key;});
       var offNames=offs.filter(function(o){return o.store_key===st.key;}).map(function(o){return o.employee_name;});
       var conflicts=stShifts.filter(function(s){
@@ -1024,40 +1086,46 @@ function _paintCoverage(ws){
   // Day grid
   var gridHTML=days.map(function(day){
     var isToday=day.iso===toISO(new Date());
-    var storesHTML=STORES.map(function(st){
-      var sd=day.storeData[st.key];
-      var statusLabel=sd.status==='gap'?'Gap':'Covered';
-      var hoursLabel=sd.hours?fmtTime(sd.hours.open)+'–'+fmtTime(sd.hours.close):'';
-      var stHTML='<div class="cov-store">'+
-        '<div class="cov-store-label '+st.cls+'">'+st.label+
-          (hoursLabel?' <span style="font-weight:400;color:#aaa;font-size:0.62rem;letter-spacing:0">'+hoursLabel+'</span>':'')+
-          '<span class="cov-status '+sd.status+'">'+statusLabel+'</span>'+
-        '</div>';
-      if(sd.shifts.length===0){
-        stHTML+='<div class="cov-no-staff">No one scheduled</div>';
-      } else {
-        stHTML+='<div class="cov-shift-list">'+sd.shifts.map(function(s){
-          var e=empById(sEmpId(s))||{name:'?',color:'#aaa'};
-          return '<div class="cov-shift-item">'+
-            '<div class="cov-shift-dot" style="background:'+e.color+'"></div>'+
-            '<span>'+esc(e.name)+'</span>'+
-            '<span class="cov-shift-time">'+fmtTime(sStart(s))+(sEnd(s)?'–'+fmtTime(sEnd(s)):'')+'</span>'+
-            '</div>';
-        }).join('')+'</div>';
-      }
-      if(sd.hourGaps&&sd.hourGaps.length>0){
-        stHTML+='<div style="margin-top:4px;font-size:0.72rem;color:#C62828;font-weight:600">'+
-          sd.hourGaps.map(function(g){return '🕐 No coverage '+fmtTime(g.from)+'–'+fmtTime(g.to);}).join('<br>')+
+    var hol=day.storeData[STORES[0].key].holiday;
+    var storesHTML;
+    if(hol){
+      storesHTML='<div class="cov-holiday-label">'+holidayIcon(hol)+' '+esc(hol)+' — CLOSED</div>';
+    } else {
+      storesHTML=STORES.map(function(st){
+        var sd=day.storeData[st.key];
+        var statusLabel=sd.status==='gap'?'Gap':'Covered';
+        var hoursLabel=sd.hours?fmtTime(sd.hours.open)+'–'+fmtTime(sd.hours.close):'';
+        var stHTML='<div class="cov-store">'+
+          '<div class="cov-store-label '+st.cls+'">'+st.label+
+            (hoursLabel?' <span style="font-weight:400;color:#aaa;font-size:0.62rem;letter-spacing:0">'+hoursLabel+'</span>':'')+
+            '<span class="cov-status '+sd.status+'">'+statusLabel+'</span>'+
           '</div>';
-      }
-      if(sd.offNames.length){
-        stHTML+='<div class="cov-pto-warn">🏖 Off: '+sd.offNames.join(', ')+'</div>';
-      }
-      stHTML+='</div>';
-      return stHTML;
-    }).join('');
+        if(sd.shifts.length===0){
+          stHTML+='<div class="cov-no-staff">No one scheduled</div>';
+        } else {
+          stHTML+='<div class="cov-shift-list">'+sd.shifts.map(function(s){
+            var e=empById(sEmpId(s))||{name:'?',color:'#aaa'};
+            return '<div class="cov-shift-item">'+
+              '<div class="cov-shift-dot" style="background:'+e.color+'"></div>'+
+              '<span>'+esc(e.name)+'</span>'+
+              '<span class="cov-shift-time">'+fmtTime(sStart(s))+(sEnd(s)?'–'+fmtTime(sEnd(s)):'')+'</span>'+
+              '</div>';
+          }).join('')+'</div>';
+        }
+        if(sd.hourGaps&&sd.hourGaps.length>0){
+          stHTML+='<div style="margin-top:4px;font-size:0.72rem;color:#C62828;font-weight:600">'+
+            sd.hourGaps.map(function(g){return '🕐 No coverage '+fmtTime(g.from)+'–'+fmtTime(g.to);}).join('<br>')+
+            '</div>';
+        }
+        if(sd.offNames.length){
+          stHTML+='<div class="cov-pto-warn">🏖 Off: '+sd.offNames.join(', ')+'</div>';
+        }
+        stHTML+='</div>';
+        return stHTML;
+      }).join('');
+    }
 
-    return '<div class="cov-day">'+
+    return '<div class="cov-day'+(hol?' holiday':'')+'">'+
       '<div class="cov-day-hdr"'+(isToday?' style="background:#FDF0F5"':'')+'>'+
         '<div class="cov-day-name"'+(isToday?' style="color:#C4276E"':'')+'>'+DAY_SHORT[day.i]+' '+fmtShort(day.d)+'</div>'+
       '</div>'+
