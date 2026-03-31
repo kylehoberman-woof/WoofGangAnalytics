@@ -99,7 +99,7 @@ ET_BUFFER_DAYS = 2
 INCREMENTAL_DAYS = 60
 
 # Shared JS snippet for dynamic portal back link in generated dashboards
-PORTAL_BACK_JS = '<script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager")a.href=a.href.replace("index.html","manager.html");else if(l==="store")a.href=a.href.replace("index.html","store.html");}}();</script>'
+PORTAL_BACK_JS = '<script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\\u2190 Store Portal";}else{a.innerHTML="\\u2190 Owner Portal";}}}();</script>'
 
 
 # ─── FDD Industry Standards ─────────────────────────────────────────────────

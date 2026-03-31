@@ -372,9 +372,9 @@ def html_head(title, subtitle="", timestamp=None, home_url="index.html", show_ho
     if timestamp is None:
         from zoneinfo import ZoneInfo
         timestamp = datetime.now(ZoneInfo("America/New_York")).strftime("%B %d, %Y at %I:%M %p ET")
+    from config import PORTAL_BACK_JS
     _home_link = (f'<a id="portal-back" href="{home_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>'
-        '<script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");'
-        'if(l==="manager")a.href="../manager.html";else if(l==="store")a.href="../store.html";}();</script>') if show_home else ''
+        f'{PORTAL_BACK_JS}') if show_home else ''
     _switch_link = f'<br><a href="{store_switch[0]}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; {store_switch[1]}</a>' if store_switch else ''
     return f"""<!DOCTYPE html>
 <html lang="en">
