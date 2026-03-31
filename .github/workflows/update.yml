@@ -66,6 +66,12 @@ jobs:
       - name: Cross-Store Comparison
         run: python3 scripts/build_crossstore_dashboard.py
 
+      # ── TEMP: Test tickets endpoint for payment type data ──
+      - name: Test tickets endpoint (one-time diagnostic)
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: python3 scripts/test_tickets_endpoint.py || true
+
       # ── Appointments (for pet-level anomaly tracking) ──
       - name: Port Washington - Fetch appointments
         env:
