@@ -60,6 +60,36 @@ try:
 except Exception as _e:
     print(f"  Operating expenses fetch failed: {_e}")
 
+# ── Load ticket data for CC fee calculation ──────────────────────────────────
+from config import CC_RATE_PCT, CC_RATE_FLAT, CC_PAYMENT_METHODS
+
+_tickets = {}
+_tickets_file = DATA_DIR / "tickets.json"
+if _tickets_file.exists():
+    with open(_tickets_file) as _f:
+        _tickets = json.load(_f)
+    print(f"  Tickets loaded: {len(_tickets)} for CC fee calculation")
+
+def get_monthly_cc_fees(month_start, month_end):
+    """Calculate CC processing fees for a given month from ticket data."""
+    ms = month_start.strftime("%Y-%m-%d")
+    me = month_end.strftime("%Y-%m-%d")
+    total_fee = 0.0
+    cc_count = 0
+    cc_volume = 0.0
+    for t in _tickets.values():
+        d = t.get("date", "")
+        if d < ms or d > me:
+            continue
+        method = t.get("payment_method", "")
+        if method in CC_PAYMENT_METHODS:
+            order_total = float(t.get("total", 0))
+            fee = round(order_total * CC_RATE_PCT + CC_RATE_FLAT, 2)
+            total_fee += fee
+            cc_count += 1
+            cc_volume += order_total
+    return round(total_fee, 2), cc_count, round(cc_volume, 2)
+
 def get_monthly_expenses(month_date):
     """Calculate total owner expenses and operating costs for a given month.
     Returns (owner_total, operating_total, detail_dict)."""
@@ -228,9 +258,10 @@ while m_start <= TODAY:
     royalties = round(total_rev * _royalty_rate, 2)
     rent = get_monthly_rent(_store_name, m_start)
     owner_exp, operating_exp = get_monthly_expenses(m_start)
+    cc_fees, cc_txn_count, cc_volume = get_monthly_cc_fees(m_start, m_end)
 
     gross_profit = round(net_rev - retail_cogs - comm_paid, 2)
-    total_opex = round(mgr + bather_pay + retail_pay + royalties + rent + owner_exp + operating_exp, 2)
+    total_opex = round(mgr + bather_pay + retail_pay + royalties + rent + owner_exp + operating_exp + cc_fees, 2)
     net_margin = round(gross_profit - total_opex, 2)
     net_margin_pct = round(net_margin / total_rev * 100, 1) if total_rev else 0
 
@@ -262,6 +293,9 @@ while m_start <= TODAY:
         "rent": rent,
         "owner_exp": owner_exp,
         "operating_exp": operating_exp,
+        "cc_fees": cc_fees,
+        "cc_txn_count": cc_txn_count,
+        "cc_volume": cc_volume,
         "total_opex": total_opex,
         "net_margin": net_margin,
         "net_margin_pct": net_margin_pct,
@@ -285,7 +319,7 @@ ytd = [m for m in monthly if m["year"] == 2026]
 ytd_sums = {}
 for key in ["groom_rev", "retail_rev", "total_rev", "groom_disc", "net_rev",
             "retail_cogs", "comm_paid", "gross_profit", "mgr", "bather_pay",
-            "retail_pay", "royalties", "rent", "owner_exp", "operating_exp", "total_opex", "net_margin", "tips"]:
+            "retail_pay", "royalties", "rent", "owner_exp", "operating_exp", "cc_fees", "total_opex", "net_margin", "tips"]:
     ytd_sums[key] = round(sum(m[key] for m in ytd), 2)
 ytd_sums["net_margin_pct"] = round(ytd_sums["net_margin"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
 ytd_sums["gross_margin_pct"] = round(ytd_sums["gross_profit"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
@@ -413,6 +447,7 @@ for m in monthly:
       <td class="n">{fc(m["rent"])}</td>
       <td class="n" style="color:#E65100">{fc(m["owner_exp"])}</td>
       <td class="n" style="color:#1565C0">{fc(m["operating_exp"])}</td>
+      <td class="n" style="color:#7B1FA2">{fc(m["cc_fees"])}</td>
       <td class="n" style="font-weight:700;color:{mc}">{fc(m["net_margin"])}<br><span style="font-size:0.72rem;font-weight:400">{m["net_margin_pct"]}%</span></td>
     </tr>'''
 
@@ -437,6 +472,7 @@ CMP_KPIS = [
     ("rent", "Rent", False),
     ("owner_exp", "Owner Expenses", False),
     ("operating_exp", "Operating Costs", False),
+    ("cc_fees", "CC Processing Fees", False),
     ("net_margin", "Net Margin", True),
 ]
 
@@ -611,7 +647,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
         <th>Groom Rev</th><th>Retail Rev</th><th>Total Rev</th>
         <th>Discounts</th><th>Retail COGS</th><th>Commission</th><th>Gross Profit</th>
         <th>Manager</th><th>Bather</th><th>Retail Staff</th><th>Royalties</th><th>Rent</th>
-        <th>Owner Exp</th><th>Oper. Costs</th>
+        <th>Owner Exp</th><th>Oper. Costs</th><th>CC Fees</th>
         <th>Net Margin</th>
       </tr></thead>
       <tbody>{table_rows}</tbody>
@@ -818,6 +854,7 @@ function updateMonthDetail() {{
     kpiHtml('Gross Profit', fc(m.gross_profit), '#2E7D32', fp(m.gross_margin_pct)) +
     kpiHtml('Owner Expenses', fc(m.owner_exp||0), '#E65100', '') +
     kpiHtml('Operating Costs', fc(m.operating_exp||0), '#1565C0', '') +
+    kpiHtml('CC Fees', fc(m.cc_fees||0), '#7B1FA2', m.cc_txn_count ? m.cc_txn_count+' txns' : '') +
     kpiHtml('Total OpEx', fc(m.total_opex), '#7B1FA2', '') +
     kpiHtml('Net Margin', fc(m.net_margin), mc, fp(m.net_margin_pct)) +
     kpiHtml('Tips', fc(m.tips), '#F57C00', '');
@@ -878,6 +915,7 @@ var wf = [
   {{ label: 'Rent', val: -{ytd_sums["rent"]} }},
   {{ label: 'Owner Exp', val: -{ytd_sums["owner_exp"]} }},
   {{ label: 'Oper. Costs', val: -{ytd_sums["operating_exp"]} }},
+  {{ label: 'CC Fees', val: -{ytd_sums["cc_fees"]} }},
 ];
 var running = 0;
 var wfBases = [], wfVals = [], wfColors = [];

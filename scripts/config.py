@@ -98,6 +98,14 @@ PAGE_SIZE = 500
 ET_BUFFER_DAYS = 2
 INCREMENTAL_DAYS = 60
 
+# ─── Credit Card Processing Fees ─────────────────────────────────────────────
+# Update these when you confirm your actual processor rate
+CC_RATE_PCT = 0.029       # 2.9% per transaction (estimate — update with actual rate)
+CC_RATE_FLAT = 0.30       # $0.30 per transaction (estimate — update with actual rate)
+# Payment methods considered "credit card" (from FranPOS EZPAY field)
+CC_PAYMENT_METHODS = {"amex", "visa", "mastercard", "discover", "credit", "debit"}
+# Anything not in this set (e.g., "cash", "", "check") is treated as non-CC
+
 # Shared JS snippet for dynamic portal back link in generated dashboards
 PORTAL_BACK_JS = '<script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\\u2190 Store Portal";}else{a.innerHTML="\\u2190 Owner Portal";}}}();</script>'
 

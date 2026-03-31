@@ -39,6 +39,10 @@ jobs:
         run: python3 scripts/fetch_brands.py
       - name: Port Washington - Inventory dashboard
         run: cd scripts && python generate_inventory_dashboard.py
+      - name: Port Washington - Fetch tickets (payment data)
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: python3 scripts/fetch_tickets.py
       - name: Port Washington - Financial dashboard
         run: python3 scripts/build_financial_dashboard.py
 
@@ -59,18 +63,16 @@ jobs:
         run: python3 scripts/fetch_brands.py hicksville
       - name: Hicksville - Inventory dashboard
         run: cd scripts && python generate_inventory_dashboard.py hicksville
+      - name: Hicksville - Fetch tickets (payment data)
+        env:
+          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+        run: python3 scripts/fetch_tickets.py hicksville
       - name: Hicksville - Financial dashboard
         run: python3 scripts/build_financial_dashboard.py hicksville
 
       # ── Cross-Store ──
       - name: Cross-Store Comparison
         run: python3 scripts/build_crossstore_dashboard.py
-
-      # ── TEMP: Test tickets endpoint for payment type data ──
-      - name: Test tickets endpoint (one-time diagnostic)
-        env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
-        run: python3 scripts/test_tickets_endpoint.py || true
 
       # ── Appointments (for pet-level anomaly tracking) ──
       - name: Port Washington - Fetch appointments
