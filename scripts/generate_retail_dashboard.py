@@ -179,6 +179,79 @@ brand_p = (df[df["brand"] != "–"]
              .reset_index().sort_values("revenue", ascending=False).head(20))
 brand_p["avg_price"] = (brand_p["revenue"] / brand_p["units"]).round(2)
 
+# ── Monthly SKU matrix — top 200 SKUs × last 12 months ───────────────────────
+matrix_src = df[df["ym"].isin(last_12)]
+top200_rev = (matrix_src.groupby(["sku", "name", "category"])
+              .agg(total_rev=("net_sales", "sum"), total_units=("quantity", "sum"))
+              .reset_index().sort_values("total_rev", ascending=False).head(200))
+top200_set = set(top200_rev["sku"])
+m_src = matrix_src[matrix_src["sku"].isin(top200_set)]
+rev_piv   = m_src.groupby(["sku", "ym"])["net_sales"].sum().unstack(fill_value=0)
+units_piv = m_src.groupby(["sku", "ym"])["quantity"].sum().unstack(fill_value=0)
+
+matrix_rows = []
+for _, r in top200_rev.iterrows():
+    s = r["sku"]
+    rev_mo   = [round(float(rev_piv.loc[s, p]),   2) if (s in rev_piv.index   and p in rev_piv.columns)   else 0.0 for p in last_12]
+    units_mo = [round(float(units_piv.loc[s, p]), 1) if (s in units_piv.index and p in units_piv.columns) else 0.0 for p in last_12]
+    matrix_rows.append({
+        "sku": s, "name": r["name"], "category": r["category"],
+        "total_rev": round(float(r["total_rev"]), 2),
+        "total_units": round(float(r["total_units"]), 1),
+        "rev": rev_mo, "units": units_mo,
+    })
+matrix_json        = json.dumps(matrix_rows)
+matrix_months_json = json.dumps(m_labels)
+
+# ── Key Insights ──────────────────────────────────────────────────────────────
+_cur_per   = pd.Period(datetime.now(et), "M")
+last3_per  = [_cur_per - i for i in range(3)]
+prior3_per = [_cur_per - 3 - i for i in range(3)]
+older_per  = [_cur_per - 3 - i for i in range(9)]
+
+def _wrev(periods):
+    return df[df["ym"].isin(periods)].groupby("sku")["net_sales"].sum()
+
+wl3 = _wrev(last3_per)
+wp3 = _wrev(prior3_per)
+wol = _wrev(older_per)
+
+all_skus_df = df.groupby(["sku", "name", "category"])["net_sales"].sum().reset_index()
+insights_rising, insights_fading, insights_stars = [], [], []
+
+for _, row in all_skus_df.iterrows():
+    s = row["sku"]
+    name, cat = row["name"], row["category"]
+    rl3 = float(wl3.get(s, 0))
+    rp3 = float(wp3.get(s, 0))
+    if rl3 >= 50 and rp3 > 0 and (rl3 - rp3) / rp3 >= 0.30:
+        pct = (rl3 - rp3) / rp3 * 100
+        insights_rising.append({"name": name, "category": cat,
+                                  "metric": f"+{pct:.0f}% vs prior 3mo", "rev3": round(rl3, 2)})
+    if rl3 >= 100 and (rp3 + float(wol.get(s, 0))) < 20:
+        insights_stars.append({"name": name, "category": cat,
+                                 "metric": f"${rl3:,.0f} in last 3mo (new!)", "rev3": round(rl3, 2)})
+
+older_top50 = (df[df["ym"].isin(older_per)]
+               .groupby(["sku", "name", "category"])["net_sales"]
+               .sum().reset_index().sort_values("net_sales", ascending=False).head(50))
+for _, row in older_top50.iterrows():
+    s   = row["sku"]
+    rl3 = float(wl3.get(s, 0))
+    rp3 = float(wp3.get(s, 0))
+    baseline = rp3 if rp3 > 10 else float(row["net_sales"]) / 3
+    if baseline > 10 and rl3 < baseline * 0.5:
+        drop = (baseline - rl3) / baseline * 100
+        insights_fading.append({"name": row["name"], "category": row["category"],
+                                  "metric": f"-{drop:.0f}% vs prior avg", "rev3": round(rl3, 2)})
+
+insights_rising.sort(key=lambda x: x["rev3"], reverse=True)
+insights_fading.sort(key=lambda x: x["rev3"])
+insights_stars.sort(key=lambda x: x["rev3"], reverse=True)
+insights_rising = insights_rising[:15]
+insights_fading = insights_fading[:15]
+insights_stars  = insights_stars[:15]
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 def fc(v):
     return f"${v:,.0f}"
@@ -262,10 +335,54 @@ def build_brand_rows():
         )
     return "\n".join(out)
 
+def build_insight_cards():
+    def irows(items, empty_msg):
+        if not items:
+            return f'<div class="insight-empty">{empty_msg}</div>'
+        rows = []
+        for it in items:
+            rows.append(
+                f'<div class="insight-row">'
+                f'<div class="insight-name" title="{it["name"]}">{it["name"][:50]}</div>'
+                f'<div class="insight-meta">{cat_pill(it["category"])}'
+                f'<span class="insight-metric">{it["metric"]}</span></div>'
+                f'<div class="insight-rev">{fc(it["rev3"])}</div>'
+                f'</div>'
+            )
+        return "\n".join(rows)
+
+    cards_data = [
+        ("rising", "📈 Rising",    insights_rising,
+         "Last 3mo revenue ≥30% above prior 3mo",
+         "No rising products detected this period."),
+        ("fading", "📉 Fading",    insights_fading,
+         "Former top sellers down ≥50% in the last 3 months",
+         "No fading products detected this period."),
+        ("stars",  "⭐ New Stars", insights_stars,
+         "Little prior history but ≥$100 in the last 3 months",
+         "No new stars detected this period."),
+    ]
+    parts = []
+    for cid, title, items, desc, empty_msg in cards_data:
+        badge = f'<span class="insight-badge">{len(items)}</span>' if items else ''
+        parts.append(
+            f'<div class="insight-card">'
+            f'<button class="insight-toggle" onclick="toggleInsight(\'{cid}\')">'
+            f'<span class="insight-title">{title}{badge}</span>'
+            f'<span class="insight-desc">{desc}</span>'
+            f'<span class="insight-chevron" id="chev-{cid}">▼</span>'
+            f'</button>'
+            f'<div class="insight-body" id="ins-{cid}" style="display:none">'
+            f'{irows(items, empty_msg)}'
+            f'</div></div>'
+        )
+    return "\n".join(parts)
+
 rev_rows_html    = build_rev_rows()
 units_rows_html  = build_units_rows()
 monthly_html     = build_monthly_html()
 brand_rows_html  = build_brand_rows()
+insight_cards_html = build_insight_cards()
 
 # ── Portal back / switch links ────────────────────────────────────────────────
 _switch_url  = f"{_odir}/WoofGang_{_ofn}_Retail_Dashboard.html"
@@ -323,6 +440,43 @@ td.brand-cell{font-size:12px;color:var(--mu);max-width:140px;}
 .footer strong{color:var(--m);}
 @media(max-width:900px){.charts-row{grid-template-columns:1fr;}.monthly-grid{grid-template-columns:1fr 1fr;}.kpi-bar{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:600px){.kpi-bar{grid-template-columns:1fr 1fr;}.monthly-grid{grid-template-columns:1fr;}}
+/* ── SKU Matrix ───────────────────────────────────────────────────────────── */
+.matrix-controls{display:flex;align-items:center;gap:12px;padding:16px 28px 0;flex-wrap:wrap;}
+.matrix-search{flex:1;min-width:180px;max-width:320px;padding:7px 12px;border:1px solid var(--bd);border-radius:6px;font-size:13px;font-family:inherit;}
+.matrix-search:focus{outline:none;border-color:var(--m);box-shadow:0 0 0 3px rgba(196,39,110,0.08);}
+.matrix-toggle{display:flex;border:1px solid var(--bd);border-radius:6px;overflow:hidden;}
+.matrix-toggle button{padding:6px 16px;border:none;background:white;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;color:var(--mu);transition:all .15s;}
+.matrix-toggle button.active{background:var(--m);color:white;}
+.matrix-count{font-size:11px;color:var(--mu);padding:6px 28px 0;}
+.matrix-wrap{overflow-x:auto;overflow-y:auto;max-height:600px;margin-top:8px;position:relative;}
+.matrix-table{border-collapse:collapse;font-size:12px;width:max-content;min-width:100%;}
+.matrix-table thead th{background:var(--dk);color:rgba(255,255,255,.85);padding:9px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;position:sticky;top:0;z-index:20;cursor:pointer;user-select:none;}
+.matrix-table thead th:hover{background:#2d3050;}
+.matrix-table thead th.sort-asc::after{content:' ↑';}
+.matrix-table thead th.sort-desc::after{content:' ↓';}
+.matrix-table th.col-name{position:sticky;left:0;z-index:30;min-width:200px;max-width:240px;}
+.matrix-table td{padding:7px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid #f3f4f6;font-family:'DM Mono',monospace;font-size:12px;}
+.matrix-table td.col-name{position:sticky;left:0;z-index:10;background:white;font-weight:500;font-family:inherit;max-width:240px;padding:7px 12px;border-right:2px solid var(--bd);text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.matrix-table td.col-total{font-weight:700;border-left:2px solid var(--bd);}
+.matrix-table tbody tr:hover td.col-name{background:#fdf0f5;}
+/* ── Key Insights ─────────────────────────────────────────────────────────── */
+.insight-card{border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:12px;}
+.insight-card:last-child{margin-bottom:0;}
+.insight-toggle{width:100%;text-align:left;background:white;border:none;padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .15s;}
+.insight-toggle:hover{background:var(--ml);}
+.insight-title{font-size:14px;font-weight:700;color:var(--tx);white-space:nowrap;}
+.insight-badge{display:inline-block;background:var(--m);color:white;font-size:10px;font-weight:700;border-radius:20px;padding:1px 7px;margin-left:6px;vertical-align:middle;}
+.insight-desc{font-size:11px;color:var(--mu);flex:1;}
+.insight-chevron{font-size:11px;color:var(--mu);transition:transform .2s;flex-shrink:0;}
+.insight-chevron.open{transform:rotate(180deg);}
+.insight-body{border-top:1px solid var(--bd);}
+.insight-row{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;}
+.insight-row:last-child{border-bottom:none;}
+.insight-name{font-size:13px;font-weight:500;flex:1;min-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.insight-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.insight-metric{font-size:11px;font-weight:700;color:var(--m);white-space:nowrap;}
+.insight-rev{font-size:12px;font-family:'DM Mono',monospace;color:var(--mu);white-space:nowrap;text-align:right;flex-shrink:0;}
+.insight-empty{padding:20px;text-align:center;color:var(--mu);font-size:13px;font-style:italic;}
 """
 
 # ── HTML ──────────────────────────────────────────────────────────────────────
@@ -358,6 +512,14 @@ html = f"""<!DOCTYPE html>
 
 <div class="container">
 
+  <!-- KEY INSIGHTS -->
+  <div class="section">
+    <div class="section-hdr"><h2>Key Insights</h2></div>
+    <div class="section-body">
+      {insight_cards_html}
+    </div>
+  </div>
+
   <!-- CATEGORY OVERVIEW -->
   <div class="section">
     <div class="section-hdr"><h2>Category Overview</h2></div>
@@ -382,6 +544,7 @@ html = f"""<!DOCTYPE html>
       <button class="tb active" onclick="switchTab('rev',this)">By Revenue</button>
       <button class="tb" onclick="switchTab('units',this)">By Units</button>
       <button class="tb" onclick="switchTab('monthly',this)">Monthly Bestsellers</button>
+      <button class="tb" onclick="switchTab('matrix',this)">SKU Matrix</button>
     </div>
 
     <div id="p-rev" class="panel active">
@@ -412,6 +575,24 @@ html = f"""<!DOCTYPE html>
     <div id="p-monthly" class="panel">
       <div class="monthly-grid" style="margin-top:16px">
         {monthly_html}
+      </div>
+    </div>
+
+    <div id="p-matrix" class="panel">
+      <div class="matrix-controls">
+        <input class="matrix-search" type="search" id="matrixSearch"
+               placeholder="Search products..." oninput="filterMatrix()">
+        <div class="matrix-toggle">
+          <button id="btnRev" class="active" onclick="setMatrixMode('rev')">$ Revenue</button>
+          <button id="btnUnits" onclick="setMatrixMode('units')">Units</button>
+        </div>
+      </div>
+      <div class="matrix-count" id="matrixCount"></div>
+      <div class="matrix-wrap">
+        <table class="matrix-table">
+          <thead id="matrixHead"></thead>
+          <tbody id="matrixBody"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -452,6 +633,7 @@ function switchTab(id, btn) {{
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('p-' + id).classList.add('active');
+  if (id === 'matrix' && !_mxBuilt) {{ _mxBuilt = true; _buildMxHead(); _renderMx(); }}
 }}
 
 // ── Category donut ────────────────────────────────────────────────────────────
@@ -540,6 +722,91 @@ new Chart(document.getElementById('weeklyChart'), {{
     }}
   }}
 }});
+
+// ── SKU Matrix ────────────────────────────────────────────────────────────────
+const MATRIX_DATA   = {matrix_json};
+const MATRIX_MONTHS = {matrix_months_json};
+let _mxMode = 'rev', _mxSortCol = -1, _mxSortDir = 'desc', _mxQuery = '', _mxBuilt = false;
+
+function _buildMxHead() {{
+  const tr = document.createElement('tr');
+  const thN = document.createElement('th'); thN.className = 'col-name'; thN.textContent = 'Product'; tr.appendChild(thN);
+  MATRIX_MONTHS.forEach((lbl, i) => {{
+    const th = document.createElement('th'); th.textContent = lbl; th.onclick = () => _mxSort(i); tr.appendChild(th);
+  }});
+  const thT = document.createElement('th'); thT.textContent = 'Total'; thT.className = 'col-total'; thT.onclick = () => _mxSort(-1); tr.appendChild(thT);
+  document.getElementById('matrixHead').appendChild(tr);
+}}
+
+function _mxGet(row, i) {{ return _mxMode === 'rev' ? row.rev[i] : row.units[i]; }}
+function _mxTotal(row) {{ return _mxMode === 'rev' ? row.total_rev : row.total_units; }}
+function _mxFmt(v) {{
+  if (!v) return '';
+  return _mxMode === 'rev'
+    ? '$' + v.toLocaleString('en-US', {{maximumFractionDigits:0}})
+    : v.toLocaleString('en-US', {{maximumFractionDigits:0}});
+}}
+function _mxHeat(frac) {{
+  if (frac <= 0) return '';
+  const r = Math.round(255 + (196 - 255) * frac);
+  const g = Math.round(255 + (39  - 255) * frac);
+  const b = Math.round(255 + (110 - 255) * frac);
+  return `background:rgb(${{r}},${{g}},${{b}});color:${{frac > 0.55 ? '#fff' : '#1f2937'}};`;
+}}
+
+function _renderMx() {{
+  const q = _mxQuery.toLowerCase();
+  let rows = q ? MATRIX_DATA.filter(r => r.name.toLowerCase().includes(q)) : MATRIX_DATA.slice();
+  rows.sort((a, b) => {{
+    const va = _mxSortCol === -1 ? _mxTotal(a) : _mxGet(a, _mxSortCol);
+    const vb = _mxSortCol === -1 ? _mxTotal(b) : _mxGet(b, _mxSortCol);
+    return _mxSortDir === 'desc' ? vb - va : va - vb;
+  }});
+  const ths = document.querySelectorAll('#matrixHead th');
+  ths.forEach(th => th.classList.remove('sort-asc','sort-desc'));
+  const si = _mxSortCol === -1 ? MATRIX_MONTHS.length + 1 : _mxSortCol + 1;
+  if (ths[si]) ths[si].classList.add(_mxSortDir === 'desc' ? 'sort-desc' : 'sort-asc');
+  const maxes = Array(MATRIX_MONTHS.length).fill(0);
+  rows.forEach(r => MATRIX_MONTHS.forEach((_, i) => {{ const v = _mxGet(r, i); if (v > maxes[i]) maxes[i] = v; }}));
+  const tbody = document.getElementById('matrixBody');
+  tbody.innerHTML = '';
+  rows.forEach(row => {{
+    const tr = document.createElement('tr');
+    const tdN = document.createElement('td'); tdN.className = 'col-name'; tdN.title = row.name; tdN.textContent = row.name; tr.appendChild(tdN);
+    MATRIX_MONTHS.forEach((_, i) => {{
+      const v = _mxGet(row, i), td = document.createElement('td');
+      td.textContent = _mxFmt(v);
+      const hs = _mxHeat(maxes[i] > 0 ? v / maxes[i] : 0); if (hs) td.setAttribute('style', hs);
+      tr.appendChild(td);
+    }});
+    const tdT = document.createElement('td'); tdT.className = 'col-total'; tdT.textContent = _mxFmt(_mxTotal(row)); tr.appendChild(tdT);
+    tbody.appendChild(tr);
+  }});
+  document.getElementById('matrixCount').textContent = rows.length < MATRIX_DATA.length
+    ? `Showing ${{rows.length}} of ${{MATRIX_DATA.length}} products`
+    : `${{MATRIX_DATA.length}} products`;
+}}
+
+function _mxSort(col) {{
+  _mxSortDir = _mxSortCol === col ? (_mxSortDir === 'desc' ? 'asc' : 'desc') : 'desc';
+  _mxSortCol = col; _renderMx();
+}}
+function setMatrixMode(mode) {{
+  _mxMode = mode; _mxSortCol = -1; _mxSortDir = 'desc';
+  document.getElementById('btnRev').classList.toggle('active', mode === 'rev');
+  document.getElementById('btnUnits').classList.toggle('active', mode !== 'rev');
+  _renderMx();
+}}
+function filterMatrix() {{ _mxQuery = document.getElementById('matrixSearch').value; _renderMx(); }}
+
+// ── Insight accordion ─────────────────────────────────────────────────────────
+function toggleInsight(id) {{
+  const body = document.getElementById('ins-' + id);
+  const chev = document.getElementById('chev-' + id);
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  chev.classList.toggle('open', open);
+}}
 </script>
 </body>
 </html>
