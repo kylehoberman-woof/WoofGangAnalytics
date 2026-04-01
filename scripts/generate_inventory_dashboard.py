@@ -200,7 +200,7 @@ def make_rows(items, show_cost=True):
         rows.append(
             f'<tr class="row-{s}" data-status="{s}" data-vendor="{r["vendor"].lower()}">'
             f'<td>{badge(s)}</td><td class="sku-cell">{r["sku"]}</td>'
-            f'<td class="name-cell">{r["name"][:48]}</td><td class="vendor-cell">{r["vendor"]}</td>'
+            f'<td class="name-cell">{r["name"][:48]}</td><td class="vendor-cell vendor-edit" data-sku="{r["sku"]}">{r["vendor"]}</td>'
             f'<td class="num stock-edit{neg}" data-sku="{r["sku"]}">{stock_str}</td>{pending_cell(r["sku"])}<td class="num">{vel_str}</td>'
             f'<td class="num">{wos_str}</td>{cost_cols}'
             f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
@@ -374,6 +374,9 @@ thead th{position:sticky;top:0;z-index:10;}
 .cost-edit{cursor:pointer;position:relative;transition:background 0.2s;color:#7c3aed;font-weight:600;}
 .cost-edit:hover{background:rgba(124,58,237,0.06);border-radius:4px;}
 .cost-edit input{width:70px;padding:2px 4px;border:2px solid #7c3aed;border-radius:4px;font-family:inherit;font-size:inherit;text-align:right;color:#1a1a2e;background:#fff;outline:none;}
+.vendor-edit{cursor:pointer;position:relative;transition:background 0.2s;color:#00838F;font-weight:600;}
+.vendor-edit:hover{background:rgba(0,131,143,0.06);border-radius:4px;}
+.vendor-edit input{width:120px;padding:2px 4px;border:2px solid #00838F;border-radius:4px;font-family:inherit;font-size:inherit;text-align:left;color:#1a1a2e;background:#fff;outline:none;}
 """
 
 JS = """
@@ -506,6 +509,47 @@ document.addEventListener('click',function(e){
         cell.classList.remove('stock-flash-ok');
         cell.classList.add('stock-flash-ok');
         cell.title='Cost updated to $'+nv.toFixed(2);
+      })
+      .catch(function(err){
+        cell.classList.remove('stock-flash-ok');
+        cell.classList.add('stock-flash-err');
+        cell.title='Update failed: '+err.message;
+        setTimeout(function(){cell.classList.remove('stock-flash-err');},1200);
+      });
+  }
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();save();}
+    if(e.key==='Escape'){e.preventDefault();cancel();}
+  });
+  inp.addEventListener('blur',function(){save();});
+});
+
+// ── Inline vendor editing ──
+document.addEventListener('click',function(e){
+  var cell=e.target.closest('.vendor-edit');
+  if(!cell||cell.querySelector('input')) return;
+  var sku=cell.dataset.sku;
+  if(!sku) return;
+  var oldVal=cell.textContent.trim();
+  var inp=document.createElement('input');
+  inp.type='text';inp.value=oldVal;
+  cell.textContent='';cell.appendChild(inp);
+  inp.focus();inp.select();
+  function cancel(){cell.textContent=oldVal;}
+  function save(){
+    var nv=inp.value.trim();
+    if(!nv||nv===oldVal){cancel();return;}
+    cell.textContent=nv;
+    cell.classList.add('stock-flash-ok');
+    setTimeout(function(){cell.classList.remove('stock-flash-ok');},1200);
+    var row=cell.closest('tr');
+    if(row) row.dataset.vendor=nv.toLowerCase();
+    fetch('https://scanner.hoberman.io/api/set-vendor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,vendor:nv,store:FRANPOS_LOC==='203698'?'port-washington':'hicksville'})})
+      .then(function(r){
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        cell.classList.remove('stock-flash-ok');
+        cell.classList.add('stock-flash-ok');
+        cell.title='Vendor updated to '+nv;
       })
       .catch(function(err){
         cell.classList.remove('stock-flash-ok');
