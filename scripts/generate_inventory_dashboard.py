@@ -174,6 +174,10 @@ def badge(s):
          "untracked":'<span class="badge badge-na">-</span>'}
     return m.get(s,"")
 
+def esc_attr(s):
+    """Escape a string for use in an HTML attribute value."""
+    return s.replace("&","&amp;").replace('"',"&quot;").replace("'","&#39;")
+
 def pending_cell(sku):
     """Build the Pending column cell for a SKU."""
     plist = _pending_by_sku.get(sku, [])
@@ -203,7 +207,8 @@ def make_rows(items, show_cost=True):
             f'<td class="name-cell">{r["name"][:48]}</td><td class="vendor-cell vendor-edit" data-sku="{r["sku"]}">{r["vendor"]}</td>'
             f'<td class="num stock-edit{neg}" data-sku="{r["sku"]}">{stock_str}</td>{pending_cell(r["sku"])}<td class="num">{vel_str}</td>'
             f'<td class="num">{wos_str}</td>{cost_cols}'
-            f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
+            f'<td class="num">${r["revenue"]:,.0f}</td>'
+            f'<td><button class="req-btn" onclick="openReqModal(this)" data-name="{esc_attr(r["name"][:50])}">Request</button></td></tr>'
         )
     return "\n".join(rows)
 
@@ -235,7 +240,8 @@ nocost_rows = "\n".join(
     f'<td class="num">{"-" if r["velocity_monthly"] <= 0 else str(round(r["velocity_monthly"],1))}</td>'
     f'<td class="num cost-edit" data-sku="{r["sku"]}">-</td>'
     f'<td class="num">{"${:.2f}".format(r["retail_price"]) if r["retail_price"] > 0 else "-"}</td>'
-    f'<td class="num">${r["revenue"]:,.0f}</td></tr>'
+    f'<td class="num">${r["revenue"]:,.0f}</td>'
+    f'<td><button class="req-btn" onclick="openReqModal(this)" data-name="{esc_attr(r["name"][:50])}">Request</button></td></tr>'
     for r in results if not r["has_cost"]
 )
 
@@ -293,9 +299,10 @@ for r in sorted(results, key=lambda x: x.get("stock") or 0):
     neg_rows += (f'<tr data-status="{r["status"]}" data-vendor="{r["vendor"].lower()}">'
         f'<td>{r["sku"]}</td><td>{r["name"][:45]}</td>'
         f'<td class="num stock-edit" style="color:red" data-sku="{r["sku"]}">{r.get("stock",0):.1f}</td>'
-        f'<td>{r["vendor"]}</td><td class="num">{r["velocity_monthly"]}</td></tr>')
+        f'<td>{r["vendor"]}</td><td class="num">{r["velocity_monthly"]}</td>'
+        f'<td><button class="req-btn" onclick="openReqModal(this)" data-name="{esc_attr(r["name"][:50])}">Request</button></td></tr>')
 
-TH_NEG = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th>Vendor</th><th class="num">Vel/Mo</th>'
+TH_NEG = '<th>SKU</th><th>Product</th><th class="num">Stock</th><th>Vendor</th><th class="num">Vel/Mo</th><th></th>'
 
 CSS = """
 :root{--m:#C4276E;--ml:#FDF0F5;--t:#1B6B6B;--br:#6B3520;--dk:#1a1a2e;--md:#2d2d44;--tx:#1f2937;--mu:#6b7280;--bd:#e5e7eb;--bg:#f8f9fb;}
@@ -377,11 +384,52 @@ thead th{position:sticky;top:0;z-index:10;}
 .vendor-edit{cursor:pointer;position:relative;transition:background 0.2s;color:#00838F;font-weight:600;}
 .vendor-edit:hover{background:rgba(0,131,143,0.06);border-radius:4px;}
 .vendor-edit input{width:120px;padding:2px 4px;border:2px solid #00838F;border-radius:4px;font-family:inherit;font-size:inherit;text-align:left;color:#1a1a2e;background:#fff;outline:none;}
+/* ── Request button (inline in table rows) ── */
+.req-btn{padding:3px 8px;background:none;border:1px solid #C4276E;color:#C4276E;border-radius:5px;font-family:inherit;font-size:0.72rem;font-weight:700;cursor:pointer;white-space:nowrap;}
+.req-btn:hover{background:#FDF0F5;}
+/* ── Requests tab ── */
+.req-toolbar{display:flex;align-items:center;padding:14px 0 14px;gap:10px;}
+.req-new-btn{padding:8px 16px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:700;cursor:pointer;}
+.req-new-btn:hover{background:#a31f5b;}
+#req-filter{padding:7px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:'Inter',sans-serif;font-size:0.85rem;background:white;}
+.req-card{background:white;border-radius:10px;padding:14px 18px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.07);display:flex;align-items:flex-start;gap:12px;border-left:4px solid #e8e8e8;}
+.req-card.urgent{border-left-color:#C62828;}
+.req-card.ordered{border-left-color:#2E7D32;opacity:0.75;}
+.req-card.dismissed{opacity:0.45;}
+.req-badge{font-size:0.65rem;font-weight:800;padding:3px 7px;border-radius:8px;text-transform:uppercase;letter-spacing:0.05em;}
+.req-badge.urgent{background:#ffebee;color:#C62828;}
+.req-badge.normal{background:#f5f5f5;color:#888;}
+.req-badge.ordered{background:#e8f5e9;color:#2E7D32;}
+.req-badge.dismissed{background:#f5f5f5;color:#bbb;}
+.req-name{font-weight:700;font-size:0.95rem;}
+.req-meta{font-size:0.75rem;color:#999;margin-top:3px;}
+.req-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0;align-items:center;}
+.req-order-btn{padding:5px 12px;background:#1B6B6B;color:white;border:none;border-radius:6px;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer;}
+.req-order-btn:hover{background:#145858;}
+.req-dismiss-btn{padding:5px 10px;background:white;border:1px solid #ddd;border-radius:6px;font-family:inherit;font-size:0.78rem;color:#999;cursor:pointer;}
+.req-dismiss-btn:hover{color:#C62828;border-color:#C62828;}
+.req-empty{text-align:center;color:#ccc;padding:40px;font-size:0.9rem;}
+/* ── Shared modal (no existing modal in this file) ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.overlay.hidden{display:none;}
+.modal{background:white;border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.15);}
+.modal-hdr{padding:20px 24px 12px;border-bottom:1px solid #eee;}.modal-hdr h2{font-size:1.1rem;font-weight:800;}
+.modal-body{padding:16px 24px;}
+.rfg{margin-bottom:14px;}.rfg label{display:block;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#999;margin-bottom:5px;}
+.rfg input,.rfg select,.rfg textarea{width:100%;padding:9px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem;color:#1a1a2e;background:white;}
+.rfg input:focus,.rfg select:focus,.rfg textarea:focus{outline:none;border-color:#C4276E;}
+.rfg textarea{resize:vertical;min-height:60px;}
+.rrow2{display:flex;gap:12px;}.rrow2>.rfg{flex:1;}
+.modal-actions{padding:12px 24px 20px;display:flex;justify-content:flex-end;gap:8px;}
+.mbtn-save{padding:10px 24px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;}
+.mbtn-save:hover{background:#a31f5b;}.mbtn-save:disabled{opacity:0.5;}
+.mbtn-cancel{padding:10px 20px;background:white;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;color:#888;}
+.mbtn-cancel:hover{border-color:#999;}
 """
 
 JS = """
 let cf='all',cs='',ct='top50';
-function switchTab(t,b){ct=t;document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById('p-'+t).classList.add('active');af();}
+function switchTab(t,b){ct=t;document.querySelectorAll('.tb').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById('p-'+t).classList.add('active');if(t==='requests'){loadRequests();}else{af();}}
 function setFilter(f,b){cf=f;document.querySelectorAll('.fb').forEach(x=>x.classList.remove('active'));b.classList.add('active');af();}
 function doSearch(v){cs=v.toLowerCase();af();}
 function af(){
@@ -564,10 +612,107 @@ document.addEventListener('click',function(e){
   });
   inp.addEventListener('blur',function(){save();});
 });
+
+// ── Item Requests ──
+var _SB_HDR={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+var _portalLevel=sessionStorage.getItem('wg_portal_level')||'store';
+var _canAct=(_portalLevel==='owner'||_portalLevel==='manager');
+
+function openReqModal(nameOrBtn){
+  var name=typeof nameOrBtn==='string'?nameOrBtn:(nameOrBtn&&nameOrBtn.dataset?nameOrBtn.dataset.name:'');
+  document.getElementById('req-name').value=name||'';
+  document.getElementById('req-qty').value='';
+  document.getElementById('req-priority').value='normal';
+  document.getElementById('req-notes').value='';
+  document.getElementById('req-overlay').classList.remove('hidden');
+  setTimeout(function(){document.getElementById('req-name').focus();},50);
+}
+function closeReqModal(){document.getElementById('req-overlay').classList.add('hidden');}
+
+function saveRequest(){
+  var name=document.getElementById('req-name').value.trim();
+  if(!name){alert('Item name is required');return;}
+  var btn=document.getElementById('req-save-btn');
+  btn.disabled=true;btn.textContent='Submitting...';
+  fetch(SB_URL+'/inventory_requests',{method:'POST',headers:_SB_HDR,body:JSON.stringify({
+    store_key:STORE_KEY,
+    item_name:name,
+    quantity:document.getElementById('req-qty').value.trim()||null,
+    priority:document.getElementById('req-priority').value,
+    notes:document.getElementById('req-notes').value.trim()||null,
+    status:'pending'
+  })}).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    btn.disabled=false;btn.textContent='Submit Request';
+    closeReqModal();
+    // Switch to requests tab to show the new entry
+    var reqTab=document.querySelector('[onclick*="requests"]');
+    if(reqTab) switchTab('requests',reqTab);
+    else loadRequests();
+  }).catch(function(e){
+    btn.disabled=false;btn.textContent='Submit Request';
+    alert('Failed to submit request: '+e.message);
+  });
+}
+
+function loadRequests(){
+  var status=document.getElementById('req-filter')?document.getElementById('req-filter').value:'pending';
+  var q='/inventory_requests?store_key=eq.'+STORE_KEY+'&order=created_at.desc';
+  if(status!=='all') q+='&status=eq.'+status;
+  fetch(SB_URL+q,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}})
+    .then(function(r){return r.json();})
+    .then(function(rows){renderRequests(rows||[]);})
+    .catch(function(e){
+      var el=document.getElementById('req-list');
+      if(el) el.innerHTML='<div class="req-empty">Failed to load requests</div>';
+    });
+}
+
+function renderRequests(rows){
+  var el=document.getElementById('req-list');
+  if(!el) return;
+  if(!rows.length){
+    var status=document.getElementById('req-filter')?document.getElementById('req-filter').value:'pending';
+    el.innerHTML='<div class="req-empty">'+(status==='pending'?'No pending requests — all clear!':'No requests found')+'</div>';
+    return;
+  }
+  el.innerHTML=rows.map(function(r){
+    var urgCls=r.priority==='urgent'?' urgent':'';
+    var stCls=r.status==='ordered'?' ordered':(r.status==='dismissed'?' dismissed':'');
+    var badgeKey=r.status==='ordered'?'ordered':(r.status==='dismissed'?'dismissed':r.priority);
+    var badgeTxt=r.status==='ordered'?'Ordered':(r.status==='dismissed'?'Dismissed':(r.priority==='urgent'?'Urgent':'Normal'));
+    var badge='<span class="req-badge '+badgeKey+'">'+badgeTxt+'</span>';
+    var dt=new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    var meta=(r.quantity?'Qty: '+r.quantity+' &middot; ':'')+dt;
+    var actions='';
+    if(_canAct&&r.status==='pending'){
+      actions='<div class="req-actions">'+
+        '<button class="req-order-btn" onclick="updateReq('+r.id+',\'ordered\',this)">Mark Ordered</button>'+
+        '<button class="req-dismiss-btn" onclick="updateReq('+r.id+',\'dismissed\',this)">Dismiss</button>'+
+        '</div>';
+    }
+    return '<div class="req-card'+urgCls+stCls+'" id="rc-'+r.id+'">'+
+      '<div style="flex:1">'+
+        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+badge+
+        '<span class="req-name">'+r.item_name+'</span></div>'+
+        '<div class="req-meta">'+meta+(r.notes?' &middot; <em>'+r.notes+'</em>':'')+'</div>'+
+      '</div>'+actions+'</div>';
+  }).join('');
+}
+
+function updateReq(id,status,btn){
+  if(btn){btn.disabled=true;btn.textContent='...';}
+  fetch(SB_URL+'/inventory_requests?id=eq.'+id,{method:'PATCH',headers:_SB_HDR,body:JSON.stringify({status:status})})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);loadRequests();})
+    .catch(function(e){
+      if(btn){btn.disabled=false;btn.textContent=status==='ordered'?'Mark Ordered':'Dismiss';}
+      alert('Update failed: '+e.message);
+    });
+}
 """
 
-TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th>"
-TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Revenue</th>"
+TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th><th></th>"
+TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Revenue</th><th></th>"
 
 html = f"""<!DOCTYPE html>
 <html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">
@@ -590,6 +735,7 @@ html = f"""<!DOCTYPE html>
   <button class=\"tb\" onclick=\"switchTab('nocost',this)\">Missing Cost</button>
   <button class=\"tb\" onclick=\"switchTab('reorder',this)\">Reorder</button>
   <button class=\"tb\" onclick=\"switchTab('negative',this)\">Negative Stock</button>
+  <button class=\"tb\" onclick=\"switchTab('requests',this)\">Requests</button>
 </div>
 <div class=\"filters\">
   <button class=\"fb active\" onclick=\"setFilter('all',this)\">All</button>
@@ -609,8 +755,46 @@ html = f"""<!DOCTYPE html>
   <div id=\"p-nocost\" class=\"panel\"><table><thead><tr>{TH2}</tr></thead><tbody id=\"b-nocost\">{nocost_rows}</tbody></table></div>
   <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px 8px 16px\">Reorder Recommendations (4-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3>{reorder_html}</div>
   <div id=\"p-negative\" class=\"panel\"><table><thead><tr>{TH_NEG}</tr></thead><tbody id=\"b-negative\">{neg_rows}</tbody></table></div>
+  <div id=\"p-requests\" class=\"panel\" style=\"padding:16px 40px 40px\">
+    <div class=\"req-toolbar\">
+      <button class=\"req-new-btn\" onclick=\"openReqModal()\">+ Request Item</button>
+      <div style=\"margin-left:auto;display:flex;gap:8px;align-items:center\">
+        <label style=\"font-size:0.78rem;color:#888;font-weight:600\">Show:</label>
+        <select id=\"req-filter\" onchange=\"loadRequests()\">
+          <option value=\"pending\">Pending</option>
+          <option value=\"ordered\">Ordered</option>
+          <option value=\"dismissed\">Dismissed</option>
+          <option value=\"all\">All</option>
+        </select>
+      </div>
+    </div>
+    <div id=\"req-list\"><div class=\"req-empty\">Loading requests...</div></div>
+  </div>
 </div>
-<script>const FRANPOS_TOKEN="{_store.token}";const FRANPOS_LOC="{_store.location_id}";const FRANPOS_URL="https://publicapi.franpos.com";{JS}</script></body></html>"""
+<!-- Request Modal -->
+<div class=\"overlay hidden\" id=\"req-overlay\">
+  <div class=\"modal\">
+    <div class=\"modal-hdr\"><h2>Request Item</h2></div>
+    <div class=\"modal-body\">
+      <div class=\"rfg\"><label>Item Name *</label><input type=\"text\" id=\"req-name\" placeholder=\"e.g., Chicken Jerkey 6oz\"></div>
+      <div class=\"rrow2\">
+        <div class=\"rfg\"><label>Quantity / Amount</label><input type=\"text\" id=\"req-qty\" placeholder=\"e.g., 2 cases\"></div>
+        <div class=\"rfg\"><label>Priority</label>
+          <select id=\"req-priority\">
+            <option value=\"normal\">Normal</option>
+            <option value=\"urgent\">Urgent</option>
+          </select>
+        </div>
+      </div>
+      <div class=\"rfg\"><label>Notes</label><textarea id=\"req-notes\" placeholder=\"Optional details...\"></textarea></div>
+    </div>
+    <div class=\"modal-actions\">
+      <button class=\"mbtn-cancel\" onclick=\"closeReqModal()\">Cancel</button>
+      <button class=\"mbtn-save\" id=\"req-save-btn\" onclick=\"saveRequest()\">Submit Request</button>
+    </div>
+  </div>
+</div>
+<script>const FRANPOS_TOKEN="{_store.token}";const FRANPOS_LOC="{_store.location_id}";const FRANPOS_URL="https://publicapi.franpos.com";const STORE_KEY=FRANPOS_LOC==="203698"?"port-washington":"hicksville";const SB_URL="https://bqzinttbjeeaybywhhet.supabase.co/rest/v1";const SB_KEY="{SUPABASE_ANON_KEY}";{JS}</script></body></html>"""
 
 _fn_store = _store_display.replace(" ", "")
 out_path = OUTPUT_DIR / f"WoofGang_{_fn_store}_Inventory_Dashboard.html"
