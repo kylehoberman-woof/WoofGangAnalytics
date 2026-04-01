@@ -45,6 +45,8 @@ jobs:
         run: python3 scripts/fetch_tickets.py
       - name: Port Washington - Financial dashboard
         run: python3 scripts/build_financial_dashboard.py
+      - name: Port Washington - Retail dashboard
+        run: cd scripts && python generate_retail_dashboard.py
 
       # ── Hicksville ──
       - name: Hicksville - Executive dashboard
@@ -69,6 +71,8 @@ jobs:
         run: python3 scripts/fetch_tickets.py hicksville
       - name: Hicksville - Financial dashboard
         run: python3 scripts/build_financial_dashboard.py hicksville
+      - name: Hicksville - Retail dashboard
+        run: cd scripts && python generate_retail_dashboard.py hicksville
 
       # ── Cross-Store ──
       - name: Cross-Store Comparison

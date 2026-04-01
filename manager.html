@@ -178,6 +178,18 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
         <a class="card-btn" id="link-anomaly" href="port-washington/WoofGang_PortWashington_BookingAnomalies.html">Open Booking Anomalies</a>
       </div>
 
+      <div class="card">
+        <div class="card-icon">🛍️</div>
+        <div class="card-title">Retail Products Dashboard</div>
+        <div class="card-desc">Top-selling retail products by revenue and units. Category breakdown, monthly bestsellers, weekly revenue trend, and brand performance — all-time and YTD.</div>
+        <div class="card-tags">
+          <span class="tag">Retail</span>
+          <span class="tag">Products</span>
+          <span class="tag">Trends</span>
+        </div>
+        <a class="card-btn" id="link-retail" href="port-washington/WoofGang_PortWashington_Retail_Dashboard.html">Open Retail Dashboard</a>
+      </div>
+
     </div>
   </div>
 
@@ -364,7 +376,8 @@ var STORES = {
     exec: 'WoofGang_PortWashington_NY_AllYears_Dashboard.html',
     inv: 'WoofGang_PortWashington_Inventory_Dashboard.html',
     cross: 'WoofGang_CrossStore_Comparison.html',
-    anomaly: 'WoofGang_PortWashington_BookingAnomalies.html'
+    anomaly: 'WoofGang_PortWashington_BookingAnomalies.html',
+    retail: 'WoofGang_PortWashington_Retail_Dashboard.html'
   },
   'hicksville': {
     title: 'Woof Gang Hicksville',
@@ -372,7 +385,8 @@ var STORES = {
     exec: 'WoofGang_Hicksville_NY_AllYears_Dashboard.html',
     inv: 'WoofGang_Hicksville_Inventory_Dashboard.html',
     cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
-    anomaly: 'WoofGang_Hicksville_BookingAnomalies.html'
+    anomaly: 'WoofGang_Hicksville_BookingAnomalies.html',
+    retail: 'WoofGang_Hicksville_Retail_Dashboard.html'
   }
 };
 
@@ -383,6 +397,7 @@ function switchStore(key) {
   document.getElementById('link-inv').href = s.base + s.inv;
   document.getElementById('link-cross').href = s.base + s.cross;
   document.getElementById('link-anomaly').href = s.base + s.anomaly;
+  document.getElementById('link-retail').href = s.base + s.retail;
   localStorage.setItem('selectedStore', key);
 }
 

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang Port Washington — Retail Products</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--m:#C4276E;--ml:#FDF0F5;--t:#1B6B6B;--dk:#1a1a2e;--tx:#1f2937;--mu:#6b7280;--bd:#e5e7eb;--bg:#f8f9fb;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--tx);}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);color:white;padding:36px 0 28px;text-align:center;position:relative;}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 50%)}
+.header h1{font-size:2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px;}
+.header .subtitle{font-size:0.95rem;font-weight:400;opacity:0.9;position:relative}
+.header .brand-tag{display:inline-block;background:rgba(255,255,255,0.2);color:white;padding:4px 14px;border-radius:20px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-top:10px;position:relative}
+.header-timestamp{position:absolute;top:12px;right:20px;font-size:0.75rem;opacity:0.8;font-weight:400;z-index:1}
+.kpi-bar{display:grid;grid-template-columns:repeat(5,1fr);background:white;border-bottom:1px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.kpi{padding:20px 24px;border-right:1px solid var(--bd);text-align:center;}
+.kpi:last-child{border-right:none;}
+.kpi .v{font-size:28px;font-weight:800;color:var(--m);line-height:1.1;}
+.kpi .l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-top:5px;color:var(--mu);}
+.kpi .sub{font-size:11px;color:var(--mu);margin-top:2px;}
+.container{max-width:1200px;margin:0 auto;padding:32px 24px 60px;}
+.section{background:white;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:28px;overflow:hidden;}
+.section-hdr{padding:20px 28px 0;border-bottom:1px solid var(--bd);padding-bottom:16px;}
+.section-hdr h2{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
+.section-body{padding:24px 28px;}
+.charts-row{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;}
+.chart-box{padding:0;}
+.chart-box h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);margin-bottom:12px;}
+.tab-bar{display:flex;gap:0;padding:0 28px;border-bottom:2px solid var(--bd);background:white;}
+.tb{padding:12px 18px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--mu);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tb.active{color:var(--m);border-bottom-color:var(--m);}
+.panel{display:none;padding:0 28px 24px;}.panel.active{display:block;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--dk);color:rgba(255,255,255,.8);padding:10px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;position:sticky;top:0;z-index:10;}
+thead th.num{text-align:right;}
+tbody tr{border-bottom:1px solid #f3f4f6;}
+tbody tr:hover{background:#fdf0f5;}
+td{padding:9px 12px;vertical-align:middle;}
+td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px;}
+td.rank{font-size:11px;color:var(--mu);font-weight:700;width:32px;}
+td.name-cell{font-weight:500;max-width:280px;}
+td.brand-cell{font-size:12px;color:var(--mu);max-width:140px;}
+.cat-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;}
+.monthly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.month-card{border:1px solid var(--bd);border-radius:10px;overflow:hidden;}
+.month-card table{font-size:12px;}
+.month-card thead th{background:#f8f9fb;color:var(--mu);font-size:10px;}
+.month-title{padding:10px 14px;font-weight:700;font-size:13px;background:var(--m);color:white;}
+.bar-bg{background:#f3f4f6;border-radius:4px;height:8px;min-width:80px;}
+.bar-fill{background:var(--m);border-radius:4px;height:8px;}
+.footer{text-align:center;padding:24px;font-size:0.78rem;color:#999;}
+.footer strong{color:var(--m);}
+@media(max-width:900px){.charts-row{grid-template-columns:1fr;}.monthly-grid{grid-template-columns:1fr 1fr;}.kpi-bar{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.kpi-bar{grid-template-columns:1fr 1fr;}.monthly-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-timestamp">Updated March 31, 2026 at 09:47 PM ET &nbsp;|&nbsp; <a href="../hicksville/WoofGang_Hicksville_Retail_Dashboard.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
+  <a id="portal-back" href="../index.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.83rem;font-weight:600;display:inline-block;margin-bottom:8px;">&larr; Home</a>
+  <script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
+  <h1>Woof Gang Port Washington</h1>
+  <div class="subtitle">Retail Products Dashboard</div>
+  <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
+<div class="kpi-bar">
+  <div class="kpi"><div class="v">$296,370</div><div class="l">Total Retail Revenue</div><div class="sub">All Time</div></div>
+  <div class="kpi"><div class="v">$46,805</div><div class="l">Retail Revenue</div><div class="sub">2026 YTD</div></div>
+  <div class="kpi"><div class="v">31,086</div><div class="l">Units Sold</div><div class="sub">All Time</div></div>
+  <div class="kpi"><div class="v">1,624</div><div class="l">Unique Products</div><div class="sub">All Time</div></div>
+  <div class="kpi"><div class="v">$29.25</div><div class="l">Avg Retail / Order</div><div class="sub">With retail items</div></div>
+</div>
+
+<div class="container">
+
+  <!-- CATEGORY OVERVIEW -->
+  <div class="section">
+    <div class="section-hdr"><h2>Category Overview</h2></div>
+    <div class="section-body">
+      <div class="charts-row">
+        <div class="chart-box">
+          <h3>Revenue Mix — All Time</h3>
+          <div style="position:relative;height:280px"><canvas id="catDonut"></canvas></div>
+        </div>
+        <div class="chart-box">
+          <h3>Monthly Revenue by Category — Last 12 Months</h3>
+          <div style="position:relative;height:280px"><canvas id="monthlyBar"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP PRODUCTS -->
+  <div class="section">
+    <div class="section-hdr"><h2>Top Products</h2></div>
+    <div class="tab-bar">
+      <button class="tb active" onclick="switchTab('rev',this)">By Revenue</button>
+      <button class="tb" onclick="switchTab('units',this)">By Units</button>
+      <button class="tb" onclick="switchTab('monthly',this)">Monthly Bestsellers</button>
+    </div>
+
+    <div id="p-rev" class="panel active">
+      <div style="overflow-x:auto;margin-top:16px">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Product</th><th>Brand</th><th>Category</th>
+          <th class="num">All-Time Rev</th><th class="num">2026 YTD</th>
+          <th class="num">Units</th><th class="num">Avg Price</th>
+        </tr></thead>
+        <tbody><tr><td class="rank">1</td><td class="name-cell">Farmers Market Bulk </td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$7,988</td><td class="num">$1,284</td><td class="num">3215</td><td class="num">$2.48</td></tr>
+<tr><td class="rank">2</td><td class="name-cell">WGB Chicken Chips, 8 oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$7,032</td><td class="num">$1,096</td><td class="num">305</td><td class="num">$23.06</td></tr>
+<tr><td class="rank">3</td><td class="name-cell">WGB Chicken Chips, 4 oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$6,670</td><td class="num">$848</td><td class="num">514</td><td class="num">$12.98</td></tr>
+<tr><td class="rank">4</td><td class="name-cell">Cookie Large</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$6,207</td><td class="num">$855</td><td class="num">955</td><td class="num">$6.50</td></tr>
+<tr><td class="rank">5</td><td class="name-cell">WGB 12" Braided Bully Stick</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$6,067</td><td class="num">$397</td><td class="num">404</td><td class="num">$15.02</td></tr>
+<tr><td class="rank">6</td><td class="name-cell">WGB Regular Bully Stick 6", 6-pack</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$4,388</td><td class="num">$736</td><td class="num">195</td><td class="num">$22.50</td></tr>
+<tr><td class="rank">7</td><td class="name-cell">Miscellaneous</td><td class="brand-cell">–</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">$4,304</td><td class="num">$798</td><td class="num">249</td><td class="num">$17.29</td></tr>
+<tr><td class="rank">8</td><td class="name-cell">Cookie Mediu,m</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$4,232</td><td class="num">$533</td><td class="num">771</td><td class="num">$5.49</td></tr>
+<tr><td class="rank">9</td><td class="name-cell">WGB Chips - Chicken Chips (16 oz)</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$4,093</td><td class="num">$1,656</td><td class="num">91</td><td class="num">$44.98</td></tr>
+<tr><td class="rank">10</td><td class="name-cell">Bakery Bay Bulk Treats per ounce</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$3,834</td><td class="num">$343</td><td class="num">2579</td><td class="num">$1.49</td></tr>
+<tr><td class="rank">11</td><td class="name-cell">WGB 6" Braided Bully Stick</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$3,514</td><td class="num">$638</td><td class="num">389</td><td class="num">$9.03</td></tr>
+<tr><td class="rank">12</td><td class="name-cell">Cookie XS</td><td class="brand-cell">Bosco & Roxy</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$3,461</td><td class="num">$462</td><td class="num">1175</td><td class="num">$2.95</td></tr>
+<tr><td class="rank">13</td><td class="name-cell">WGB Sweet Potato Chips, 4oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$3,282</td><td class="num">$452</td><td class="num">261</td><td class="num">$12.57</td></tr>
+<tr><td class="rank">14</td><td class="name-cell">WGB Straws Sweet Potato, 4oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">$3,261</td><td class="num">$315</td><td class="num">222</td><td class="num">$14.69</td></tr>
+<tr><td class="rank">15</td><td class="name-cell">WGB 12" Large Bully Stick</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$2,542</td><td class="num">$0</td><td class="num">243</td><td class="num">$10.46</td></tr>
+<tr><td class="rank">16</td><td class="name-cell">Jack&Pup Braided Bully 12"</td><td class="brand-cell">Jack&Pup</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$2,383</td><td class="num">$1,424</td><td class="num">159</td><td class="num">$14.99</td></tr>
+<tr><td class="rank">17</td><td class="name-cell">WGB Straws Chicken, 4oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">$2,314</td><td class="num">$255</td><td class="num">156</td><td class="num">$14.84</td></tr>
+<tr><td class="rank">18</td><td class="name-cell">Cookie small</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$2,240</td><td class="num">$537</td><td class="num">518</td><td class="num">$4.33</td></tr>
+<tr><td class="rank">19</td><td class="name-cell">WGB Bully Stick Springs</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$2,233</td><td class="num">$198</td><td class="num">276</td><td class="num">$8.09</td></tr>
+<tr><td class="rank">20</td><td class="name-cell">Cookie Medium</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$2,227</td><td class="num">$533</td><td class="num">446</td><td class="num">$4.99</td></tr>
+<tr><td class="rank">21</td><td class="name-cell">Preppy Puppy Birthday Cupcakes</td><td class="brand-cell">Preppy Puppy</td><td><span class="cat-pill" style="background:#AD145722;color:#AD1457">Bakery & Birthday</span></td><td class="num">$2,101</td><td class="num">$444</td><td class="num">298</td><td class="num">$7.05</td></tr>
+<tr><td class="rank">22</td><td class="name-cell">Fromm 4 Star Dog Dry Chicken A La Veg 26# NEW SIZE</td><td class="brand-cell">Fromm</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">$1,952</td><td class="num">$256</td><td class="num">32</td><td class="num">$61.01</td></tr>
+<tr><td class="rank">23</td><td class="name-cell">WGB 12" Jumbo Bully Stick</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$1,926</td><td class="num">$634</td><td class="num">115</td><td class="num">$16.74</td></tr>
+<tr><td class="rank">24</td><td class="name-cell">WGB Turkey Tendons Rings - 3oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$1,923</td><td class="num">$494</td><td class="num">75</td><td class="num">$25.64</td></tr>
+<tr><td class="rank">25</td><td class="name-cell">WOOF Dental Refill</td><td class="brand-cell">WOOF</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">$1,789</td><td class="num">$375</td><td class="num">120</td><td class="num">$14.91</td></tr>
+<tr><td class="rank">26</td><td class="name-cell">WGB Turkey Tendons Full Strip - 3oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$1,781</td><td class="num">$249</td><td class="num">120</td><td class="num">$14.84</td></tr>
+<tr><td class="rank">27</td><td class="name-cell">Fromm 4 Star Dog Dry Salmon A La Veg 26# NEW SIZE</td><td class="brand-cell">Fromm</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">$1,776</td><td class="num">$360</td><td class="num">24</td><td class="num">$74.00</td></tr>
+<tr><td class="rank">28</td><td class="name-cell">Woof Dog Treat Calming Pops Large 8 oz</td><td class="brand-cell">WOOF</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$1,774</td><td class="num">$391</td><td class="num">79</td><td class="num">$22.45</td></tr>
+<tr><td class="rank">29</td><td class="name-cell">WGB Chicken Feet, 20-pack</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">$1,614</td><td class="num">$267</td><td class="num">124</td><td class="num">$13.02</td></tr>
+<tr><td class="rank">30</td><td class="name-cell">WGB Chips - Beef Chips (4 oz)</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">$1,539</td><td class="num">$426</td><td class="num">107</td><td class="num">$14.39</td></tr></tbody>
+      </table>
+      </div>
+    </div>
+
+    <div id="p-units" class="panel">
+      <div style="overflow-x:auto;margin-top:16px">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Product</th><th>Brand</th><th>Category</th>
+          <th class="num">Units Sold</th><th class="num">Revenue</th>
+        </tr></thead>
+        <tbody><tr><td class="rank">1</td><td class="name-cell">Farmers Market Bulk </td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">3215</td><td class="num">$7,988</td></tr>
+<tr><td class="rank">2</td><td class="name-cell">Bakery Bay Bulk Treats per ounce</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">2579</td><td class="num">$3,834</td></tr>
+<tr><td class="rank">3</td><td class="name-cell">Cookie XS</td><td class="brand-cell">Bosco & Roxy</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">1175</td><td class="num">$3,461</td></tr>
+<tr><td class="rank">4</td><td class="name-cell">Cookie Large</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">955</td><td class="num">$6,207</td></tr>
+<tr><td class="rank">5</td><td class="name-cell">Cookie Mediu,m</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">771</td><td class="num">$4,232</td></tr>
+<tr><td class="rank">6</td><td class="name-cell">Bakery Bulk Treats</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">712</td><td class="num">$1,053</td></tr>
+<tr><td class="rank">7</td><td class="name-cell">Cookie small</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">518</td><td class="num">$2,240</td></tr>
+<tr><td class="rank">8</td><td class="name-cell">WGB Chicken Chips, 4 oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">514</td><td class="num">$6,670</td></tr>
+<tr><td class="rank">9</td><td class="name-cell">WG Treats Table</td><td class="brand-cell">Woof Gang</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">488</td><td class="num">$726</td></tr>
+<tr><td class="rank">10</td><td class="name-cell">Cookie Medium</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">446</td><td class="num">$2,227</td></tr>
+<tr><td class="rank">11</td><td class="name-cell">WGB 12" Braided Bully Stick</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">404</td><td class="num">$6,067</td></tr>
+<tr><td class="rank">12</td><td class="name-cell">WGB 6" Braided Bully Stick</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">389</td><td class="num">$3,514</td></tr>
+<tr><td class="rank">13</td><td class="name-cell">Farmers Market Bulk Treats</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">377</td><td class="num">$932</td></tr>
+<tr><td class="rank">14</td><td class="name-cell">WGB Chicken Chips, 8 oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">305</td><td class="num">$7,032</td></tr>
+<tr><td class="rank">15</td><td class="name-cell">Preppy Puppy Birthday Cupcakes</td><td class="brand-cell">Preppy Puppy</td><td><span class="cat-pill" style="background:#AD145722;color:#AD1457">Bakery & Birthday</span></td><td class="num">298</td><td class="num">$2,101</td></tr>
+<tr><td class="rank">16</td><td class="name-cell">WGB Bully Stick Springs</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">276</td><td class="num">$2,233</td></tr>
+<tr><td class="rank">17</td><td class="name-cell">WGB Pig ears</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">261</td><td class="num">$759</td></tr>
+<tr><td class="rank">18</td><td class="name-cell">WGB Sweet Potato Chips, 4oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">261</td><td class="num">$3,282</td></tr>
+<tr><td class="rank">19</td><td class="name-cell">Cookies Small</td><td class="brand-cell">Woof Gang Bakery</td><td><span class="cat-pill" style="background:#C4276E22;color:#C4276E">Treats & Chews</span></td><td class="num">256</td><td class="num">$1,020</td></tr>
+<tr><td class="rank">20</td><td class="name-cell">Miscellaneous</td><td class="brand-cell">–</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">249</td><td class="num">$4,304</td></tr>
+<tr><td class="rank">21</td><td class="name-cell">WGB 12" Large Bully Stick</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">243</td><td class="num">$2,542</td></tr>
+<tr><td class="rank">22</td><td class="name-cell">Preppy Puppy Cannoli</td><td class="brand-cell">Preppy Puppy</td><td><span class="cat-pill" style="background:#AD145722;color:#AD1457">Bakery & Birthday</span></td><td class="num">241</td><td class="num">$959</td></tr>
+<tr><td class="rank">23</td><td class="name-cell">WGB Straws Sweet Potato, 4oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">222</td><td class="num">$3,261</td></tr>
+<tr><td class="rank">24</td><td class="name-cell">WGB Regular Bully Stick 6", 6-pack</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">195</td><td class="num">$4,388</td></tr>
+<tr><td class="rank">25</td><td class="name-cell">I Ruv Ice Cream Swirl</td><td class="brand-cell">Bosco & Roxy</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">194</td><td class="num">$802</td></tr>
+<tr><td class="rank">26</td><td class="name-cell">WGB 12" Moo Taffy</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">168</td><td class="num">$534</td></tr>
+<tr><td class="rank">27</td><td class="name-cell">Jack&Pup Braided Bully 12"</td><td class="brand-cell">Jack&Pup</td><td><span class="cat-pill" style="background:#8B451322;color:#8B4513">Natural Chews</span></td><td class="num">159</td><td class="num">$2,383</td></tr>
+<tr><td class="rank">28</td><td class="name-cell">WGB Straws Chicken, 4oz</td><td class="brand-cell">Woof Gang Private Label</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">156</td><td class="num">$2,314</td></tr>
+<tr><td class="rank">29</td><td class="name-cell">Fromm 4 Star Dog Can GF Shredded Chicken in Gravy Entre</td><td class="brand-cell">Fromm</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">143</td><td class="num">$739</td></tr>
+<tr><td class="rank">30</td><td class="name-cell">Broken But Delicious</td><td class="brand-cell">Bosco & Roxy</td><td><span class="cat-pill" style="background:#9E9E9E22;color:#9E9E9E">Other</span></td><td class="num">133</td><td class="num">$332</td></tr></tbody>
+      </table>
+      </div>
+    </div>
+
+    <div id="p-monthly" class="panel">
+      <div class="monthly-grid" style="margin-top:16px">
+        <div class="month-card"><div class="month-title">October 2025</div><table><thead><tr><th>#</th><th>Product</th><th class="num">Revenue</th></tr></thead><tbody><tr><td class="rank">1</td><td class="name-cell">Farmers Market Bulk </td><td class="num">$429</td></tr><tr><td class="rank">2</td><td class="name-cell">Cookie Large</td><td class="num">$416</td></tr><tr><td class="rank">3</td><td class="name-cell">WGB Chips - Chicken Chips (16 oz)</td><td class="num">$414</td></tr><tr><td class="rank">4</td><td class="name-cell">WGB Regular Bully Stick 6", 6-pack</td><td class="num">$414</td></tr><tr><td class="rank">5</td><td class="name-cell">Cookie Mediu,m</td><td class="num">$363</td></tr><tr><td class="rank">6</td><td class="name-cell">WGB 6" Braided Bully Stick</td><td class="num">$359</td></tr><tr><td class="rank">7</td><td class="name-cell">WGB 12" Smoked Beef Collagen Braided S</td><td class="num">$349</td></tr><tr><td class="rank">8</td><td class="name-cell">WGB 12" Large Bully Stick</td><td class="num">$346</td></tr><tr><td class="rank">9</td><td class="name-cell">WGB Chicken Chips, 4 oz</td><td class="num">$319</td></tr><tr><td class="rank">10</td><td class="name-cell">WGB Chicken Chips, 8 oz</td><td class="num">$283</td></tr></tbody></table></div>
+<div class="month-card"><div class="month-title">November 2025</div><table><thead><tr><th>#</th><th>Product</th><th class="num">Revenue</th></tr></thead><tbody><tr><td class="rank">1</td><td class="name-cell">Farmers Market Bulk </td><td class="num">$436</td></tr><tr><td class="rank">2</td><td class="name-cell">Jack&Pup Braided Bully 12"</td><td class="num">$420</td></tr><tr><td class="rank">3</td><td class="name-cell">WGB Chicken Chips, 8 oz</td><td class="num">$417</td></tr><tr><td class="rank">4</td><td class="name-cell">Cookie Large</td><td class="num">$389</td></tr><tr><td class="rank">5</td><td class="name-cell">Cookie small</td><td class="num">$359</td></tr><tr><td class="rank">6</td><td class="name-cell">Miscellaneous</td><td class="num">$340</td></tr><tr><td class="rank">7</td><td class="name-cell">WGB Chicken Chips, 4 oz</td><td class="num">$336</td></tr><tr><td class="rank">8</td><td class="name-cell">WGB 6" Braided Bully Stick</td><td class="num">$330</td></tr><tr><td class="rank">9</td><td class="name-cell">WGB Chips - Chicken Chips (16 oz)</td><td class="num">$322</td></tr><tr><td class="rank">10</td><td class="name-cell">WGB Regular Bully Stick 6", 6-pack</td><td class="num">$322</td></tr></tbody></table></div>
+<div class="month-card"><div class="month-title">December 2025</div><table><thead><tr><th>#</th><th>Product</th><th class="num">Revenue</th></tr></thead><tbody><tr><td class="rank">1</td><td class="name-cell">Cookie Mediu,m</td><td class="num">$878</td></tr><tr><td class="rank">2</td><td class="name-cell">WGB Chips - Chicken Chips (16 oz)</td><td class="num">$736</td></tr><tr><td class="rank">3</td><td class="name-cell">Cookie Large</td><td class="num">$677</td></tr><tr><td class="rank">4</td><td class="name-cell">WGB 12" Braided Bully Stick</td><td class="num">$636</td></tr><tr><td class="rank">5</td><td class="name-cell">WGB Chicken Chips, 8 oz</td><td class="num">$602</td></tr><tr><td class="rank">6</td><td class="name-cell">Miscellaneous</td><td class="num">$598</td></tr><tr><td class="rank">7</td><td class="name-cell">WGB Chicken Chips, 4 oz</td><td class="num">$473</td></tr><tr><td class="rank">8</td><td class="name-cell">Cookie small</td><td class="num">$445</td></tr><tr><td class="rank">9</td><td class="name-cell">Jack&Pup Braided Bully 12"</td><td class="num">$420</td></tr><tr><td class="rank">10</td><td class="name-cell">Farmers Market Bulk </td><td class="num">$385</td></tr></tbody></table></div>
+<div class="month-card"><div class="month-title">January 2026</div><table><thead><tr><th>#</th><th>Product</th><th class="num">Revenue</th></tr></thead><tbody><tr><td class="rank">1</td><td class="name-cell">Jack&Pup Braided Bully 12"</td><td class="num">$495</td></tr><tr><td class="rank">2</td><td class="name-cell">Miscellaneous</td><td class="num">$433</td></tr><tr><td class="rank">3</td><td class="name-cell">Farmers Market Bulk </td><td class="num">$377</td></tr><tr><td class="rank">4</td><td class="name-cell">WGB Chips - Chicken Chips (16 oz)</td><td class="num">$368</td></tr><tr><td class="rank">5</td><td class="name-cell">WGB 12" Jumbo Bully Stick</td><td class="num">$366</td></tr><tr><td class="rank">6</td><td class="name-cell">WGB Chicken Chips, 8 oz</td><td class="num">$357</td></tr><tr><td class="rank">7</td><td class="name-cell">WGB 6" Braided Bully Stick</td><td class="num">$319</td></tr><tr><td class="rank">8</td><td class="name-cell">Cookie Large</td><td class="num">$307</td></tr><tr><td class="rank">9</td><td class="name-cell">Farmers Market Bulk Treats</td><td class="num">$277</td></tr><tr><td class="rank">10</td><td class="name-cell">WGB Regular Bully Stick 6", 6-pack</td><td class="num">$276</td></tr></tbody></table></div>
+<div class="month-card"><div class="month-title">February 2026</div><table><thead><tr><th>#</th><th>Product</th><th class="num">Revenue</th></tr></thead><tbody><tr><td class="rank">1</td><td class="name-cell">WGB Chips - Chicken Chips (16 oz)</td><td class="num">$782</td></tr><tr><td class="rank">2</td><td class="name-cell">Jack&Pup Braided Bully 12"</td><td class="num">$480</td></tr><tr><td class="rank">3</td><td class="name-cell">Farmers Market Bulk </td><td class="num">$399</td></tr><tr><td class="rank">4</td><td class="name-cell">WGB Chicken Chips, 8 oz</td><td class="num">$382</td></tr><tr><td class="rank">5</td><td class="name-cell">WGB Chicken Chips, 4 oz</td><td class="num">$333</td></tr><tr><td class="rank">6</td><td class="name-cell">WGB Regular Bully Stick 6", 6-pack</td><td class="num">$322</td></tr><tr><td class="rank">7</td><td class="name-cell">WGB 6" Braided Bully Stick</td><td class="num">$320</td></tr><tr><td class="rank">8</td><td class="name-cell">Cookie small</td><td class="num">$286</td></tr><tr><td class="rank">9</td><td class="name-cell">Farmers Market Bulk Treats</td><td class="num">$261</td></tr><tr><td class="rank">10</td><td class="name-cell">WGB 12" Jumbo Bully Stick</td><td class="num">$250</td></tr></tbody></table></div>
+<div class="month-card"><div class="month-title">March 2026</div><table><thead><tr><th>#</th><th>Product</th><th class="num">Revenue</th></tr></thead><tbody><tr><td class="rank">1</td><td class="name-cell">WGB Chips - Chicken Chips (16 oz)</td><td class="num">$506</td></tr><tr><td class="rank">2</td><td class="name-cell">Jack&Pup Braided Bully 12"</td><td class="num">$450</td></tr><tr><td class="rank">3</td><td class="name-cell">WGB Chicken Chips, 8 oz</td><td class="num">$357</td></tr><tr><td class="rank">4</td><td class="name-cell">Cookie Large</td><td class="num">$342</td></tr><tr><td class="rank">5</td><td class="name-cell">Farmers Market Bulk</td><td class="num">$326</td></tr><tr><td class="rank">6</td><td class="name-cell">WGB 12" Braided Bully Stick</td><td class="num">$301</td></tr><tr><td class="rank">7</td><td class="name-cell">WGB Chicken Chips, 4 oz</td><td class="num">$277</td></tr><tr><td class="rank">8</td><td class="name-cell">WGB 12 inch Standard Bully Stick</td><td class="num">$210</td></tr><tr><td class="rank">9</td><td class="name-cell">Farmers Market Bulk </td><td class="num">$183</td></tr><tr><td class="rank">10</td><td class="name-cell">WGB Turkey Tendons Rings - 3oz</td><td class="num">$182</td></tr></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEKLY TREND -->
+  <div class="section">
+    <div class="section-hdr"><h2>Weekly Revenue Trend — Last 16 Weeks</h2></div>
+    <div class="section-body">
+      <div style="position:relative;height:160px"><canvas id="weeklyChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- BRAND PERFORMANCE -->
+  <div class="section">
+    <div class="section-hdr"><h2>Brand Performance</h2></div>
+    <div style="overflow-x:auto;padding:0 28px 24px">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Brand</th><th class="num">Revenue</th><th style="min-width:120px">Share</th>
+        <th class="num">Units</th><th class="num">SKUs</th><th class="num">Avg Price</th>
+      </tr></thead>
+      <tbody><tr><td class="rank">1</td><td class="brand-cell">Woof Gang Private Label</td><td class="num">$97,300</td><td><div class="bar-bg"><div class="bar-fill" style="width:100.0%"></div></div></td><td class="num">13774</td><td class="num">127</td><td class="num">$7.06</td></tr>
+<tr><td class="rank">2</td><td class="brand-cell">Woof Gang Bakery</td><td class="num">$34,021</td><td><div class="bar-bg"><div class="bar-fill" style="width:35.0%"></div></div></td><td class="num">5361</td><td class="num">88</td><td class="num">$6.35</td></tr>
+<tr><td class="rank">3</td><td class="brand-cell">WOOF</td><td class="num">$20,599</td><td><div class="bar-bg"><div class="bar-fill" style="width:21.2%"></div></div></td><td class="num">1107</td><td class="num">64</td><td class="num">$18.61</td></tr>
+<tr><td class="rank">4</td><td class="brand-cell">Fromm</td><td class="num">$19,711</td><td><div class="bar-bg"><div class="bar-fill" style="width:20.3%"></div></div></td><td class="num">1274</td><td class="num">57</td><td class="num">$15.47</td></tr>
+<tr><td class="rank">5</td><td class="brand-cell">Stella & Chewy's</td><td class="num">$15,416</td><td><div class="bar-bg"><div class="bar-fill" style="width:15.8%"></div></div></td><td class="num">758</td><td class="num">63</td><td class="num">$20.34</td></tr>
+<tr><td class="rank">6</td><td class="brand-cell">Fluff & Tuff</td><td class="num">$9,427</td><td><div class="bar-bg"><div class="bar-fill" style="width:9.7%"></div></div></td><td class="num">582</td><td class="num">78</td><td class="num">$16.20</td></tr>
+<tr><td class="rank">7</td><td class="brand-cell">Up Country</td><td class="num">$8,100</td><td><div class="bar-bg"><div class="bar-fill" style="width:8.3%"></div></div></td><td class="num">301</td><td class="num">154</td><td class="num">$26.91</td></tr>
+<tr><td class="rank">8</td><td class="brand-cell">Earth Animal</td><td class="num">$6,849</td><td><div class="bar-bg"><div class="bar-fill" style="width:7.0%"></div></div></td><td class="num">409</td><td class="num">13</td><td class="num">$16.74</td></tr>
+<tr><td class="rank">9</td><td class="brand-cell">Preppy Puppy</td><td class="num">$6,831</td><td><div class="bar-bg"><div class="bar-fill" style="width:7.0%"></div></div></td><td class="num">1037</td><td class="num">16</td><td class="num">$6.59</td></tr>
+<tr><td class="rank">10</td><td class="brand-cell">Bosco & Roxy</td><td class="num">$5,544</td><td><div class="bar-bg"><div class="bar-fill" style="width:5.7%"></div></div></td><td class="num">1625</td><td class="num">11</td><td class="num">$3.41</td></tr>
+<tr><td class="rank">11</td><td class="brand-cell">Primal Pet Foods Inc</td><td class="num">$4,916</td><td><div class="bar-bg"><div class="bar-fill" style="width:5.1%"></div></div></td><td class="num">237</td><td class="num">50</td><td class="num">$20.74</td></tr>
+<tr><td class="rank">12</td><td class="brand-cell">Haute Diggity Dog</td><td class="num">$4,786</td><td><div class="bar-bg"><div class="bar-fill" style="width:4.9%"></div></div></td><td class="num">298</td><td class="num">90</td><td class="num">$16.06</td></tr>
+<tr><td class="rank">13</td><td class="brand-cell">Huxley & Kent</td><td class="num">$4,415</td><td><div class="bar-bg"><div class="bar-fill" style="width:4.5%"></div></div></td><td class="num">377</td><td class="num">77</td><td class="num">$11.71</td></tr>
+<tr><td class="rank">14</td><td class="brand-cell">Fabdog</td><td class="num">$3,477</td><td><div class="bar-bg"><div class="bar-fill" style="width:3.6%"></div></div></td><td class="num">190</td><td class="num">67</td><td class="num">$18.30</td></tr>
+<tr><td class="rank">15</td><td class="brand-cell">WUNDERball</td><td class="num">$3,086</td><td><div class="bar-bg"><div class="bar-fill" style="width:3.2%"></div></div></td><td class="num">195</td><td class="num">4</td><td class="num">$15.82</td></tr>
+<tr><td class="rank">16</td><td class="brand-cell">Gooby</td><td class="num">$2,771</td><td><div class="bar-bg"><div class="bar-fill" style="width:2.8%"></div></div></td><td class="num">70</td><td class="num">45</td><td class="num">$39.59</td></tr>
+<tr><td class="rank">17</td><td class="brand-cell">Jack&Pup</td><td class="num">$2,614</td><td><div class="bar-bg"><div class="bar-fill" style="width:2.7%"></div></div></td><td class="num">192</td><td class="num">2</td><td class="num">$13.62</td></tr>
+<tr><td class="rank">18</td><td class="brand-cell">FUZZYARD LIFE</td><td class="num">$2,250</td><td><div class="bar-bg"><div class="bar-fill" style="width:2.3%"></div></div></td><td class="num">75</td><td class="num">47</td><td class="num">$30.00</td></tr>
+<tr><td class="rank">19</td><td class="brand-cell">Teddy London</td><td class="num">$2,230</td><td><div class="bar-bg"><div class="bar-fill" style="width:2.3%"></div></div></td><td class="num">11</td><td class="num">6</td><td class="num">$202.76</td></tr>
+<tr><td class="rank">20</td><td class="brand-cell">Sassy Woof</td><td class="num">$2,007</td><td><div class="bar-bg"><div class="bar-fill" style="width:2.1%"></div></div></td><td class="num">57</td><td class="num">16</td><td class="num">$35.20</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="footer">
+  Generated March 31, 2026 &mdash;
+  <strong>Woof Gang Bakery &amp; Grooming</strong> &mdash; Operations Intelligence
+</div>
+
+<script>
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tb').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('p-' + id).classList.add('active');
+}
+
+// ── Category donut ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('catDonut'), {
+  type: 'doughnut',
+  data: {
+    labels: ["Other", "Treats & Chews", "Natural Chews", "Toys", "Apparel & Lifestyle", "Bakery & Birthday", "Grooming Supplies", "Supplements & Health", "Accessories", "Wet Food", "Toppers & Mix-ins"],
+    datasets: [{
+      data: [112317.63, 83726.36, 49674.89, 18698.34, 11649.07, 8669.39, 4734.81, 3512.07, 2772.87, 358.62, 255.68],
+      backgroundColor: ["#9E9E9E", "#C4276E", "#8B4513", "#1565C0", "#7B1FA2", "#AD1457", "#1B6B6B", "#2E7D32", "#FB8C00", "#0097A7", "#00838F"],
+      borderWidth: 2,
+      borderColor: '#fff',
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'right', labels: { font: { size: 11 }, padding: 10 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ' ' + ctx.label + ': $' + ctx.raw.toLocaleString('en-US', {maximumFractionDigits:0})
+        }
+      }
+    }
+  }
+});
+
+// ── Monthly stacked bar ───────────────────────────────────────────────────────
+new Chart(document.getElementById('monthlyBar'), {
+  type: 'bar',
+  data: {
+    labels: ["Apr '25", "May '25", "Jun '25", "Jul '25", "Aug '25", "Sep '25", "Oct '25", "Nov '25", "Dec '25", "Jan '26", "Feb '26", "Mar '26"],
+    datasets: [{"label":"Other","data":[5243.72, 5539.04, 5189.04, 5786.36, 5989.64, 6133.53, 6064.04, 6397.57, 9112.0, 5620.11, 5393.55, 5753.79],"backgroundColor":"#9E9E9E","stack":"s"},{"label":"Treats & Chews","data":[3380.12, 3951.84, 3408.07, 4571.99, 5009.99, 4525.24, 4460.23, 4844.93, 6921.56, 4028.25, 5566.75, 4461.8],"backgroundColor":"#C4276E","stack":"s"},{"label":"Natural Chews","data":[2320.95, 2878.76, 2156.49, 2651.57, 2983.02, 3055.88, 3612.45, 3397.08, 3540.58, 3008.89, 3061.95, 2956.96],"backgroundColor":"#8B4513","stack":"s"},{"label":"Toys","data":[943.71, 1215.66, 740.82, 872.51, 1240.92, 829.59, 484.77, 874.48, 1460.53, 766.33, 866.78, 952.51],"backgroundColor":"#1565C0","stack":"s"},{"label":"Apparel & Lifestyle","data":[546.58, 766.98, 822.66, 457.84, 870.63, 562.35, 531.01, 650.73, 783.71, 583.21, 388.65, 619.71],"backgroundColor":"#7B1FA2","stack":"s"},{"label":"Bakery & Birthday","data":[272.17, 353.56, 502.25, 429.31, 560.53, 420.39, 421.45, 468.42, 535.2, 278.82, 307.62, 368.57],"backgroundColor":"#AD1457","stack":"s"},{"label":"Grooming Supplies","data":[94.54, 176.89, 224.84, 389.73, 374.91, 275.61, 306.8, 189.88, 431.24, 253.12, 381.79, 176.87],"backgroundColor":"#1B6B6B","stack":"s"},{"label":"Supplements & Health","data":[51.77, 159.7, 247.76, 144.52, 213.86, 227.4, 270.02, 303.82, 205.83, 224.88, 160.9, 355.78],"backgroundColor":"#2E7D32","stack":"s"}]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8, boxWidth: 12 } },
+      tooltip: {
+        callbacks: {
+          label: ctx => ' ' + ctx.dataset.label + ': $' + ctx.raw.toLocaleString('en-US', {maximumFractionDigits:0})
+        }
+      }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } },
+      y: { stacked: true, ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k', font: { size: 10 } }, grid: { color: '#f3f4f6' } }
+    }
+  }
+});
+
+// ── Weekly line chart ─────────────────────────────────────────────────────────
+new Chart(document.getElementById('weeklyChart'), {
+  type: 'line',
+  data: {
+    labels: ["W51 '25", "W52 '25", "W1 '26", "W2 '26", "W3 '26", "W4 '26", "W5 '26", "W6 '26", "W7 '26", "W8 '26", "W9 '26", "W10 '26", "W11 '26", "W12 '26", "W13 '26", "W14 '26"],
+    datasets: [{
+      label: 'Weekly Retail Revenue',
+      data: [6433.73, 6268.55, 3225.01, 3461.83, 3387.31, 4133.09, 2587.13, 3897.7, 5038.35, 3605.73, 3980.6, 2982.64, 4097.77, 3705.33, 3590.1, 850.0],
+      borderColor: '#C4276E',
+      backgroundColor: 'rgba(196,39,110,0.08)',
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: '#C4276E',
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ' $' + ctx.raw.toLocaleString('en-US', {maximumFractionDigits:0}),
+          title: (items) => ["2025-W51", "2025-W52", "2026-W01", "2026-W02", "2026-W03", "2026-W04", "2026-W05", "2026-W06", "2026-W07", "2026-W08", "2026-W09", "2026-W10", "2026-W11", "2026-W12", "2026-W13", "2026-W14"][items[0].dataIndex]
+        }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+      y: { ticks: { callback: v => '$' + (v/1000).toFixed(1) + 'k', font: { size: 10 } }, grid: { color: '#f3f4f6' } }
+    }
+  }
+});
+</script>
+</body>
+</html>

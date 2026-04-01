@@ -1,0 +1,552 @@
+#!/usr/bin/env python3
+"""
+Retail Products Dashboard — Woof Gang
+Generates a standalone HTML dashboard showing top-selling retail products,
+category trends, monthly bestsellers, weekly revenue trend, and brand performance.
+
+Usage:
+    python generate_retail_dashboard.py                # Port Washington
+    python generate_retail_dashboard.py hicksville     # Hicksville
+"""
+import json
+import sys
+from pathlib import Path
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+sys.path.insert(0, str(Path(__file__).parent))
+from config import get_store, PORTAL_BACK_JS
+from classifier import classify_item
+import pandas as pd
+
+# ── Store setup ───────────────────────────────────────────────────────────────
+_sn   = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
+_st   = get_store(_sn)
+_disp = "Port Washington" if _sn == "port-washington" else "Hicksville"
+_fn   = "PortWashington" if _sn == "port-washington" else "Hicksville"
+_ofn  = "Hicksville" if _sn == "port-washington" else "PortWashington"
+_odir = "../hicksville" if _sn == "port-washington" else "../port-washington"
+DATA_DIR   = _st.data_dir
+OUTPUT_DIR = _st.output_dir
+
+# ── Load data ─────────────────────────────────────────────────────────────────
+print(f"Loading data for {_disp}...")
+with open(DATA_DIR / "all_data.json") as f:
+    all_data = json.load(f)
+_brands = {}
+bp = DATA_DIR / "sku_brands.json"
+if bp.exists():
+    with open(bp) as f:
+        _brands = json.load(f)
+
+et = ZoneInfo("America/New_York")
+now_str = datetime.now(et).strftime("%B %d, %Y at %I:%M %p ET")
+
+# ── Build retail DataFrame ────────────────────────────────────────────────────
+rows = []
+for item in all_data["order_items"]:
+    name = item.get("Name", "")
+    sku  = str(item.get("Sku", ""))
+    cls  = classify_item(name, sku)
+    if not cls["is_retail"]:
+        continue
+    price = float(item.get("Price", 0))
+    qty   = float(item.get("Quantity", 1))
+    disc  = float(item.get("Discount", 0))
+    net   = max(0, price * qty - disc)
+    bi    = _brands.get(sku, {})
+    brand = (bi.get("brand", "") or "") if isinstance(bi, dict) else ""
+    rows.append({
+        "sku":      sku,
+        "name":     name[:55],
+        "brand":    brand or "–",
+        "category": cls["retail_category"] or "Other",
+        "quantity": qty,
+        "net_sales": net,
+        "order_id": item.get("OrderId"),
+        "created":  item.get("CreatedOn", ""),
+    })
+
+df = pd.DataFrame(rows)
+if df.empty:
+    print("No retail items found!")
+    sys.exit(1)
+
+df["created"] = pd.to_datetime(df["created"])
+df["year"]  = df["created"].dt.year
+df["ym"]    = df["created"].dt.to_period("M")
+df["yw"]    = (df["created"].dt.isocalendar().year.astype(str) + "-W" +
+               df["created"].dt.isocalendar().week.astype(str).str.zfill(2))
+
+print(f"  Retail rows: {len(df):,}  |  Revenue: ${df['net_sales'].sum():,.0f}")
+
+# ── KPI aggregations ─────────────────────────────────────────────────────────
+YEAR = datetime.now().year
+ytd  = df[df["year"] == YEAR]
+
+total_rev   = df["net_sales"].sum()
+ytd_rev     = ytd["net_sales"].sum()
+total_units = df["quantity"].sum()
+unique_skus = df["sku"].nunique()
+avg_basket  = df.groupby("order_id")["net_sales"].sum().mean()
+
+# ── Category palette ─────────────────────────────────────────────────────────
+CAT_COLORS = {
+    "Treats & Chews":      "#C4276E",
+    "Natural Chews":       "#8B4513",
+    "Toys":                "#1565C0",
+    "Bakery & Birthday":   "#AD1457",
+    "Apparel & Lifestyle": "#7B1FA2",
+    "Grooming Supplies":   "#1B6B6B",
+    "Supplements & Health":"#2E7D32",
+    "Accessories":         "#FB8C00",
+    "Wet Food":            "#0097A7",
+    "Toppers & Mix-ins":   "#00838F",
+    "Other":               "#9E9E9E",
+}
+
+# ── Category donut ───────────────────────────────────────────────────────────
+cat_rev    = df.groupby("category")["net_sales"].sum().sort_values(ascending=False)
+cat_labels = list(cat_rev.index)
+cat_vals   = [round(float(v), 2) for v in cat_rev.values]
+cat_colors = [CAT_COLORS.get(c, "#9E9E9E") for c in cat_labels]
+
+# ── Monthly stacked bar — last 12 months, top 8 categories ───────────────────
+all_periods = sorted(df["ym"].unique())
+last_12     = all_periods[-12:]
+m_labels    = [p.strftime("%b '%y") for p in last_12]
+top8_cats   = cat_labels[:8]
+
+m_data = (df[df["ym"].isin(last_12)]
+          .groupby(["ym", "category"])["net_sales"].sum()
+          .unstack(fill_value=0))
+
+monthly_ds_parts = []
+for cat in top8_cats:
+    vals = []
+    for p in last_12:
+        v = float(m_data.loc[p, cat]) if (p in m_data.index and cat in m_data.columns) else 0.0
+        vals.append(round(v, 2))
+    c = CAT_COLORS.get(cat, "#9E9E9E")
+    monthly_ds_parts.append(
+        f'{{"label":{json.dumps(cat)},"data":{vals},"backgroundColor":"{c}","stack":"s"}}'
+    )
+monthly_datasets_js = "[" + ",".join(monthly_ds_parts) + "]"
+
+# ── Top products by revenue ───────────────────────────────────────────────────
+top_rev = (df.groupby(["sku", "name", "brand", "category"])
+             .agg(revenue=("net_sales", "sum"), units=("quantity", "sum"),
+                  orders=("order_id", "nunique"))
+             .reset_index().sort_values("revenue", ascending=False).head(30))
+top_rev["avg_price"] = (top_rev["revenue"] / top_rev["units"]).round(2)
+ytd_sku = ytd.groupby("sku")["net_sales"].sum()
+top_rev["ytd"] = top_rev["sku"].map(ytd_sku).fillna(0)
+
+# ── Top products by units ─────────────────────────────────────────────────────
+top_units_df = (df.groupby(["sku", "name", "brand", "category"])
+                  .agg(units=("quantity", "sum"), revenue=("net_sales", "sum"))
+                  .reset_index().sort_values("units", ascending=False).head(30))
+
+# ── Monthly bestsellers — last 6 months ──────────────────────────────────────
+last_6  = all_periods[-6:]
+monthly_tops = {}
+for m in last_6:
+    mdf = df[df["ym"] == m]
+    monthly_tops[m] = (mdf.groupby("name")["net_sales"].sum()
+                          .reset_index().sort_values("net_sales", ascending=False).head(10))
+
+# ── Weekly revenue trend — last 16 weeks ─────────────────────────────────────
+all_weeks = sorted(df["yw"].unique())
+last_16   = all_weeks[-16:]
+weekly    = df[df["yw"].isin(last_16)].groupby("yw")["net_sales"].sum()
+w_labels  = [w for w in last_16]  # full "2025-W12" strings for tooltips
+w_vals    = [round(float(weekly.get(w, 0)), 2) for w in last_16]
+
+# Short label: "W12" or "W3 '24" if crosses year boundary
+def week_label(w):
+    parts = w.split("-W")
+    yr, wk = parts[0], parts[1].lstrip("0") or "0"
+    yr_short = "'" + yr[2:]
+    return f"W{wk} {yr_short}"
+
+w_short_labels = [week_label(w) for w in last_16]
+
+# ── Brand performance ─────────────────────────────────────────────────────────
+brand_p = (df[df["brand"] != "–"]
+             .groupby("brand")
+             .agg(revenue=("net_sales", "sum"), units=("quantity", "sum"),
+                  skus=("sku", "nunique"))
+             .reset_index().sort_values("revenue", ascending=False).head(20))
+brand_p["avg_price"] = (brand_p["revenue"] / brand_p["units"]).round(2)
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+def fc(v):
+    return f"${v:,.0f}"
+
+def fp(v):
+    return f"${v:,.2f}"
+
+def cat_pill(cat):
+    c = CAT_COLORS.get(cat, "#9E9E9E")
+    return f'<span class="cat-pill" style="background:{c}22;color:{c}">{cat}</span>'
+
+# ── Build table rows ──────────────────────────────────────────────────────────
+def build_rev_rows():
+    out = []
+    for i, (_, r) in enumerate(top_rev.iterrows()):
+        out.append(
+            f'<tr>'
+            f'<td class="rank">{i+1}</td>'
+            f'<td class="name-cell">{r["name"]}</td>'
+            f'<td class="brand-cell">{r["brand"]}</td>'
+            f'<td>{cat_pill(r["category"])}</td>'
+            f'<td class="num">{fc(r["revenue"])}</td>'
+            f'<td class="num">{fc(r["ytd"])}</td>'
+            f'<td class="num">{r["units"]:.0f}</td>'
+            f'<td class="num">{fp(r["avg_price"])}</td>'
+            f'</tr>'
+        )
+    return "\n".join(out)
+
+def build_units_rows():
+    out = []
+    for i, (_, r) in enumerate(top_units_df.iterrows()):
+        out.append(
+            f'<tr>'
+            f'<td class="rank">{i+1}</td>'
+            f'<td class="name-cell">{r["name"]}</td>'
+            f'<td class="brand-cell">{r["brand"]}</td>'
+            f'<td>{cat_pill(r["category"])}</td>'
+            f'<td class="num">{r["units"]:.0f}</td>'
+            f'<td class="num">{fc(r["revenue"])}</td>'
+            f'</tr>'
+        )
+    return "\n".join(out)
+
+def build_monthly_html():
+    parts = []
+    for m in last_6:
+        mdf = monthly_tops[m]
+        mstr = m.strftime("%B %Y")
+        r_html = ""
+        for rank, (_, row) in enumerate(mdf.iterrows()):
+            r_html += (f'<tr><td class="rank">{rank+1}</td>'
+                       f'<td class="name-cell">{row["name"][:38]}</td>'
+                       f'<td class="num">{fc(row["net_sales"])}</td></tr>')
+        parts.append(
+            f'<div class="month-card">'
+            f'<div class="month-title">{mstr}</div>'
+            f'<table><thead><tr><th>#</th><th>Product</th><th class="num">Revenue</th></tr></thead>'
+            f'<tbody>{r_html}</tbody></table>'
+            f'</div>'
+        )
+    return "\n".join(parts)
+
+def build_brand_rows():
+    if brand_p.empty:
+        return '<tr><td colspan="6" style="text-align:center;color:#999">No brand data available</td></tr>'
+    max_rev = float(brand_p["revenue"].max())
+    out = []
+    for i, (_, r) in enumerate(brand_p.iterrows()):
+        bar_pct = round(float(r["revenue"]) / max_rev * 100, 1)
+        out.append(
+            f'<tr>'
+            f'<td class="rank">{i+1}</td>'
+            f'<td class="brand-cell">{r["brand"]}</td>'
+            f'<td class="num">{fc(r["revenue"])}</td>'
+            f'<td><div class="bar-bg"><div class="bar-fill" style="width:{bar_pct}%"></div></div></td>'
+            f'<td class="num">{r["units"]:.0f}</td>'
+            f'<td class="num">{r["skus"]}</td>'
+            f'<td class="num">{fp(r["avg_price"])}</td>'
+            f'</tr>'
+        )
+    return "\n".join(out)
+
+rev_rows_html    = build_rev_rows()
+units_rows_html  = build_units_rows()
+monthly_html     = build_monthly_html()
+brand_rows_html  = build_brand_rows()
+
+# ── Portal back / switch links ────────────────────────────────────────────────
+_switch_url  = f"{_odir}/WoofGang_{_ofn}_Retail_Dashboard.html"
+_switch_name = "Hicksville" if _sn == "port-washington" else "Port Washington"
+_home_url    = "../index.html"
+
+# ── CSS ───────────────────────────────────────────────────────────────────────
+CSS = """
+:root{--m:#C4276E;--ml:#FDF0F5;--t:#1B6B6B;--dk:#1a1a2e;--tx:#1f2937;--mu:#6b7280;--bd:#e5e7eb;--bg:#f8f9fb;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--tx);}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);color:white;padding:36px 0 28px;text-align:center;position:relative;}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 50%)}
+.header h1{font-size:2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px;}
+.header .subtitle{font-size:0.95rem;font-weight:400;opacity:0.9;position:relative}
+.header .brand-tag{display:inline-block;background:rgba(255,255,255,0.2);color:white;padding:4px 14px;border-radius:20px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-top:10px;position:relative}
+.header-timestamp{position:absolute;top:12px;right:20px;font-size:0.75rem;opacity:0.8;font-weight:400;z-index:1}
+.kpi-bar{display:grid;grid-template-columns:repeat(5,1fr);background:white;border-bottom:1px solid var(--bd);box-shadow:0 2px 8px rgba(0,0,0,0.05);}
+.kpi{padding:20px 24px;border-right:1px solid var(--bd);text-align:center;}
+.kpi:last-child{border-right:none;}
+.kpi .v{font-size:28px;font-weight:800;color:var(--m);line-height:1.1;}
+.kpi .l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-top:5px;color:var(--mu);}
+.kpi .sub{font-size:11px;color:var(--mu);margin-top:2px;}
+.container{max-width:1200px;margin:0 auto;padding:32px 24px 60px;}
+.section{background:white;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.05);margin-bottom:28px;overflow:hidden;}
+.section-hdr{padding:20px 28px 0;border-bottom:1px solid var(--bd);padding-bottom:16px;}
+.section-hdr h2{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--mu);}
+.section-body{padding:24px 28px;}
+.charts-row{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;}
+.chart-box{padding:0;}
+.chart-box h3{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);margin-bottom:12px;}
+.tab-bar{display:flex;gap:0;padding:0 28px;border-bottom:2px solid var(--bd);background:white;}
+.tb{padding:12px 18px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--mu);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.tb.active{color:var(--m);border-bottom-color:var(--m);}
+.panel{display:none;padding:0 28px 24px;}.panel.active{display:block;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--dk);color:rgba(255,255,255,.8);padding:10px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;position:sticky;top:0;z-index:10;}
+thead th.num{text-align:right;}
+tbody tr{border-bottom:1px solid #f3f4f6;}
+tbody tr:hover{background:#fdf0f5;}
+td{padding:9px 12px;vertical-align:middle;}
+td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px;}
+td.rank{font-size:11px;color:var(--mu);font-weight:700;width:32px;}
+td.name-cell{font-weight:500;max-width:280px;}
+td.brand-cell{font-size:12px;color:var(--mu);max-width:140px;}
+.cat-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap;}
+.monthly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.month-card{border:1px solid var(--bd);border-radius:10px;overflow:hidden;}
+.month-card table{font-size:12px;}
+.month-card thead th{background:#f8f9fb;color:var(--mu);font-size:10px;}
+.month-title{padding:10px 14px;font-weight:700;font-size:13px;background:var(--m);color:white;}
+.bar-bg{background:#f3f4f6;border-radius:4px;height:8px;min-width:80px;}
+.bar-fill{background:var(--m);border-radius:4px;height:8px;}
+.footer{text-align:center;padding:24px;font-size:0.78rem;color:#999;}
+.footer strong{color:var(--m);}
+@media(max-width:900px){.charts-row{grid-template-columns:1fr;}.monthly-grid{grid-template-columns:1fr 1fr;}.kpi-bar{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.kpi-bar{grid-template-columns:1fr 1fr;}.monthly-grid{grid-template-columns:1fr;}}
+"""
+
+# ── HTML ──────────────────────────────────────────────────────────────────────
+html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang {_disp} — Retail Products</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>{CSS}</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-timestamp">Updated {now_str} &nbsp;|&nbsp; <a href="{_switch_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.78rem">&#x21C4; {_switch_name}</a></div>
+  <a id="portal-back" href="{_home_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.83rem;font-weight:600;display:inline-block;margin-bottom:8px;">&larr; Home</a>
+  {PORTAL_BACK_JS}
+  <h1>Woof Gang {_disp}</h1>
+  <div class="subtitle">Retail Products Dashboard</div>
+  <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
+<div class="kpi-bar">
+  <div class="kpi"><div class="v">{fc(total_rev)}</div><div class="l">Total Retail Revenue</div><div class="sub">All Time</div></div>
+  <div class="kpi"><div class="v">{fc(ytd_rev)}</div><div class="l">Retail Revenue</div><div class="sub">{YEAR} YTD</div></div>
+  <div class="kpi"><div class="v">{total_units:,.0f}</div><div class="l">Units Sold</div><div class="sub">All Time</div></div>
+  <div class="kpi"><div class="v">{unique_skus:,}</div><div class="l">Unique Products</div><div class="sub">All Time</div></div>
+  <div class="kpi"><div class="v">{fp(avg_basket)}</div><div class="l">Avg Retail / Order</div><div class="sub">With retail items</div></div>
+</div>
+
+<div class="container">
+
+  <!-- CATEGORY OVERVIEW -->
+  <div class="section">
+    <div class="section-hdr"><h2>Category Overview</h2></div>
+    <div class="section-body">
+      <div class="charts-row">
+        <div class="chart-box">
+          <h3>Revenue Mix — All Time</h3>
+          <div style="position:relative;height:280px"><canvas id="catDonut"></canvas></div>
+        </div>
+        <div class="chart-box">
+          <h3>Monthly Revenue by Category — Last 12 Months</h3>
+          <div style="position:relative;height:280px"><canvas id="monthlyBar"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP PRODUCTS -->
+  <div class="section">
+    <div class="section-hdr"><h2>Top Products</h2></div>
+    <div class="tab-bar">
+      <button class="tb active" onclick="switchTab('rev',this)">By Revenue</button>
+      <button class="tb" onclick="switchTab('units',this)">By Units</button>
+      <button class="tb" onclick="switchTab('monthly',this)">Monthly Bestsellers</button>
+    </div>
+
+    <div id="p-rev" class="panel active">
+      <div style="overflow-x:auto;margin-top:16px">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Product</th><th>Brand</th><th>Category</th>
+          <th class="num">All-Time Rev</th><th class="num">{YEAR} YTD</th>
+          <th class="num">Units</th><th class="num">Avg Price</th>
+        </tr></thead>
+        <tbody>{rev_rows_html}</tbody>
+      </table>
+      </div>
+    </div>
+
+    <div id="p-units" class="panel">
+      <div style="overflow-x:auto;margin-top:16px">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Product</th><th>Brand</th><th>Category</th>
+          <th class="num">Units Sold</th><th class="num">Revenue</th>
+        </tr></thead>
+        <tbody>{units_rows_html}</tbody>
+      </table>
+      </div>
+    </div>
+
+    <div id="p-monthly" class="panel">
+      <div class="monthly-grid" style="margin-top:16px">
+        {monthly_html}
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEKLY TREND -->
+  <div class="section">
+    <div class="section-hdr"><h2>Weekly Revenue Trend — Last 16 Weeks</h2></div>
+    <div class="section-body">
+      <div style="position:relative;height:160px"><canvas id="weeklyChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- BRAND PERFORMANCE -->
+  <div class="section">
+    <div class="section-hdr"><h2>Brand Performance</h2></div>
+    <div style="overflow-x:auto;padding:0 28px 24px">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Brand</th><th class="num">Revenue</th><th style="min-width:120px">Share</th>
+        <th class="num">Units</th><th class="num">SKUs</th><th class="num">Avg Price</th>
+      </tr></thead>
+      <tbody>{brand_rows_html}</tbody>
+    </table>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="footer">
+  Generated {datetime.now().strftime("%B %d, %Y")} &mdash;
+  <strong>Woof Gang Bakery &amp; Grooming</strong> &mdash; Operations Intelligence
+</div>
+
+<script>
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(id, btn) {{
+  document.querySelectorAll('.tb').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('p-' + id).classList.add('active');
+}}
+
+// ── Category donut ────────────────────────────────────────────────────────────
+new Chart(document.getElementById('catDonut'), {{
+  type: 'doughnut',
+  data: {{
+    labels: {json.dumps(cat_labels)},
+    datasets: [{{
+      data: {cat_vals},
+      backgroundColor: {json.dumps(cat_colors)},
+      borderWidth: 2,
+      borderColor: '#fff',
+    }}]
+  }},
+  options: {{
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {{
+      legend: {{ position: 'right', labels: {{ font: {{ size: 11 }}, padding: 10 }} }},
+      tooltip: {{
+        callbacks: {{
+          label: ctx => ' ' + ctx.label + ': $' + ctx.raw.toLocaleString('en-US', {{maximumFractionDigits:0}})
+        }}
+      }}
+    }}
+  }}
+}});
+
+// ── Monthly stacked bar ───────────────────────────────────────────────────────
+new Chart(document.getElementById('monthlyBar'), {{
+  type: 'bar',
+  data: {{
+    labels: {json.dumps(m_labels)},
+    datasets: {monthly_datasets_js}
+  }},
+  options: {{
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {{
+      legend: {{ position: 'bottom', labels: {{ font: {{ size: 10 }}, padding: 8, boxWidth: 12 }} }},
+      tooltip: {{
+        callbacks: {{
+          label: ctx => ' ' + ctx.dataset.label + ': $' + ctx.raw.toLocaleString('en-US', {{maximumFractionDigits:0}})
+        }}
+      }}
+    }},
+    scales: {{
+      x: {{ stacked: true, grid: {{ display: false }}, ticks: {{ font: {{ size: 10 }} }} }},
+      y: {{ stacked: true, ticks: {{ callback: v => '$' + (v/1000).toFixed(0) + 'k', font: {{ size: 10 }} }}, grid: {{ color: '#f3f4f6' }} }}
+    }}
+  }}
+}});
+
+// ── Weekly line chart ─────────────────────────────────────────────────────────
+new Chart(document.getElementById('weeklyChart'), {{
+  type: 'line',
+  data: {{
+    labels: {json.dumps(w_short_labels)},
+    datasets: [{{
+      label: 'Weekly Retail Revenue',
+      data: {w_vals},
+      borderColor: '#C4276E',
+      backgroundColor: 'rgba(196,39,110,0.08)',
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: '#C4276E',
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    }}]
+  }},
+  options: {{
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {{
+      legend: {{ display: false }},
+      tooltip: {{
+        callbacks: {{
+          label: ctx => ' $' + ctx.raw.toLocaleString('en-US', {{maximumFractionDigits:0}}),
+          title: (items) => {json.dumps(w_labels)}[items[0].dataIndex]
+        }}
+      }}
+    }},
+    scales: {{
+      x: {{ grid: {{ display: false }}, ticks: {{ font: {{ size: 10 }} }} }},
+      y: {{ ticks: {{ callback: v => '$' + (v/1000).toFixed(1) + 'k', font: {{ size: 10 }} }}, grid: {{ color: '#f3f4f6' }} }}
+    }}
+  }}
+}});
+</script>
+</body>
+</html>
+"""
+
+# ── Write output ──────────────────────────────────────────────────────────────
+out_path = OUTPUT_DIR / f"WoofGang_{_fn}_Retail_Dashboard.html"
+with open(out_path, "w") as f:
+    f.write(html)
+print(f"  Saved: {out_path}")
