@@ -71,46 +71,24 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 }
 .card-btn:hover{background:#a31f5b;transform:translateY(-1px)}
 
-/* Card accent colors */
-.card:nth-child(1){border-left-color:#6B3520}
-.card:nth-child(1) .card-btn{background:#6B3520}
-.card:nth-child(1) .card-btn:hover{background:#4d2717}
-.card:nth-child(1) .tag{background:#efebe9;color:#6B3520}
-
-.card:nth-child(2){border-left-color:#AD1457}
-.card:nth-child(2) .card-btn{background:#AD1457}
-.card:nth-child(2) .card-btn:hover{background:#880e4f}
-.card:nth-child(2) .tag{background:#fce4ec;color:#AD1457}
-
-.card:nth-child(3){border-left-color:#1B6B6B}
-.card:nth-child(3) .card-btn{background:#1B6B6B}
-.card:nth-child(3) .card-btn:hover{background:#145252}
-.card:nth-child(3) .tag{background:#e0f2f1;color:#1B6B6B}
-
-.card:nth-child(4){border-left-color:#C4276E}
-.card:nth-child(4) .card-btn{background:#C4276E}
-.card:nth-child(4) .card-btn:hover{background:#a31f5b}
-.card:nth-child(4) .tag{background:#FDF0F5;color:#C4276E}
-
-.card:nth-child(5){border-left-color:#2E7D32}
-.card:nth-child(5) .card-btn{background:#2E7D32}
-.card:nth-child(5) .card-btn:hover{background:#1b5e20}
-.card:nth-child(5) .tag{background:#e8f5e9;color:#2E7D32}
-
-.card:nth-child(6){border-left-color:#1565C0}
-.card:nth-child(6) .card-btn{background:#1565C0}
-.card:nth-child(6) .card-btn:hover{background:#0d47a1}
-.card:nth-child(6) .tag{background:#e3f2fd;color:#1565C0}
-
-.card:nth-child(7){border-left-color:#E53935}
-.card:nth-child(7) .card-btn{background:#E53935}
-.card:nth-child(7) .card-btn:hover{background:#b71c1c}
-.card:nth-child(7) .tag{background:#ffebee;color:#C62828}
-
-.card:nth-child(8){border-left-color:#FB8C00}
-.card:nth-child(8) .card-btn{background:#FB8C00}
-.card:nth-child(8) .card-btn:hover{background:#e65100}
-.card:nth-child(8) .tag{background:#fff3e0;color:#E65100}
+.card-group{margin-bottom:48px}
+.section-label{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #eee}
+.section-dashboards .card{border-left-color:#C4276E}
+.section-dashboards .card-btn{background:#C4276E}
+.section-dashboards .card-btn:hover{background:#a31f5b}
+.section-dashboards .tag{background:#FDF0F5;color:#C4276E}
+.section-inventory .card{border-left-color:#1B6B6B}
+.section-inventory .card-btn{background:#1B6B6B}
+.section-inventory .card-btn:hover{background:#145252}
+.section-inventory .tag{background:#e0f2f1;color:#1B6B6B}
+.section-hr .card{border-left-color:#1565C0}
+.section-hr .card-btn{background:#1565C0}
+.section-hr .card-btn:hover{background:#0d47a1}
+.section-hr .tag{background:#e3f2fd;color:#1565C0}
+.section-training .card{border-left-color:#FB8C00}
+.section-training .card-btn{background:#FB8C00}
+.section-training .card-btn:hover{background:#e65100}
+.section-training .tag{background:#fff3e0;color:#E65100}
 
 .footer{
   text-align:center;padding:24px;
@@ -159,117 +137,143 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 </div>
 
 <div class="main">
-  <div class="cards">
 
-    <div class="card">
-      <div class="card-icon">&#128230;</div>
-      <div class="card-title">Inventory Dashboard</div>
-      <div class="card-desc">Stock levels, reorder recommendations, vendor analysis, out-of-stock alerts, and negative inventory tracking across all product categories.</div>
-      <div class="card-tags">
-        <span class="tag">Stock</span>
-        <span class="tag">Reorder</span>
-        <span class="tag">Vendors</span>
+  <div class="card-group section-dashboards">
+    <div class="section-label">Dashboards</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-icon">&#128230;</div>
+        <div class="card-title">Inventory Dashboard</div>
+        <div class="card-desc">Stock levels, reorder recommendations, vendor analysis, out-of-stock alerts, and negative inventory tracking across all product categories.</div>
+        <div class="card-tags">
+          <span class="tag">Stock</span>
+          <span class="tag">Reorder</span>
+          <span class="tag">Vendors</span>
+        </div>
+        <a class="card-btn" id="link-inv" href="port-washington/WoofGang_PortWashington_Inventory_Dashboard.html">Open Inventory Dashboard</a>
       </div>
-      <a class="card-btn" id="link-inv" href="port-washington/WoofGang_PortWashington_Inventory_Dashboard.html">Open Inventory Dashboard</a>
-    </div>
 
-    <div class="card">
-      <div class="card-icon">&#x26A0;&#xFE0F;</div>
-      <div class="card-title">Booking Anomalies</div>
-      <div class="card-desc">Flags customers whose recent groom differs from their history — wrong breed type (General vs Poodle-Doodle), wrong size, or unexpected service change. Review and acknowledge.</div>
-      <div class="card-tags">
-        <span class="tag">Breed</span>
-        <span class="tag">Size</span>
-        <span class="tag">Errors</span>
+      <div class="card">
+        <div class="card-icon">&#x26A0;&#xFE0F;</div>
+        <div class="card-title">Booking Anomalies</div>
+        <div class="card-desc">Flags customers whose recent groom differs from their history — wrong breed type (General vs Poodle-Doodle), wrong size, or unexpected service change. Review and acknowledge.</div>
+        <div class="card-tags">
+          <span class="tag">Breed</span>
+          <span class="tag">Size</span>
+          <span class="tag">Errors</span>
+        </div>
+        <a class="card-btn" id="link-anomaly" href="port-washington/WoofGang_PortWashington_BookingAnomalies.html">Open Booking Anomalies</a>
       </div>
-      <a class="card-btn" id="link-anomaly" href="port-washington/WoofGang_PortWashington_BookingAnomalies.html">Open Booking Anomalies</a>
-    </div>
 
-    <div class="card">
-      <div class="card-icon">&#128203;</div>
-      <div class="card-title">Receiving Tool</div>
-      <div class="card-desc">Scan invoices with AI, verify received quantities, and push stock updates to Franpos. Two-phase PO workflow — owner scans, associate receives.</div>
-      <div class="card-tags">
-        <span class="tag">Invoices</span>
-        <span class="tag">Receiving</span>
-        <span class="tag">Inventory</span>
-      </div>
-      <a class="card-btn" href="https://scanner.hoberman.io" target="_blank">Open Receiving Tool</a>
     </div>
-
-    <div class="card">
-      <div class="card-icon">&#128197;</div>
-      <div class="card-title">Time Off Tracker</div>
-      <div class="card-desc">Log and manage employee PTO, sick days, vacations, and personal time across both stores. Calendar view, approval workflow, and real-time stats.</div>
-      <div class="card-tags">
-        <span class="tag">PTO</span>
-        <span class="tag">Schedule</span>
-        <span class="tag">All Staff</span>
-      </div>
-      <a class="card-btn" href="time-off.html">Open Time Off Tracker</a>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">&#129529;</div>
-      <div class="card-title">Store Supplies</div>
-      <div class="card-desc">Track office, cleaning, and operational supplies across both stores via Airtable. Low-stock alerts, reorder tracking, and quantity updates from any device.</div>
-      <div class="card-tags">
-        <span class="tag">Inventory</span>
-        <span class="tag">Reorder</span>
-        <span class="tag">Airtable</span>
-      </div>
-      <a class="card-btn" href="supplies.html">Open Store Supplies</a>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">&#128197;</div>
-      <div class="card-title">Staff Schedule</div>
-      <div class="card-desc">Weekly and monthly shift scheduling for both stores. Manage the employee roster, set recurring default schedules, copy last week, and track hours per person.</div>
-      <div class="card-tags">
-        <span class="tag">Shifts</span>
-        <span class="tag">Roster</span>
-        <span class="tag">Hours</span>
-      </div>
-      <a class="card-btn" href="schedule.html">Open Staff Schedule</a>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">&#128657;</div>
-      <div class="card-title">Employee Incidents</div>
-      <div class="card-desc">Log and track employee injuries, disciplinary actions, and workplace incidents. Filter by type and severity, mark items resolved, and maintain a full record across both stores.</div>
-      <div class="card-tags">
-        <span class="tag">Injuries</span>
-        <span class="tag">Disciplinary</span>
-        <span class="tag">Incidents</span>
-      </div>
-      <a class="card-btn" href="incidents.html">Open Employee Incidents</a>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">&#128172;</div>
-      <div class="card-title">Customer Complaints</div>
-      <div class="card-desc">Log customer complaints with category tagging (grooming, retail, staff, booking). Track resolution status from open through in-progress to resolved across both stores.</div>
-      <div class="card-tags">
-        <span class="tag">Complaints</span>
-        <span class="tag">Resolution</span>
-        <span class="tag">Tracking</span>
-      </div>
-      <a class="card-btn" href="complaints.html">Open Customer Complaints</a>
-    </div>
-
-    <div class="card">
-      <div class="card-icon">&#128203;</div>
-      <div class="card-title">New Hire Onboarding</div>
-      <div class="card-desc">Interactive onboarding checklist for new retail team members. Covers brand values, grooming services, FranPos, safety protocols, daily routines, and more.</div>
-      <div class="card-tags">
-        <span class="tag">Training</span>
-        <span class="tag">Checklist</span>
-        <span class="tag">New Hire</span>
-      </div>
-      <a class="card-btn" href="onboarding.html">Open Onboarding</a>
-    </div>
-
   </div>
+
+  <div class="card-group section-inventory">
+    <div class="section-label">Inventory &amp; Supplies</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-icon">&#128203;</div>
+        <div class="card-title">Receiving Tool</div>
+        <div class="card-desc">Scan invoices with AI, verify received quantities, and push stock updates to Franpos. Two-phase PO workflow — owner scans, associate receives.</div>
+        <div class="card-tags">
+          <span class="tag">Invoices</span>
+          <span class="tag">Receiving</span>
+          <span class="tag">Inventory</span>
+        </div>
+        <a class="card-btn" href="https://scanner.hoberman.io" target="_blank">Open Receiving Tool</a>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">&#129529;</div>
+        <div class="card-title">Store Supplies</div>
+        <div class="card-desc">Track office, cleaning, and operational supplies across both stores via Airtable. Low-stock alerts, reorder tracking, and quantity updates from any device.</div>
+        <div class="card-tags">
+          <span class="tag">Inventory</span>
+          <span class="tag">Reorder</span>
+          <span class="tag">Airtable</span>
+        </div>
+        <a class="card-btn" href="supplies.html">Open Store Supplies</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card-group section-hr">
+    <div class="section-label">Scheduling &amp; HR</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-icon">&#128197;</div>
+        <div class="card-title">Staff Schedule</div>
+        <div class="card-desc">Weekly and monthly shift scheduling for both stores. Manage the employee roster, set recurring default schedules, copy last week, and track hours per person.</div>
+        <div class="card-tags">
+          <span class="tag">Shifts</span>
+          <span class="tag">Roster</span>
+          <span class="tag">Hours</span>
+        </div>
+        <a class="card-btn" href="schedule.html">Open Staff Schedule</a>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">&#128197;</div>
+        <div class="card-title">Time Off Tracker</div>
+        <div class="card-desc">Log and manage employee PTO, sick days, vacations, and personal time across both stores. Calendar view, approval workflow, and real-time stats.</div>
+        <div class="card-tags">
+          <span class="tag">PTO</span>
+          <span class="tag">Schedule</span>
+          <span class="tag">All Staff</span>
+        </div>
+        <a class="card-btn" href="time-off.html">Open Time Off Tracker</a>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">&#128657;</div>
+        <div class="card-title">Employee Incidents</div>
+        <div class="card-desc">Log and track employee injuries, disciplinary actions, and workplace incidents. Filter by type and severity, mark items resolved, and maintain a full record across both stores.</div>
+        <div class="card-tags">
+          <span class="tag">Injuries</span>
+          <span class="tag">Disciplinary</span>
+          <span class="tag">Incidents</span>
+        </div>
+        <a class="card-btn" href="incidents.html">Open Employee Incidents</a>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">&#128172;</div>
+        <div class="card-title">Customer Complaints</div>
+        <div class="card-desc">Log customer complaints with category tagging (grooming, retail, staff, booking). Track resolution status from open through in-progress to resolved across both stores.</div>
+        <div class="card-tags">
+          <span class="tag">Complaints</span>
+          <span class="tag">Resolution</span>
+          <span class="tag">Tracking</span>
+        </div>
+        <a class="card-btn" href="complaints.html">Open Customer Complaints</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card-group section-training">
+    <div class="section-label">Training</div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-icon">&#128203;</div>
+        <div class="card-title">New Hire Onboarding</div>
+        <div class="card-desc">Interactive onboarding checklist for new retail team members. Covers brand values, grooming services, FranPos, safety protocols, daily routines, and more.</div>
+        <div class="card-tags">
+          <span class="tag">Training</span>
+          <span class="tag">Checklist</span>
+          <span class="tag">New Hire</span>
+        </div>
+        <a class="card-btn" href="onboarding.html">Open Onboarding</a>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <div class="footer">
