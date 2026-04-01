@@ -4,7 +4,7 @@
 <script>if(sessionStorage.getItem('wg_portal_level')!=='owner')window.location.href='index.html';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Woof Gang — Owner Expenses & Operating Costs</title>
+<title>Woof Gang — Expenses</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -78,6 +78,55 @@ tr:last-child td{border-bottom:none}
 .override-del{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.85rem}
 .override-del:hover{color:#C62828}
 @media(max-width:600px){.topbar{flex-direction:column;align-items:stretch}.add-btn{width:100%}.summary{flex-direction:column}.row2{flex-direction:column}}
+/* Statement Reconciliation */
+.recon-section{padding:0 20px 40px}
+.recon-toggle{width:100%;text-align:left;background:white;border:2px solid #e8e8e8;border-radius:12px;padding:16px 20px;font-family:inherit;font-size:0.95rem;font-weight:700;cursor:pointer;color:#1a1a2e;display:flex;align-items:center;gap:10px;transition:border-color 0.15s}
+.recon-toggle:hover{border-color:#C4276E}
+.recon-toggle .chevron{margin-left:auto;font-size:0.75rem;transition:transform 0.2s;color:#999}
+.recon-toggle.open .chevron{transform:rotate(180deg)}
+.recon-body{display:none;background:white;border:2px solid #e8e8e8;border-top:none;border-radius:0 0 12px 12px;padding:20px}
+.recon-body.open{display:block}
+.recon-upload{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;padding-bottom:20px;border-bottom:1px solid #f0f0f0;margin-bottom:20px}
+.rf{flex:1;min-width:140px}
+.rf label{display:block;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#999;margin-bottom:5px}
+.rf input,.rf select{width:100%;padding:9px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.88rem;color:#1a1a2e;background:white}
+.rf input:focus,.rf select:focus{outline:none;border-color:#C4276E}
+.recon-submit{padding:10px 20px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;white-space:nowrap;align-self:flex-end}
+.recon-submit:hover{background:#a31f5b}
+.recon-submit:disabled{opacity:0.5;cursor:default}
+.recon-spinner{display:none;text-align:center;padding:20px;color:#999;font-size:0.9rem}
+.recon-spinner.active{display:block}
+.rg{margin-bottom:12px}
+.rg-hdr{padding:10px 14px;border-radius:8px 8px 0 0;font-weight:700;font-size:0.82rem;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.rg-hdr .rg-count{font-size:0.72rem;background:rgba(0,0,0,0.1);padding:2px 7px;border-radius:10px;font-weight:800}
+.rg-hdr .rg-chevron{margin-left:auto;font-size:0.7rem;transition:transform 0.2s}
+.rg-hdr.open .rg-chevron{transform:rotate(180deg)}
+.rg-disc .rg-hdr{background:#FFF8E1;color:#7B5800;border:1px solid #FFE082}
+.rg-unmatch .rg-hdr{background:#F5F5F5;color:#555;border:1px solid #E0E0E0}
+.rg-match .rg-hdr{background:#E8F5E9;color:#2E7D32;border:1px solid #A5D6A7}
+.rg-body{display:none;border:1px solid #e8e8e8;border-top:none;border-radius:0 0 8px 8px;overflow:hidden}
+.rg-body.open{display:block}
+.rtable{width:100%;border-collapse:collapse}
+.rtable th{padding:8px 12px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#999;text-align:left;border-bottom:1px solid #eee;background:#fafafa}
+.rtable td{padding:9px 12px;font-size:0.83rem;border-bottom:1px solid #f5f5f5}
+.rtable tr:last-child td{border-bottom:none}
+.rtable .n{text-align:right}
+.upd-btn{padding:4px 10px;background:#F9A825;color:white;border:none;border-radius:6px;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer}
+.upd-btn:hover{background:#F57F17}
+.upd-btn:disabled{opacity:0.6;cursor:default}
+.add-exp-btn{padding:4px 10px;background:#555;color:white;border:none;border-radius:6px;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer}
+.add-exp-btn:hover{background:#333}
+.match-ok{color:#2E7D32;font-weight:700;font-size:0.82rem}
+.conf-badge{font-size:0.65rem;padding:2px 6px;border-radius:8px;font-weight:700}
+.conf-high{background:#e8f5e9;color:#2E7D32}
+.conf-medium{background:#FFF8E1;color:#7B5800}
+.conf-none{background:#f5f5f5;color:#888}
+.recon-history{margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0}
+.recon-history h3{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#999;margin-bottom:10px}
+.hist-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fafafa;border-radius:8px;margin-bottom:6px;font-size:0.82rem;flex-wrap:wrap}
+.hist-row .hist-month{font-weight:700;color:#1a1a2e}
+.hist-row .hist-meta{color:#999;font-size:0.75rem}
+.hist-row .hist-disc{color:#7B5800;font-size:0.75rem;font-weight:700}
 </style>
 </head>
 <body>
@@ -85,8 +134,8 @@ tr:last-child td{border-bottom:none}
 
 <div class="header">
   <a class="back-link" href="index.html" id="portal-back">&larr; Owner Portal</a>
-  <h1>Owner Expenses & Operating Costs</h1>
-  <p>Manage recurring and one-time business expenses</p>
+  <h1>Expenses</h1>
+  <p>Track recurring and one-time expenses per store · Upload statements to reconcile entries</p>
 </div>
 
 <div class="topbar">
@@ -121,6 +170,40 @@ tr:last-child td{border-bottom:none}
     </thead>
     <tbody id="tbody"></tbody>
   </table>
+</div>
+
+<!-- STATEMENT RECONCILIATION -->
+<div class="recon-section">
+  <button class="recon-toggle" id="recon-toggle" onclick="toggleRecon()">
+    📄 Statement Reconciliation
+    <span class="chevron">▼</span>
+  </button>
+  <div class="recon-body" id="recon-body">
+    <div class="recon-upload">
+      <div class="rf">
+        <label>Store</label>
+        <select id="recon-store">
+          <option value="port-washington">Port Washington</option>
+          <option value="hicksville">Hicksville</option>
+        </select>
+      </div>
+      <div class="rf">
+        <label>Statement Month</label>
+        <input type="month" id="recon-month">
+      </div>
+      <div class="rf" style="flex:2">
+        <label>Bank / CC Statement (PDF)</label>
+        <input type="file" id="recon-file" accept=".pdf">
+      </div>
+      <button class="recon-submit" id="recon-submit" onclick="uploadStatement()">Upload &amp; Parse</button>
+    </div>
+    <div class="recon-spinner" id="recon-spinner">⏳ Extracting transactions… this may take 15–30 seconds</div>
+    <div id="recon-results"></div>
+    <div class="recon-history" id="recon-history" style="display:none">
+      <h3>Previously Uploaded Statements</h3>
+      <div id="hist-list"></div>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -266,7 +349,7 @@ function render(){
     else opTotal+=amt;
   });
   document.getElementById('summary').innerHTML=
-    '<div class="sum-card"><div class="val">'+fc(ownerTotal)+'</div><div class="lbl">Owner Expenses / mo</div></div>'+
+    '<div class="sum-card"><div class="val">'+fc(ownerTotal)+'</div><div class="lbl">Owner / mo</div></div>'+
     '<div class="sum-card op"><div class="val">'+fc(opTotal)+'</div><div class="lbl">Operating Costs / mo</div></div>'+
     '<div class="sum-card total"><div class="val">'+fc(ownerTotal+opTotal)+'</div><div class="lbl">Total / mo</div></div>'+
     '<div class="sum-card total"><div class="val">'+fc((ownerTotal+opTotal)*12)+'</div><div class="lbl">Annual Est.</div></div>';
@@ -416,6 +499,165 @@ function deleteExpenseById(id){
     load();
   }).catch(function(){showToast('Delete failed','err');});
 }
+
+// ── Statement Reconciliation ──
+var SCANNER_URL='https://scanner.hoberman.io';
+
+function toggleRecon(){
+  var tog=document.getElementById('recon-toggle');
+  var body=document.getElementById('recon-body');
+  tog.classList.toggle('open');
+  body.classList.toggle('open');
+  if(body.classList.contains('open')){
+    document.getElementById('recon-store').value=currentStore==='all'?'port-washington':currentStore;
+    loadStatementHistory(currentStore==='all'?'port-washington':currentStore);
+  }
+}
+
+function uploadStatement(){
+  var store=document.getElementById('recon-store').value;
+  var month=document.getElementById('recon-month').value;
+  var file=document.getElementById('recon-file').files[0];
+  if(!file){showToast('Please select a PDF file','err');return;}
+  if(!month){showToast('Please select a statement month','err');return;}
+  var btn=document.getElementById('recon-submit');
+  btn.disabled=true;btn.textContent='Parsing...';
+  document.getElementById('recon-spinner').classList.add('active');
+  document.getElementById('recon-results').innerHTML='';
+  var fd=new FormData();
+  fd.append('file',file);
+  fd.append('store',store);
+  fd.append('month',month);
+  fetch(SCANNER_URL+'/api/parse-statement',{method:'POST',body:fd})
+    .then(function(r){return r.json();})
+    .then(function(data){
+      btn.disabled=false;btn.textContent='Upload & Parse';
+      document.getElementById('recon-spinner').classList.remove('active');
+      if(data.error){showToast(data.error,'err');return;}
+      renderRecon(data.transactions||data);
+      loadStatementHistory(store);
+    })
+    .catch(function(){
+      btn.disabled=false;btn.textContent='Upload & Parse';
+      document.getElementById('recon-spinner').classList.remove('active');
+      showToast('Parse failed — check scanner connection','err');
+    });
+}
+
+function renderRecon(txns){
+  var disc=txns.filter(function(t){return t.expense_id&&Math.abs((t.amount||0)-(t.entry_amount||0))>1;});
+  var unmatch=txns.filter(function(t){return !t.expense_id||t.confidence==='none';});
+  var match=txns.filter(function(t){return t.expense_id&&Math.abs((t.amount||0)-(t.entry_amount||0))<=1&&t.confidence!=='none';});
+
+  function makeRows(list,type){
+    return list.map(function(t){
+      var confCls='conf-'+(t.confidence||'none');
+      var confLbl=(t.confidence||'none').charAt(0).toUpperCase()+(t.confidence||'none').slice(1);
+      var actionCol='';
+      if(type==='disc'){
+        actionCol='<td><button class="upd-btn" onclick="updateAmount('+t.expense_id+','+t.amount+',this)">Update to $'+Number(t.amount).toFixed(2)+'</button></td>';
+      } else if(type==='unmatch'){
+        actionCol='<td><button class="add-exp-btn" onclick="prefillAddModal(\''+esc(t.raw||'').replace(/'/g,"&#39;")+'\','+t.amount+')">Add Expense</button></td>';
+      } else {
+        actionCol='<td><span class="match-ok">✓ Match</span></td>';
+      }
+      var entryCol=t.expense_name
+        ?esc(t.expense_name)+(type==='disc'?' <span style="color:#7B5800">($'+Number(t.entry_amount).toFixed(2)+')</span>':'')
+        :'<span style="color:#ccc">—</span>';
+      var rawShort=(t.raw||'').substring(0,42)+((t.raw||'').length>42?'…':'');
+      return '<tr>'+
+        '<td style="color:#999;white-space:nowrap">'+(t.date||'')+'</td>'+
+        '<td title="'+esc(t.raw||'')+'">'+esc(rawShort)+'</td>'+
+        '<td class="n"><strong>$'+Number(t.amount||0).toFixed(2)+'</strong></td>'+
+        '<td>'+entryCol+'</td>'+
+        '<td><span class="conf-badge '+confCls+'">'+confLbl+'</span></td>'+
+        actionCol+
+        '</tr>';
+    }).join('');
+  }
+
+  function makeGroup(id,cls,icon,label,list,type,openByDefault){
+    if(!list.length) return '';
+    var headCls=openByDefault?'rg-hdr open':'rg-hdr';
+    var bodyCls=openByDefault?'rg-body open':'rg-body';
+    return '<div class="rg '+cls+'" id="rg-'+id+'">'+
+      '<div class="'+headCls+'" onclick="toggleRg(\''+id+'\')">'+
+      icon+' '+label+' <span class="rg-count">'+list.length+'</span>'+
+      '<span class="rg-chevron">▼</span></div>'+
+      '<div class="'+bodyCls+'" id="rgb-'+id+'">'+
+      '<table class="rtable"><thead><tr>'+
+      '<th>Date</th><th>Description</th><th class="n">Amount</th><th>Matched Entry</th><th>Confidence</th><th></th>'+
+      '</tr></thead><tbody>'+makeRows(list,type)+'</tbody></table></div></div>';
+  }
+
+  var html=makeGroup('disc','rg-disc','⚠️','Discrepancies',disc,'disc',true)+
+           makeGroup('unmatch','rg-unmatch','❓','Unmatched',unmatch,'unmatch',true)+
+           makeGroup('match','rg-match','✅','Matched',match,'match',false);
+  if(!html) html='<div style="text-align:center;color:#999;padding:30px">No transactions found in statement</div>';
+  document.getElementById('recon-results').innerHTML=html;
+}
+
+function toggleRg(id){
+  var hdr=document.querySelector('#rg-'+id+' .rg-hdr');
+  var body=document.getElementById('rgb-'+id);
+  hdr.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+function updateAmount(expenseId,newAmount,btn){
+  btn.disabled=true;btn.textContent='Updating...';
+  sbPatch('operating_expenses','id=eq.'+expenseId,{amount:newAmount})
+    .then(function(){
+      var row=btn.closest('tr');
+      row.style.background='#e8f5e9';
+      btn.textContent='✓ Updated';
+      btn.style.background='#2E7D32';
+      var e=expenses.find(function(x){return x.id===expenseId;});
+      if(e) e.amount=newAmount;
+      render();
+      showToast('Expense amount updated');
+    })
+    .catch(function(){
+      btn.disabled=false;btn.textContent='Update to $'+Number(newAmount).toFixed(2);
+      showToast('Update failed','err');
+    });
+}
+
+function prefillAddModal(description,amount){
+  openModal();
+  document.getElementById('m-name').value=description;
+  document.getElementById('m-amount').value=amount;
+}
+
+function loadStatementHistory(store){
+  var q='/bank_statements?order=created_at.desc&limit=5';
+  if(store&&store!=='all') q+='&store=eq.'+encodeURIComponent(store);
+  sbGet(q).then(function(rows){
+    var hist=document.getElementById('recon-history');
+    var list=document.getElementById('hist-list');
+    if(!rows||!rows.length){hist.style.display='none';return;}
+    hist.style.display='block';
+    list.innerHTML=rows.map(function(r){
+      var txns=r.transactions||[];
+      var discCount=txns.filter(function(t){return t.expense_id&&Math.abs((t.amount||0)-(t.entry_amount||0))>1;}).length;
+      var ts=new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      return '<div class="hist-row">'+
+        '<span class="hist-month">'+esc(r.statement_month)+'</span>'+
+        (r.bank?'<span class="hist-meta">'+esc(r.bank)+'</span>':'')+
+        '<span class="hist-meta">'+txns.length+' transaction'+(txns.length===1?'':'s')+'</span>'+
+        (discCount?'<span class="hist-disc">'+discCount+' discrepanc'+(discCount===1?'y':'ies')+'</span>':'')+
+        '<span class="hist-meta" style="margin-left:auto">'+ts+'</span>'+
+        '</div>';
+    }).join('');
+  }).catch(function(){});
+}
+
+// Init
+var _initMonth=(function(){
+  var d=new Date();d.setMonth(d.getMonth()-1);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+})();
+document.getElementById('recon-month').value=_initMonth;
 
 // Init
 setStore(currentStore);
