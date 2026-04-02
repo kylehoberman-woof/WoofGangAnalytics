@@ -450,8 +450,9 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
         import calendar as _cal_rr
         _last_p = periods[-1]
         _today_rr = _d_rr.today()
-        if _last_p["year"] == _today_rr.year and _last_p["month"] == _today_rr.month:
-            _days_elapsed = _today_rr.day
+        _last_data_dt = df["created"].max().date() if len(df) else _today_rr
+        if _last_p["year"] == _last_data_dt.year and _last_p["month"] == _last_data_dt.month:
+            _days_elapsed = _last_data_dt.day
             _days_in_month = _cal_rr.monthrange(_today_rr.year, _today_rr.month)[1]
             if _days_elapsed > 0 and _days_elapsed < _days_in_month:
                 _partial_raw = monthly_rev[-1]
@@ -523,7 +524,8 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
             _curr_by_month[p["month"]] = rev
 
         # Pro-rate the current partial month to a full-month estimate
-        if _last_partial_fc and _today_fc.month in _curr_by_month:
+        # Skip if monthly_rev was already pro-rated above (avoids double pro-rating)
+        if _last_partial_fc and _today_fc.month in _curr_by_month and not _rr_prorated:
             _curr_by_month[_today_fc.month] = (
                 _curr_by_month[_today_fc.month] / _today_fc.day * _last_day_fc
             )
