@@ -1,0 +1,103 @@
+/* ── Woof Gang Portal — Shared Styles ── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── Header ── */
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:48px 32px 40px;text-align:center;color:white}
+.header h1{font-size:2rem;font-weight:800;margin-bottom:6px;letter-spacing:-0.02em}
+.header p{font-size:1rem;opacity:0.85;font-weight:400}
+.header .brand{display:inline-block;margin-top:12px;background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+
+/* ── Store Selector ── */
+.store-selector{display:flex;justify-content:center;padding:16px;background:white;border-bottom:2px solid #eee}
+.store-selector select{padding:10px 20px;border:2px solid #C4276E;border-radius:10px;font-family:inherit;font-size:1rem;font-weight:600;color:#C4276E;background:white;cursor:pointer;min-width:280px;text-align:center}
+.store-selector select:focus{outline:none;box-shadow:0 0 0 3px rgba(196,39,110,0.2)}
+
+/* ── Layout ── */
+.main{max-width:1100px;width:100%;margin:0 auto;padding:40px 24px 60px;flex:1}
+
+/* ── Cards ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.card-full{grid-column:1/-1}
+.card{background:white;border-radius:16px;padding:32px 28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border-left:5px solid #C4276E;transition:transform 0.2s,box-shadow 0.2s;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(196,39,110,0.12)}
+.card-icon{font-size:2.4rem;margin-bottom:14px}
+.card-title{font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:8px}
+.card-desc{font-size:0.88rem;color:#666;line-height:1.6;margin-bottom:20px;flex:1}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.tag{font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:12px;background:#FDF0F5;color:#C4276E;text-transform:uppercase;letter-spacing:0.04em}
+.card-btn{display:inline-block;padding:12px 28px;border-radius:10px;background:#C4276E;color:white;text-decoration:none;font-size:0.9rem;font-weight:600;text-align:center;transition:background 0.2s,transform 0.1s}
+.card-btn:hover{background:#a31f5b;transform:translateY(-1px)}
+.card-group{margin-bottom:48px}
+.section-label{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #eee}
+
+/* ── Section Themes ── */
+.section-dashboards .card{border-left-color:#C4276E}
+.section-dashboards .card-btn{background:#C4276E}
+.section-dashboards .card-btn:hover{background:#a31f5b}
+.section-dashboards .tag{background:#FDF0F5;color:#C4276E}
+
+.section-financials .card{border-left-color:#2E7D32}
+.section-financials .card-btn{background:#2E7D32}
+.section-financials .card-btn:hover{background:#1b5e20}
+.section-financials .tag{background:#e8f5e9;color:#2E7D32}
+
+.section-performance .card{border-left-color:#2E7D32}
+.section-performance .card-btn{background:#2E7D32}
+.section-performance .card-btn:hover{background:#1b5e20}
+.section-performance .tag{background:#e8f5e9;color:#2E7D32}
+
+.section-inventory .card{border-left-color:#1B6B6B}
+.section-inventory .card-btn{background:#1B6B6B}
+.section-inventory .card-btn:hover{background:#145252}
+.section-inventory .tag{background:#e0f2f1;color:#1B6B6B}
+
+.section-hr .card{border-left-color:#1565C0}
+.section-hr .card-btn{background:#1565C0}
+.section-hr .card-btn:hover{background:#0d47a1}
+.section-hr .tag{background:#e3f2fd;color:#1565C0}
+
+.section-training .card{border-left-color:#FB8C00}
+.section-training .card-btn{background:#FB8C00}
+.section-training .card-btn:hover{background:#e65100}
+.section-training .tag{background:#fff3e0;color:#E65100}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:24px;font-size:0.8rem;color:#999}
+.footer strong{color:#C4276E;font-weight:600}
+
+/* ── Bonus Tracker Widget ── */
+.bw-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:12px}
+.bw-max-pill{background:#e8f5e9;color:#2E7D32;font-size:0.72rem;font-weight:700;padding:3px 12px;border-radius:20px;white-space:nowrap}
+.bw-sub{font-size:0.82rem;color:#999;margin-bottom:18px}
+.bw-stores{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+.bw-store{background:#fafafa;border-radius:10px;padding:14px 16px}
+.bw-sname{font-size:0.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px}
+.bw-ytd-row{display:flex;align-items:baseline;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.bw-ytd-val{font-size:1.45rem;font-weight:800;color:#1a1a2e;letter-spacing:-0.03em}
+.bw-ytd-lbl{font-size:0.72rem;color:#bbb}
+.bw-avg{font-size:0.72rem;color:#2E7D32;font-weight:700;margin-left:auto}
+.bw-tier-row{margin-bottom:10px}
+.bw-tier-info{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.bw-tier-name{font-size:0.65rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#aaa}
+.bw-tier-target{font-size:0.8rem;font-weight:700;color:#1a1a2e}
+.bw-tier-bonus{font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:10px;margin-left:auto}
+.bw-tier-bonus.t1{background:#e8f5e9;color:#2E7D32}
+.bw-tier-bonus.t2{background:#fff8e1;color:#E65100}
+.bw-bar-bg{background:#efefef;border-radius:6px;height:8px;overflow:hidden;margin-bottom:4px}
+.bw-bar{height:100%;background:#C4276E;border-radius:6px}
+.bw-bar.t2{background:#E65100}
+.bw-bar-meta{font-size:0.66rem;color:#bbb}
+.bw-callout{background:#f7f7f7;border-radius:8px;padding:10px 14px;font-size:0.8rem;color:#555;line-height:1.6;margin-top:4px}
+.bw-callout strong{color:#2E7D32}
+
+/* ── Responsive ── */
+@media(max-width:700px){
+  .header{padding:32px 20px 28px}
+  .header h1{font-size:1.5rem}
+  .main{padding:24px 16px 40px}
+  .cards{grid-template-columns:1fr}
+  .bw-stores{grid-template-columns:1fr}
+}

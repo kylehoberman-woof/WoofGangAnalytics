@@ -4,105 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Woof Gang — Store Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5;min-height:100vh;display:flex;flex-direction:column}
-
-.header{
-  background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);
-  padding:48px 32px 40px;
-  text-align:center;
-  color:white;
-}
-.header h1{font-size:2rem;font-weight:800;margin-bottom:6px;letter-spacing:-0.02em}
-.header p{font-size:1rem;opacity:0.85;font-weight:400}
-.header .brand{
-  display:inline-block;margin-top:12px;
-  background:rgba(255,255,255,0.15);padding:4px 14px;border-radius:20px;
-  font-size:0.78rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;
-}
-
-.store-selector{
-  display:flex;justify-content:center;padding:16px;background:white;border-bottom:2px solid #eee;
-}
-.store-selector select{
-  padding:10px 20px;border:2px solid #C4276E;border-radius:10px;font-family:inherit;
-  font-size:1rem;font-weight:600;color:#C4276E;background:white;cursor:pointer;min-width:280px;
-  text-align:center;
-}
-.store-selector select:focus{outline:none;box-shadow:0 0 0 3px rgba(196,39,110,0.2)}
-
-.main{
-  max-width:1100px;width:100%;margin:0 auto;padding:40px 24px 60px;
-  flex:1;
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:24px;
-}
-
-.card{
-  background:white;border-radius:16px;padding:32px 28px;
-  box-shadow:0 2px 12px rgba(0,0,0,0.06);
-  border-left:5px solid #C4276E;
-  transition:transform 0.2s,box-shadow 0.2s;
-  display:flex;flex-direction:column;
-}
-.card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(196,39,110,0.12)}
-
-.card-icon{font-size:2.4rem;margin-bottom:14px}
-.card-title{font-size:1.25rem;font-weight:700;color:#1a1a2e;margin-bottom:8px}
-.card-desc{font-size:0.88rem;color:#666;line-height:1.6;margin-bottom:20px;flex:1}
-
-.card-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
-.tag{
-  font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:12px;
-  background:#FDF0F5;color:#C4276E;text-transform:uppercase;letter-spacing:0.04em;
-}
-
-.card-btn{
-  display:inline-block;padding:12px 28px;border-radius:10px;
-  background:#C4276E;color:white;text-decoration:none;
-  font-size:0.9rem;font-weight:600;text-align:center;
-  transition:background 0.2s,transform 0.1s;
-}
-.card-btn:hover{background:#a31f5b;transform:translateY(-1px)}
-
-.card-group{margin-bottom:48px}
-.section-label{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#aaa;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #eee}
-.section-dashboards .card{border-left-color:#C4276E}
-.section-dashboards .card-btn{background:#C4276E}
-.section-dashboards .card-btn:hover{background:#a31f5b}
-.section-dashboards .tag{background:#FDF0F5;color:#C4276E}
-.section-inventory .card{border-left-color:#1B6B6B}
-.section-inventory .card-btn{background:#1B6B6B}
-.section-inventory .card-btn:hover{background:#145252}
-.section-inventory .tag{background:#e0f2f1;color:#1B6B6B}
-.section-hr .card{border-left-color:#1565C0}
-.section-hr .card-btn{background:#1565C0}
-.section-hr .card-btn:hover{background:#0d47a1}
-.section-hr .tag{background:#e3f2fd;color:#1565C0}
-.section-training .card{border-left-color:#FB8C00}
-.section-training .card-btn{background:#FB8C00}
-.section-training .card-btn:hover{background:#e65100}
-.section-training .tag{background:#fff3e0;color:#E65100}
-
-.footer{
-  text-align:center;padding:24px;
-  font-size:0.8rem;color:#999;
-}
-.footer strong{color:#C4276E;font-weight:600}
-
-@media(max-width:700px){
-  .header{padding:32px 20px 28px}
-  .header h1{font-size:1.5rem}
-  .main{padding:24px 16px 40px}
-  .cards{grid-template-columns:1fr}
-}
-</style>
+<link rel="stylesheet" href="portal.css">
 </head>
 <body>
 
@@ -294,68 +196,38 @@ body{font-family:'DM Sans',system-ui,-apple-system,sans-serif;background:#FDF0F5
 
 </div><!-- /app-content -->
 
+<script src="portal-auth.js"></script>
 <script>
-// ─── PIN Auth (two PINs: Casey=PW, Hailey=HV) ─────────────────
-var PIN_HASHES={
-  'fb1548cece225c928b67452754417cd305864043278e526189d57b8e0977d71d':'port-washington',
-  'eb7015b56be919a2c96c3fcb7e4ddd08fc17c1ccf17fd86dd060409ad58e0cb9':'hicksville'
+var PIN_HASHES = {
+  'fb1548cece225c928b67452754417cd305864043278e526189d57b8e0977d71d': 'port-washington',
+  'eb7015b56be919a2c96c3fcb7e4ddd08fc17c1ccf17fd86dd060409ad58e0cb9': 'hicksville'
 };
-async function sha256(str){
-  var buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+
+async function checkPin(pin) {
+  var hash = await sha256(pin);
+  var store = PIN_HASHES[hash];
+  if (store) {
+    sessionStorage.setItem('wg_portal_auth', '1');
+    sessionStorage.setItem('wg_portal_level', 'store');
+    sessionStorage.setItem('wg_portal_store', store);
+    document.getElementById('store-select').value = store;
+    switchStore(store);
+    unlockPortal();
+  } else { showPinError(); }
 }
-function initAuth(){
-  if(sessionStorage.getItem('wg_portal_auth')==='1'&&sessionStorage.getItem('wg_portal_level')==='store'){
-    document.getElementById('login-gate').style.display='none';
-    document.getElementById('app-content').style.display='block';
-    var ds=sessionStorage.getItem('wg_portal_store');
-    if(ds&&STORES[ds]){
-      document.getElementById('store-select').value=ds;
+
+function initAuth() {
+  if (sessionStorage.getItem('wg_portal_auth') === '1' && sessionStorage.getItem('wg_portal_level') === 'store') {
+    var ds = sessionStorage.getItem('wg_portal_store');
+    if (ds && STORES[ds]) {
+      document.getElementById('store-select').value = ds;
       switchStore(ds);
     }
-    return;
+    unlockPortal(); return;
   }
-  document.getElementById('login-gate').style.display='flex';
-  var pins=[1,2,3,4].map(function(i){return document.getElementById('pin-'+i);});
-  pins.forEach(function(p,i){
-    p.value='';
-    p.addEventListener('input',function(){
-      if(p.value.length===1&&i<3) pins[i+1].focus();
-      var full=pins.map(function(x){return x.value;}).join('');
-      if(full.length===4) checkPin(full);
-    });
-    p.addEventListener('keydown',function(e){
-      if(e.key==='Backspace'&&!p.value&&i>0){pins[i-1].focus();pins[i-1].value='';}
-    });
-    p.addEventListener('paste',function(e){
-      e.preventDefault();
-      var text=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
-      text.split('').forEach(function(c,j){if(pins[j])pins[j].value=c;});
-      if(text.length===4) checkPin(text);
-      else if(text.length>0&&pins[text.length]) pins[text.length].focus();
-    });
-  });
-  pins[0].focus();
+  showLoginGate();
+  initPinInputs(checkPin);
 }
-async function checkPin(pin){
-  var hash=await sha256(pin);
-  var store=PIN_HASHES[hash];
-  if(store){
-    sessionStorage.setItem('wg_portal_auth','1');
-    sessionStorage.setItem('wg_portal_level','store');
-    sessionStorage.setItem('wg_portal_store',store);
-    document.getElementById('login-gate').style.display='none';
-    document.getElementById('app-content').style.display='block';
-    document.getElementById('store-select').value=store;
-    switchStore(store);
-  } else {
-    document.getElementById('pin-error').textContent='Incorrect PIN';
-    [1,2,3,4].forEach(function(i){document.getElementById('pin-'+i).value='';});
-    document.getElementById('pin-1').focus();
-    setTimeout(function(){document.getElementById('pin-error').textContent='';},2000);
-  }
-}
-initAuth();
 
 var STORES = {
   'port-washington': {
@@ -383,12 +255,7 @@ function switchStore(key) {
   localStorage.setItem('selectedStore', key);
 }
 
-// Restore last selected store
-var saved = localStorage.getItem('selectedStore');
-if (saved && STORES[saved]) {
-  document.getElementById('store-select').value = saved;
-  switchStore(saved);
-}
+initAuth();
 </script>
 
 </body>
