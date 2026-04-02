@@ -687,8 +687,8 @@ function renderRequests(rows){
     var actions='';
     if(_canAct&&r.status==='pending'){
       actions='<div class="req-actions">'+
-        '<button class="req-order-btn" onclick="updateReq('+r.id+',\'ordered\',this)">Mark Ordered</button>'+
-        '<button class="req-dismiss-btn" onclick="updateReq('+r.id+',\'dismissed\',this)">Dismiss</button>'+
+        '<button class="req-order-btn" onclick="updateReq('+r.id+',\\'ordered\\',this)">Mark Ordered</button>'+
+        '<button class="req-dismiss-btn" onclick="updateReq('+r.id+',\\'dismissed\\',this)">Dismiss</button>'+
         '</div>';
     }
     return '<div class="req-card'+urgCls+stCls+'" id="rc-'+r.id+'">'+
