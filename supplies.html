@@ -300,11 +300,11 @@ function showToast(msg, type) {
 
 /* ── Settings ─────────────────────────────────── */
 function loadConfig() {
-  config.token   = DEFAULTS.token;
-  config.pwBase  = DEFAULTS.pwBase;
-  config.hvBase  = DEFAULTS.hvBase;
-  config.pwTable = DEFAULTS.pwTable;
-  config.hvTable = DEFAULTS.hvTable;
+  config.token   = localStorage.getItem('wg_at_token')    || DEFAULTS.token;
+  config.pwBase  = localStorage.getItem('wg_at_pw_base')  || DEFAULTS.pwBase;
+  config.hvBase  = localStorage.getItem('wg_at_hv_base')  || DEFAULTS.hvBase;
+  config.pwTable = localStorage.getItem('wg_at_pw_table') || DEFAULTS.pwTable;
+  config.hvTable = localStorage.getItem('wg_at_hv_table') || DEFAULTS.hvTable;
 }
 function saveSettings() {
   var token   = document.getElementById('s-token').value.trim();
