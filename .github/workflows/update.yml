@@ -51,23 +51,23 @@ jobs:
       # ── Hicksville ──
       - name: Hicksville - Executive dashboard
         env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
         run: cd scripts && python run.py hicksville
       - name: Hicksville - Commission dashboard
         run: python3 scripts/build_commission_dashboard.py hicksville
       - name: Hicksville - Fetch stock levels
         env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
         run: python3 scripts/fetch_stock.py hicksville
       - name: Hicksville - Fetch brand data
         env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
         run: python3 scripts/fetch_brands.py hicksville
       - name: Hicksville - Inventory dashboard
         run: cd scripts && python generate_inventory_dashboard.py hicksville
       - name: Hicksville - Fetch tickets (payment data)
         env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
         run: python3 scripts/fetch_tickets.py hicksville
       - name: Hicksville - Financial dashboard
         run: python3 scripts/build_financial_dashboard.py hicksville
@@ -85,7 +85,7 @@ jobs:
         run: python3 scripts/fetch_appointments.py
       - name: Hicksville - Fetch appointments
         env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
         run: python3 scripts/fetch_appointments.py hicksville
 
       # ── Booking Anomalies ──

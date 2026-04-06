@@ -52,9 +52,15 @@ STORES = {
 
 
 def get_store(name="port-washington"):
-    """Get store config by name. Token from env var FRANPOS_TOKEN overrides stored token."""
-    store = STORES[name]
-    env_token = os.environ.get("FRANPOS_TOKEN")
+    """Get store config by name. Token from env var overrides stored token.
+    Checks FRANPOS_TOKEN_HV for hicksville, FRANPOS_TOKEN for port-washington.
+    Falls back to FRANPOS_TOKEN if store-specific var not set."""
+    import copy
+    store = copy.copy(STORES[name])
+    if name == "hicksville":
+        env_token = os.environ.get("FRANPOS_TOKEN_HV") or os.environ.get("FRANPOS_TOKEN")
+    else:
+        env_token = os.environ.get("FRANPOS_TOKEN_PW") or os.environ.get("FRANPOS_TOKEN")
     if env_token:
         store.token = env_token
     return store
