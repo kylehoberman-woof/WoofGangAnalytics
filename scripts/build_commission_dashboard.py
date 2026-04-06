@@ -659,6 +659,28 @@ tr:hover td{{background:#fafaf8!important}}
 .header .subtitle{{font-size:1rem;font-weight:400;opacity:0.9;position:relative}}
 .header .brand-tag{{display:inline-block;background:#C4276E;color:white;padding:4px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:12px;position:relative}}
 .header-timestamp{{position:absolute;top:12px;right:20px;font-size:0.78rem;opacity:0.85;font-weight:400;z-index:1}}
+.adj-overlay{{position:fixed;inset:0;background:rgba(0,0,0,0.42);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}}
+.adj-overlay.hidden{{display:none}}
+.adj-modal{{background:white;border-radius:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.18)}}
+.adj-modal-hdr{{padding:18px 22px 12px;border-bottom:1px solid #eee}}
+.adj-modal-hdr h3{{font-size:1rem;font-weight:800;margin:0;color:#1a1a2e}}
+.adj-modal-body{{padding:16px 22px}}
+.adj-fg{{margin-bottom:13px}}
+.adj-fg label{{display:block;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:4px}}
+.adj-fg input,.adj-fg textarea{{width:100%;padding:8px 11px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem;box-sizing:border-box}}
+.adj-fg input:focus,.adj-fg textarea:focus{{outline:none;border-color:#C4276E}}
+.adj-fg textarea{{resize:vertical;min-height:52px}}
+.adj-orig{{font-size:0.8rem;color:#999;margin-top:3px}}
+.adj-modal-actions{{padding:10px 22px 18px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}}
+.adj-save-btn{{padding:9px 22px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.87rem;font-weight:700;cursor:pointer}}
+.adj-save-btn:hover{{background:#a31f5b}}
+.adj-save-btn:disabled{{opacity:.5;cursor:not-allowed}}
+.adj-cancel-btn{{padding:9px 18px;background:white;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.87rem;font-weight:600;cursor:pointer;color:#888}}
+.adj-clear-btn{{padding:9px 18px;background:white;border:2px solid #e53935;border-radius:8px;font-family:inherit;font-size:0.87rem;font-weight:600;cursor:pointer;color:#e53935}}
+.adj-clear-btn:hover{{background:#ffebee}}
+.adj-tag{{font-size:0.68rem;padding:1px 5px;border-radius:5px;font-weight:700;background:#fff3e0;color:#e65100;margin-left:5px;vertical-align:middle}}
+.adj-edit-btn{{padding:1px 5px;border-radius:5px;border:1px solid #ccc;background:#fff;color:#aaa;font-size:0.7rem;cursor:pointer;margin-left:5px;vertical-align:middle}}
+.adj-edit-btn:hover{{border-color:#C4276E;color:#C4276E}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -849,8 +871,10 @@ function groomerBadge(g) {{
 
 // ── Overrides system (Supabase) ──────────────────────────────────────────────
 var _overrides = {{}};
+var _adjMap = {{}};  // _adjMap[groomer][date][type] = corrected_amount
 var _sbUrl = '{{supabase_url}}';
 var _sbKey = '{{supabase_key}}';
+var _storeKey = '{_store_name}';
 var _sbHeaders = {{
   'apikey': _sbKey,
   'Authorization': 'Bearer ' + _sbKey,
@@ -859,20 +883,25 @@ var _sbHeaders = {{
 }};
 
 function _loadOverrides() {{
-  fetch(_sbUrl + '/rest/v1/guarantee_overrides?select=groomer_name,override_date,waived', {{
+  var p1 = fetch(_sbUrl + '/rest/v1/guarantee_overrides?select=groomer_name,override_date,waived', {{
     headers: {{ 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey }}
-  }})
-  .then(function(r) {{ return r.ok ? r.json() : []; }})
-  .then(function(rows) {{
+  }}).then(function(r) {{ return r.ok ? r.json() : []; }}).catch(function() {{ return []; }});
+  var p2 = fetch(_sbUrl + '/rest/v1/commission_adjustments?select=groomer_name,adj_date,adj_type,corrected_amount&store_key=eq.' + encodeURIComponent(_storeKey), {{
+    headers: {{ 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey }}
+  }}).then(function(r) {{ return r.ok ? r.json() : []; }}).catch(function() {{ return []; }});
+  Promise.all([p1, p2]).then(function(results) {{
     _overrides = {{}};
-    rows.forEach(function(row) {{
-      if (row.waived) {{
-        _overrides['guar_override_' + row.override_date + '_' + row.groomer_name] = true;
-      }}
+    results[0].forEach(function(row) {{
+      if (row.waived) _overrides['guar_override_' + row.override_date + '_' + row.groomer_name] = true;
+    }});
+    _adjMap = {{}};
+    results[1].forEach(function(row) {{
+      if (!_adjMap[row.groomer_name]) _adjMap[row.groomer_name] = {{}};
+      if (!_adjMap[row.groomer_name][row.adj_date]) _adjMap[row.groomer_name][row.adj_date] = {{}};
+      _adjMap[row.groomer_name][row.adj_date][row.adj_type] = parseFloat(row.corrected_amount);
     }});
     renderPayPeriod(document.getElementById('pp-select').value);
-  }})
-  .catch(function() {{
+  }}).catch(function() {{
     renderPayPeriod(document.getElementById('pp-select').value);
   }});
 }}
@@ -880,6 +909,9 @@ _loadOverrides();
 
 function getOverride(key) {{
   return _overrides[key] === true;
+}}
+function getAdj(g, date, type) {{
+  return (_adjMap[g] && _adjMap[g][date] && _adjMap[g][date][type] !== undefined) ? _adjMap[g][date][type] : null;
 }}
 
 function _parseOverrideKey(key) {{
@@ -969,21 +1001,22 @@ function renderPayPeriod(ppId) {{
   GROOMERS.forEach(function(g) {{
     var d = data[g]; if (!d) return;
     totDisc += (d.disc || 0);
-    var adjPaid = d.paid, adjTotal = d.total;
-    if (GUARANTEES[g] && d.daily) {{
-      adjPaid = 0; adjTotal = 0;
+    var adjPaid = 0, adjTotal = 0, adjTips = 0;
+    if (d.daily && d.daily.length) {{
       d.daily.forEach(function(day) {{
         var guar = getGuarRate(g, day.date);
         var overrideKey = 'guar_override_'+day.date+'_'+g;
         var overridden = getOverride(overrideKey);
         var guarActive = guar > 0 && day.guar_applied && !overridden;
-        var p = guarActive ? Math.max(day.comm, guar) : day.comm;
-        adjPaid += p; adjTotal += p + day.tips;
+        var commVal = getAdj(g, day.date, 'commission'); if (commVal === null) commVal = day.comm;
+        var tipsVal = getAdj(g, day.date, 'tip');        if (tipsVal === null) tipsVal = day.tips;
+        var p = guarActive ? Math.max(commVal, guar) : commVal;
+        adjPaid += p; adjTips += tipsVal; adjTotal += p + tipsVal;
       }});
-      // add tip-only days
-      adjTotal += (d.tips - (d.daily ? d.daily.reduce(function(a,b){{return a+b.tips;}},0) : 0));
+    }} else {{
+      adjPaid = d.paid; adjTips = d.tips; adjTotal = d.total;
     }}
-    totRev += d.rev; totPaid += adjPaid; totTips += d.tips; totTotal += adjTotal;
+    totRev += d.rev; totPaid += adjPaid; totTips += adjTips; totTotal += adjTotal;
     totGuar += d.guar_days;
   }});
   totRev += (data._bather_rev || 0);
@@ -1021,18 +1054,20 @@ function renderPayPeriod(ppId) {{
   var rows = '';
   sorted.forEach(function(g) {{
     var d = data[g]; if (!d || (d.rev===0 && d.tips===0)) return;
-    // Recompute paid/total respecting guarantee overrides (same logic as totals loop)
-    var adjPaid = d.paid, adjTotal = d.total;
-    if (GUARANTEES[g] && d.daily) {{
-      adjPaid = 0; adjTotal = 0;
+    // Recompute paid/total respecting guarantee overrides + commission adjustments
+    var adjPaid = 0, adjTotal = 0;
+    if (d.daily && d.daily.length) {{
       d.daily.forEach(function(day) {{
         var guar = getGuarRate(g, day.date);
         var overrideKey = 'guar_override_'+day.date+'_'+g;
         var guarActive = guar > 0 && day.guar_applied && !getOverride(overrideKey);
-        var p = guarActive ? Math.max(day.comm, guar) : day.comm;
-        adjPaid += p; adjTotal += p + day.tips;
+        var commVal = getAdj(g, day.date, 'commission'); if (commVal === null) commVal = day.comm;
+        var tipsVal = getAdj(g, day.date, 'tip');        if (tipsVal === null) tipsVal = day.tips;
+        var p = guarActive ? Math.max(commVal, guar) : commVal;
+        adjPaid += p; adjTotal += p + tipsVal;
       }});
-      adjTotal += (d.tips - d.daily.reduce(function(a,b){{return a+b.tips;}},0));
+    }} else {{
+      adjPaid = d.paid; adjTotal = d.total;
     }}
     var guarNote = d.guar_days ? '<br><span style="font-size:0.72rem;color:#1565c0">↑ '+d.guar_days+' guar days</span>' : '';
     var avgDay = d.working_days ? fc(adjTotal/d.working_days) : '—';
@@ -1061,8 +1096,12 @@ function renderPayPeriod(ppId) {{
       var overrideKey = 'guar_override_'+day.date+'_'+g;
       var overridden = getOverride(overrideKey);
       var guarActive = guar > 0 && day.guar_applied && !overridden;
-      var actualPaid = guarActive ? Math.max(day.comm, guar) : day.comm;
-      var actualTotal = actualPaid + day.tips;
+      var commAdj = getAdj(g, day.date, 'commission');
+      var tipsAdj = getAdj(g, day.date, 'tip');
+      var commVal = (commAdj !== null) ? commAdj : day.comm;
+      var tipsVal = (tipsAdj !== null) ? tipsAdj : day.tips;
+      var actualPaid = guarActive ? Math.max(commVal, guar) : commVal;
+      var actualTotal = actualPaid + tipsVal;
       var gflag = '';
       if (day.guar_applied) {{
         if (overridden) {{
@@ -1073,14 +1112,18 @@ function renderPayPeriod(ppId) {{
                   '<button onclick="toggleGuar(&quot;'+overrideKey+'&quot;,&quot;'+ppId+'&quot;)" style="margin-left:6px;font-size:0.7rem;padding:1px 6px;border-radius:5px;border:1px solid #e57373;background:#fff;color:#e57373;cursor:pointer">waive</button>';
         }}
       }}
+      var commAdjTag = commAdj !== null ? '<span class="adj-tag">adj</span>' : '';
+      var tipsAdjTag = tipsAdj !== null ? '<span class="adj-tag">adj</span>' : '';
+      var editCommBtn = '<button class="adj-edit-btn" onclick="openAdjModal(&quot;'+g+'&quot;,&quot;'+day.date+'&quot;,&quot;commission&quot;,'+day.comm+','+(commAdj!==null?commAdj:'null')+')">✏</button>';
+      var editTipsBtn = '<button class="adj-edit-btn" onclick="openAdjModal(&quot;'+g+'&quot;,&quot;'+day.date+'&quot;,&quot;tip&quot;,'+day.tips+','+(tipsAdj!==null?tipsAdj:'null')+')">✏</button>';
       var dayDisc = (day.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(day.disc)+'</span>' : '—';
       detailRows += '<tr>'+
         '<td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">'+day.date+'</td>'+
         '<td style="text-align:right">'+fc(day.rev)+'</td>'+
         '<td style="text-align:right">'+dayDisc+'</td>'+
         '<td style="text-align:right;color:#888">'+fc(day.comm)+'</td>'+
-        '<td style="text-align:right;color:#1565c0">'+fc(actualPaid)+gflag+'</td>'+
-        '<td style="text-align:right;color:#f57c00">'+fc(day.tips)+'</td>'+
+        '<td style="text-align:right;color:#1565c0">'+fc(actualPaid)+gflag+commAdjTag+editCommBtn+'</td>'+
+        '<td style="text-align:right;color:#f57c00">'+fc(tipsVal)+tipsAdjTag+editTipsBtn+'</td>'+
         '<td style="text-align:right;font-weight:600;color:#C4276E">'+fc(actualTotal)+'</td>'+
         '<td></td></tr>';
     }});
@@ -1345,7 +1388,90 @@ function kpiCard(label, val, color) {{
     '<div style="font-size:0.82rem;color:#888;margin-top:4px">'+label+'</div>'+
     '</div>';
 }}
+
+// ── Commission / Tip Adjustment Modal ────────────────────────────────────────
+var _adjModal = {{g:'', date:'', type:'', original:0}};
+
+function openAdjModal(g, date, type, original, current) {{
+  _adjModal = {{g:g, date:date, type:type, original:original}};
+  document.getElementById('adj-modal-title').textContent =
+    'Adjust ' + (type==='commission'?'Commission':'Tips') + ' \u2014 ' + g + ' on ' + date;
+  document.getElementById('adj-original').textContent = 'FranPOS value: $' + parseFloat(original).toFixed(2);
+  document.getElementById('adj-amount').value = current !== null ? parseFloat(current).toFixed(2) : parseFloat(original).toFixed(2);
+  document.getElementById('adj-note').value = '';
+  document.getElementById('adj-clear-btn').style.display = current !== null ? 'inline-block' : 'none';
+  document.getElementById('adj-overlay').classList.remove('hidden');
+  setTimeout(function() {{
+    var inp = document.getElementById('adj-amount');
+    inp.focus(); inp.select();
+  }}, 50);
+}}
+
+function closeAdjModal() {{
+  document.getElementById('adj-overlay').classList.add('hidden');
+}}
+
+function saveAdj() {{
+  var amount = parseFloat(document.getElementById('adj-amount').value);
+  if (isNaN(amount) || amount < 0) {{ alert('Enter a valid amount (0 or more)'); return; }}
+  var note = document.getElementById('adj-note').value.trim();
+  var btn = document.getElementById('adj-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving\u2026';
+  var hdrs = Object.assign({{}}, _sbHeaders, {{'Prefer': 'return=minimal,resolution=merge-duplicates'}});
+  fetch(_sbUrl + '/rest/v1/commission_adjustments', {{
+    method: 'POST', headers: hdrs,
+    body: JSON.stringify({{
+      store_key: _storeKey,
+      groomer_name: _adjModal.g,
+      adj_date: _adjModal.date,
+      adj_type: _adjModal.type,
+      corrected_amount: amount,
+      note: note || null
+    }})
+  }}).then(function(r) {{
+    btn.disabled = false; btn.textContent = 'Save';
+    if (r.ok || r.status === 201 || r.status === 200) {{ closeAdjModal(); _loadOverrides(); }}
+    else {{ r.text().then(function(t) {{ alert('Save failed: ' + t); }}); }}
+  }}).catch(function(e) {{ btn.disabled = false; btn.textContent = 'Save'; alert('Save failed'); }});
+}}
+
+function clearAdj() {{
+  var btn = document.getElementById('adj-clear-btn');
+  btn.disabled = true;
+  fetch(_sbUrl + '/rest/v1/commission_adjustments?store_key=eq.' + encodeURIComponent(_storeKey) +
+    '&groomer_name=eq.' + encodeURIComponent(_adjModal.g) +
+    '&adj_date=eq.' + _adjModal.date +
+    '&adj_type=eq.' + _adjModal.type, {{
+    method: 'DELETE', headers: _sbHeaders
+  }}).then(function() {{ btn.disabled = false; closeAdjModal(); _loadOverrides(); }})
+    .catch(function() {{ btn.disabled = false; alert('Clear failed'); }});
+}}
 </script>
+
+<!-- Commission/Tip Adjustment Modal -->
+<div class="adj-overlay hidden" id="adj-overlay" onclick="if(event.target===this)closeAdjModal()">
+  <div class="adj-modal">
+    <div class="adj-modal-hdr">
+      <h3 id="adj-modal-title">Adjust Commission</h3>
+      <div class="adj-orig" id="adj-original"></div>
+    </div>
+    <div class="adj-modal-body">
+      <div class="adj-fg">
+        <label>Corrected Amount ($)</label>
+        <input type="number" id="adj-amount" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="adj-fg">
+        <label>Note (optional)</label>
+        <textarea id="adj-note" placeholder="Reason for correction\u2026"></textarea>
+      </div>
+    </div>
+    <div class="adj-modal-actions">
+      <button class="adj-clear-btn" id="adj-clear-btn" onclick="clearAdj()" style="display:none;margin-right:auto">Clear Adjustment</button>
+      <button class="adj-cancel-btn" onclick="closeAdjModal()">Cancel</button>
+      <button class="adj-save-btn" id="adj-save-btn" onclick="saveAdj()">Save</button>
+    </div>
+  </div>
+</div>
 </body></html>'''
 
 # Inject Supabase credentials
