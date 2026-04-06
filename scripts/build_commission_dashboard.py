@@ -581,6 +581,15 @@ _sue_panel = '''<!-- Sue M -->
   <div id="sue-weeks-container"></div>
 </div>''' if _store_name == "port-washington" else ''
 
+# Carol panel - built outside f-string to avoid backslash issues (hicksville only)
+_carol_tab_btn = '<button class="tab" onclick="showTab(\'carol\',this)">Carol</button>' if _store_name == "hicksville" else ''
+_carol_panel = '''<!-- Carol W -->
+<div class="panel" id="panel-carol">
+  <div class="kpi-grid" id="carol-kpis"></div>
+  <div class="info-box">Carol W's weekly pay breakdown. <strong>$100/week</strong> goes on payroll; the remainder is paid off-books via check.</div>
+  <div id="carol-weeks-container"></div>
+</div>''' if _store_name == "hicksville" else ''
+
 if _store_name == "port-washington":
     _mgr_bonus_kpi = f"<div class='kpi' style='border-color:#E91E63;flex:1;min-width:120px'><div class='kpi-val' style='color:#E91E63;font-size:1.4rem'>{fc(ytd_mgr_bonus)}</div><div class='kpi-label'>Bonus (Mar 1)</div></div>" if ytd_mgr_bonus else ""
     _mgr_daily_rows = "".join(
@@ -702,6 +711,7 @@ tr:hover td{{background:#fafaf8!important}}
   <button class="tab" onclick="showTab('pp',this)">Pay Period</button>
   <button class="tab" onclick="showTab('exec',this)">&#128200; Executive</button>
   {_sue_tab_btn}
+  {_carol_tab_btn}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
@@ -789,6 +799,7 @@ tr:hover td{{background:#fafaf8!important}}
 </div>
 
 {_sue_panel}
+{_carol_panel}
 
 <div class="panel" id="panel-exec">
   <div style="padding:32px">
@@ -846,6 +857,7 @@ function showTab(id, btn) {{
   if (id === 'pp') renderPayPeriod(sel.value);
   if (id === 'exec') renderExec();
   if (id === 'sue') renderSue();
+  if (id === 'carol') renderCarol();
 }}
 
 function toggleDetail(id, btn) {{
@@ -1280,6 +1292,84 @@ function renderSue() {{
   }});
   html += '</tbody></table></div></div>';
   document.getElementById('sue-weeks-container').innerHTML = html;
+}}
+
+// ── Carol W Weekly Payroll Tab (Hicksville) ───────────────────────────────
+var _carolRendered = false;
+function renderCarol() {{
+  if (_carolRendered) return;
+  _carolRendered = true;
+
+  var CAROL_PAYROLL = 100; // $100/week goes on payroll
+
+  // Build pay period label map from the select element
+  var sel = document.getElementById('pp-select');
+  var labelMap = {{}};
+  for (var i = 0; i < sel.options.length; i++) {{
+    labelMap[sel.options[i].value] = sel.options[i].text;
+  }}
+
+  // Gather Carol's data across all pay periods (PP_DATA is most-recent-first)
+  var carolPeriods = [];
+  var totalEarned = 0, totalPayroll = 0, totalOffBooks = 0;
+
+  Object.keys(PP_DATA).forEach(function(ppId) {{
+    var d = PP_DATA[ppId]['Carol W'];
+    if (!d || (d.total <= 0 && d.rev <= 0)) return;
+    var total = d.total; // comm paid + tips
+    var payroll = CAROL_PAYROLL;
+    var offBook = total - CAROL_PAYROLL;
+    totalEarned  += total;
+    totalPayroll += payroll;
+    totalOffBooks += offBook;
+    carolPeriods.push({{
+      label: labelMap[ppId] || ppId,
+      rev:  d.rev,
+      comm: d.paid,
+      tips: d.tips,
+      total: total,
+      payroll: payroll,
+      offBook: offBook,
+      days: d.working_days
+    }});
+  }});
+
+  // KPI cards
+  document.getElementById('carol-kpis').innerHTML =
+    '<div class="kpi green"><div class="kpi-val">'+fc(totalEarned)+'</div><div class="kpi-label">Total Earned</div></div>'+
+    '<div class="kpi blue"><div class="kpi-val">'+fc(totalPayroll)+'</div><div class="kpi-label">Total on Payroll</div></div>'+
+    '<div class="kpi orange"><div class="kpi-val">'+fc(totalOffBooks)+'</div><div class="kpi-label">Total Off-Books (Check)</div></div>'+
+    '<div class="kpi grey"><div class="kpi-val">'+carolPeriods.length+'</div><div class="kpi-label">Working Weeks</div></div>';
+
+  // Table
+  var html = '<div class="card"><div class="stitle">Weekly Payroll Breakdown — Carol W</div><div class="tbl-wrap"><table>'+
+    '<thead><tr>'+
+    '<th>Pay Period</th>'+
+    '<th style="text-align:right">Days</th>'+
+    '<th style="text-align:right">Groom Revenue</th>'+
+    '<th style="text-align:right">Commission</th>'+
+    '<th style="text-align:right">Tips</th>'+
+    '<th style="text-align:right">Total Earned</th>'+
+    '<th style="text-align:right">On Payroll</th>'+
+    '<th style="text-align:right">Off-Books (Check)</th>'+
+    '</tr></thead><tbody>';
+
+  carolPeriods.forEach(function(p) {{
+    var offColor = p.offBook < 0 ? '#e53935' : '#F57C00';
+    html += '<tr>'+
+      '<td style="font-weight:600">'+p.label+'</td>'+
+      '<td style="text-align:right">'+p.days+'</td>'+
+      '<td style="text-align:right">'+fc(p.rev)+'</td>'+
+      '<td style="text-align:right;color:#388E3C">'+fc(p.comm)+'</td>'+
+      '<td style="text-align:right;color:#F57C00">'+(p.tips > 0 ? fc(p.tips) : '—')+'</td>'+
+      '<td style="text-align:right;font-weight:700">'+fc(p.total)+'</td>'+
+      '<td style="text-align:right;color:#1976D2">'+fc(p.payroll)+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:'+offColor+'">'+fc(p.offBook)+'</td>'+
+      '</tr>';
+  }});
+
+  html += '</tbody></table></div></div>';
+  document.getElementById('carol-weeks-container').innerHTML = html;
 }}
 
 // ── Executive Dashboard ───────────────────────────────────────────────────
