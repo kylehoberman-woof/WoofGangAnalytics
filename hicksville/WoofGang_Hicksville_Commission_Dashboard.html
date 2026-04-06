@@ -48,7 +48,7 @@ tr:hover td{background:#fafaf8!important}
 </head>
 <body>
 <div class="header">
-    <div class="header-timestamp">Updated April 06, 2026 at 05:10 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
+    <div class="header-timestamp">Updated April 06, 2026 at 12:09 PM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
     <h1>Woof Gang Hicksville</h1>
     <div class="subtitle">Groomer Commission Dashboard</div>
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
@@ -2085,8 +2085,21 @@ function renderPayPeriod(ppId) {
   var rows = '';
   sorted.forEach(function(g) {
     var d = data[g]; if (!d || (d.rev===0 && d.tips===0)) return;
+    // Recompute paid/total respecting guarantee overrides (same logic as totals loop)
+    var adjPaid = d.paid, adjTotal = d.total;
+    if (GUARANTEES[g] && d.daily) {
+      adjPaid = 0; adjTotal = 0;
+      d.daily.forEach(function(day) {
+        var guar = getGuarRate(g, day.date);
+        var overrideKey = 'guar_override_'+day.date+'_'+g;
+        var guarActive = guar > 0 && day.guar_applied && !getOverride(overrideKey);
+        var p = guarActive ? Math.max(day.comm, guar) : day.comm;
+        adjPaid += p; adjTotal += p + day.tips;
+      });
+      adjTotal += (d.tips - d.daily.reduce(function(a,b){return a+b.tips;},0));
+    }
     var guarNote = d.guar_days ? '<br><span style="font-size:0.72rem;color:#1565c0">↑ '+d.guar_days+' guar days</span>' : '';
-    var avgDay = d.working_days ? fc(d.total/d.working_days) : '—';
+    var avgDay = d.working_days ? fc(adjTotal/d.working_days) : '—';
     var discCell = (d.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(d.disc)+'</span>' : '—';
     rows += '<tr>'+
       '<td>'+groomerBadge(g)+'</td>'+
@@ -2094,9 +2107,9 @@ function renderPayPeriod(ppId) {
       '<td style="text-align:right">'+fc(d.rev)+'</td>'+
       '<td style="text-align:right">'+discCell+'</td>'+
       '<td style="text-align:right;color:#888">'+fc(d.comm)+'</td>'+
-      '<td style="text-align:right;color:#1565c0;font-weight:600">'+fc(d.paid)+guarNote+'</td>'+
+      '<td style="text-align:right;color:#1565c0;font-weight:600">'+fc(adjPaid)+guarNote+'</td>'+
       '<td style="text-align:right;color:#f57c00">'+fc(d.tips)+'</td>'+
-      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(d.total)+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(adjTotal)+'</td>'+
       '<td style="text-align:right;color:#888;font-size:0.82rem">'+avgDay+'</td>'+
       '</tr>';
   });
