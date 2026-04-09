@@ -690,6 +690,29 @@ tr:hover td{{background:#fafaf8!important}}
 .adj-tag{{font-size:0.68rem;padding:1px 5px;border-radius:5px;font-weight:700;background:#fff3e0;color:#e65100;margin-left:5px;vertical-align:middle}}
 .adj-edit-btn{{padding:1px 5px;border-radius:5px;border:1px solid #ccc;background:#fff;color:#aaa;font-size:0.7rem;cursor:pointer;margin-left:5px;vertical-align:middle}}
 .adj-edit-btn:hover{{border-color:#C4276E;color:#C4276E}}
+
+/* ── Print Sheet styles ── */
+@media print {{
+  /* Hide everything except the print sheet card */
+  body * {{ visibility: hidden !important; }}
+  #print-sheet-card, #print-sheet-card * {{ visibility: visible !important; }}
+  #print-sheet-card {{
+    position: absolute !important;
+    left: 0 !important; top: 0 !important; right: 0 !important;
+    width: 100% !important;
+    margin: 0 !important; padding: 24px 32px !important;
+    box-shadow: none !important; border-radius: 0 !important;
+    background: white !important;
+    page-break-inside: avoid;
+  }}
+  .print-hide {{ display: none !important; }}
+  .print-sheet-header {{ border-top-color: #C4276E !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
+  #print-sheet-body table {{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
+  #print-sheet-body table th {{ background: #FDF0F5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: #C4276E !important; }}
+  #print-sheet-body table tfoot tr {{ background: #FDF0F5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
+  body {{ background: white !important; padding: 0 !important; margin: 0 !important; }}
+  @page {{ margin: 0.5in; }}
+}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -793,6 +816,20 @@ tr:hover td{{background:#fafaf8!important}}
         <tbody id="cindy-pp-tbody"></tbody>
       </table></div>
     </div>
+  </div>
+
+  <!-- ── Printable Groomer Sheet ── -->
+  <div class="card no-print-shadow" id="print-sheet-card">
+    <div class="stitle print-hide">&#128424; Printable Groomer Sheet</div>
+    <div class="print-controls print-hide" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+      <label style="font-size:0.82rem;font-weight:600;color:#666">Groomer:</label>
+      <select id="print-groomer-select" onchange="renderPrintSheet()" style="padding:8px 14px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:600;min-width:180px">
+        <option value="">Select a groomer…</option>
+      </select>
+      <button onclick="window.print()" id="print-btn" style="padding:9px 20px;background:#C4276E;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:0.87rem;font-weight:700;cursor:pointer">&#128424; Print Sheet</button>
+      <span style="font-size:0.78rem;color:#999;font-style:italic">Select a groomer to generate their daily pay period sheet</span>
+    </div>
+    <div id="print-sheet-body"></div>
   </div>
 </div>
 
@@ -1243,6 +1280,124 @@ function renderPayPeriod(ppId) {{
     }});
     document.getElementById('cindy-pp-tbody').innerHTML = cindyRows;
   }}
+
+  // Populate print sheet groomer dropdown with groomers who have activity this pay period
+  _populatePrintGroomerSelect(ppId);
+  // Re-render print sheet if a groomer is already selected
+  if (document.getElementById('print-groomer-select').value) {{
+    renderPrintSheet();
+  }} else {{
+    document.getElementById('print-sheet-body').innerHTML = '';
+  }}
+}}
+
+// ── Print Sheet: per-groomer daily pay period breakdown ──────────────────
+function _populatePrintGroomerSelect(ppId) {{
+  var data = PP_DATA[ppId];
+  if (!data) return;
+  var sel = document.getElementById('print-groomer-select');
+  var prior = sel.value;
+  // Only include groomers with daily activity in this pay period
+  var active = GROOMERS.filter(function(g) {{
+    var d = data[g];
+    return d && d.daily && d.daily.length > 0;
+  }});
+  var opts = '<option value="">Select a groomer…</option>';
+  active.forEach(function(g) {{
+    opts += '<option value="'+g+'"'+(g===prior?' selected':'')+'>'+g+'</option>';
+  }});
+  sel.innerHTML = opts;
+}}
+
+function renderPrintSheet() {{
+  var DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var ppId = document.getElementById('pp-select').value;
+  var groomer = document.getElementById('print-groomer-select').value;
+  var body = document.getElementById('print-sheet-body');
+  if (!groomer || !ppId) {{ body.innerHTML = ''; return; }}
+
+  var data = PP_DATA[ppId];
+  var sel = document.getElementById('pp-select');
+  var ppLabel = sel.options[sel.selectedIndex].text;
+  var d = data[groomer];
+  if (!d) {{ body.innerHTML = '<div style="padding:20px;text-align:center;color:#999">No data for '+groomer+' in this pay period.</div>'; return; }}
+
+  // Recompute totals respecting adjustments + guarantee overrides (matches main renderPayPeriod logic)
+  var rows = '';
+  var sumRev=0, sumDisc=0, sumComm=0, sumPaid=0, sumTips=0, sumTotal=0;
+  var dayCount = 0;
+  (d.daily || []).forEach(function(day) {{
+    var guar = getGuarRate(groomer, day.date);
+    var overrideKey = 'guar_override_'+day.date+'_'+groomer;
+    var overridden = getOverride(overrideKey);
+    var guarActive = guar > 0 && day.guar_applied && !overridden;
+    var commVal = getAdj(groomer, day.date, 'commission'); if (commVal === null) commVal = day.comm;
+    var tipsVal = getAdj(groomer, day.date, 'tip'); if (tipsVal === null) tipsVal = day.tips;
+    var p = guarActive ? Math.max(commVal, guar) : commVal;
+    var tot = p + tipsVal;
+    sumRev += day.rev; sumDisc += (day.disc||0); sumComm += commVal;
+    sumPaid += p; sumTips += tipsVal; sumTotal += tot;
+    dayCount++;
+    var dt = new Date(day.date+'T12:00:00');
+    var dayName = DAYS[dt.getDay()];
+    var guarTag = guarActive && p > commVal ? ' <span style="font-size:0.7rem;color:#1565c0">(guar)</span>' : '';
+    rows += '<tr>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee">'+day.date+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;color:#888">'+dayName+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">'+fc(day.rev)+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;color:'+((day.disc||0)>0?'#e53935':'#ccc')+'">'+((day.disc||0)>0?'-'+fc(day.disc):'—')+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">'+fc(commVal)+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:600;color:#1565c0">'+fc(p)+guarTag+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;color:#f57c00">'+fc(tipsVal)+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:700;color:#2E7D32">'+fc(tot)+'</td>'+
+      '</tr>';
+  }});
+
+  body.innerHTML =
+    '<div class="print-sheet-header" style="border-top:3px solid #C4276E;border-bottom:1px solid #eee;padding:18px 2px 14px;margin-bottom:16px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">'+
+        '<div>'+
+          '<div style="font-size:0.78rem;color:#999;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Woof Gang {_store_display} — Groomer Pay Sheet</div>'+
+          '<div style="font-size:1.6rem;font-weight:800;color:#1a1a2e;margin-top:4px">'+groomer+'</div>'+
+          '<div style="font-size:0.9rem;color:#666;margin-top:2px">Pay period: <strong>'+ppLabel+'</strong></div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Total Pay</div>'+
+          '<div style="font-size:2rem;font-weight:800;color:#2E7D32">'+fc(sumTotal)+'</div>'+
+          '<div style="font-size:0.78rem;color:#666">'+dayCount+' working day'+(dayCount===1?'':'s')+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:0.88rem">'+
+      '<thead>'+
+        '<tr style="background:#FDF0F5">'+
+          '<th style="padding:10px 12px;text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Date</th>'+
+          '<th style="padding:10px 12px;text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Day</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Revenue</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Discounts</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">50% Comm</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Paid</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Tips</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Day Total</th>'+
+        '</tr>'+
+      '</thead>'+
+      '<tbody>'+rows+'</tbody>'+
+      '<tfoot>'+
+        '<tr style="background:#FDF0F5">'+
+          '<td colspan="2" style="padding:12px;font-weight:700;color:#1a1a2e;border-top:2px solid #C4276E">TOTAL ('+dayCount+' days)</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:700;border-top:2px solid #C4276E">'+fc(sumRev)+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:700;color:'+(sumDisc>0?'#e53935':'#ccc')+';border-top:2px solid #C4276E">'+(sumDisc>0?'-'+fc(sumDisc):'—')+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:700;border-top:2px solid #C4276E">'+fc(sumComm)+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:800;color:#1565c0;border-top:2px solid #C4276E">'+fc(sumPaid)+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:800;color:#f57c00;border-top:2px solid #C4276E">'+fc(sumTips)+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:800;color:#2E7D32;font-size:1.05rem;border-top:2px solid #C4276E">'+fc(sumTotal)+'</td>'+
+        '</tr>'+
+      '</tfoot>'+
+    '</table></div>'+
+    '<div class="print-footer" style="margin-top:20px;padding-top:14px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-size:0.72rem;color:#999">'+
+      '<div>Generated '+new Date().toLocaleString()+'</div>'+
+      '<div>Woof Gang Bakery &amp; Grooming — {_store_display}</div>'+
+    '</div>';
 }}
 
 // Init pay period on load
