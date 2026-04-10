@@ -403,13 +403,20 @@ function loadItems() {
 }
 
 function patchRecord(id, fields, store) {
-  return fetch(atBaseUrl(store) + '/' + id, {
+  var url = atBaseUrl(store) + '/' + id;
+  var payload = JSON.stringify({ fields: fields });
+  console.log('[PATCH]', url, payload);
+  return fetch(url, {
     method: 'PATCH',
     headers: atHeaders(),
-    body: JSON.stringify({ fields: fields })
+    body: payload
   }).then(function(r) {
-    if (!r.ok) return r.json().then(function(e){ throw new Error(e.error ? e.error.message : JSON.stringify(e)); });
-    return r.json();
+    console.log('[PATCH response]', r.status, r.statusText);
+    return r.json().then(function(data) {
+      console.log('[PATCH data]', JSON.stringify(data));
+      if (!r.ok) throw new Error(data.error ? data.error.message : JSON.stringify(data));
+      return data;
+    });
   });
 }
 
