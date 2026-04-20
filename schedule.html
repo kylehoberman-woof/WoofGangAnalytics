@@ -178,6 +178,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .cov-pto-warn{font-size:0.7rem;color:#F57F17;font-weight:600;margin-top:4px}
 .cov-summary-card{padding:10px 16px;border-radius:10px;font-size:0.8rem;font-weight:700;background:white;box-shadow:0 1px 4px rgba(0,0,0,0.07)}
 .rec-store-sel{display:flex;gap:4px;margin-left:4px}
+.rec-weeks-sel{padding:5px 8px;border:2px solid #e8e8e8;border-radius:6px;font-family:inherit;font-size:0.78rem;font-weight:600;color:#1a1a2e;background:white;cursor:pointer;margin-left:4px}
+.rec-weeks-sel:focus{outline:none;border-color:#C4276E}
+.rec-weeks-sel.biweekly{border-color:#C4276E;background:#FDF0F5;color:#C4276E}
+.week-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:0.72rem;font-weight:800;letter-spacing:0.04em;margin-left:8px;vertical-align:middle}
+.week-badge.a{background:#FDF0F5;color:#C4276E;border:1px solid #C4276E}
+.week-badge.b{background:#E8F5F3;color:#1B6B6B;border:1px solid #1B6B6B}
 .rec-store-btn{padding:3px 9px;border:2px solid #eee;border-radius:6px;font-size:0.7rem;font-weight:800;cursor:pointer;background:white;color:#aaa;transition:all 0.15s}
 .rec-store-btn.active{border-color:#C4276E;background:#C4276E;color:white}
 .rec-store-btn[data-store="hicksville"].active{border-color:#1565C0;background:#1565C0}
@@ -446,6 +452,17 @@ var DAY_KEYS=['mon','tue','wed','thu','fri','sat','sun'];
 var DAY_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+/* Bi-weekly anchor — Monday Feb 23, 2026 = Week A. Aligns with PW pay period anchor. */
+var BIWEEKLY_ANCHOR=new Date(2026,1,23); // month is 0-indexed (1=Feb)
+function weekLetterFor(d){
+  var monday=getMonday(d);
+  monday.setHours(0,0,0,0);
+  var anchor=new Date(BIWEEKLY_ANCHOR); anchor.setHours(0,0,0,0);
+  var weeks=Math.round((monday-anchor)/(7*86400000));
+  // Use modulo that handles negatives correctly (weeks may be negative for dates before anchor)
+  return ((weeks%2)+2)%2===0 ? 'A' : 'B';
+}
+
 /* ════════════════════════════════════════
    STORE HOLIDAYS (both stores closed)
 ════════════════════════════════════════ */
@@ -668,7 +685,9 @@ function renderWeek(){
   var today=new Date(), monday=getMonday(today);
   var ws=addDays(monday,weekOffset*7), we=addDays(ws,6);
   var sameM=ws.getMonth()===we.getMonth();
-  document.getElementById('week-label').textContent=fmtShort(ws)+' – '+(sameM?we.getDate():fmtShort(we))+', '+we.getFullYear();
+  var wkLetter=weekLetterFor(ws);
+  var dateText=fmtShort(ws)+' – '+(sameM?we.getDate():fmtShort(we))+', '+we.getFullYear();
+  document.getElementById('week-label').innerHTML=esc(dateText)+' <span class="week-badge '+(wkLetter==='A'?'a':'b')+'" title="Bi-weekly anchor: Mon Feb 23, 2026 = Week A">Week '+wkLetter+'</span>';
   document.getElementById('week-summary').innerHTML='<span style="font-size:0.78rem;color:#bbb">Loading…</span>';
   document.getElementById('week-grid').innerHTML='';
 
@@ -855,13 +874,18 @@ function fillRecurring(){
   if(currentStore==='all'){showToast('Switch to a specific store to fill shifts','error');return;}
   var today=new Date(), monday=getMonday(today);
   var ws=addDays(monday,weekOffset*7);
+  var wkLetter=weekLetterFor(ws);  // "A" or "B" for the week being filled
   var posts=[];
+  var skippedBiweekly=0;
 
   storeEmployees().forEach(function(e){
     var rec=e.recurring||{};
     DAY_KEYS.forEach(function(key,i){
       var r=rec[key];
       if(!r) return;
+      // Bi-weekly filter: if this day is restricted to a specific week, skip when week doesn't match
+      var rWeeks=r.weeks||'all';
+      if(rWeeks!=='all' && rWeeks!==wkLetter){ skippedBiweekly++; return; }
       var iso=toISO(addDays(ws,i));
       if(isHoliday(iso)) return;
       var existing=shifts[iso]||[];
@@ -870,12 +894,16 @@ function fillRecurring(){
     });
   });
 
-  if(!posts.length){showToast('No recurring shifts to fill');return;}
+  if(!posts.length){
+    var msg=skippedBiweekly>0?'No recurring shifts to fill (Week '+wkLetter+' — '+skippedBiweekly+' bi-weekly skipped)':'No recurring shifts to fill';
+    showToast(msg);return;
+  }
   startLoad();
   Promise.all(posts.map(function(p){return sbPost('schedule_shifts',p);})).then(function(){
     endLoad();
     renderWeek();
-    showToast(posts.length+' shift'+(posts.length!==1?'s':'')+' filled');
+    var wkNote=skippedBiweekly>0?' (Week '+wkLetter+')':'';
+    showToast(posts.length+' shift'+(posts.length!==1?'s':'')+' filled'+wkNote);
   }).catch(function(){endLoad();showToast('Fill failed','error');});
 }
 
@@ -1391,6 +1419,7 @@ function openRecModal(id){
   document.getElementById('rec-rows').innerHTML=DAY_KEYS.map(function(key,i){
     var on=rec[key]!=null, st=(rec[key]&&rec[key].start)||'09:00', en=(rec[key]&&rec[key].end)||'17:00';
     var dayStore=(rec[key]&&rec[key].store)||'port-washington';
+    var dayWeeks=(rec[key]&&rec[key].weeks)||'all';
     var storeEl='';
     if(isBoth){
       storeEl='<div class="rec-store-sel" id="rss-'+key+'"'+(on?'':' style="display:none"')+'>'+
@@ -1398,6 +1427,12 @@ function openRecModal(id){
         '<button type="button" class="rec-store-btn'+(dayStore==='hicksville'?' active':'')+'" data-store="hicksville" onclick="setRecStore(\''+key+'\',\'hicksville\')">HV</button>'+
         '</div>';
     }
+    var weeksSelectCls='rec-weeks-sel'+(dayWeeks!=='all'?' biweekly':'');
+    var weeksEl='<select class="'+weeksSelectCls+'" id="rw-'+key+'"'+(on?'':' style="display:none"')+' onchange="onRecWeeksChange(\''+key+'\')">'+
+      '<option value="all"'+(dayWeeks==='all'?' selected':'')+'>Every week</option>'+
+      '<option value="A"'+(dayWeeks==='A'?' selected':'')+'>Week A only</option>'+
+      '<option value="B"'+(dayWeeks==='B'?' selected':'')+'>Week B only</option>'+
+      '</select>';
     return '<div class="rec-row">'+
       '<div class="rec-day">'+DAY_SHORT[i]+'</div>'+
       '<button class="rec-toggle'+(on?' on':'')+'" id="rt-'+key+'" onclick="toggleRecDay(\''+key+'\','+isBoth+')"></button>'+
@@ -1406,6 +1441,7 @@ function openRecModal(id){
         '<span style="font-size:0.8rem;color:#aaa">to</span>'+
         buildTimeSelectHtml('re-'+key,en,!on)+
       '</div>'+
+      weeksEl+
       storeEl+
       (!on?'<div class="rec-off">Day off</div>':'')+
       '</div>';
@@ -1432,6 +1468,12 @@ function toggleRecDay(key, isBoth){
   if(isOn){if(!offEl){var d=document.createElement('div');d.className='rec-off';d.textContent='Day off';row.appendChild(d);}}
   else{if(offEl)offEl.remove();}
   if(isBoth){var storeEl=document.getElementById('rss-'+key);if(storeEl)storeEl.style.display=isOn?'none':'flex';}
+  var weeksEl=document.getElementById('rw-'+key);if(weeksEl)weeksEl.style.display=isOn?'none':'';
+}
+function onRecWeeksChange(key){
+  var sel=document.getElementById('rw-'+key);
+  if(!sel) return;
+  sel.classList.toggle('biweekly', sel.value!=='all');
 }
 function closeRecModal(){document.getElementById('rec-overlay').classList.add('hidden');recEmpId=null;}
 function saveRecurring(){
@@ -1442,6 +1484,9 @@ function saveRecurring(){
     if(on){
       var entry={start:document.getElementById('rs-'+key).value,end:document.getElementById('re-'+key).value};
       if(isBoth) entry.store=getRecStore(key);
+      var weeksSel=document.getElementById('rw-'+key);
+      var weeksVal=weeksSel?weeksSel.value:'all';
+      if(weeksVal && weeksVal!=='all') entry.weeks=weeksVal;  // only persist if not default
       rec[key]=entry;
     } else {
       rec[key]=null;
