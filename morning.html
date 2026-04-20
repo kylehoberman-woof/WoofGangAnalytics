@@ -88,6 +88,14 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .ql-btn:hover{background:#C4276E;color:white}
 
 .loading{padding:40px;text-align:center;color:#888}
+
+/* Executive Summary */
+.exec-summary{background:linear-gradient(135deg,#fff,#FDF0F5);border-left:5px solid #C4276E}
+.summary-body p{font-size:0.98rem;line-height:1.65;color:#2a2a3e;margin-bottom:14px;font-weight:500}
+.summary-body p:last-child{margin-bottom:0}
+.summary-body p:first-child::first-letter{font-size:1.6rem;font-weight:800;color:#C4276E}
+.exec-summary-empty{background:#fafafa;border-left:5px solid #ddd}
+.exec-summary-empty .empty-msg{padding:20px;font-size:0.9rem}
 </style>
 </head>
 <body>
@@ -149,6 +157,22 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
   var yesterdayLabel = DAY_LABELS[(new Date().getDay()+6)%7];
 
   var html = '';
+
+  // ── EXECUTIVE SUMMARY (Claude-generated memo) ──
+  if (briefing.summary_text) {
+    html += '<div class="section exec-summary">';
+    html += '<div class="section-hdr"><div class="section-icon">&#128188;</div><div class="section-title">Executive Summary</div><div class="section-sub">Daily memo</div></div>';
+    html += '<div class="summary-body">';
+    briefing.summary_text.split(/\n\n+/).forEach(function(para){
+      if (para.trim()) html += '<p>'+esc(para.trim())+'</p>';
+    });
+    html += '</div></div>';
+  } else {
+    html += '<div class="section exec-summary-empty">';
+    html += '<div class="section-hdr"><div class="section-icon">&#128188;</div><div class="section-title">Executive Summary</div></div>';
+    html += '<div class="empty-msg">Your daily briefing memo will appear here after the next nightly build (requires ANTHROPIC_API_KEY GitHub secret).</div>';
+    html += '</div>';
+  }
 
   // ── YESTERDAY'S RECAP ──
   html += '<div class="section">';

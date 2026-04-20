@@ -10,7 +10,7 @@ Usage:
     python3 scripts/build_morning_briefing.py
 """
 
-import json, sys
+import json, sys, os
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
@@ -259,6 +259,115 @@ def build_store_briefing(store_key, store_cfg):
     return briefing
 
 
+def _trend_line(cur, prev, label, fmt="currency"):
+    """Format a one-line trend comparison."""
+    if fmt == "currency":
+        c = f"${cur:,.0f}"
+        p = f"${prev:,.0f}"
+    else:
+        c = f"{cur:,.0f}"
+        p = f"{prev:,.0f}"
+    if prev == 0:
+        return f"{label}: {c} (no comparable prior)"
+    pct = (cur - prev) / prev * 100
+    direction = "up" if pct > 1 else "down" if pct < -1 else "flat"
+    return f"{label}: {c} vs {p} ({direction} {abs(pct):.0f}%)"
+
+
+def generate_executive_summary(output):
+    """Generate a Bezos-style morning memo using Claude. Returns summary text or None."""
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        print("\n[AI summary] Skipped — no ANTHROPIC_API_KEY env var")
+        return None
+
+    try:
+        import httpx as _httpx
+    except ImportError:
+        print("[AI summary] Skipped — httpx not available")
+        return None
+
+    # Build a compact data brief for the LLM
+    lines = []
+    today_date = datetime.fromisoformat(output["today"]).strftime("%A, %B %d, %Y")
+    yesterday_label = datetime.fromisoformat(output["yesterday"]).strftime("%A")
+    lines.append(f"Today: {today_date}")
+    lines.append(f"Data represents {yesterday_label}'s performance (yesterday).")
+    lines.append("")
+
+    for store_key, store in output.get("stores", {}).items():
+        if "error" in store:
+            continue
+        lines.append(f"## {store['label']}")
+        y = store["yesterday"]
+        prev = store["last_week_same_day"]
+        wtd = store["wtd"]
+        pwtd = store["prev_wtd"]
+        lines.append(f"Yesterday:")
+        lines.append(f"  - {_trend_line(y['total_rev'], prev['total_rev'], 'Total revenue')}")
+        lines.append(f"  - {_trend_line(y['groom_rev'], prev['groom_rev'], 'Grooming revenue')}")
+        lines.append(f"  - {_trend_line(y['retail_rev'], prev['retail_rev'], 'Retail revenue')}")
+        lines.append(f"  - {_trend_line(y['transactions'], prev['transactions'], 'Transactions', fmt='int')}")
+        lines.append(f"  - Grooms: {y['grooms']}, Baths: {y['baths']}, Avg ticket: ${y['avg_ticket']:.0f}")
+        lines.append(f"Week-to-date (Mon through yesterday):")
+        lines.append(f"  - {_trend_line(wtd['total_rev'], pwtd['total_rev'], 'Revenue')}")
+        lines.append(f"  - {_trend_line(wtd['appointments'], pwtd['appointments'], 'Appointments', fmt='int')}")
+        low = store.get("low_stock", [])
+        out = sum(1 for x in low if x["status"] == "out")
+        crit = sum(1 for x in low if x["status"] == "critical")
+        lines.append(f"Inventory: {out} items out of stock, {crit} critical (< 1 wk supply)")
+        # Top 3 low-stock items with highest velocity
+        if low:
+            top = low[:3]
+            lines.append(f"Top reorder priorities: " + ", ".join(f"{a['name']} ({a['velocity_monthly']:.0f}/mo, {a['stock']} left)" for a in top))
+        lines.append("")
+
+    data_brief = "\n".join(lines)
+
+    prompt = f"""You are the Chief of Staff to Kyle, CEO and President of Woof Gang Bakery & Grooming — a 2-location pet grooming and retail business (Port Washington #264 and Hicksville #265 in Long Island, NY).
+
+Write his morning briefing. Model your style on the way a trusted chief of staff would brief Jeff Bezos: direct, specific, strategic, efficient. No fluff. Lead with what matters most. Highlight one thing he should be proud of and one thing he should pay attention to. If you notice a pattern across both stores, name it. If something is concerning, say so plainly. If something is going well, say so.
+
+Write 3-4 short paragraphs, prose only — no bullet points, no headers, no markdown. Keep it under 180 words total. Address him by name (Kyle) once at the start.
+
+Here is the data:
+
+{data_brief}
+
+Write the briefing now."""
+
+    try:
+        print("\n[AI summary] Calling Claude...")
+        r = _httpx.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 600,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+            timeout=45,
+        )
+        if r.status_code != 200:
+            print(f"[AI summary] API error {r.status_code}: {r.text[:200]}")
+            return None
+        data = r.json()
+        text = ""
+        for block in data.get("content", []):
+            if block.get("type") == "text":
+                text += block.get("text", "")
+        text = text.strip()
+        print(f"[AI summary] Generated {len(text)} chars")
+        return text
+    except Exception as e:
+        print(f"[AI summary] Error: {e}")
+        return None
+
+
 def main():
     from zoneinfo import ZoneInfo
     et = ZoneInfo("America/New_York")
@@ -277,6 +386,9 @@ def main():
         except Exception as e:
             print(f"  ERROR for {store_key}: {e}")
             output["stores"][store_key] = {"error": str(e)}
+
+    # Generate executive summary via Claude
+    output["summary_text"] = generate_executive_summary(output)
 
     with open(OUT_FILE, "w") as f:
         json.dump(output, f, indent=2)
