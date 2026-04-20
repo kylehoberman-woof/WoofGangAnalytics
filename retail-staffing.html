@@ -182,14 +182,14 @@ function render(){
     html += '</div>';
   }
 
-  // ── VARIANCES (actual vs scheduled) ──
+  // ── VARIANCES (actual vs scheduled + punch creep) ──
   var variances = pw.variances || [];
   html += '<div class="section">';
-  html += '<div class="section-hdr"><div class="section-title">&#9888;&#65039; Hours Variance</div><div class="section-sub">Last 30 days &middot; threshold: ±30 min</div></div>';
+  html += '<div class="section-hdr"><div class="section-title">&#9888;&#65039; Hours Variance &amp; Punch Creep</div><div class="section-sub">Last 30 days</div></div>';
   if (variances.length === 0) {
-    html += '<div style="padding:30px;text-align:center;color:#2E7D32;font-weight:600">&#10003; No variances flagged — all worked hours match scheduled hours within 30 minutes.</div>';
+    html += '<div style="padding:30px;text-align:center;color:#2E7D32;font-weight:600">&#10003; No variances flagged — all worked hours and punch times match schedule.</div>';
   } else {
-    // Summary stats
+    // Totals
     var overs = variances.filter(function(v){return v.status === "over";});
     var unders = variances.filter(function(v){return v.status === "under";});
     var totalOverHrs = overs.reduce(function(s,v){return s + v.variance_hrs;}, 0);
@@ -197,30 +197,53 @@ function render(){
     var totalOverCost = overs.reduce(function(s,v){return s + v.variance_cost;}, 0);
     var totalUnderCost = unders.reduce(function(s,v){return s + Math.abs(v.variance_cost);}, 0);
 
+    // Punch creep totals (early in + late out across all flagged days)
+    var totalEarlyMins = variances.reduce(function(s,v){return s + (v.early_in_mins || 0);}, 0);
+    var totalLateMins = variances.reduce(function(s,v){return s + (v.late_out_mins || 0);}, 0);
+    var totalEarlyCost = variances.reduce(function(s,v){return s + (v.early_in_cost || 0);}, 0);
+    var totalLateCost = variances.reduce(function(s,v){return s + (v.late_out_cost || 0);}, 0);
+    var totalPunchCost = totalEarlyCost + totalLateCost;
+    var punchDaysCount = variances.filter(function(v){return (v.early_in_mins || 0) > 0 || (v.late_out_mins || 0) > 0;}).length;
+
     html += '<div class="kpi-grid" style="margin-bottom:14px">';
     html += '<div class="kpi danger"><div class="kpi-label">Over-Worked Days</div><div class="kpi-val">'+overs.length+'</div><div class="kpi-sub">+'+totalOverHrs.toFixed(1)+'h extra &middot; +'+fc(totalOverCost)+' cost</div></div>';
     html += '<div class="kpi warn"><div class="kpi-label">Under-Worked Days</div><div class="kpi-val">'+unders.length+'</div><div class="kpi-sub">-'+totalUnderHrs.toFixed(1)+'h short &middot; -'+fc(totalUnderCost)+' cost</div></div>';
     html += '<div class="kpi"><div class="kpi-label">Net Variance</div><div class="kpi-val">'+(totalOverHrs-totalUnderHrs >= 0 ? '+' : '')+(totalOverHrs - totalUnderHrs).toFixed(1)+'h</div><div class="kpi-sub">'+(totalOverCost-totalUnderCost >= 0 ? '+' : '')+fc(totalOverCost - totalUnderCost)+' vs schedule</div></div>';
     html += '</div>';
 
+    // Punch creep subsection
+    html += '<div class="kpi-grid" style="margin-bottom:14px">';
+    html += '<div class="kpi danger"><div class="kpi-label">&#9201; Early Clock-Ins</div><div class="kpi-val">'+totalEarlyMins+' min</div><div class="kpi-sub">'+fc(totalEarlyCost)+' extra cost</div></div>';
+    html += '<div class="kpi danger"><div class="kpi-label">&#128338; Late Clock-Outs</div><div class="kpi-val">'+totalLateMins+' min</div><div class="kpi-sub">'+fc(totalLateCost)+' extra cost</div></div>';
+    html += '<div class="kpi danger"><div class="kpi-label">Total Punch Creep</div><div class="kpi-val">'+fc(totalPunchCost)+'</div><div class="kpi-sub">'+(totalEarlyMins + totalLateMins)+' extra min across '+punchDaysCount+' days</div></div>';
+    html += '<div class="kpi"><div class="kpi-label">Annualized Punch Creep</div><div class="kpi-val">'+fc(totalPunchCost * 12)+'</div><div class="kpi-sub">if this pattern continues</div></div>';
+    html += '</div>';
+
     html += '<div class="tbl-wrap"><table>';
-    html += '<thead><tr><th>Date</th><th>Day</th><th>Employee</th><th class="num">Scheduled</th><th class="num">Actual</th><th class="num">Variance</th><th class="num">Cost Impact</th></tr></thead><tbody>';
+    html += '<thead><tr><th>Date</th><th>Day</th><th>Employee</th><th class="num">Scheduled</th><th class="num">Actual</th><th class="num">Early In</th><th class="num">Late Out</th><th class="num">Net Hrs</th><th class="num">Cost Impact</th></tr></thead><tbody>';
     variances.forEach(function(v){
-      var cls = v.status === "over" ? 'style="background:#ffebee"' : 'style="background:#fff8e1"';
-      var arrow = v.status === "over" ? '&#9650;' : '&#9660;';
-      var color = v.status === "over" ? '#e53935' : '#FB8C00';
-      html += '<tr '+cls+'>';
+      var isPunchOnly = v.status === "punch" || (Math.abs(v.variance_hrs) < 0.5 && ((v.early_in_mins||0) > 0 || (v.late_out_mins||0) > 0));
+      var bg = v.status === "over" ? '#ffebee' : (v.status === "under" ? '#fff8e1' : '#f3e5f5');
+      var arrow = v.variance_hrs > 0.01 ? '&#9650;' : (v.variance_hrs < -0.01 ? '&#9660;' : '&middot;');
+      var color = v.variance_hrs > 0.01 ? '#e53935' : (v.variance_hrs < -0.01 ? '#FB8C00' : '#888');
+      var schedRange = v.scheduled_start ? (v.scheduled_start+'&ndash;'+v.scheduled_end) : '&ndash;';
+      var actualRange = v.actual_start ? (v.actual_start+'&ndash;'+v.actual_end) : '&ndash;';
+      var earlyTxt = (v.early_in_mins || 0) > 0 ? '<span style="color:#e53935;font-weight:700">+'+v.early_in_mins+'m</span>' : '&ndash;';
+      var lateTxt = (v.late_out_mins || 0) > 0 ? '<span style="color:#e53935;font-weight:700">+'+v.late_out_mins+'m</span>' : '&ndash;';
+      html += '<tr style="background:'+bg+'">';
       html += '<td>'+v.date+'</td>';
       html += '<td>'+v.day_name+'</td>';
-      html += '<td><strong>'+esc(v.employee)+'</strong></td>';
+      html += '<td><strong>'+esc(v.employee)+'</strong><br><span style="font-size:0.72rem;color:#888">sched '+schedRange+' &middot; actual '+actualRange+'</span></td>';
       html += '<td class="num">'+v.scheduled_hrs.toFixed(2)+'h</td>';
       html += '<td class="num">'+v.actual_hrs.toFixed(2)+'h</td>';
+      html += '<td class="num">'+earlyTxt+'</td>';
+      html += '<td class="num">'+lateTxt+'</td>';
       html += '<td class="num" style="color:'+color+';font-weight:800">'+arrow+' '+(v.variance_hrs >= 0 ? '+' : '')+v.variance_hrs.toFixed(2)+'h</td>';
       html += '<td class="num" style="color:'+color+';font-weight:700">'+(v.variance_cost >= 0 ? '+' : '')+fc(v.variance_cost)+'</td>';
       html += '</tr>';
     });
     html += '</tbody></table></div>';
-    html += '<div class="footer-note">Red rows = worked more than scheduled (unplanned overtime / extra cost). Yellow rows = worked less than scheduled (no-shows / early-outs). Compare actual time clock hours vs Supabase scheduled shifts. Cindy excluded (salaried).</div>';
+    html += '<div class="footer-note">Red rows = net hours over schedule. Yellow = under schedule. Purple = punch creep only (hours match but clocked in early or out late). "Early In" = minutes clocked in BEFORE scheduled start. "Late Out" = minutes clocked out AFTER scheduled end. Flag threshold: 5 min per punch or 30 min net hours. Cindy excluded (salaried).</div>';
   }
   html += '</div>';
 

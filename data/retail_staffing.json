@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-20T18:54:15.363858-04:00",
+  "generated_at": "2026-04-20T19:15:57.894228-04:00",
   "today": "2026-04-20",
   "stores": {
     "port-washington": {
@@ -264,7 +264,17 @@
           "actual_hrs": 7.07,
           "variance_hrs": -0.93,
           "variance_cost": -18.67,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "10:00",
+          "actual_start": "09:58",
+          "scheduled_end": "18:00",
+          "actual_end": "17:02",
+          "early_in_mins": 2,
+          "late_out_mins": 0,
+          "early_in_cost": 0.67,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 2,
+          "punch_bonus_cost": 0.67
         },
         {
           "date": "2026-04-18",
@@ -274,7 +284,17 @@
           "actual_hrs": 6.42,
           "variance_hrs": -0.58,
           "variance_cost": -11.67,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "12:00",
+          "actual_start": "12:01",
+          "scheduled_end": "19:00",
+          "actual_end": "19:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-04-17",
@@ -284,7 +304,37 @@
           "actual_hrs": 0.52,
           "variance_hrs": -6.48,
           "variance_cost": -129.67,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "12:00",
+          "actual_start": "15:18",
+          "scheduled_end": "19:00",
+          "actual_end": "15:49",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
+        },
+        {
+          "date": "2026-04-16",
+          "day_name": "Thu",
+          "employee": "Casey Makowski",
+          "scheduled_hrs": 8.0,
+          "actual_hrs": 8.1,
+          "variance_hrs": 0.1,
+          "variance_cost": 1.9,
+          "status": "over",
+          "scheduled_start": "08:30",
+          "actual_start": "08:40",
+          "scheduled_end": "16:30",
+          "actual_end": "17:15",
+          "early_in_mins": 0,
+          "late_out_mins": 45,
+          "early_in_cost": 0,
+          "late_out_cost": 14.25,
+          "punch_bonus_mins": 45,
+          "punch_bonus_cost": 14.25
         },
         {
           "date": "2026-04-15",
@@ -294,7 +344,17 @@
           "actual_hrs": 6.48,
           "variance_hrs": -0.52,
           "variance_cost": -10.33,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "12:00",
+          "actual_start": "12:00",
+          "scheduled_end": "19:00",
+          "actual_end": "19:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-04-14",
@@ -304,7 +364,17 @@
           "actual_hrs": 6.5,
           "variance_hrs": -0.5,
           "variance_cost": -10.0,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "12:00",
+          "actual_start": "12:00",
+          "scheduled_end": "19:00",
+          "actual_end": "18:30",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-04-14",
@@ -314,7 +384,17 @@
           "actual_hrs": 7.98,
           "variance_hrs": -0.52,
           "variance_cost": -9.82,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "08:30",
+          "actual_start": "08:39",
+          "scheduled_end": "17:00",
+          "actual_end": "17:10",
+          "early_in_mins": 0,
+          "late_out_mins": 10,
+          "early_in_cost": 0,
+          "late_out_cost": 3.17,
+          "punch_bonus_mins": 10,
+          "punch_bonus_cost": 3.17
         },
         {
           "date": "2026-04-11",
@@ -324,7 +404,17 @@
           "actual_hrs": 4.6,
           "variance_hrs": -2.4,
           "variance_cost": -48.0,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "12:00",
+          "actual_start": "14:24",
+          "scheduled_end": "19:00",
+          "actual_end": "19:01",
+          "early_in_mins": 0,
+          "late_out_mins": 1,
+          "early_in_cost": 0,
+          "late_out_cost": 0.33,
+          "punch_bonus_mins": 1,
+          "punch_bonus_cost": 0.33
         },
         {
           "date": "2026-04-10",
@@ -334,7 +424,17 @@
           "actual_hrs": 4.68,
           "variance_hrs": -2.32,
           "variance_cost": -46.33,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "12:00",
+          "actual_start": "14:18",
+          "scheduled_end": "19:00",
+          "actual_end": "18:59",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-04-09",
@@ -344,7 +444,17 @@
           "actual_hrs": 7.88,
           "variance_hrs": -0.62,
           "variance_cost": -11.72,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "08:30",
+          "actual_start": "08:35",
+          "scheduled_end": "17:00",
+          "actual_end": "17:01",
+          "early_in_mins": 0,
+          "late_out_mins": 1,
+          "early_in_cost": 0,
+          "late_out_cost": 0.32,
+          "punch_bonus_mins": 1,
+          "punch_bonus_cost": 0.32
         },
         {
           "date": "2026-04-08",
@@ -354,7 +464,17 @@
           "actual_hrs": 7.5,
           "variance_hrs": -0.5,
           "variance_cost": -9.5,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "11:00",
+          "actual_start": "11:01",
+          "scheduled_end": "19:00",
+          "actual_end": "19:04",
+          "early_in_mins": 0,
+          "late_out_mins": 4,
+          "early_in_cost": 0,
+          "late_out_cost": 1.27,
+          "punch_bonus_mins": 4,
+          "punch_bonus_cost": 1.27
         },
         {
           "date": "2026-04-07",
@@ -364,7 +484,17 @@
           "actual_hrs": 7.83,
           "variance_hrs": -0.67,
           "variance_cost": -12.67,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "08:30",
+          "actual_start": "08:35",
+          "scheduled_end": "17:00",
+          "actual_end": "17:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-04-05",
@@ -374,7 +504,57 @@
           "actual_hrs": 5.95,
           "variance_hrs": -2.05,
           "variance_cost": -41.0,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "10:00",
+          "actual_start": "10:03",
+          "scheduled_end": "18:00",
+          "actual_end": "16:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
+        },
+        {
+          "date": "2026-04-04",
+          "day_name": "Sat",
+          "employee": "Christine Brower",
+          "scheduled_hrs": 7.0,
+          "actual_hrs": 7.12,
+          "variance_hrs": 0.12,
+          "variance_cost": 2.33,
+          "status": "over",
+          "scheduled_start": "12:00",
+          "actual_start": "11:52",
+          "scheduled_end": "19:00",
+          "actual_end": "18:59",
+          "early_in_mins": 8,
+          "late_out_mins": 0,
+          "early_in_cost": 2.67,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 8,
+          "punch_bonus_cost": 2.67
+        },
+        {
+          "date": "2026-04-04",
+          "day_name": "Sat",
+          "employee": "Casey Makowski",
+          "scheduled_hrs": 8.0,
+          "actual_hrs": 8.28,
+          "variance_hrs": 0.28,
+          "variance_cost": 5.38,
+          "status": "over",
+          "scheduled_start": "09:00",
+          "actual_start": "08:56",
+          "scheduled_end": "17:00",
+          "actual_end": "17:46",
+          "early_in_mins": 4,
+          "late_out_mins": 46,
+          "early_in_cost": 1.27,
+          "late_out_cost": 14.57,
+          "punch_bonus_mins": 50,
+          "punch_bonus_cost": 15.83
         },
         {
           "date": "2026-04-02",
@@ -384,7 +564,17 @@
           "actual_hrs": 6.45,
           "variance_hrs": -0.55,
           "variance_cost": -11.0,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "12:00",
+          "actual_start": "12:00",
+          "scheduled_end": "19:00",
+          "actual_end": "18:59",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-04-01",
@@ -394,7 +584,17 @@
           "actual_hrs": 7.38,
           "variance_hrs": -0.62,
           "variance_cost": -11.72,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "11:00",
+          "actual_start": "11:05",
+          "scheduled_end": "19:00",
+          "actual_end": "18:59",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-31",
@@ -404,7 +604,17 @@
           "actual_hrs": 6.43,
           "variance_hrs": -0.57,
           "variance_cost": -11.33,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "12:00",
+          "actual_start": "12:00",
+          "scheduled_end": "19:00",
+          "actual_end": "19:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-31",
@@ -414,7 +624,17 @@
           "actual_hrs": 7.68,
           "variance_hrs": -0.82,
           "variance_cost": -15.52,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "08:30",
+          "actual_start": "08:36",
+          "scheduled_end": "17:00",
+          "actual_end": "17:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-28",
@@ -424,7 +644,17 @@
           "actual_hrs": 2.93,
           "variance_hrs": 2.93,
           "variance_cost": 58.67,
-          "status": "over"
+          "status": "over",
+          "scheduled_start": "",
+          "actual_start": "11:57",
+          "scheduled_end": "",
+          "actual_end": "14:53",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-27",
@@ -434,7 +664,17 @@
           "actual_hrs": 6.5,
           "variance_hrs": 6.5,
           "variance_cost": 130.0,
-          "status": "over"
+          "status": "over",
+          "scheduled_start": "",
+          "actual_start": "12:00",
+          "scheduled_end": "",
+          "actual_end": "18:30",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-26",
@@ -444,7 +684,17 @@
           "actual_hrs": 6.47,
           "variance_hrs": 6.47,
           "variance_cost": 129.33,
-          "status": "over"
+          "status": "over",
+          "scheduled_start": "",
+          "actual_start": "12:00",
+          "scheduled_end": "",
+          "actual_end": "19:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-26",
@@ -454,17 +704,37 @@
           "actual_hrs": 8.0,
           "variance_hrs": -0.5,
           "variance_cost": -9.5,
-          "status": "under"
+          "status": "under",
+          "scheduled_start": "08:30",
+          "actual_start": "08:30",
+          "scheduled_end": "17:00",
+          "actual_end": "16:30",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-25",
           "day_name": "Wed",
           "employee": "Casey Makowski",
-          "scheduled_hrs": 0,
+          "scheduled_hrs": 19.0,
           "actual_hrs": 7.43,
-          "variance_hrs": 7.43,
-          "variance_cost": 141.23,
-          "status": "over"
+          "variance_hrs": -11.57,
+          "variance_cost": -219.77,
+          "status": "under",
+          "scheduled_start": "00:00",
+          "actual_start": "11:04",
+          "scheduled_end": "19:00",
+          "actual_end": "18:30",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-24",
@@ -474,7 +744,17 @@
           "actual_hrs": 6.5,
           "variance_hrs": 6.5,
           "variance_cost": 130.0,
-          "status": "over"
+          "status": "over",
+          "scheduled_start": "",
+          "actual_start": "12:00",
+          "scheduled_end": "",
+          "actual_end": "19:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-23",
@@ -484,7 +764,17 @@
           "actual_hrs": 10.42,
           "variance_hrs": 1.92,
           "variance_cost": 36.42,
-          "status": "over"
+          "status": "over",
+          "scheduled_start": "08:30",
+          "actual_start": "08:37",
+          "scheduled_end": "17:00",
+          "actual_end": "19:02",
+          "early_in_mins": 0,
+          "late_out_mins": 122,
+          "early_in_cost": 0,
+          "late_out_cost": 38.63,
+          "punch_bonus_mins": 122,
+          "punch_bonus_cost": 38.63
         },
         {
           "date": "2026-03-22",
@@ -494,7 +784,17 @@
           "actual_hrs": 8.0,
           "variance_hrs": 8.0,
           "variance_cost": 160.0,
-          "status": "over"
+          "status": "over",
+          "scheduled_start": "",
+          "actual_start": "10:00",
+          "scheduled_end": "",
+          "actual_end": "18:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-03-21",
@@ -504,7 +804,17 @@
           "actual_hrs": 6.62,
           "variance_hrs": 6.62,
           "variance_cost": 132.33,
-          "status": "over"
+          "status": "over",
+          "scheduled_start": "",
+          "actual_start": "12:00",
+          "scheduled_end": "",
+          "actual_end": "19:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         }
       ],
       "forward_projection": {

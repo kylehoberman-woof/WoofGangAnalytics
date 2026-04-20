@@ -38,6 +38,9 @@ SB_HEADERS = {"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_A
 
 # Flag any day where |actual - scheduled| exceeds this many hours
 VARIANCE_THRESHOLD_HRS = 0.5  # 30 minutes
+# Additional flag: clock-in earlier than scheduled by more than N minutes,
+# or clock-out later than scheduled by more than N minutes
+PUNCH_FLAG_MINUTES = 5
 VARIANCE_LOOKBACK_DAYS = 30
 FORWARD_PROJECTION_DAYS = 62  # about 2 months out
 
@@ -262,9 +265,41 @@ def build_pw_staffing():
     }
 
 
+def _hhmm_to_mins(hhmm):
+    """Convert 'HH:MM' or 'HH:MM:SS' string to minutes since midnight. Returns None if invalid."""
+    if not hhmm:
+        return None
+    try:
+        h, m = int(hhmm[:2]), int(hhmm[3:5])
+        return h * 60 + m
+    except Exception:
+        return None
+
+
+def _iso_to_mins(iso_ts):
+    """From '2026-04-15T08:45:00', extract hour:minute → mins since midnight."""
+    if not iso_ts or len(iso_ts) < 16:
+        return None
+    try:
+        return int(iso_ts[11:13]) * 60 + int(iso_ts[14:16])
+    except Exception:
+        return None
+
+
+def _mins_to_hhmm(mins):
+    if mins is None:
+        return ''
+    h = mins // 60
+    m = mins % 60
+    return f"{h:02d}:{m:02d}"
+
+
 def compute_variances(today):
     """Compare actual hours (from time_clocks) vs scheduled hours (from Supabase)
-    for the last N days. Flag any day where variance exceeds threshold."""
+    for the last N days. Flag any day where:
+      - Total hours variance exceeds VARIANCE_THRESHOLD_HRS, OR
+      - Clock-in was earlier than scheduled start by > PUNCH_FLAG_MINUTES, OR
+      - Clock-out was later than scheduled end by > PUNCH_FLAG_MINUTES."""
     if _httpx is None:
         return []
 
@@ -276,7 +311,6 @@ def compute_variances(today):
     if not emps:
         return []
 
-    # Name lookups
     name_by_id = {e['id']: (e.get('full_name') or e.get('name') or '').strip() for e in emps}
     rate_by_name = {}
     role_by_name = {}
@@ -285,50 +319,94 @@ def compute_variances(today):
         if nm:
             rate_by_name[nm] = float(e.get('hourly_rate') or 0)
             role_by_name[nm] = e.get('role', 'retail')
-    # We focus on PW — these names work at PW
     track_names = {nm for nm, role in role_by_name.items() if role == 'retail'}  # skip Cindy (salaried)
 
     # Fetch scheduled shifts for PW last 30 days
     shifts = sb_get(f"/schedule_shifts?store=eq.port-washington&shift_date=gte.{start_iso}&shift_date=lte.{yesterday_iso}&select=emp_id,shift_date,start_time,end_time")
 
-    # Build scheduled hours by (name, date)
-    scheduled = defaultdict(lambda: defaultdict(float))
+    # For each (name, date): total scheduled hrs, earliest start, latest end
+    scheduled_hrs = defaultdict(lambda: defaultdict(float))
+    scheduled_start = defaultdict(dict)  # (name, date) -> earliest start mins
+    scheduled_end = defaultdict(dict)    # (name, date) -> latest end mins
     for s in shifts:
         nm = name_by_id.get(s.get('emp_id'))
         if not nm or nm not in track_names:
             continue
-        hrs = shift_hours(s.get('start_time'), s.get('end_time'))
-        if hrs > 0:
-            scheduled[nm][s.get('shift_date')] += hrs
+        d = s.get('shift_date')
+        st_mins = _hhmm_to_mins(s.get('start_time', ''))
+        et_mins = _hhmm_to_mins(s.get('end_time', ''))
+        if st_mins is None or et_mins is None or et_mins <= st_mins:
+            continue
+        scheduled_hrs[nm][d] += (et_mins - st_mins) / 60
+        cur_start = scheduled_start[nm].get(d)
+        scheduled_start[nm][d] = st_mins if cur_start is None else min(cur_start, st_mins)
+        cur_end = scheduled_end[nm].get(d)
+        scheduled_end[nm][d] = et_mins if cur_end is None else max(cur_end, et_mins)
 
-    # Build actual hours from PW time_clocks
+    # For each (name, date): total actual hrs, earliest TimeIn, latest TimeOut
     pw = STORES['port-washington']
     with open(pw.data_dir / 'all_data.json') as f:
         data = json.load(f)
     clocks = data.get('time_clocks', [])
-    actual = defaultdict(lambda: defaultdict(float))
+
+    actual_hrs = defaultdict(lambda: defaultdict(float))
+    actual_start = defaultdict(dict)
+    actual_end = defaultdict(dict)
     for c in clocks:
         emp = (c.get('EmployeeName') or '').strip()
         if emp not in track_names:
             continue
         ti = c.get('TimeIn', '')
+        to = c.get('TimeOut', '')
         if not ti or ti[:10] < start_iso or ti[:10] > yesterday_iso:
             continue
-        hrs = parse_hours(ti, c.get('TimeOut', ''))
-        if hrs > 0:
-            actual[emp][ti[:10]] += hrs
+        d = ti[:10]
+        hrs = parse_hours(ti, to)
+        if hrs <= 0:
+            continue
+        actual_hrs[emp][d] += hrs
+        ti_mins = _iso_to_mins(ti)
+        to_mins = _iso_to_mins(to)
+        if ti_mins is not None:
+            cur_in = actual_start[emp].get(d)
+            actual_start[emp][d] = ti_mins if cur_in is None else min(cur_in, ti_mins)
+        if to_mins is not None:
+            cur_out = actual_end[emp].get(d)
+            actual_end[emp][d] = to_mins if cur_out is None else max(cur_out, to_mins)
 
-    # Compute variances per (name, date)
+    # Build variance records
     variances = []
     for nm in track_names:
-        all_dates = set(list(actual.get(nm, {}).keys()) + list(scheduled.get(nm, {}).keys()))
+        all_dates = set(list(actual_hrs.get(nm, {}).keys()) + list(scheduled_hrs.get(nm, {}).keys()))
         for d in sorted(all_dates, reverse=True):
-            act = actual.get(nm, {}).get(d, 0)
-            sch = scheduled.get(nm, {}).get(d, 0)
+            act = actual_hrs.get(nm, {}).get(d, 0)
+            sch = scheduled_hrs.get(nm, {}).get(d, 0)
             delta = act - sch
-            if abs(delta) < VARIANCE_THRESHOLD_HRS:
+
+            # Punch-level metrics: compare earliest clock-in to scheduled start
+            # and latest clock-out to scheduled end
+            sch_start = scheduled_start.get(nm, {}).get(d)
+            sch_end = scheduled_end.get(nm, {}).get(d)
+            act_start = actual_start.get(nm, {}).get(d)
+            act_end = actual_end.get(nm, {}).get(d)
+
+            # early_in_mins: positive means clocked in BEFORE scheduled start
+            early_in_mins = (sch_start - act_start) if (sch_start is not None and act_start is not None) else 0
+            # late_out_mins: positive means clocked out AFTER scheduled end
+            late_out_mins = (act_end - sch_end) if (sch_end is not None and act_end is not None) else 0
+
+            # Apply flag rules
+            total_variance_flag = abs(delta) >= VARIANCE_THRESHOLD_HRS
+            early_in_flag = early_in_mins > PUNCH_FLAG_MINUTES
+            late_out_flag = late_out_mins > PUNCH_FLAG_MINUTES
+            if not (total_variance_flag or early_in_flag or late_out_flag):
                 continue
+
             rate = rate_by_name.get(nm, 0)
+            # Cost of early-in/late-out minutes specifically
+            early_cost = (early_in_mins / 60) * rate if early_in_mins > 0 else 0
+            late_cost = (late_out_mins / 60) * rate if late_out_mins > 0 else 0
+
             variances.append({
                 'date': d,
                 'day_name': datetime.strptime(d, '%Y-%m-%d').strftime('%a'),
@@ -337,10 +415,20 @@ def compute_variances(today):
                 'actual_hrs': round(act, 2),
                 'variance_hrs': round(delta, 2),
                 'variance_cost': round(delta * rate, 2),
-                'status': 'over' if delta > 0 else 'under',
+                'status': 'over' if delta > 0.01 else ('under' if delta < -0.01 else 'punch'),
+                # Punch-level details
+                'scheduled_start': _mins_to_hhmm(sch_start),
+                'actual_start': _mins_to_hhmm(act_start),
+                'scheduled_end': _mins_to_hhmm(sch_end),
+                'actual_end': _mins_to_hhmm(act_end),
+                'early_in_mins': max(0, early_in_mins),
+                'late_out_mins': max(0, late_out_mins),
+                'early_in_cost': round(early_cost, 2),
+                'late_out_cost': round(late_cost, 2),
+                'punch_bonus_mins': max(0, early_in_mins) + max(0, late_out_mins),
+                'punch_bonus_cost': round(early_cost + late_cost, 2),
             })
 
-    # Sort newest first
     variances.sort(key=lambda v: v['date'], reverse=True)
     return variances
 
