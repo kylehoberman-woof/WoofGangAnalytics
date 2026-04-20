@@ -26,7 +26,46 @@ from config import (
     STORES, PROJ_ROOT, KNOWN_CLOSURES,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_START, STORE_OPEN_DATES,
+    SUPABASE_URL, SUPABASE_ANON_KEY,
 )
+
+try:
+    import httpx as _httpx
+except ImportError:
+    _httpx = None
+
+SB_HEADERS = {"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}"}
+
+# Flag any day where |actual - scheduled| exceeds this many hours
+VARIANCE_THRESHOLD_HRS = 0.5  # 30 minutes
+VARIANCE_LOOKBACK_DAYS = 30
+FORWARD_PROJECTION_DAYS = 62  # about 2 months out
+
+
+def sb_get(path):
+    if _httpx is None:
+        return []
+    try:
+        r = _httpx.get(f"{SUPABASE_URL}/rest/v1{path}", headers=SB_HEADERS, timeout=15)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        print(f"  [Supabase] error fetching {path[:60]}: {e}")
+        return []
+
+
+def shift_hours(start_time, end_time):
+    """Compute hours from HH:MM:SS strings."""
+    if not start_time or not end_time:
+        return 0
+    try:
+        st = start_time[:5]; et = end_time[:5]
+        sh, sm = int(st[:2]), int(st[3:5])
+        eh, em = int(et[:2]), int(et[3:5])
+        h = (eh * 60 + em - sh * 60 - sm) / 60
+        return h if 0 < h <= 16 else 0
+    except Exception:
+        return 0
 
 OUT_FILE = PROJ_ROOT / "data" / "retail_staffing.json"
 OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -223,16 +262,187 @@ def build_pw_staffing():
     }
 
 
+def compute_variances(today):
+    """Compare actual hours (from time_clocks) vs scheduled hours (from Supabase)
+    for the last N days. Flag any day where variance exceeds threshold."""
+    if _httpx is None:
+        return []
+
+    start_iso = (today - timedelta(days=VARIANCE_LOOKBACK_DAYS)).isoformat()
+    yesterday_iso = (today - timedelta(days=1)).isoformat()
+
+    # Fetch active retail + manager employees
+    emps = sb_get(f"/schedule_employees?is_active=eq.true&role=in.(retail,manager)&select=id,name,full_name,role,store,hourly_rate")
+    if not emps:
+        return []
+
+    # Name lookups
+    name_by_id = {e['id']: (e.get('full_name') or e.get('name') or '').strip() for e in emps}
+    rate_by_name = {}
+    role_by_name = {}
+    for e in emps:
+        nm = (e.get('full_name') or e.get('name') or '').strip()
+        if nm:
+            rate_by_name[nm] = float(e.get('hourly_rate') or 0)
+            role_by_name[nm] = e.get('role', 'retail')
+    # We focus on PW — these names work at PW
+    track_names = {nm for nm, role in role_by_name.items() if role == 'retail'}  # skip Cindy (salaried)
+
+    # Fetch scheduled shifts for PW last 30 days
+    shifts = sb_get(f"/schedule_shifts?store=eq.port-washington&shift_date=gte.{start_iso}&shift_date=lte.{yesterday_iso}&select=emp_id,shift_date,start_time,end_time")
+
+    # Build scheduled hours by (name, date)
+    scheduled = defaultdict(lambda: defaultdict(float))
+    for s in shifts:
+        nm = name_by_id.get(s.get('emp_id'))
+        if not nm or nm not in track_names:
+            continue
+        hrs = shift_hours(s.get('start_time'), s.get('end_time'))
+        if hrs > 0:
+            scheduled[nm][s.get('shift_date')] += hrs
+
+    # Build actual hours from PW time_clocks
+    pw = STORES['port-washington']
+    with open(pw.data_dir / 'all_data.json') as f:
+        data = json.load(f)
+    clocks = data.get('time_clocks', [])
+    actual = defaultdict(lambda: defaultdict(float))
+    for c in clocks:
+        emp = (c.get('EmployeeName') or '').strip()
+        if emp not in track_names:
+            continue
+        ti = c.get('TimeIn', '')
+        if not ti or ti[:10] < start_iso or ti[:10] > yesterday_iso:
+            continue
+        hrs = parse_hours(ti, c.get('TimeOut', ''))
+        if hrs > 0:
+            actual[emp][ti[:10]] += hrs
+
+    # Compute variances per (name, date)
+    variances = []
+    for nm in track_names:
+        all_dates = set(list(actual.get(nm, {}).keys()) + list(scheduled.get(nm, {}).keys()))
+        for d in sorted(all_dates, reverse=True):
+            act = actual.get(nm, {}).get(d, 0)
+            sch = scheduled.get(nm, {}).get(d, 0)
+            delta = act - sch
+            if abs(delta) < VARIANCE_THRESHOLD_HRS:
+                continue
+            rate = rate_by_name.get(nm, 0)
+            variances.append({
+                'date': d,
+                'day_name': datetime.strptime(d, '%Y-%m-%d').strftime('%a'),
+                'employee': nm,
+                'scheduled_hrs': round(sch, 2),
+                'actual_hrs': round(act, 2),
+                'variance_hrs': round(delta, 2),
+                'variance_cost': round(delta * rate, 2),
+                'status': 'over' if delta > 0 else 'under',
+            })
+
+    # Sort newest first
+    variances.sort(key=lambda v: v['date'], reverse=True)
+    return variances
+
+
+def compute_forward_projection(today):
+    """Project upcoming retail labor cost based on scheduled shifts in Supabase.
+    Looks at the rest of this month + next month."""
+    if _httpx is None:
+        return {'months': [], 'detail': []}
+
+    start_iso = today.isoformat()
+    end_iso = (today + timedelta(days=FORWARD_PROJECTION_DAYS)).isoformat()
+
+    # Active employees with rates
+    emps = sb_get(f"/schedule_employees?is_active=eq.true&role=in.(retail,manager)&select=id,name,full_name,role,hourly_rate")
+    if not emps:
+        return {'months': [], 'detail': []}
+
+    name_by_id = {e['id']: (e.get('full_name') or e.get('name') or '').strip() for e in emps}
+    rate_by_name = {}
+    role_by_name = {}
+    for e in emps:
+        nm = (e.get('full_name') or e.get('name') or '').strip()
+        if nm:
+            rate_by_name[nm] = float(e.get('hourly_rate') or 0)
+            role_by_name[nm] = e.get('role', 'retail')
+    retail_names = {nm for nm, role in role_by_name.items() if role == 'retail'}
+
+    # Fetch scheduled shifts for PW
+    shifts = sb_get(f"/schedule_shifts?store=eq.port-washington&shift_date=gte.{start_iso}&shift_date=lte.{end_iso}&select=emp_id,shift_date,start_time,end_time")
+
+    # Aggregate by month → name → hours
+    monthly = defaultdict(lambda: defaultdict(float))
+    for s in shifts:
+        nm = name_by_id.get(s.get('emp_id'))
+        if not nm or nm not in retail_names:
+            continue
+        hrs = shift_hours(s.get('start_time'), s.get('end_time'))
+        if hrs > 0:
+            monthly[s.get('shift_date', '')[:7]][nm] += hrs
+
+    results = []
+    for m in sorted(monthly.keys()):
+        y, mo = int(m[:4]), int(m[5:7])
+        month_label = datetime(y, mo, 1).strftime('%b %Y')
+
+        # Retail cost from scheduled hours + known rates
+        people = []
+        retail_cost = 0.0
+        retail_hrs = 0.0
+        for nm, hrs in monthly[m].items():
+            rate = rate_by_name.get(nm, 0)
+            cost = hrs * rate
+            retail_cost += cost
+            retail_hrs += hrs
+            people.append({'name': nm, 'hrs': round(hrs, 1), 'rate': rate, 'cost': round(cost, 2)})
+
+        # Manager cost for that month (excl. bonus)
+        mgr_cost = manager_salary_for_month(y, mo, date(y, mo, monthrange(y, mo)[1]), include_bonus=False)
+        total = retail_cost + mgr_cost
+
+        results.append({
+            'month': m,
+            'month_label': month_label,
+            'people': sorted(people, key=lambda x: -x['cost']),
+            'retail_hrs': round(retail_hrs, 1),
+            'retail_cost': round(retail_cost, 2),
+            'mgr_cost': round(mgr_cost, 2),
+            'total_labor': round(total, 2),
+        })
+
+    return {'months': results, 'generated_at': today.isoformat()}
+
+
 def main():
     from zoneinfo import ZoneInfo
     et = ZoneInfo('America/New_York')
 
+    today = date.today()
+
     print('Building PW retail staffing data...')
     pw_data = build_pw_staffing()
 
+    print('\nComputing variances (actual vs scheduled)...')
+    variances = compute_variances(today)
+    print(f"  {len(variances)} variance flags in last {VARIANCE_LOOKBACK_DAYS} days")
+    if variances[:3]:
+        for v in variances[:3]:
+            print(f"    {v['date']} {v['employee']}: sched {v['scheduled_hrs']}h, actual {v['actual_hrs']}h → {v['variance_hrs']:+.1f}h (${v['variance_cost']:+.0f})")
+
+    print('\nBuilding forward schedule projection...')
+    forward = compute_forward_projection(today)
+    print(f"  {len(forward['months'])} upcoming months projected")
+    for m in forward['months']:
+        print(f"    {m['month_label']}: {m['retail_hrs']}h retail ${m['retail_cost']:,.0f} + mgr ${m['mgr_cost']:,.0f} = ${m['total_labor']:,.0f}")
+
+    pw_data['variances'] = variances
+    pw_data['forward_projection'] = forward
+
     output = {
         'generated_at': datetime.now(et).isoformat(),
-        'today': date.today().isoformat(),
+        'today': today.isoformat(),
         'stores': {
             'port-washington': pw_data,
         },
