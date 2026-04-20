@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>if(sessionStorage.getItem('wg_portal_level')!=='owner')window.location.href='index.html';</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Good Morning Woof Gang</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e;padding-bottom:60px}
+
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:36px 32px 30px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.greeting{font-size:2rem;font-weight:800;letter-spacing:-0.02em;line-height:1.1}
+.date-line{font-size:0.95rem;opacity:0.9;margin-top:8px;font-weight:500}
+
+.main{max-width:1100px;margin:24px auto 0;padding:0 20px;display:flex;flex-direction:column;gap:20px}
+
+.section{background:white;border-radius:16px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #FDF0F5}
+.section-icon{font-size:1.5rem}
+.section-title{font-size:1.15rem;font-weight:800;letter-spacing:-0.01em}
+.section-sub{font-size:0.78rem;color:#999;margin-left:auto;font-weight:600}
+
+/* Stores side by side */
+.stores-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.stores-grid{grid-template-columns:1fr}}
+.store-block{background:#FDF0F5;border-radius:12px;padding:16px 18px;border-left:4px solid #C4276E}
+.store-block.hv{border-left-color:#1B6B6B;background:#E8F5F3}
+.store-name{font-size:0.75rem;font-weight:800;color:#C4276E;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.store-block.hv .store-name{color:#1B6B6B}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kpi{background:white;padding:10px 12px;border-radius:8px;display:flex;flex-direction:column;gap:2px}
+.kpi-label{font-size:0.68rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.kpi-value{font-size:1.25rem;font-weight:800;color:#1a1a2e}
+.kpi-trend{font-size:0.72rem;font-weight:700;margin-top:2px}
+.trend-up{color:#2E7D32}
+.trend-down{color:#e53935}
+.trend-flat{color:#888}
+
+/* Checklist */
+.checklist-today{display:flex;flex-direction:column;gap:8px}
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:#FDF0F5;cursor:pointer;transition:all 0.15s}
+.task-row:hover{background:#fae1ec}
+.task-row.done{opacity:0.55;background:#f5f5f5}
+.task-row.done .task-title{text-decoration:line-through;color:#888}
+.task-check{width:22px;height:22px;border:2px solid #C4276E;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:white}
+.task-row.done .task-check{background:#C4276E;color:white}
+.task-row.done .task-check::after{content:'✓';font-size:0.95rem;font-weight:800}
+.task-title{font-size:0.92rem;font-weight:600;flex:1}
+.empty-msg{padding:16px;color:#999;font-style:italic;text-align:center;font-size:0.9rem}
+
+/* Schedule */
+.shifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.shifts-grid{grid-template-columns:1fr}}
+.shift-column{background:#FDF0F5;border-radius:12px;padding:14px 16px;border-left:4px solid #C4276E}
+.shift-column.hv{border-left-color:#1B6B6B;background:#E8F5F3}
+.shift-column h3{font-size:0.78rem;font-weight:800;color:#C4276E;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.shift-column.hv h3{color:#1B6B6B}
+.shift-role-group{margin-bottom:10px}
+.shift-role-label{font-size:0.7rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.shift-item{background:white;padding:7px 10px;border-radius:6px;margin-bottom:4px;font-size:0.86rem;display:flex;justify-content:space-between;gap:8px}
+.shift-emp{font-weight:700;color:#1a1a2e}
+.shift-time{color:#666;font-weight:500;font-size:0.82rem}
+.off-pill{background:#FFF8E1;border-left:3px solid #F9A825;padding:6px 10px;border-radius:6px;margin-bottom:4px;font-size:0.82rem;color:#6D4C41}
+.off-pill strong{color:#4E342E}
+
+/* Low Stock */
+.stock-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.stock-grid{grid-template-columns:1fr}}
+.stock-column{background:#fff8f0;border-radius:12px;padding:14px 16px;border-left:4px solid #FB8C00}
+.stock-column h3{font-size:0.78rem;font-weight:800;color:#E65100;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.stock-item{background:white;padding:8px 10px;border-radius:6px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:0.82rem}
+.stock-name{font-weight:600;color:#1a1a2e;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stock-meta{display:flex;gap:8px;flex-shrink:0;align-items:center}
+.status-chip{font-size:0.64rem;font-weight:800;padding:2px 6px;border-radius:8px;text-transform:uppercase;letter-spacing:0.04em}
+.status-out{background:#ffcdd2;color:#c62828}
+.status-critical{background:#ffe0b2;color:#e65100}
+.status-low{background:#fff9c4;color:#f57f17}
+.stock-qty{font-weight:700;color:#666;font-size:0.82rem}
+.stock-more{font-size:0.78rem;color:#888;text-align:center;margin-top:6px;font-style:italic}
+
+/* Quick links */
+.quick-links{display:flex;flex-wrap:wrap;gap:10px}
+.ql-btn{padding:10px 18px;background:white;border:2px solid #C4276E;border-radius:10px;color:#C4276E;font-family:inherit;font-size:0.85rem;font-weight:700;text-decoration:none;transition:all 0.15s}
+.ql-btn:hover{background:#C4276E;color:white}
+
+.loading{padding:40px;text-align:center;color:#888}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-link" id="portal-back" href="index.html">&larr; Owner Portal</a>
+  <div class="greeting" id="greeting">Good Morning, Kyle</div>
+  <div class="date-line" id="date-line">—</div>
+</div>
+
+<div class="main" id="main">
+  <div class="loading">Loading your morning briefing…</div>
+</div>
+
+<script>
+// Portal back link
+(function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.innerHTML='\u2190 Manager Portal';}else if(l==='store'){a.href='store.html';a.innerHTML='\u2190 Store Portal';}})();
+
+var SB = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var HD = {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
+function sbGet(p){return fetch(SB+p,{headers:HD}).then(function(r){return r.json();});}
+function sbPost(t,b){return fetch(SB+'/'+t,{method:'POST',headers:HD,body:JSON.stringify(b)}).then(function(r){return r.json();});}
+function sbDelete(t,f){return fetch(SB+'/'+t+'?'+f,{method:'DELETE',headers:HD});}
+
+var DAY_NAMES=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+var DAY_LABELS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function todayKey(){return DAY_NAMES[new Date().getDay()];}
+function mondayISO(d){d=d||new Date();var day=d.getDay();var diff=day===0?-6:1-day;var m=new Date(d);m.setDate(d.getDate()+diff);m.setHours(0,0,0,0);return m.toISOString().slice(0,10);}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+
+function fc(v){if(v==null)return '-';return '$'+Math.round(v).toLocaleString('en-US');}
+function fcFull(v){if(v==null)return '-';return '$'+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function trendPct(cur,prev){if(!prev||prev===0)return null;return ((cur-prev)/prev)*100;}
+function trendBadge(cur,prev){var p=trendPct(cur,prev);if(p==null)return '';var cls=p>=1?'trend-up':p<=-1?'trend-down':'trend-flat';var arrow=p>=1?'&#9650;':p<=-1?'&#9660;':'&middot;';return '<div class="kpi-trend '+cls+'">'+arrow+' '+Math.abs(Math.round(p))+'% vs last wk</div>';}
+
+function fmtTime(t){
+  if(!t)return '';
+  var p=t.split(':'),h=parseInt(p[0],10),m=p[1]||'00';
+  var ampm=h>=12?'pm':'am';
+  h=h%12||12;
+  return h+(m==='00'?'':':'+m)+ampm;
+}
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function renderGreeting(){
+  var hour = new Date().getHours();
+  var greet = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+  document.getElementById('greeting').textContent = greet + ', Kyle';
+  var d = new Date();
+  var opts = {weekday:'long', month:'long', day:'numeric', year:'numeric'};
+  document.getElementById('date-line').textContent = d.toLocaleDateString('en-US', opts);
+}
+
+function render(briefing, tasks, completions, shifts, employees, timeOff){
+  var tk = todayKey();
+  var todayLabel = DAY_LABELS[new Date().getDay()];
+  var yesterdayLabel = DAY_LABELS[(new Date().getDay()+6)%7];
+
+  var html = '';
+
+  // ── YESTERDAY'S RECAP ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128176;</div><div class="section-title">Yesterday\'s Recap</div><div class="section-sub">'+yesterdayLabel+', '+briefing.yesterday+'</div></div>';
+  html += '<div class="stores-grid">';
+  ['port-washington','hicksville'].forEach(function(storeKey){
+    var s = briefing.stores[storeKey]; if (!s) return;
+    var y = s.yesterday, prev = s.last_week_same_day;
+    var cls = storeKey === 'hicksville' ? ' hv' : '';
+    html += '<div class="store-block'+cls+'">';
+    html += '<div class="store-name">'+s.label+'</div>';
+    html += '<div class="kpi-grid">';
+    html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(y.total_rev)+'</div>'+trendBadge(y.total_rev,prev.total_rev)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Transactions</div><div class="kpi-value">'+y.transactions+'</div>'+trendBadge(y.transactions,prev.transactions)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooming Rev</div><div class="kpi-value">'+fc(y.groom_rev)+'</div>'+trendBadge(y.groom_rev,prev.groom_rev)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(y.retail_rev)+'</div>'+trendBadge(y.retail_rev,prev.retail_rev)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooms / Baths</div><div class="kpi-value">'+y.grooms+' / '+y.baths+'</div></div>';
+    html += '<div class="kpi"><div class="kpi-label">Avg Ticket</div><div class="kpi-value">'+fc(y.avg_ticket)+'</div></div>';
+    html += '</div></div>';
+  });
+  html += '</div></div>';
+
+  // ── WEEK-TO-DATE ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128202;</div><div class="section-title">Week-to-Date</div><div class="section-sub">Mon &rarr; Yesterday</div></div>';
+  html += '<div class="stores-grid">';
+  ['port-washington','hicksville'].forEach(function(storeKey){
+    var s = briefing.stores[storeKey]; if (!s) return;
+    var w = s.wtd, pw = s.prev_wtd;
+    var cls = storeKey === 'hicksville' ? ' hv' : '';
+    html += '<div class="store-block'+cls+'">';
+    html += '<div class="store-name">'+s.label+'</div>';
+    html += '<div class="kpi-grid">';
+    html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(w.total_rev)+'</div>'+trendBadge(w.total_rev,pw.total_rev)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+w.appointments+'</div>'+trendBadge(w.appointments,pw.appointments)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(w.groom_rev)+'</div>'+trendBadge(w.groom_rev,pw.groom_rev)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(w.retail_rev)+'</div>'+trendBadge(w.retail_rev,pw.retail_rev)+'</div>';
+    html += '</div></div>';
+  });
+  html += '</div></div>';
+
+  // ── TODAY'S CHECKLIST ──
+  var todayTasks = tasks.filter(function(t){return t.day_of_week === tk;});
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#9989;</div><div class="section-title">Today\'s Checklist</div><div class="section-sub">'+todayLabel+'</div></div>';
+  if (todayTasks.length === 0) {
+    html += '<div class="empty-msg">No tasks scheduled for '+todayLabel+' &mdash; enjoy the day.</div>';
+  } else {
+    html += '<div class="checklist-today" id="checklist-today">';
+    todayTasks.forEach(function(t){
+      var done = !!completions[t.id];
+      html += '<div class="task-row'+(done?' done':'')+'" onclick="toggleTask('+t.id+')">';
+      html += '<div class="task-check"></div>';
+      html += '<div class="task-title">'+esc(t.title)+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // ── WHO'S WORKING TODAY ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128104;&#8205;&#128187;</div><div class="section-title">Who\'s Working Today</div><div class="section-sub">'+todayLabel+'</div></div>';
+  html += '<div class="shifts-grid">';
+  ['port-washington','hicksville'].forEach(function(storeKey){
+    var storeLabel = storeKey === 'hicksville' ? 'Hicksville' : 'Port Washington';
+    var cls = storeKey === 'hicksville' ? ' hv' : '';
+    html += '<div class="shift-column'+cls+'"><h3>'+storeLabel+'</h3>';
+
+    // Time-off pills for this store
+    var offs = timeOff.filter(function(o){return o.store_key === storeKey;});
+    offs.forEach(function(o){
+      html += '<div class="off-pill">&#127957; <strong>'+esc(o.employee_name)+'</strong> &mdash; '+esc(o.type||'off')+'</div>';
+    });
+
+    // Group shifts by role
+    var storeShifts = shifts.filter(function(s){return s.store === storeKey;}).sort(function(a,b){return (a.start_time||'').localeCompare(b.start_time||'');});
+    var byRole = {retail: [], manager: [], groomer: [], bather: [], other: []};
+    storeShifts.forEach(function(sh){
+      var emp = employees.find(function(e){return e.id === sh.emp_id;});
+      if (!emp) return;
+      var role = emp.role || 'other';
+      if (!byRole[role]) byRole[role] = [];
+      byRole[role].push({emp: emp, shift: sh});
+    });
+
+    var roleLabels = {manager:'Manager', retail:'Retail', groomer:'Groomers', bather:'Bathers', other:'Other'};
+    ['manager','retail','groomer','bather','other'].forEach(function(role){
+      var list = byRole[role];
+      if (!list || list.length === 0) return;
+      html += '<div class="shift-role-group">';
+      html += '<div class="shift-role-label">'+roleLabels[role]+'</div>';
+      list.forEach(function(x){
+        var t = fmtTime(x.shift.start_time.slice(0,5)) + (x.shift.end_time ? ' – ' + fmtTime(x.shift.end_time.slice(0,5)) : '');
+        html += '<div class="shift-item"><span class="shift-emp">'+esc(x.emp.name)+'</span><span class="shift-time">'+t+'</span></div>';
+      });
+      html += '</div>';
+    });
+
+    if (storeShifts.length === 0 && offs.length === 0) {
+      html += '<div class="empty-msg">No shifts scheduled</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  // ── LOW STOCK ALERTS ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128230;</div><div class="section-title">Low Stock Alerts</div><div class="section-sub">Top reorder priorities</div></div>';
+  html += '<div class="stock-grid">';
+  ['port-washington','hicksville'].forEach(function(storeKey){
+    var s = briefing.stores[storeKey]; if (!s) return;
+    var alerts = (s.low_stock || []);
+    html += '<div class="stock-column"><h3>'+s.label+'</h3>';
+    if (alerts.length === 0) {
+      html += '<div class="empty-msg">All stock levels OK</div>';
+    } else {
+      alerts.slice(0,10).forEach(function(a){
+        html += '<div class="stock-item">';
+        html += '<div class="stock-name" title="'+esc(a.name)+'">'+esc(a.name)+'</div>';
+        html += '<div class="stock-meta">';
+        html += '<span class="stock-qty">'+a.stock+' left</span>';
+        html += '<span class="status-chip status-'+a.status+'">'+a.status+'</span>';
+        html += '</div></div>';
+      });
+      if (alerts.length > 10) {
+        html += '<div class="stock-more">+ '+(alerts.length-10)+' more — see Inventory Dashboard</div>';
+      }
+    }
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  // ── QUICK LINKS ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128279;</div><div class="section-title">Quick Links</div></div>';
+  html += '<div class="quick-links">';
+  html += '<a class="ql-btn" href="port-washington/WoofGang_PortWashington_Commission_Dashboard.html">Commission Dashboard</a>';
+  html += '<a class="ql-btn" href="port-washington/WoofGang_PortWashington_Inventory_Dashboard.html">Inventory Dashboard</a>';
+  html += '<a class="ql-btn" href="schedule.html">Full Schedule</a>';
+  html += '<a class="ql-btn" href="checklist.html">Full Checklist</a>';
+  html += '<a class="ql-btn" href="https://scanner.hoberman.io" target="_blank">Receiving Tool</a>';
+  html += '</div></div>';
+
+  document.getElementById('main').innerHTML = html;
+}
+
+// Task toggle
+var currentState = null;
+function toggleTask(taskId){
+  if (!currentState) return;
+  var existing = currentState.completions[taskId];
+  if (existing) {
+    sbDelete('checklist_completions', 'id=eq.'+existing.id).then(function(){
+      delete currentState.completions[taskId];
+      render(currentState.briefing, currentState.tasks, currentState.completions, currentState.shifts, currentState.employees, currentState.timeOff);
+    });
+  } else {
+    sbPost('checklist_completions', {task_id: taskId, week_start: mondayISO()}).then(function(res){
+      if (Array.isArray(res) && res.length) currentState.completions[taskId] = res[0];
+      else currentState.completions[taskId] = {id: 'pending', task_id: taskId};
+      render(currentState.briefing, currentState.tasks, currentState.completions, currentState.shifts, currentState.employees, currentState.timeOff);
+    });
+  }
+}
+
+function load(){
+  renderGreeting();
+  var today = todayISO();
+  var mon = mondayISO();
+  Promise.all([
+    fetch('data/morning_briefing.json?t='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    sbGet('/checklist_tasks?is_active=eq.true&select=*&order=sort_order,id'),
+    sbGet('/checklist_completions?week_start=eq.'+mon+'&select=id,task_id'),
+    sbGet('/schedule_shifts?shift_date=eq.'+today+'&select=*'),
+    sbGet('/schedule_employees?is_active=eq.true&select=id,name,full_name,role,store,color'),
+    sbGet('/time_off?start_date=lte.'+today+'&end_date=gte.'+today+'&status=neq.Rejected&select=employee_name,type,status,store_key')
+  ]).then(function(res){
+    var briefing = res[0];
+    if (!briefing) {
+      document.getElementById('main').innerHTML = '<div class="section"><div class="empty-msg">Morning briefing data not available yet. Trigger the nightly build from GitHub Actions to generate it.</div></div>';
+      return;
+    }
+    var tasks = Array.isArray(res[1]) ? res[1] : [];
+    var comps = Array.isArray(res[2]) ? res[2] : [];
+    var completions = {};
+    comps.forEach(function(c){ completions[c.task_id] = c; });
+    var shifts = Array.isArray(res[3]) ? res[3] : [];
+    var employees = Array.isArray(res[4]) ? res[4] : [];
+    var timeOff = Array.isArray(res[5]) ? res[5] : [];
+
+    currentState = {briefing: briefing, tasks: tasks, completions: completions, shifts: shifts, employees: employees, timeOff: timeOff};
+    render(briefing, tasks, completions, shifts, employees, timeOff);
+  }).catch(function(e){
+    console.error(e);
+    document.getElementById('main').innerHTML = '<div class="section"><div class="empty-msg">Failed to load briefing: '+e.message+'</div></div>';
+  });
+}
+
+load();
+</script>
+
+</body>
+</html>
