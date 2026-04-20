@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>if(sessionStorage.getItem('wg_portal_level')!=='owner')window.location.href='index.html';</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — Retail Staffing Financial</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e;padding-bottom:60px}
+
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:28px 32px 22px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.header h1{font-size:1.6rem;font-weight:800}
+.header p{font-size:0.85rem;opacity:0.85;margin-top:3px}
+
+.main{max-width:1200px;margin:20px auto;padding:0 20px;display:flex;flex-direction:column;gap:20px}
+
+.section{background:white;border-radius:14px;padding:20px 22px;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #FDF0F5}
+.section-title{font-size:1.1rem;font-weight:800;letter-spacing:-0.01em}
+.section-sub{font-size:0.76rem;color:#999;margin-left:auto;font-weight:600}
+
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.kpi{background:#FDF0F5;border-radius:10px;padding:12px 14px;border-left:4px solid #C4276E}
+.kpi.warn{border-left-color:#FB8C00;background:#fff8e1}
+.kpi.good{border-left-color:#2E7D32;background:#e8f5e9}
+.kpi.danger{border-left-color:#e53935;background:#ffebee}
+.kpi-label{font-size:0.68rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em}
+.kpi-val{font-size:1.4rem;font-weight:800;color:#1a1a2e;margin-top:2px}
+.kpi-sub{font-size:0.72rem;color:#666;font-weight:600;margin-top:2px}
+.trend-up{color:#e53935}
+.trend-down{color:#2E7D32}
+.trend-flat{color:#888}
+
+/* Chart */
+.chart-wrap{position:relative;height:340px}
+
+/* Table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;min-width:900px}
+th{padding:10px 8px;text-align:left;background:#FDF0F5;color:#C4276E;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;font-size:0.7rem;border-bottom:2px solid #C4276E}
+td{padding:10px 8px;border-bottom:1px solid #f0f0f0}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:hover{background:#FDF0F5}
+tr.best{background:#e8f5e9}
+tr.worst{background:#ffebee}
+tr.current{background:#fff8e1;font-weight:700}
+
+/* Scenario calculator */
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.calc-grid{grid-template-columns:1fr}}
+.calc-inputs{display:flex;flex-direction:column;gap:12px}
+.input-group{display:flex;flex-direction:column;gap:4px}
+.input-group label{font-size:0.76rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.04em}
+.input-row{display:flex;gap:8px;align-items:center}
+.input-row input[type=range]{flex:1;accent-color:#C4276E}
+.input-row input[type=number]{width:80px;padding:6px 10px;border:2px solid #ddd;border-radius:6px;font-family:inherit;font-size:0.88rem;text-align:right}
+.input-row input[type=number]:focus{outline:none;border-color:#C4276E}
+.input-row .unit{font-size:0.78rem;color:#999;font-weight:600}
+.calc-results{background:#FDF0F5;border-radius:10px;padding:16px}
+.calc-result-row{display:flex;justify-content:space-between;padding:6px 0;font-size:0.9rem;border-bottom:1px solid rgba(196,39,110,0.15)}
+.calc-result-row:last-child{border-bottom:none;margin-top:6px;padding-top:12px;border-top:2px solid #C4276E;font-size:1.05rem;font-weight:800}
+.calc-result-label{color:#666;font-weight:600}
+.calc-result-val{font-weight:800;color:#1a1a2e}
+.calc-result-val.good{color:#2E7D32}
+.calc-result-val.warn{color:#FB8C00}
+.calc-result-val.bad{color:#e53935}
+.calc-delta{font-size:0.78rem;color:#666;font-weight:600;margin-top:4px}
+
+.loading{padding:50px;text-align:center;color:#888}
+.footer-note{font-size:0.78rem;color:#999;font-style:italic;padding:10px 14px;background:#fafafa;border-radius:8px;margin-top:14px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-link" id="portal-back" href="index.html">&larr; Owner Portal</a>
+  <h1>&#128100; Retail Staffing Financial</h1>
+  <p>Port Washington retail labor analysis &amp; scenario modeling</p>
+</div>
+
+<div class="main" id="main">
+  <div class="loading">Loading retail staffing data…</div>
+</div>
+
+<script>
+(function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.innerHTML='\u2190 Manager Portal';}else if(l==='store'){a.href='store.html';a.innerHTML='\u2190 Store Portal';}})();
+
+function fc(v){if(v==null||isNaN(v))return '-';return '$'+Math.round(v).toLocaleString('en-US');}
+function fcDec(v){if(v==null||isNaN(v))return '-';return '$'+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function pct(v){if(v==null||isNaN(v))return '-';return v.toFixed(1)+'%';}
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+var data = null;
+var chart = null;
+
+function render(){
+  var pw = data.stores['port-washington'];
+  var rows = pw.rows;
+  var summary = pw.summary;
+  var rates = pw.rates;
+
+  var html = '';
+
+  // ── KPI ROW ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-title">&#128200; Current Snapshot</div><div class="section-sub">Port Washington</div></div>';
+  html += '<div class="kpi-grid">';
+
+  var latest = summary.latest_complete_month;
+  var best = summary.best_month;
+  var worst = summary.worst_month;
+  var current = summary.current_month;
+  var ytd = summary.ytd_2026;
+
+  if (latest) {
+    var cls = latest.labor_pct_sales <= 11 ? 'good' : latest.labor_pct_sales <= 13 ? '' : latest.labor_pct_sales <= 14 ? 'warn' : 'danger';
+    html += '<div class="kpi '+cls+'"><div class="kpi-label">Latest Month ('+latest.month_label+')</div>';
+    html += '<div class="kpi-val">'+fc(latest.total_labor)+'</div>';
+    html += '<div class="kpi-sub">'+latest.labor_pct_sales.toFixed(1)+'% of $'+Math.round(latest.sales).toLocaleString()+' sales</div></div>';
+  }
+
+  if (current && current.total_labor > 0) {
+    html += '<div class="kpi"><div class="kpi-label">'+current.month_label+' (partial)</div>';
+    html += '<div class="kpi-val">'+fc(current.total_labor)+'</div>';
+    html += '<div class="kpi-sub">'+current.days_open+' days open so far</div></div>';
+  }
+
+  if (ytd.labor > 0) {
+    html += '<div class="kpi"><div class="kpi-label">YTD 2026</div>';
+    html += '<div class="kpi-val">'+pct(ytd.labor_pct)+'</div>';
+    html += '<div class="kpi-sub">'+fc(ytd.labor)+' labor / '+fc(ytd.sales)+' sales</div></div>';
+  }
+
+  if (best) {
+    html += '<div class="kpi good"><div class="kpi-label">Best Month</div>';
+    html += '<div class="kpi-val">'+pct(best.labor_pct)+'</div>';
+    html += '<div class="kpi-sub">'+best.label+' &middot; '+fc(best.labor)+'</div></div>';
+  }
+
+  if (worst) {
+    html += '<div class="kpi danger"><div class="kpi-label">Worst Month</div>';
+    html += '<div class="kpi-val">'+pct(worst.labor_pct)+'</div>';
+    html += '<div class="kpi-sub">'+worst.label+' &middot; '+fc(worst.labor)+'</div></div>';
+  }
+
+  html += '</div></div>';
+
+  // ── CHART ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-title">&#128201; Monthly Trend</div><div class="section-sub">Labor $ + Labor % of Sales</div></div>';
+  html += '<div class="chart-wrap"><canvas id="trend-chart"></canvas></div>';
+  html += '</div>';
+
+  // ── TABLE ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-title">&#128221; Monthly Detail</div><div class="section-sub">Since Jun 2025</div></div>';
+  html += '<div class="tbl-wrap"><table><thead><tr>';
+  html += '<th>Month</th>';
+  html += '<th class="num">Casey hrs</th><th class="num">Casey $</th>';
+  html += '<th class="num">Chris hrs</th><th class="num">Chris $</th>';
+  html += '<th class="num">Retail $</th><th class="num">Cindy $</th>';
+  html += '<th class="num">Total Labor</th>';
+  html += '<th class="num">Sales</th>';
+  html += '<th class="num">Labor %</th>';
+  html += '<th class="num">Days Open</th>';
+  html += '<th class="num">$/day</th>';
+  html += '</tr></thead><tbody>';
+
+  rows.forEach(function(r){
+    var cls = '';
+    if (best && r.month === best.month) cls = 'best';
+    else if (worst && r.month === worst.month) cls = 'worst';
+    else if (current && r.month === current.month) cls = 'current';
+    html += '<tr'+(cls ? ' class="'+cls+'"' : '')+'>';
+    html += '<td><strong>'+r.month_label+'</strong>'+(r.closures > 0 ? '<br><span style="font-size:0.7rem;color:#e65100">'+r.closures+' closure'+(r.closures>1?'s':'')+'</span>' : '')+'</td>';
+    html += '<td class="num">'+r.casey_hrs+'</td><td class="num">'+fc(r.casey_cost)+'</td>';
+    html += '<td class="num">'+(r.chris_hrs || '-')+'</td><td class="num">'+(r.chris_cost > 0 ? fc(r.chris_cost) : '-')+'</td>';
+    html += '<td class="num">'+fc(r.retail_cost)+'</td>';
+    html += '<td class="num">'+fc(r.cindy_cost)+'</td>';
+    html += '<td class="num"><strong>'+fc(r.total_labor)+'</strong></td>';
+    html += '<td class="num">'+fc(r.sales)+'</td>';
+    var pctCls = r.labor_pct_sales <= 11 ? 'style="color:#2E7D32;font-weight:800"' : r.labor_pct_sales >= 14 ? 'style="color:#e53935;font-weight:800"' : 'style="font-weight:700"';
+    html += '<td class="num" '+pctCls+'>'+r.labor_pct_sales.toFixed(1)+'%</td>';
+    html += '<td class="num">'+r.days_open+'</td>';
+    html += '<td class="num">'+fc(r.cost_per_open_day)+'</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  html += '<div class="footer-note">Green row = best labor % month &middot; Red row = worst &middot; Yellow row = current (partial) month. Cindy\'s salary is 100% on PW\'s books (the $2K March bonus is excluded as a one-time exception).</div>';
+  html += '</div>';
+
+  // ── SCENARIO CALCULATOR ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-title">&#128300; Scenario Calculator</div><div class="section-sub">Model future staffing cost</div></div>';
+  html += '<div class="calc-grid">';
+
+  // Inputs
+  html += '<div class="calc-inputs">';
+  html += '<div class="input-group"><label>Casey Hours/Week</label><div class="input-row">';
+  html += '<input type="range" id="calc-casey-hrs" min="0" max="50" step="0.5" value="40">';
+  html += '<input type="number" id="calc-casey-hrs-num" min="0" max="60" step="0.5" value="40">';
+  html += '<span class="unit">hrs</span></div></div>';
+
+  html += '<div class="input-group"><label>Casey Rate</label><div class="input-row">';
+  html += '<input type="range" id="calc-casey-rate" min="15" max="25" step="0.25" value="20">';
+  html += '<input type="number" id="calc-casey-rate-num" min="15" max="30" step="0.25" value="20">';
+  html += '<span class="unit">$/hr</span></div></div>';
+
+  html += '<div class="input-group"><label>Replacement Hours/Week</label><div class="input-row">';
+  html += '<input type="range" id="calc-rep-hrs" min="0" max="40" step="0.5" value="20">';
+  html += '<input type="number" id="calc-rep-hrs-num" min="0" max="50" step="0.5" value="20">';
+  html += '<span class="unit">hrs</span></div></div>';
+
+  html += '<div class="input-group"><label>Replacement Rate</label><div class="input-row">';
+  html += '<input type="range" id="calc-rep-rate" min="15" max="25" step="0.25" value="19">';
+  html += '<input type="number" id="calc-rep-rate-num" min="15" max="30" step="0.25" value="19">';
+  html += '<span class="unit">$/hr</span></div></div>';
+
+  html += '<div class="input-group"><label>Assumed Monthly Sales</label><div class="input-row">';
+  html += '<input type="range" id="calc-sales" min="60000" max="120000" step="1000" value="85000">';
+  html += '<input type="number" id="calc-sales-num" min="50000" max="200000" step="1000" value="85000">';
+  html += '<span class="unit">$</span></div></div>';
+
+  html += '<div class="input-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="calc-cindy" checked style="width:16px;height:16px;accent-color:#C4276E"> Include Cindy on PW books ($'+Math.round(rates.cindy_annual/12).toLocaleString()+'/mo)</label></div>';
+  html += '</div>';
+
+  // Results
+  html += '<div class="calc-results" id="calc-results"></div>';
+  html += '</div></div>';
+
+  document.getElementById('main').innerHTML = html;
+
+  // Render chart
+  renderChart(rows);
+  // Wire up calculator
+  wireCalc(rates, latest ? latest.labor_pct_sales : null, latest ? latest.total_labor : null);
+}
+
+function renderChart(rows){
+  var ctx = document.getElementById('trend-chart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: rows.map(function(r){return r.month_label;}),
+      datasets: [
+        {label: 'Cindy', data: rows.map(function(r){return r.cindy_cost;}), backgroundColor: 'rgba(92,107,192,0.7)', stack: 'labor', order: 2, yAxisID: 'y'},
+        {label: 'Chris', data: rows.map(function(r){return r.chris_cost;}), backgroundColor: 'rgba(107,53,32,0.7)', stack: 'labor', order: 2, yAxisID: 'y'},
+        {label: 'Casey', data: rows.map(function(r){return r.casey_cost;}), backgroundColor: 'rgba(196,39,110,0.7)', stack: 'labor', order: 2, yAxisID: 'y'},
+        {label: 'Labor % of Sales', data: rows.map(function(r){return r.labor_pct_sales;}), type: 'line', borderColor: '#2E7D32', backgroundColor: '#2E7D32', borderWidth: 3, pointRadius: 5, pointBackgroundColor: '#2E7D32', tension: 0.3, yAxisID: 'y1', order: 1, fill: false},
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {mode: 'index', intersect: false},
+      plugins: {
+        legend: {position: 'bottom'},
+        tooltip: {
+          callbacks: {
+            label: function(ctx){
+              var v = ctx.parsed.y;
+              if (ctx.dataset.label === 'Labor % of Sales') return ctx.dataset.label + ': ' + v.toFixed(1) + '%';
+              return ctx.dataset.label + ': $' + Math.round(v).toLocaleString();
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          stacked: true,
+          position: 'left',
+          title: {display: true, text: 'Monthly Labor Cost ($)'},
+          ticks: {callback: function(v){return '$' + (v/1000).toFixed(0) + 'k';}}
+        },
+        y1: {
+          stacked: false,
+          position: 'right',
+          title: {display: true, text: 'Labor % of Sales'},
+          ticks: {callback: function(v){return v.toFixed(0) + '%';}},
+          min: 0,
+          max: 20,
+          grid: {drawOnChartArea: false},
+        },
+      },
+    },
+  });
+}
+
+function wireCalc(rates, latestPct, latestLabor){
+  function syncPair(sliderId, numId){
+    var s = document.getElementById(sliderId);
+    var n = document.getElementById(numId);
+    s.addEventListener('input', function(){n.value = s.value; compute();});
+    n.addEventListener('input', function(){s.value = n.value; compute();});
+  }
+  syncPair('calc-casey-hrs', 'calc-casey-hrs-num');
+  syncPair('calc-casey-rate', 'calc-casey-rate-num');
+  syncPair('calc-rep-hrs', 'calc-rep-hrs-num');
+  syncPair('calc-rep-rate', 'calc-rep-rate-num');
+  syncPair('calc-sales', 'calc-sales-num');
+  document.getElementById('calc-cindy').addEventListener('change', compute);
+
+  function compute(){
+    var caseyHrs = parseFloat(document.getElementById('calc-casey-hrs-num').value) || 0;
+    var caseyRate = parseFloat(document.getElementById('calc-casey-rate-num').value) || 0;
+    var repHrs = parseFloat(document.getElementById('calc-rep-hrs-num').value) || 0;
+    var repRate = parseFloat(document.getElementById('calc-rep-rate-num').value) || 0;
+    var sales = parseFloat(document.getElementById('calc-sales-num').value) || 0;
+    var includeCindy = document.getElementById('calc-cindy').checked;
+
+    var weeksInMonth = 4.33;
+    var caseyMonthly = caseyHrs * weeksInMonth * caseyRate;
+    var repMonthly = repHrs * weeksInMonth * repRate;
+    var cindyMonthly = includeCindy ? rates.cindy_annual / 12 : 0;
+    var retailMonthly = caseyMonthly + repMonthly;
+    var total = retailMonthly + cindyMonthly;
+    var pct = sales > 0 ? (total / sales) * 100 : 0;
+    var annual = total * 12;
+    var costPerDay = total / 30.4;
+
+    var pctCls = pct <= 11 ? 'good' : pct <= 13 ? '' : pct <= 14 ? 'warn' : 'bad';
+
+    var deltaLine = '';
+    if (latestLabor) {
+      var deltaAmt = total - latestLabor;
+      var deltaPct = latestLabor > 0 ? (deltaAmt / latestLabor) * 100 : 0;
+      var arrow = deltaAmt > 10 ? '&#9650;' : deltaAmt < -10 ? '&#9660;' : '&middot;';
+      var cls = deltaAmt > 10 ? 'trend-up' : deltaAmt < -10 ? 'trend-down' : 'trend-flat';
+      deltaLine = '<div class="calc-delta"><span class="'+cls+'">'+arrow+' '+(deltaAmt >= 0 ? '+' : '')+fc(deltaAmt)+'/mo vs latest ('+(deltaPct>=0?'+':'')+deltaPct.toFixed(0)+'%)</span></div>';
+    }
+
+    var html = '';
+    html += '<div class="calc-result-row"><span class="calc-result-label">Casey ('+caseyHrs+'h/wk @ $'+caseyRate+')</span><span class="calc-result-val">'+fc(caseyMonthly)+'/mo</span></div>';
+    html += '<div class="calc-result-row"><span class="calc-result-label">Replacement ('+repHrs+'h/wk @ $'+repRate+')</span><span class="calc-result-val">'+fc(repMonthly)+'/mo</span></div>';
+    html += '<div class="calc-result-row"><span class="calc-result-label">Retail Subtotal</span><span class="calc-result-val">'+fc(retailMonthly)+'/mo</span></div>';
+    if (includeCindy) {
+      html += '<div class="calc-result-row"><span class="calc-result-label">Cindy (salary, no bonus)</span><span class="calc-result-val">'+fc(cindyMonthly)+'/mo</span></div>';
+    }
+    html += '<div class="calc-result-row"><span class="calc-result-label">Labor / Sales</span><span class="calc-result-val '+pctCls+'">'+pct.toFixed(1)+'%</span></div>';
+    html += '<div class="calc-result-row"><span class="calc-result-label">Cost / Day Open (~30.4d)</span><span class="calc-result-val">'+fc(costPerDay)+'</span></div>';
+    html += '<div class="calc-result-row"><span class="calc-result-label">Total Monthly</span><span class="calc-result-val '+pctCls+'">'+fc(total)+'</span></div>';
+    html += deltaLine;
+    html += '<div class="calc-delta" style="margin-top:10px">Annualized: <strong>'+fc(annual)+'/year</strong></div>';
+
+    document.getElementById('calc-results').innerHTML = html;
+  }
+  compute();
+}
+
+fetch('data/retail_staffing.json?t='+Date.now())
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(d){data = d; render();})
+  .catch(function(e){
+    console.error(e);
+    document.getElementById('main').innerHTML = '<div class="section"><div class="loading" style="color:#e53935">Failed to load staffing data: '+e.message+'<br><br>Run <code>python3 scripts/build_retail_staffing.py</code> to generate data/retail_staffing.json</div></div>';
+  });
+</script>
+
+</body>
+</html>
