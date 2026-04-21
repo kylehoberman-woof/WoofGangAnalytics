@@ -94,6 +94,12 @@ jobs:
       - name: Hicksville - Booking Anomalies
         run: python3 scripts/build_booking_anomaly_dashboard.py hicksville
 
+      # ── Good Morning Woof Gang briefing (with Claude AI summary) ──
+      - name: Morning Briefing
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 scripts/build_morning_briefing.py
+        
       # ── Commit and push ──
       - name: Commit and push
         run: |
