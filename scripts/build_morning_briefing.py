@@ -16,8 +16,61 @@ from pathlib import Path
 from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import STORES, PROJ_ROOT, UNTRACKED_SKUS
+from config import STORES, PROJ_ROOT, UNTRACKED_SKUS, SUPABASE_URL, SUPABASE_ANON_KEY
 from classifier import classify_item
+
+
+def fetch_store_supplies_needed():
+    """Pull store supplies from Supabase and return items that need reordering
+    (out of stock OR at/below reorder level). Grouped by store.
+    Returns dict: { store_key: [ {item_name, current_quantity, reorder_level, unit, status}, ... ] }
+    """
+    try:
+        import httpx as _httpx
+        h = {"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}"}
+        r = _httpx.get(
+            f"{SUPABASE_URL}/rest/v1/store_supplies?select=store,item_name,category,current_quantity,reorder_level,unit&order=item_name",
+            headers=h, timeout=15
+        )
+        if r.status_code != 200:
+            print(f"  [supplies] Supabase error {r.status_code}")
+            return {}
+        rows = r.json()
+    except Exception as e:
+        print(f"  [supplies] Error fetching: {e}")
+        return {}
+
+    by_store = defaultdict(list)
+    for row in rows:
+        cur = row.get("current_quantity")
+        mn  = row.get("reorder_level")
+        if cur is None:
+            continue
+        try:
+            cur_f = float(cur)
+            mn_f  = float(mn) if mn is not None else 0
+        except (ValueError, TypeError):
+            continue
+        if cur_f == 0:
+            status = "out"
+        elif mn_f > 0 and cur_f <= mn_f:
+            status = "order"
+        elif mn_f > 0 and cur_f <= mn_f * 1.5:
+            status = "low"
+        else:
+            continue
+        by_store[row["store"]].append({
+            "item_name": row.get("item_name") or "Unknown",
+            "category": row.get("category") or "",
+            "current_quantity": cur_f,
+            "reorder_level": mn_f if mn_f > 0 else None,
+            "unit": row.get("unit") or "",
+            "status": status,
+        })
+    status_order = {"out": 0, "order": 1, "low": 2}
+    for k in by_store:
+        by_store[k].sort(key=lambda x: (status_order.get(x["status"], 9), x["item_name"].lower()))
+    return dict(by_store)
 
 # Untracked SKU set (bulk treats, cookies, etc — intentionally 0 stock)
 _UNTRACKED_SET = {sku for sku, _ in UNTRACKED_SKUS}
@@ -365,6 +418,14 @@ def generate_executive_summary(output):
         if low:
             top = low[:3]
             lines.append(f"Top reorder priorities: " + ", ".join(f"{a['name']} ({a['velocity_monthly']:.0f}/mo, {a['stock']} left)" for a in top))
+        supplies = store.get("supplies_needed", [])
+        if supplies:
+            sup_out = sum(1 for x in supplies if x["status"] == "out")
+            sup_order = sum(1 for x in supplies if x["status"] == "order")
+            lines.append(f"Store supplies (cleaning/grooming/packaging): {sup_out} out of stock, {sup_order} at reorder level")
+            top_sup = [x["item_name"] for x in supplies[:4] if x["status"] in ("out","order")]
+            if top_sup:
+                lines.append(f"  Supplies to reorder: {', '.join(top_sup)}")
         lines.append("")
 
     data_brief = "\n".join(lines)
@@ -431,6 +492,14 @@ def main():
         except Exception as e:
             print(f"  ERROR for {store_key}: {e}")
             output["stores"][store_key] = {"error": str(e)}
+
+    # Attach store supplies needed (from Supabase store_supplies table)
+    print("\nFetching store supplies from Supabase...")
+    supplies_by_store = fetch_store_supplies_needed()
+    for store_key, items in supplies_by_store.items():
+        if store_key in output["stores"] and "error" not in output["stores"][store_key]:
+            output["stores"][store_key]["supplies_needed"] = items
+            print(f"  {store_key}: {len(items)} supplies flagged")
 
     # Generate executive summary via Claude
     output["summary_text"] = generate_executive_summary(output)

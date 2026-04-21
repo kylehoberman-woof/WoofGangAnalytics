@@ -78,6 +78,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .status-chip{font-size:0.64rem;font-weight:800;padding:2px 6px;border-radius:8px;text-transform:uppercase;letter-spacing:0.04em}
 .status-out{background:#ffcdd2;color:#c62828}
 .status-critical{background:#ffe0b2;color:#e65100}
+.status-order{background:#ffe0b2;color:#e65100}
 .status-low{background:#fff9c4;color:#f57f17}
 .stock-qty{font-weight:700;color:#666;font-size:0.82rem}
 .stock-more{font-size:0.78rem;color:#888;text-align:center;margin-top:6px;font-style:italic}
@@ -326,6 +327,40 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
     html += '</div>';
   });
   html += '</div></div>';
+
+  // ── STORE SUPPLIES NEEDED ──
+  var hasSupplies = ['port-washington','hicksville'].some(function(k){
+    return briefing.stores[k] && (briefing.stores[k].supplies_needed||[]).length > 0;
+  });
+  if (hasSupplies) {
+    html += '<div class="section">';
+    html += '<div class="section-hdr"><div class="section-icon">&#129529;</div><div class="section-title">Store Supplies Needed</div><div class="section-sub">Cleaning, grooming, packaging</div></div>';
+    html += '<div class="stock-grid">';
+    ['port-washington','hicksville'].forEach(function(storeKey){
+      var s = briefing.stores[storeKey]; if (!s) return;
+      var sup = (s.supplies_needed || []);
+      html += '<div class="stock-column"><h3>'+s.label+'</h3>';
+      if (sup.length === 0) {
+        html += '<div class="empty-msg">All supplies stocked</div>';
+      } else {
+        sup.slice(0,10).forEach(function(a){
+          var qtyTxt = (a.current_quantity||0) + (a.unit ? ' '+a.unit : '') + ' left';
+          var statusLabel = a.status === 'out' ? 'out' : a.status === 'order' ? 'order' : 'low';
+          html += '<div class="stock-item">';
+          html += '<div class="stock-name" title="'+esc(a.item_name)+'">'+esc(a.item_name)+'</div>';
+          html += '<div class="stock-meta">';
+          html += '<span class="stock-qty">'+qtyTxt+'</span>';
+          html += '<span class="status-chip status-'+a.status+'">'+statusLabel+'</span>';
+          html += '</div></div>';
+        });
+        if (sup.length > 10) {
+          html += '<div class="stock-more">+ '+(sup.length-10)+' more — see <a href="supplies.html">Store Supplies</a></div>';
+        }
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
 
   // ── LOW STOCK ALERTS ──
   html += '<div class="section">';
