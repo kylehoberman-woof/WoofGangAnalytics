@@ -111,7 +111,7 @@ jobs:
           git add port-washington/*.html
           git add hicksville/data/
           git add hicksville/*.html
-          git add data/                                     ← ADD THIS LINE
+          git add data/
           git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
           git pull --rebase origin main || {
             git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
