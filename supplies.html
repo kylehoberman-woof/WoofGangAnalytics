@@ -12,25 +12,15 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:36px 32px 32px;text-align:center;color:white;position:relative}
 .back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px;transition:background 0.2s}
 .back-link:hover{background:rgba(255,255,255,0.28)}
-.settings-btn{position:absolute;right:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.15);border:none;font-size:1.1rem;padding:7px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s;font-family:inherit}
-.settings-btn:hover{background:rgba(255,255,255,0.28)}
 .header h1{font-size:1.8rem;font-weight:800;margin-bottom:4px;letter-spacing:-0.02em}
 .header p{font-size:0.9rem;opacity:0.85}
 .brand{display:inline-block;margin-top:10px;background:rgba(255,255,255,0.15);padding:3px 14px;border-radius:20px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
 .main{max-width:1200px;margin:0 auto;padding:32px 24px 60px}
 
-/* Setup panel */
-.setup-panel{background:white;border-radius:16px;padding:32px;box-shadow:0 4px 20px rgba(0,0,0,0.1);max-width:560px;margin:40px auto}
-.setup-panel h2{font-size:1.2rem;font-weight:800;color:#1a1a2e;margin-bottom:6px}
-.setup-panel p{font-size:0.87rem;color:#666;margin-bottom:24px;line-height:1.6}
-.setup-fields{display:flex;flex-direction:column;gap:14px}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg label{font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.04em}
 .fg input,.fg select,.fg textarea{padding:9px 11px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.9rem;color:#1a1a2e;transition:border-color 0.2s;background:white}
 .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#C4276E;box-shadow:0 0 0 3px rgba(196,39,110,0.08)}
-.fg small{font-size:0.74rem;color:#999}
-.schema-box{background:#f8f8f8;border-radius:8px;padding:14px;font-size:0.78rem;color:#555;line-height:1.8;margin-top:6px}
-.schema-box strong{color:#C4276E}
 .btn-primary{padding:11px 28px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:8px}
 .btn-primary:hover{background:#a31f5b;transform:translateY(-1px)}
 .btn-primary:disabled{background:#ccc;cursor:not-allowed;transform:none}
@@ -51,8 +41,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .filter-sel{padding:7px 11px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.82rem;color:#1a1a2e;cursor:pointer;background:white;-webkit-appearance:none}
 .filter-sel:focus{outline:none;border-color:#C4276E}
 .toolbar-actions{display:flex;gap:8px;align-items:center}
-.btn-airtable{padding:8px 16px;background:#FCB400;color:#1a1a2e;border:none;border-radius:8px;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:background 0.2s}
-.btn-airtable:hover{background:#e0a100}
 .btn-add{padding:8px 16px;background:#2E7D32;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;transition:background 0.2s}
 .btn-add:hover{background:#1b5e20}
 
@@ -87,7 +75,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .btn-sm{padding:5px 11px;border-radius:6px;font-family:inherit;font-size:0.76rem;font-weight:600;cursor:pointer;transition:all 0.15s;border:1.5px solid #ddd;background:white;color:#555}
 .btn-sm:hover{background:#f0f0f0}
 .btn-order:hover{background:#fce4ec;color:#c62828;border-color:#e8a0a0}
-.btn-ordered:hover{background:#e8f5e9;color:#2E7D32;border-color:#90c090}
 .edit-qty-row{display:flex;gap:6px;align-items:center;margin-top:8px}
 .edit-qty-input{width:70px;padding:6px 8px;border:2px solid #C4276E;border-radius:6px;font-family:inherit;font-size:0.9rem;font-weight:700;text-align:center}
 .edit-qty-input:focus{outline:none}
@@ -110,7 +97,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 @media(max-width:700px){
   .header{padding:24px 16px 20px}
   .back-link{position:static;transform:none;display:inline-block;margin-bottom:10px;font-size:0.75rem}
-  .settings-btn{position:static;transform:none;display:inline-block;margin-bottom:10px}
   .main{padding:20px 12px 40px}
   .items-grid{grid-template-columns:1fr}
   .add-form-grid{grid-template-columns:1fr 1fr}
@@ -124,62 +110,11 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
   <h1>&#129529; Store Supplies</h1>
   <p>Track office, cleaning, and operational supplies across both stores</p>
   <div class="brand">Woof Gang Bakery &amp; Grooming</div>
-  <button class="settings-btn" onclick="showSettings()" title="Configure Airtable">&#9881;</button>
 </div>
 
 <div class="main">
 
-  <!-- Setup / Settings panel -->
-  <div id="setup-panel" class="setup-panel">
-    <h2>&#128279; Connect Airtable</h2>
-    <p>
-      Store supplies are tracked in Airtable. Enter your credentials below to connect.
-      Credentials are stored locally in your browser — never sent to any server.
-    </p>
-    <div class="setup-fields">
-      <div class="fg">
-        <label>Personal Access Token</label>
-        <input type="password" id="s-token" placeholder="pat..." autocomplete="off">
-        <small>Generate at <strong>airtable.com/account</strong> → Personal access tokens → Create token (scope: data.records:read, data.records:write)</small>
-      </div>
-      <div class="fg">
-        <label>Port Washington — Base ID</label>
-        <input type="text" id="s-pw-base" placeholder="appXXXXXXXXXXXXXX" autocomplete="off">
-        <small>From PW Airtable URL: airtable.com/<strong>appXXX</strong>/...</small>
-      </div>
-      <div class="fg">
-        <label>Port Washington — Table ID or Name</label>
-        <input type="text" id="s-pw-table" value="tbl7Qz3jurzRrHFen">
-        <small>Table ID from URL (tbl...) or display name. Default works for both stores.</small>
-      </div>
-      <div class="fg">
-        <label>Hicksville — Base ID</label>
-        <input type="text" id="s-hv-base" placeholder="appXXXXXXXXXXXXXX" autocomplete="off">
-        <small>From HV Airtable URL: airtable.com/<strong>appXXX</strong>/...</small>
-      </div>
-      <div class="fg">
-        <label>Hicksville — Table ID or Name</label>
-        <input type="text" id="s-hv-table" value="tbl7Qz3jurzRrHFen">
-      </div>
-      <div class="fg">
-        <label>Airtable Field Names (read-only reference)</label>
-        <div class="schema-box">
-          Fields detected in your Airtable bases:<br>
-          <strong>Item Name</strong> (text) &bull; <strong>Category</strong> (select) &bull;
-          <strong>Current Quantity</strong> (number) &bull; <strong>Reorder Level</strong> (number) &bull;
-          <strong>Unit</strong> (text) &bull; <strong>Last Updated</strong> (auto timestamp) &bull;
-          <strong>Alert Sent</strong> (checkbox)
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button class="btn-primary" onclick="saveSettings()">Connect Airtable</button>
-        <button class="btn-secondary" id="skip-btn" onclick="hideSettings()" style="display:none">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Dashboard (hidden until connected) -->
-  <div id="dashboard" class="hidden">
+  <div id="dashboard">
 
     <div class="summary-cards">
       <div class="sc"><div class="sc-val" id="stat-total">–</div><div class="sc-label">Total Items</div></div>
@@ -203,6 +138,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
             <option value="Cleaning">Cleaning</option>
             <option value="Office">Office</option>
             <option value="Grooming">Grooming Supplies</option>
+            <option value="Bag and Packaging">Bag and Packaging</option>
             <option value="Packaging">Packaging</option>
             <option value="Bakery">Bakery</option>
             <option value="Safety">Safety</option>
@@ -219,7 +155,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         </div>
         <div class="fg">
           <label>Current Qty</label>
-          <input type="number" id="a-qty" min="0" value="0">
+          <input type="number" id="a-qty" min="0" value="0" step="0.25">
         </div>
         <div class="fg">
           <label>Unit</label>
@@ -227,7 +163,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         </div>
         <div class="fg">
           <label>Reorder Level</label>
-          <input type="number" id="a-minqty" min="0" value="0">
+          <input type="number" id="a-minqty" min="0" value="0" step="0.25">
         </div>
         <div class="fg span-full" style="display:flex;gap:10px;justify-content:flex-end">
           <button class="btn-secondary" onclick="toggleAddForm(false)">Cancel</button>
@@ -238,7 +174,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 
     <div class="toolbar">
       <div class="filters">
-        <select class="filter-sel" id="filter-store" onchange="loadItems()">
+        <select class="filter-sel" id="filter-store" onchange="renderItems()">
           <option value="">All Stores</option>
           <option value="port-washington">Port Washington</option>
           <option value="hicksville">Hicksville</option>
@@ -248,6 +184,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
           <option value="Cleaning">Cleaning</option>
           <option value="Office">Office</option>
           <option value="Grooming">Grooming</option>
+          <option value="Bag and Packaging">Bag and Packaging</option>
           <option value="Packaging">Packaging</option>
           <option value="Bakery">Bakery</option>
           <option value="Safety">Safety</option>
@@ -263,8 +200,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
       </div>
       <div class="toolbar-actions">
         <button class="btn-add" onclick="toggleAddForm(true)">+ Add Item</button>
-        <a id="at-link-pw" href="#" target="_blank" class="btn-airtable">&#128279; PW Airtable</a>
-        <a id="at-link-hv" href="#" target="_blank" class="btn-airtable">&#128279; HV Airtable</a>
         <button class="btn-secondary" onclick="loadItems()">&#8635; Refresh</button>
       </div>
     </div>
@@ -277,17 +212,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 <div class="toast hidden" id="toast"></div>
 
 <script>
-/* ── Config ───────────────────────────────────── */
-var AT_URL  = 'https://api.airtable.com/v0';
-var DEFAULTS = {
-  token:   '',
-  pwBase:  'appVnzUFW0Yv43xe6',
-  hvBase:  'appDWS8jBdNIpVq04',
-  pwTable: 'tbl7Qz3jurzRrHFen',
-  hvTable: 'tbl7Qz3jurzRrHFen',
-};
-var config  = { token: '', pwBase: '', hvBase: '', pwTable: 'tbl7Qz3jurzRrHFen', hvTable: 'tbl7Qz3jurzRrHFen' };
-var records = []; // array of {id, fields, _store}
+/* ── Supabase config ─────────────────────────── */
+var SB_URL = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SB_HDR = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+var records = []; // array of Supabase rows
 
 /* ── Toast ────────────────────────────────────── */
 function showToast(msg, type) {
@@ -298,150 +228,62 @@ function showToast(msg, type) {
   t._timer = setTimeout(function(){ t.classList.add('hidden'); }, 2800);
 }
 
-/* ── Settings ─────────────────────────────────── */
-function loadConfig() {
-  config.token   = localStorage.getItem('wg_at_token')    || DEFAULTS.token;
-  config.pwBase  = localStorage.getItem('wg_at_pw_base')  || DEFAULTS.pwBase;
-  config.hvBase  = localStorage.getItem('wg_at_hv_base')  || DEFAULTS.hvBase;
-  config.pwTable = localStorage.getItem('wg_at_pw_table') || DEFAULTS.pwTable;
-  config.hvTable = localStorage.getItem('wg_at_hv_table') || DEFAULTS.hvTable;
-}
-function saveSettings() {
-  var token   = document.getElementById('s-token').value.trim();
-  var pwBase  = document.getElementById('s-pw-base').value.trim();
-  var hvBase  = document.getElementById('s-hv-base').value.trim();
-  var pwTable = document.getElementById('s-pw-table').value.trim() || 'tbl7Qz3jurzRrHFen';
-  var hvTable = document.getElementById('s-hv-table').value.trim() || 'tbl7Qz3jurzRrHFen';
-  if (!token || (!pwBase && !hvBase)) {
-    showToast('Token and at least one Base ID are required', 'error');
-    return;
-  }
-  localStorage.setItem('wg_at_token',    token);
-  localStorage.setItem('wg_at_pw_base',  pwBase);
-  localStorage.setItem('wg_at_hv_base',  hvBase);
-  localStorage.setItem('wg_at_pw_table', pwTable);
-  localStorage.setItem('wg_at_hv_table', hvTable);
-  config.token   = token;
-  config.pwBase  = pwBase;
-  config.hvBase  = hvBase;
-  config.pwTable = pwTable;
-  config.hvTable = hvTable;
-  hideSettings();
-  loadItems();
-}
-function showSettings() {
-  document.getElementById('setup-panel').classList.remove('hidden');
-  document.getElementById('dashboard').classList.add('hidden');
-  document.getElementById('skip-btn').style.display = config.token ? '' : 'none';
-  document.getElementById('s-token').value   = config.token;
-  document.getElementById('s-pw-base').value = config.pwBase;
-  document.getElementById('s-hv-base').value = config.hvBase;
-  document.getElementById('s-pw-table').value = config.pwTable;
-  document.getElementById('s-hv-table').value = config.hvTable;
-}
-function hideSettings() {
-  if (!config.token) return;
-  document.getElementById('setup-panel').classList.add('hidden');
-  document.getElementById('dashboard').classList.remove('hidden');
-}
-
-/* ── Airtable API ─────────────────────────────── */
-function atHeaders() {
-  return { 'Authorization': 'Bearer ' + config.token, 'Content-Type': 'application/json' };
-}
-function atBaseUrl(store) {
-  var base  = store === 'hicksville' ? config.hvBase  : config.pwBase;
-  var table = store === 'hicksville' ? config.hvTable : config.pwTable;
-  return AT_URL + '/' + encodeURIComponent(base) + '/' + encodeURIComponent(table);
-}
-
-function fetchAllFromBase(store, offset, accumulated) {
-  accumulated = accumulated || [];
-  var url = atBaseUrl(store) + (offset ? '?offset=' + offset : '');
-  return fetch(url, { headers: atHeaders() })
+/* ── Supabase API ─────────────────────────────── */
+function sbFetchAll() {
+  return fetch(SB_URL + '/store_supplies?select=*&order=item_name', { headers: SB_HDR })
     .then(function(r) {
-      if (!r.ok) return r.json().then(function(e){ throw new Error(e.error ? e.error.message : JSON.stringify(e)); });
+      if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
       return r.json();
-    })
-    .then(function(data) {
-      var recs = (data.records || []).map(function(r){ r._store = store; return r; });
-      var all  = accumulated.concat(recs);
-      if (data.offset) return fetchAllFromBase(store, data.offset, all);
-      return all;
     });
+}
+function sbPatch(id, patch) {
+  return fetch(SB_URL + '/store_supplies?id=eq.' + encodeURIComponent(id), {
+    method: 'PATCH',
+    headers: SB_HDR,
+    body: JSON.stringify(patch)
+  }).then(function(r) {
+    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+    return r.json().then(function(a){ return a[0]; });
+  });
+}
+function sbInsert(row) {
+  return fetch(SB_URL + '/store_supplies', {
+    method: 'POST',
+    headers: SB_HDR,
+    body: JSON.stringify(row)
+  }).then(function(r) {
+    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+    return r.json().then(function(a){ return a[0]; });
+  });
+}
+function sbDelete(id) {
+  return fetch(SB_URL + '/store_supplies?id=eq.' + encodeURIComponent(id), {
+    method: 'DELETE',
+    headers: SB_HDR
+  }).then(function(r) {
+    if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+  });
 }
 
 function loadItems() {
   document.getElementById('items-container').innerHTML = '<div class="empty">Loading&hellip;</div>';
-  var sf = document.getElementById('filter-store').value;
-  var promises = [];
-  if (sf === 'hicksville') {
-    if (config.hvBase) promises.push(fetchAllFromBase('hicksville'));
-  } else if (sf === 'port-washington') {
-    if (config.pwBase) promises.push(fetchAllFromBase('port-washington'));
-  } else {
-    if (config.pwBase) promises.push(fetchAllFromBase('port-washington'));
-    if (config.hvBase) promises.push(fetchAllFromBase('hicksville'));
-  }
-  if (promises.length === 0) {
-    document.getElementById('items-container').innerHTML =
-      '<div class="empty">No base configured for this store. <button class="btn-secondary" onclick="showSettings()">&#9881; Settings</button></div>';
-    return;
-  }
-  Promise.all(promises)
-    .then(function(results) {
-      records = results.reduce(function(a, b){ return a.concat(b); }, []);
+  sbFetchAll()
+    .then(function(rows) {
+      records = rows;
       renderStats();
       renderItems();
     })
     .catch(function(e) {
       console.error(e);
       document.getElementById('items-container').innerHTML =
-        '<div class="empty" style="color:#c62828">&#9888; Error: ' + (e.message || e) + '<br><br>' +
-        '<button class="btn-secondary" onclick="showSettings()">&#9881; Check Settings</button></div>';
-    });
-}
-
-function patchRecord(id, fields, store) {
-  var url = atBaseUrl(store) + '/' + id;
-  var payload = JSON.stringify({ fields: fields });
-  console.log('[PATCH]', url, payload);
-  return fetch(url, {
-    method: 'PATCH',
-    headers: atHeaders(),
-    body: payload
-  }).then(function(r) {
-    console.log('[PATCH response]', r.status, r.statusText);
-    return r.json().then(function(data) {
-      console.log('[PATCH data]', JSON.stringify(data));
-      if (!r.ok) throw new Error(data.error ? data.error.message : JSON.stringify(data));
-      return data;
-    });
-  });
-}
-
-function createRecord(fields, store) {
-  return fetch(atBaseUrl(store), {
-    method: 'POST',
-    headers: atHeaders(),
-    body: JSON.stringify({ fields: fields })
-  }).then(function(r) {
-    if (!r.ok) return r.json().then(function(e){ throw new Error(e.error ? e.error.message : JSON.stringify(e)); });
-    return r.json();
-  });
-}
-
-function deleteRecord(id, store) {
-  return fetch(atBaseUrl(store) + '/' + id, { method: 'DELETE', headers: atHeaders() })
-    .then(function(r) {
-      if (!r.ok) return r.json().then(function(e){ throw new Error(e.error ? e.error.message : JSON.stringify(e)); });
+        '<div class="empty" style="color:#c62828">&#9888; Error loading supplies: ' + (e.message || e) + '</div>';
     });
 }
 
 /* ── Status helpers ───────────────────────────── */
-function getStatus(f) {
-  var cur = f['Current Quantity'] != null ? +f['Current Quantity'] : null;
-  var min = f['Reorder Level']    != null ? +f['Reorder Level']    : null;
+function getStatus(r) {
+  var cur = r.current_quantity != null ? +r.current_quantity : null;
+  var min = r.reorder_level    != null ? +r.reorder_level    : null;
   if (cur === null) return 'ok';
   if (cur === 0)   return 'out';
   if (min > 0 && cur <= min)         return 'order';
@@ -463,15 +305,16 @@ function fmtDate(d) {
   var ms = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return ms[+p[1]-1] + ' ' + +p[2] + ', ' + p[0];
 }
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 /* ── Stats ────────────────────────────────────── */
 function renderStats() {
   var sf    = document.getElementById('filter-store').value;
-  var src   = records.filter(function(r){ return !sf || r._store === sf; });
+  var src   = records.filter(function(r){ return !sf || r.store === sf; });
   var total = src.length;
-  var ok    = src.filter(function(r){ return getStatus(r.fields) === 'ok'; }).length;
-  var low   = src.filter(function(r){ var s = getStatus(r.fields); return s === 'low'; }).length;
-  var order = src.filter(function(r){ var s = getStatus(r.fields); return s === 'order' || s === 'out'; }).length;
+  var ok    = src.filter(function(r){ return getStatus(r) === 'ok'; }).length;
+  var low   = src.filter(function(r){ return getStatus(r) === 'low'; }).length;
+  var order = src.filter(function(r){ var s = getStatus(r); return s === 'order' || s === 'out'; }).length;
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-ok').textContent    = ok;
   document.getElementById('stat-low').textContent   = low;
@@ -484,10 +327,9 @@ function getFiltered() {
   var cf  = document.getElementById('filter-cat').value;
   var stf = document.getElementById('filter-status').value;
   return records.filter(function(r) {
-    var f = r.fields;
-    if (sf  && r._store !== sf)                        return false;
-    if (cf  && (f['Category']||'').indexOf(cf) === -1) return false;
-    if (stf && getStatus(f) !== stf)                   return false;
+    if (sf  && r.store !== sf)                     return false;
+    if (cf  && (r.category||'').indexOf(cf) === -1) return false;
+    if (stf && getStatus(r) !== stf)                return false;
     return true;
   });
 }
@@ -502,28 +344,25 @@ function renderItems() {
     return;
   }
 
-  // Sort: order/out first, then low, then ok; alphabetical within
   filtered.sort(function(a, b) {
     var sOrder = { out:0, order:1, low:2, ok:3 };
-    var sa = sOrder[getStatus(a.fields)] || 3;
-    var sb = sOrder[getStatus(b.fields)] || 3;
+    var sa = sOrder[getStatus(a)] || 3;
+    var sb = sOrder[getStatus(b)] || 3;
     if (sa !== sb) return sa - sb;
-    return (a.fields['Item Name']||'').localeCompare(b.fields['Item Name']||'');
+    return (a.item_name||'').localeCompare(b.item_name||'');
   });
 
   var html = '<div class="items-grid">';
   filtered.forEach(function(rec) {
-    var f   = rec.fields;
     var id  = rec.id;
-    var st  = getStatus(f);
-    var cur = f['Current Quantity'] != null ? +f['Current Quantity'] : '–';
-    var min = f['Reorder Level']    != null ? +f['Reorder Level']    : null;
-    var unit    = f['Unit'] || '';
-    var cat     = f['Category'] || '';
-    var store   = rec._store;
-    var updated = f['Last Updated'] ? fmtDate(f['Last Updated']) : null;
+    var st  = getStatus(rec);
+    var cur = rec.current_quantity != null ? +rec.current_quantity : '–';
+    var min = rec.reorder_level    != null ? +rec.reorder_level    : null;
+    var unit    = rec.unit || '';
+    var cat     = rec.category || '';
+    var store   = rec.store;
+    var updated = rec.last_updated ? fmtDate(rec.last_updated) : null;
 
-    // Progress bar fill %
     var fillPct  = 0;
     var fillCls  = 'fill-ok';
     if (cur !== '–' && min > 0) {
@@ -535,16 +374,16 @@ function renderItems() {
 
     html += '<div class="item-card status-' + st + '" id="card-' + id + '">' +
       '<div class="item-top">' +
-        '<div class="item-name">' + (f['Item Name']||'Untitled') + '</div>' +
+        '<div class="item-name">' + esc(rec.item_name || 'Untitled') + '</div>' +
         statusChip(st) +
       '</div>' +
       '<div class="item-badges">' +
-        (cat ? '<span class="badge b-cat">' + cat + '</span>' : '') +
+        (cat ? '<span class="badge b-cat">' + esc(cat) + '</span>' : '') +
         storeBadge(store) +
       '</div>' +
       '<div class="qty-row">' +
         '<div class="qty-big">' + cur + '</div>' +
-        (unit ? '<div class="qty-unit">' + unit + '</div>' : '') +
+        (unit ? '<div class="qty-unit">' + esc(unit) + '</div>' : '') +
         (min > 0 ? '<div class="qty-min">min: ' + min + '</div>' : '') +
       '</div>' +
       (min > 0 ? '<div class="qty-bar"><div class="qty-fill ' + fillCls + '" style="width:' + fillPct + '%"></div></div>' : '') +
@@ -559,12 +398,12 @@ function renderItems() {
         '<div class="edit-qty-row">' +
           '<div style="display:flex;flex-direction:column;gap:2px">' +
             '<label style="font-size:0.68rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em">Current Qty</label>' +
-            '<input type="number" class="edit-qty-input" id="qty-input-' + id + '" value="' + (cur !== '–' ? cur : 0) + '" min="0">' +
+            '<input type="number" class="edit-qty-input" id="qty-input-' + id + '" value="' + (cur !== '–' ? cur : 0) + '" min="0" step="0.25">' +
           '</div>' +
-          (unit ? '<span style="font-size:0.82rem;color:#888;align-self:flex-end;padding-bottom:4px">' + unit + '</span>' : '') +
+          (unit ? '<span style="font-size:0.82rem;color:#888;align-self:flex-end;padding-bottom:4px">' + esc(unit) + '</span>' : '') +
           '<div style="display:flex;flex-direction:column;gap:2px">' +
             '<label style="font-size:0.68rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em">Min Level</label>' +
-            '<input type="number" class="edit-qty-input" id="min-input-' + id + '" value="' + (min !== null ? min : 0) + '" min="0" style="border-color:#888">' +
+            '<input type="number" class="edit-qty-input" id="min-input-' + id + '" value="' + (min !== null ? min : 0) + '" min="0" step="0.25" style="border-color:#888">' +
           '</div>' +
           '<div style="display:flex;flex-direction:column;gap:4px;align-self:flex-end">' +
             '<button class="btn-save" onclick="saveQty(\'' + id + '\')">Save</button>' +
@@ -596,11 +435,11 @@ function saveQty(id) {
   var minVal = +document.getElementById('min-input-' + id).value;
   if (isNaN(val) || val < 0) { showToast('Invalid quantity', 'error'); return; }
   if (isNaN(minVal) || minVal < 0) { showToast('Invalid min level', 'error'); return; }
-  var rec = records.find(function(r){ return r.id === id; });
-  var patch = { 'Current Quantity': val, 'Reorder Level': minVal };
-  patchRecord(id, patch, rec ? rec._store : 'port-washington')
-    .then(function() {
-      if (rec) { rec.fields['Current Quantity'] = val; rec.fields['Reorder Level'] = minVal; }
+  var patch = { current_quantity: val, reorder_level: minVal, last_updated: new Date().toISOString() };
+  sbPatch(id, patch)
+    .then(function(updated) {
+      var idx = records.findIndex(function(r){ return r.id === id; });
+      if (idx >= 0 && updated) records[idx] = updated;
       renderStats();
       renderItems();
       showToast('Updated');
@@ -614,9 +453,9 @@ function saveQty(id) {
 /* ── Delete ───────────────────────────────────── */
 function doDelete(id) {
   var rec = records.find(function(r){ return r.id === id; });
-  var name = rec ? (rec.fields['Item Name'] || 'this item') : 'this item';
+  var name = rec ? (rec.item_name || 'this item') : 'this item';
   if (!confirm('Delete "' + name + '" from supplies? This cannot be undone.')) return;
-  deleteRecord(id, rec ? rec._store : 'port-washington')
+  sbDelete(id)
     .then(function() {
       records = records.filter(function(r){ return r.id !== id; });
       renderStats();
@@ -639,28 +478,29 @@ function handleAdd() {
   var store = document.getElementById('a-store').value;
   if (!name)  { showToast('Item name is required', 'error'); return; }
   if (!store) { showToast('Store is required', 'error'); return; }
-  var fields = {
-    'Item Name':        name,
-    'Category':         document.getElementById('a-cat').value.trim()  || undefined,
-    'Current Quantity': +document.getElementById('a-qty').value,
-    'Unit':             document.getElementById('a-unit').value.trim() || undefined,
-    'Reorder Level':    +document.getElementById('a-minqty').value     || undefined,
+  var row = {
+    store:            store,
+    item_name:        name,
+    category:         document.getElementById('a-cat').value.trim() || null,
+    current_quantity: +document.getElementById('a-qty').value || 0,
+    unit:             document.getElementById('a-unit').value.trim() || null,
+    reorder_level:    +document.getElementById('a-minqty').value || null,
+    last_updated:     new Date().toISOString()
   };
-  Object.keys(fields).forEach(function(k){ if (fields[k] === undefined) delete fields[k]; });
 
   var btn = document.getElementById('add-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
-  createRecord(fields, store)
+  sbInsert(row)
     .then(function(rec) {
-      rec._store = store;
-      records.unshift(rec);
+      if (rec) records.unshift(rec);
       renderStats();
       renderItems();
       toggleAddForm(false);
       ['a-name','a-qty','a-unit','a-minqty'].forEach(function(id){
-        document.getElementById(id).value = id === 'a-qty' || id === 'a-minqty' ? '0' : '';
+        document.getElementById(id).value = (id === 'a-qty' || id === 'a-minqty') ? '0' : '';
       });
       document.getElementById('a-store').value = '';
+      document.getElementById('a-cat').value = '';
       showToast('Item added');
     })
     .catch(function(e) {
@@ -673,13 +513,6 @@ function handleAdd() {
 }
 
 /* ── Init ─────────────────────────────────────── */
-loadConfig();
-document.getElementById('setup-panel').classList.add('hidden');
-document.getElementById('dashboard').classList.remove('hidden');
-var pwLink = document.getElementById('at-link-pw');
-var hvLink = document.getElementById('at-link-hv');
-if (config.pwBase) { pwLink.href = 'https://airtable.com/' + config.pwBase; } else { pwLink.style.display = 'none'; }
-if (config.hvBase) { hvLink.href = 'https://airtable.com/' + config.hvBase; } else { hvLink.style.display = 'none'; }
 loadItems();
 
 </script>
