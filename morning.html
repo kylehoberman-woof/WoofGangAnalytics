@@ -214,6 +214,54 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
   });
   html += '</div></div>';
 
+  // ── MONTH-TO-DATE ──
+  var hasMtd = ['port-washington','hicksville'].some(function(k){return briefing.stores[k] && briefing.stores[k].mtd;});
+  if (hasMtd) {
+    html += '<div class="section">';
+    var mtdLabel = (briefing.stores['port-washington']||{}).mtd_label || 'This month';
+    var prevMtdLabel = (briefing.stores['port-washington']||{}).prev_mtd_label || 'Last month';
+    html += '<div class="section-hdr"><div class="section-icon">&#128197;</div><div class="section-title">Month-to-Date</div><div class="section-sub">'+esc(mtdLabel)+' &nbsp;vs&nbsp; '+esc(prevMtdLabel)+'</div></div>';
+    html += '<div class="stores-grid">';
+    ['port-washington','hicksville'].forEach(function(storeKey){
+      var s = briefing.stores[storeKey]; if (!s || !s.mtd) return;
+      var m = s.mtd, pm = s.prev_mtd;
+      var cls = storeKey === 'hicksville' ? ' hv' : '';
+      html += '<div class="store-block'+cls+'">';
+      html += '<div class="store-name">'+s.label+'</div>';
+      html += '<div class="kpi-grid">';
+      html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(m.total_rev)+'</div>'+trendBadge(m.total_rev,pm.total_rev)+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+m.appointments+'</div>'+trendBadge(m.appointments,pm.appointments)+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(m.groom_rev)+'</div>'+trendBadge(m.groom_rev,pm.groom_rev)+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(m.retail_rev)+'</div>'+trendBadge(m.retail_rev,pm.retail_rev)+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div></div>';
+  }
+
+  // ── YEAR-TO-DATE ──
+  var hasYtd = ['port-washington','hicksville'].some(function(k){return briefing.stores[k] && briefing.stores[k].ytd;});
+  if (hasYtd) {
+    html += '<div class="section">';
+    var ytdLabel = (briefing.stores['port-washington']||{}).ytd_label || 'YTD';
+    var prevYtdLabel = (briefing.stores['port-washington']||{}).prev_ytd_label || 'YTD last year';
+    html += '<div class="section-hdr"><div class="section-icon">&#128200;</div><div class="section-title">Year-to-Date</div><div class="section-sub">'+esc(ytdLabel)+' &nbsp;vs&nbsp; '+esc(prevYtdLabel)+'</div></div>';
+    html += '<div class="stores-grid">';
+    ['port-washington','hicksville'].forEach(function(storeKey){
+      var s = briefing.stores[storeKey]; if (!s || !s.ytd) return;
+      var yy = s.ytd, py = s.prev_ytd;
+      var cls = storeKey === 'hicksville' ? ' hv' : '';
+      html += '<div class="store-block'+cls+'">';
+      html += '<div class="store-name">'+s.label+'</div>';
+      html += '<div class="kpi-grid">';
+      html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(yy.total_rev)+'</div>'+trendBadge(yy.total_rev,py.total_rev)+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+yy.appointments+'</div>'+trendBadge(yy.appointments,py.appointments)+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(yy.groom_rev)+'</div>'+trendBadge(yy.groom_rev,py.groom_rev)+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(yy.retail_rev)+'</div>'+trendBadge(yy.retail_rev,py.retail_rev)+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div></div>';
+  }
+
   // ── TODAY'S CHECKLIST ──
   var todayTasks = tasks.filter(function(t){return t.day_of_week === tk;});
   html += '<div class="section">';

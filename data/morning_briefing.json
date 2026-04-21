@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-20T13:59:09.072642-04:00",
+  "generated_at": "2026-04-20T21:03:35.104999-04:00",
   "today": "2026-04-20",
   "yesterday": "2026-04-19",
   "week_start": "2026-04-20",
@@ -27,13 +27,13 @@
         "avg_ticket": 39.57
       },
       "wtd": {
-        "total_rev": 0.0,
-        "groom_rev": 0.0,
-        "retail_rev": 0.0,
-        "grooms": 0,
-        "baths": 0,
-        "appointments": 0,
-        "transactions": 0
+        "total_rev": 2269.66,
+        "groom_rev": 1935.0,
+        "retail_rev": 334.66,
+        "grooms": 16,
+        "baths": 4,
+        "appointments": 20,
+        "transactions": 31
       },
       "prev_wtd": {
         "total_rev": 2633.22,
@@ -44,6 +44,46 @@
         "appointments": 23,
         "transactions": 36
       },
+      "mtd": {
+        "total_rev": 55014.88,
+        "groom_rev": 46269.5,
+        "retail_rev": 8720.38,
+        "grooms": 316,
+        "baths": 106,
+        "appointments": 422,
+        "transactions": 680
+      },
+      "prev_mtd": {
+        "total_rev": 54124.73,
+        "groom_rev": 44524.0,
+        "retail_rev": 9600.73,
+        "grooms": 320,
+        "baths": 93,
+        "appointments": 413,
+        "transactions": 659
+      },
+      "mtd_label": "Apr 1 \u2192 Apr 19",
+      "prev_mtd_label": "Mar 1 \u2192 Mar 19",
+      "ytd": {
+        "total_rev": 291399.52,
+        "groom_rev": 236697.42,
+        "retail_rev": 54507.1,
+        "grooms": 1644,
+        "baths": 535,
+        "appointments": 2179,
+        "transactions": 3696
+      },
+      "prev_ytd": {
+        "total_rev": 190993.5,
+        "groom_rev": 142159.75,
+        "retail_rev": 48357.75,
+        "grooms": 1018,
+        "baths": 390,
+        "appointments": 1408,
+        "transactions": 2909
+      },
+      "ytd_label": "Jan 1 \u2192 Apr 19, 2026",
+      "prev_ytd_label": "Jan 1 \u2192 Apr 19, 2025",
       "low_stock": [
         {
           "sku": "857555008148",
@@ -73,6 +113,15 @@
           "vendor": "Woof Gang Private Label"
         },
         {
+          "sku": "810153750123",
+          "name": "WGB 6\" Smoked Beef Collagen Stick",
+          "stock": -10.0,
+          "weeks_of_supply": -4.3,
+          "velocity_monthly": 10.0,
+          "status": "out",
+          "vendor": "Woof Gang Private Label"
+        },
+        {
           "sku": "810153753155",
           "name": "WGB Mini Bully Braided 4\"",
           "stock": 0.0,
@@ -80,15 +129,6 @@
           "velocity_monthly": 9.0,
           "status": "out",
           "vendor": "Woof Gang Bakery"
-        },
-        {
-          "sku": "810153750123",
-          "name": "WGB 6\" Smoked Beef Collagen Stick",
-          "stock": -5.0,
-          "weeks_of_supply": -2.6,
-          "velocity_monthly": 8.3,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
         },
         {
           "sku": "072705118762",
@@ -138,11 +178,20 @@
         {
           "sku": "1007",
           "name": "Preppy Puppy Cannoli",
-          "stock": -148.0,
-          "weeks_of_supply": -120.2,
-          "velocity_monthly": 5.3,
+          "stock": -149.0,
+          "weeks_of_supply": -113.9,
+          "velocity_monthly": 5.7,
           "status": "out",
           "vendor": "Preppy Puppy"
+        },
+        {
+          "sku": "810153750611",
+          "name": "WGB Yak Cheese Medium",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 4.8,
+          "status": "out",
+          "vendor": "Woof Gang Private Label"
         },
         {
           "sku": "1009",
@@ -156,15 +205,6 @@
         {
           "sku": "810153750178",
           "name": "WGB Stuffed Collagen Stick 6\"",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 4.5,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
-        },
-        {
-          "sku": "810153750611",
-          "name": "WGB Yak Cheese Medium",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
           "velocity_monthly": 4.5,
@@ -188,6 +228,15 @@
           "velocity_monthly": 4.0,
           "status": "out",
           "vendor": "Woof Gang Private Label"
+        },
+        {
+          "sku": "072705115570",
+          "name": "Fromm Gold Dog Dry Puppy 5#",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 3.8,
+          "status": "out",
+          "vendor": "Fromm"
         },
         {
           "sku": "810028241145",
@@ -215,15 +264,6 @@
           "velocity_monthly": 3.5,
           "status": "out",
           "vendor": "Earth Rated"
-        },
-        {
-          "sku": "810153750284",
-          "name": "WGB 12\" Moo Taffy Stick",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 3.3,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
         }
       ]
     },
@@ -250,13 +290,13 @@
         "avg_ticket": 12.67
       },
       "wtd": {
-        "total_rev": 0.0,
-        "groom_rev": 0.0,
-        "retail_rev": 0.0,
-        "grooms": 0,
-        "baths": 0,
-        "appointments": 0,
-        "transactions": 0
+        "total_rev": 652.34,
+        "groom_rev": 485.0,
+        "retail_rev": 167.34,
+        "grooms": 4,
+        "baths": 1,
+        "appointments": 5,
+        "transactions": 12
       },
       "prev_wtd": {
         "total_rev": 382.4,
@@ -267,13 +307,53 @@
         "appointments": 4,
         "transactions": 6
       },
+      "mtd": {
+        "total_rev": 17231.35,
+        "groom_rev": 13998.0,
+        "retail_rev": 3233.35,
+        "grooms": 121,
+        "baths": 22,
+        "appointments": 143,
+        "transactions": 305
+      },
+      "prev_mtd": {
+        "total_rev": 13964.21,
+        "groom_rev": 10655.0,
+        "retail_rev": 3259.21,
+        "grooms": 99,
+        "baths": 9,
+        "appointments": 108,
+        "transactions": 250
+      },
+      "mtd_label": "Apr 1 \u2192 Apr 19",
+      "prev_mtd_label": "Mar 1 \u2192 Mar 19",
+      "ytd": {
+        "total_rev": 75855.42,
+        "groom_rev": 56673.0,
+        "retail_rev": 18882.42,
+        "grooms": 534,
+        "baths": 69,
+        "appointments": 603,
+        "transactions": 1450
+      },
+      "prev_ytd": {
+        "total_rev": 0.0,
+        "groom_rev": 0.0,
+        "retail_rev": 0.0,
+        "grooms": 0,
+        "baths": 0,
+        "appointments": 0,
+        "transactions": 0
+      },
+      "ytd_label": "Jan 1 \u2192 Apr 19, 2026",
+      "prev_ytd_label": "Jan 1 \u2192 Apr 19, 2025",
       "low_stock": [
         {
           "sku": "1001",
           "name": "X-Small Treat Table",
-          "stock": -280.0,
-          "weeks_of_supply": -28.2,
-          "velocity_monthly": 43.0,
+          "stock": -282.0,
+          "weeks_of_supply": -28.1,
+          "velocity_monthly": 43.5,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -285,6 +365,15 @@
           "velocity_monthly": 12.0,
           "status": "out",
           "vendor": "Preppy Puppy"
+        },
+        {
+          "sku": "695546615476",
+          "name": "Cookie - Holiday PB Cups",
+          "stock": -20.0,
+          "weeks_of_supply": -9.6,
+          "velocity_monthly": 9.0,
+          "status": "out",
+          "vendor": "Bosco & Roxy"
         },
         {
           "sku": "504339966",
@@ -330,6 +419,15 @@
           "velocity_monthly": 5.0,
           "status": "out",
           "vendor": "Preppy Puppy"
+        },
+        {
+          "sku": "810153750666",
+          "name": "WGB Turkey Tendons Full Strip (3 oz)",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 4.0,
+          "status": "out",
+          "vendor": "Woof Gang Bakery"
         },
         {
           "sku": "20810017531428",
@@ -429,26 +527,9 @@
           "velocity_monthly": 2.0,
           "status": "out",
           "vendor": "Bosco & Roxy"
-        },
-        {
-          "sku": "810153751687",
-          "name": "WGB Toys - Pig Stick",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 2.0,
-          "status": "out",
-          "vendor": "Woof Gang Bakery"
-        },
-        {
-          "sku": "810139010029",
-          "name": "WBALL - Large (assorted colors)",
-          "stock": -5.0,
-          "weeks_of_supply": -10.8,
-          "velocity_monthly": 2.0,
-          "status": "out",
-          "vendor": "WACKYwalk'r"
         }
       ]
     }
-  }
+  },
+  "summary_text": null
 }
