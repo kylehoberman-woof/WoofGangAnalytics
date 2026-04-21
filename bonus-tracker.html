@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>if(sessionStorage.getItem('wg_portal_auth')!=='1')window.location.href='index.html';</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Manager Bonus Tracker — Woof Gang</title>
@@ -9,6 +10,7 @@
 .back-btn{display:inline-flex;align-items:center;gap:6px;color:#C4276E;font-size:0.85rem;font-weight:600;text-decoration:none;padding:8px 0;margin-bottom:24px}
 .back-btn:hover{opacity:0.75}
 .tracker-wrap{max-width:860px;margin:0 auto;padding:40px 24px 60px}
+.bw-loading{text-align:center;padding:48px 20px;color:#aaa;font-size:0.92rem}
 </style>
 </head>
 <body>
@@ -20,83 +22,195 @@
 </div>
 
 <div class="tracker-wrap">
-
-  <a class="back-btn" href="#" onclick="history.back();return false;">&#8592; Back to Portal</a>
-
-  <div class="card card-full" style="border-left-color:#2E7D32">
-    <div class="card-icon">🏆</div>
-    <div class="bw-top">
-      <div class="card-title" style="margin-bottom:0">Cindy&rsquo;s 2026 Manager Bonus Tracker</div>
-      <div class="bw-max-pill">Max $4,000</div>
-    </div>
-    <div class="bw-sub">Q1 actuals through March 31, 2026 &middot; 9 months remaining (Apr&ndash;Dec) &middot; Bonuses are per-store, non-cumulative within store</div>
-
-    <div class="bw-stores">
-      <div class="bw-store">
-        <div class="bw-sname">&#128205; Port Washington</div>
-        <div class="bw-ytd-row">
-          <span class="bw-ytd-val">$238,568</span>
-          <span class="bw-ytd-lbl">YTD (Q1)</span>
-          <span class="bw-avg">$79,523/mo avg</span>
-        </div>
-        <div class="bw-tier-row">
-          <div class="bw-tier-info">
-            <span class="bw-tier-name">Tier 1</span>
-            <span class="bw-tier-target">$1,050,000</span>
-            <span class="bw-tier-bonus t1">$2,000 bonus</span>
-          </div>
-          <div class="bw-bar-bg"><div class="bw-bar" style="width:22.7%"></div></div>
-          <div class="bw-bar-meta">22.7% of target &middot; needs $90,159/mo (+13%)</div>
-        </div>
-        <div class="bw-tier-row">
-          <div class="bw-tier-info">
-            <span class="bw-tier-name">Tier 2</span>
-            <span class="bw-tier-target">$1,150,000</span>
-            <span class="bw-tier-bonus t2">$3,000 bonus</span>
-          </div>
-          <div class="bw-bar-bg"><div class="bw-bar t2" style="width:20.7%"></div></div>
-          <div class="bw-bar-meta">20.7% of target &middot; needs $101,270/mo (+27%)</div>
-        </div>
-      </div>
-      <div class="bw-store">
-        <div class="bw-sname">&#128205; Hicksville</div>
-        <div class="bw-ytd-row">
-          <span class="bw-ytd-val">$67,725</span>
-          <span class="bw-ytd-lbl">YTD (Q1)</span>
-          <span class="bw-avg">+32% Jan&rarr;Mar trend</span>
-        </div>
-        <div class="bw-tier-row">
-          <div class="bw-tier-info">
-            <span class="bw-tier-name">Tier 1</span>
-            <span class="bw-tier-target">$500,000</span>
-            <span class="bw-tier-bonus t1">$500 bonus</span>
-          </div>
-          <div class="bw-bar-bg"><div class="bw-bar" style="width:13.5%"></div></div>
-          <div class="bw-bar-meta">13.5% of target &middot; needs $48,031/mo (+113%)</div>
-        </div>
-        <div class="bw-tier-row">
-          <div class="bw-tier-info">
-            <span class="bw-tier-name">Tier 2</span>
-            <span class="bw-tier-target">$600,000</span>
-            <span class="bw-tier-bonus t2">$1,000 bonus</span>
-          </div>
-          <div class="bw-bar-bg"><div class="bw-bar t2" style="width:11.3%"></div></div>
-          <div class="bw-bar-meta">11.3% of target &middot; needs $59,142/mo (+162%)</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="bw-callout">
-      &#128161; At Q1 run rate: PW projects <strong>$954K</strong>, HV projects <strong>$271K</strong> &rarr; <strong>$0 bonus.</strong>
-      Primary opportunity: PW Tier 1 at <strong>+13% monthly growth</strong> unlocks a <strong>$2,000 bonus</strong>. PW Tier 2 (+27%) earns <strong>$3,000</strong>. HV on strong 32% trajectory but targets require significant acceleration.
-    </div>
-  </div>
-
+  <a class="back-btn" href="#" id="portal-back" onclick="history.back();return false;">&#8592; Back to Portal</a>
+  <div id="tracker-body" class="bw-loading">Loading live YTD data&hellip;</div>
 </div>
 
 <div class="footer">
   <strong>Woof Gang Bakery &amp; Grooming</strong> — Manager Performance
 </div>
+
+<script>
+// Bonus structure (per store, non-cumulative within store):
+//   PW Tier 1: $1,050,000 → $2,000 bonus
+//   PW Tier 2: $1,150,000 → $3,000 bonus
+//   HV Tier 1:   $500,000 →   $500 bonus
+//   HV Tier 2:   $600,000 → $1,000 bonus
+var TIERS = {
+  'port-washington': {
+    label: 'Port Washington',
+    tiers: [
+      { name: 'Tier 1', target: 1050000, bonus: 2000 },
+      { name: 'Tier 2', target: 1150000, bonus: 3000 }
+    ]
+  },
+  'hicksville': {
+    label: 'Hicksville',
+    tiers: [
+      { name: 'Tier 1', target: 500000, bonus: 500 },
+      { name: 'Tier 2', target: 600000, bonus: 1000 }
+    ]
+  }
+};
+
+function fc(n){return '$'+Math.round(n).toLocaleString();}
+function fcShort(n){
+  if(n >= 1000000) return '$'+(n/1000000).toFixed(1)+'M';
+  if(n >= 1000)    return '$'+Math.round(n/1000)+'K';
+  return '$'+Math.round(n);
+}
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function daysElapsedYTD(throughDate){
+  var start = new Date(throughDate.getFullYear(), 0, 1);
+  return Math.floor((throughDate - start) / 86400000) + 1; // inclusive
+}
+function daysInYear(y){
+  return ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 366 : 365;
+}
+
+function render(briefing){
+  var yesterdayISO = briefing.yesterday;
+  var yDate = new Date(yesterdayISO + 'T00:00:00');
+  var year  = yDate.getFullYear();
+  var daysIn  = daysElapsedYTD(yDate);  // days elapsed through yesterday
+  var daysYr  = daysInYear(year);
+  var daysRemain = daysYr - daysIn;
+  var monthsRemain = Math.round((daysRemain / daysYr) * 12 * 10) / 10;
+  var monthsElapsed = (daysIn / daysYr) * 12;
+
+  var html = '';
+  html += '<div class="card card-full" style="border-left-color:#2E7D32">';
+  html += '<div class="card-icon">&#127942;</div>';
+  html += '<div class="bw-top">';
+  html += '<div class="card-title" style="margin-bottom:0">Cindy&rsquo;s '+year+' Manager Bonus Tracker</div>';
+  html += '<div class="bw-max-pill">Max $4,000</div>';
+  html += '</div>';
+
+  var ytdThru = yDate.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+  html += '<div class="bw-sub">Live YTD through '+ytdThru+' &middot; '+monthsRemain.toFixed(1)+' months remaining &middot; Bonuses are per-store, non-cumulative within store</div>';
+
+  html += '<div class="bw-stores">';
+
+  ['port-washington','hicksville'].forEach(function(storeKey){
+    var cfg = TIERS[storeKey];
+    var store = briefing.stores && briefing.stores[storeKey];
+    if (!store || !store.ytd) return;
+    var ytd = store.ytd.total_rev || 0;
+    var prevYtd = (store.prev_ytd && store.prev_ytd.total_rev) || 0;
+    var avgMo = monthsElapsed > 0 ? ytd / monthsElapsed : 0;
+    // Projected year-end at current pace
+    var projected = daysIn > 0 ? (ytd / daysIn) * daysYr : 0;
+    // YoY trend pct
+    var yoyPct = prevYtd > 0 ? ((ytd - prevYtd) / prevYtd) * 100 : null;
+
+    html += '<div class="bw-store">';
+    html += '<div class="bw-sname">&#128205; '+esc(cfg.label)+'</div>';
+    html += '<div class="bw-ytd-row">';
+    html += '<span class="bw-ytd-val">'+fc(ytd)+'</span>';
+    html += '<span class="bw-ytd-lbl">YTD</span>';
+    html += '<span class="bw-avg">'+fc(avgMo)+'/mo avg';
+    if (yoyPct !== null) {
+      var yoyLabel = yoyPct >= 0 ? '+' : '';
+      html += ' &middot; '+yoyLabel+yoyPct.toFixed(0)+'% vs LY';
+    }
+    html += '</span>';
+    html += '</div>';
+
+    cfg.tiers.forEach(function(tier, idx){
+      var pct = (ytd / tier.target) * 100;
+      var gap = tier.target - ytd;
+      var monthlyNeeded = daysRemain > 0 ? (gap / daysRemain) * (daysYr / 12) : 0;
+      var needsPct = avgMo > 0 ? ((monthlyNeeded - avgMo) / avgMo) * 100 : 0;
+      var tClass = idx === 0 ? '' : 't2';
+      var achieved = ytd >= tier.target;
+      var projectedHit = projected >= tier.target;
+
+      html += '<div class="bw-tier-row">';
+      html += '<div class="bw-tier-info">';
+      html += '<span class="bw-tier-name">'+tier.name+'</span>';
+      html += '<span class="bw-tier-target">'+fc(tier.target)+'</span>';
+      html += '<span class="bw-tier-bonus '+(tClass||'t1')+'">'+fc(tier.bonus)+' bonus</span>';
+      html += '</div>';
+      var barPct = Math.min(100, Math.max(0, pct));
+      html += '<div class="bw-bar-bg"><div class="bw-bar '+tClass+'" style="width:'+barPct.toFixed(1)+'%"></div></div>';
+
+      var metaParts = [pct.toFixed(1)+'% of target'];
+      if (achieved) {
+        metaParts.push('<strong style="color:#2E7D32">&#10004; Achieved</strong>');
+      } else {
+        metaParts.push('needs '+fc(monthlyNeeded)+'/mo');
+        if (needsPct > 0) metaParts.push('(+'+needsPct.toFixed(0)+'%)');
+        else if (needsPct < 0) metaParts.push('('+needsPct.toFixed(0)+'%)');
+        if (projectedHit) metaParts.push('<strong style="color:#2E7D32">&#10004; On pace</strong>');
+      }
+      html += '<div class="bw-bar-meta">'+metaParts.join(' &middot; ')+'</div>';
+      html += '</div>';
+    });
+
+    html += '</div>';
+  });
+
+  html += '</div>';  // /bw-stores
+
+  // Compute projection summary
+  var pwStore = briefing.stores['port-washington'];
+  var hvStore = briefing.stores['hicksville'];
+  var pwYtd = (pwStore && pwStore.ytd) ? pwStore.ytd.total_rev : 0;
+  var hvYtd = (hvStore && hvStore.ytd) ? hvStore.ytd.total_rev : 0;
+  var pwProj = daysIn > 0 ? (pwYtd / daysIn) * daysYr : 0;
+  var hvProj = daysIn > 0 ? (hvYtd / daysIn) * daysYr : 0;
+
+  // Determine projected bonus
+  var projBonus = 0;
+  TIERS['port-washington'].tiers.forEach(function(t){ if (pwProj >= t.target) projBonus = Math.max(projBonus, t.bonus); });
+  TIERS['port-washington'].tiers.forEach(function(t){ if (pwProj >= t.target && t.bonus > projBonus) projBonus = t.bonus; });
+  var pwBonus = 0, hvBonus = 0;
+  TIERS['port-washington'].tiers.forEach(function(t){ if (pwProj >= t.target) pwBonus = Math.max(pwBonus, t.bonus); });
+  TIERS['hicksville'].tiers.forEach(function(t){     if (hvProj >= t.target) hvBonus = Math.max(hvBonus, t.bonus); });
+  var totalBonus = pwBonus + hvBonus;
+
+  html += '<div class="bw-callout">';
+  html += '&#128161; At current YTD pace: PW projects <strong>'+fcShort(pwProj)+'</strong>, HV projects <strong>'+fcShort(hvProj)+'</strong> &rarr; <strong>'+fc(totalBonus)+' bonus</strong>';
+  if (totalBonus > 0) {
+    html += ' ('+(pwBonus>0?'PW $'+pwBonus.toLocaleString():'PW $0');
+    html += ' + '+(hvBonus>0?'HV $'+hvBonus.toLocaleString():'HV $0')+').';
+  } else {
+    html += '. ';
+    // Gap analysis — what's the smallest lift needed?
+    var bestGap = null;
+    [['port-washington',pwProj,pwStore],['hicksville',hvProj,hvStore]].forEach(function(pair){
+      var sk=pair[0], pr=pair[1];
+      TIERS[sk].tiers.forEach(function(t){
+        if (pr >= t.target) return;
+        var pct = ((t.target - pr) / pr) * 100;
+        if (bestGap === null || pct < bestGap.pct) {
+          bestGap = {store: TIERS[sk].label, tier: t, pct: pct};
+        }
+      });
+    });
+    if (bestGap) {
+      html += 'Closest target: '+bestGap.store+' '+bestGap.tier.name+' needs +'+bestGap.pct.toFixed(0)+'% lift to unlock $'+bestGap.tier.bonus+'.';
+    }
+  }
+  html += '</div>';
+
+  html += '</div>';  // /card
+  document.getElementById('tracker-body').innerHTML = html;
+}
+
+fetch('data/morning_briefing.json?cb=' + Date.now())
+  .then(function(r){ if (!r.ok) throw new Error('Failed to load briefing data'); return r.json(); })
+  .then(render)
+  .catch(function(e){
+    document.getElementById('tracker-body').innerHTML =
+      '<div class="bw-loading" style="color:#c62828">&#9888; Error loading data: '+esc(e.message)+
+      '<br><small>Briefing data is regenerated by the nightly build.</small></div>';
+  });
+
+// Dynamic portal back link
+!function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.textContent='\u2190 Back to Manager Portal';}else if(l==='store'){a.textContent='\u2190 Back to Store Portal';}else{a.textContent='\u2190 Back to Owner Portal';}}();
+</script>
 
 </body>
 </html>
