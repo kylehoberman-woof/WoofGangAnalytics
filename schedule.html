@@ -856,9 +856,13 @@ function copyLastWeek(){
       var dstISO=toISO(addDays(thisStart,i));
       if(isHoliday(dstISO)) continue;
       var existing=shifts[dstISO]||[];
+      var seenEmps={};
+      existing.forEach(function(x){seenEmps[sEmpId(x)]=true;});
       (shifts[srcISO]||[]).forEach(function(s){
-        var dup=existing.some(function(x){return sEmpId(x)===sEmpId(s)&&sStart(x)===sStart(s);});
-        if(!dup) posts.push({emp_id:sEmpId(s),store:currentStore,shift_date:dstISO,start_time:sStart(s),end_time:sEnd(s),notes:s.notes||''});
+        var empId=sEmpId(s);
+        if(seenEmps[empId]) return;  // already scheduled on dest day
+        seenEmps[empId]=true;  // prevent duplicates from the same src day too
+        posts.push({emp_id:empId,store:currentStore,shift_date:dstISO,start_time:sStart(s),end_time:sEnd(s),notes:s.notes||''});
       });
     }
     if(!posts.length){endLoad();showToast('No shifts to copy');return;}
@@ -1257,8 +1261,16 @@ function closeShiftModal(){document.getElementById('shift-overlay').classList.ad
 function saveShift(){
   var empId=document.getElementById('sm-emp').value;
   if(!empId){showToast('Select an employee','error');return;}
-  var btn=document.getElementById('sm-save'); btn.disabled=true; btn.textContent='Saving…';
   var date=editShiftDate||addShiftDate;
+  // Prevent same employee being scheduled twice on the same day (across both stores)
+  var existing=shifts[date]||[];
+  var dup=existing.some(function(s){return sEmpId(s)===empId && s.id!==editShiftId;});
+  if(dup){
+    var emp=empById(empId);
+    showToast((emp?emp.name:'This employee')+' is already scheduled on this day','error');
+    return;
+  }
+  var btn=document.getElementById('sm-save'); btn.disabled=true; btn.textContent='Saving…';
   var shiftStore=addShiftStore||currentStore;
   if(shiftStore==='all') shiftStore='port-washington';
   var body={emp_id:empId,store:shiftStore,shift_date:date,start_time:document.getElementById('sm-start').value,end_time:document.getElementById('sm-end').value,notes:document.getElementById('sm-notes').value.trim()};
