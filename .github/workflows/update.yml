@@ -100,7 +100,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python3 scripts/build_morning_briefing.py
         
-      # ── Commit and push ──
+         # ── Commit and push ──
       - name: Commit and push
         run: |
           git config --global user.name "github-actions[bot]"
@@ -111,6 +111,7 @@ jobs:
           git add port-washington/*.html
           git add hicksville/data/
           git add hicksville/*.html
+          git add data/                                     ← ADD THIS LINE
           git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
           git pull --rebase origin main || {
             git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
