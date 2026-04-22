@@ -107,6 +107,14 @@ if True:
                 if oid:
                     if oid not in order_groomer_rev: order_groomer_rev[oid] = {}
                     order_groomer_rev[oid][person] = order_groomer_rev[oid].get(person, 0) + price * qty
+            elif person in {"Wgb Port Washington", "Wgb Hicksville"}:
+                # Owner-performed bathes / trial grooms — revenue counts toward store
+                # totals but no commission. Routed through _bather_revenue bucket
+                # since that's exactly the non-commission-revenue bucket.
+                groom_by_day["_bather_revenue"][day] += price * qty
+                if oid:
+                    if oid not in order_groomer_rev: order_groomer_rev[oid] = {}
+                    order_groomer_rev[oid][person] = order_groomer_rev[oid].get(person, 0) + price * qty
     order_customer = {}
     for o in data["orders"]:
         oid = o.get("OrderId")
