@@ -63,6 +63,39 @@ tr:hover td{background:#fef7fa}
 .btn-approve:hover{background:#e8f5e9;color:#2E7D32;border-color:#a0d0a0}
 .row-active{background:#fffbee}
 .row-past{opacity:0.65}
+/* Usage dashboards */
+.usage-hdr{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.range-btns{display:flex;gap:6px;flex-wrap:wrap}
+.rbtn{padding:6px 14px;border:2px solid #ddd;border-radius:6px;font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;background:white;color:#666;transition:all 0.2s}
+.rbtn.active{background:#C4276E;color:white;border-color:#C4276E}
+.rbtn:not(.active):hover{border-color:#C4276E;color:#C4276E}
+.usage-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.ut-card{background:white;border-radius:10px;padding:14px 12px;border:2px solid #f0f0f0;text-align:center}
+.ut-card.pto{border-color:#C4276E}.ut-card.sick{border-color:#c62828}.ut-card.personal{border-color:#1B6B6B}.ut-card.vacation{border-color:#2E7D32}.ut-card.total{border-color:#6B3520}
+.ut-val{font-size:1.8rem;font-weight:800;line-height:1.1}
+.ut-val.pto{color:#C4276E}.ut-val.sick{color:#c62828}.ut-val.personal{color:#1B6B6B}.ut-val.vacation{color:#2E7D32}.ut-val.total{color:#6B3520}
+.ut-label{font-size:0.7rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin-top:4px}
+.ut-sub{font-size:0.68rem;color:#aaa;margin-top:3px}
+.usage-split{display:grid;grid-template-columns:1fr;gap:18px}
+@media(min-width:900px){.usage-split{grid-template-columns:1.3fr 1fr}}
+.sub-card{background:#fafbfc;border-radius:10px;padding:18px}
+.sub-title{font-size:0.95rem;font-weight:700;margin-bottom:12px;color:#1a1a2e;display:flex;justify-content:space-between;align-items:baseline}
+.sub-title .hint{font-size:0.72rem;color:#aaa;font-weight:500}
+.emp-tbl{width:100%;border-collapse:collapse;font-size:0.85rem}
+.emp-tbl th{padding:7px 8px;font-size:0.68rem;font-weight:700;color:#777;text-transform:uppercase;border-bottom:2px solid #eee}
+.emp-tbl td{padding:7px 8px;border-bottom:1px solid #f0f0f0;font-size:0.83rem}
+.emp-tbl tr:hover td{background:white}
+.emp-tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.emp-tbl .emp{font-weight:600;color:#1a1a2e}
+.emp-tbl .sick-high{color:#c62828;font-weight:700}
+.leaderboard{display:flex;flex-direction:column;gap:8px}
+.lb-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:white;border-radius:8px;border:1px solid #f0f0f0}
+.lb-rank{font-size:0.78rem;font-weight:800;color:#aaa;min-width:22px}
+.lb-name{flex:1;font-weight:600;font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-bar-wrap{flex:1.2;height:8px;background:#f5f5f5;border-radius:4px;overflow:hidden}
+.lb-bar{height:100%;background:#c62828;border-radius:4px}
+.lb-val{font-weight:800;color:#c62828;font-size:0.92rem;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.lb-empty{text-align:center;padding:18px;color:#aaa;font-size:0.85rem}
 /* Calendar */
 .cal-nav{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .cal-arrow{padding:5px 14px;border:2px solid #ddd;border-radius:6px;cursor:pointer;font-size:1rem;background:white;transition:border-color 0.2s;font-family:inherit}
@@ -189,6 +222,31 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
         <button type="submit" class="btn-primary" id="submit-btn">+ Add Time Off</button>
       </div>
     </form>
+  </div>
+
+  <div class="card">
+    <div class="usage-hdr">
+      <div style="font-size:1.05rem;font-weight:700">&#128202; Usage Dashboards</div>
+      <div class="range-btns">
+        <button class="rbtn active" id="rbtn-ytd"     onclick="setRange('ytd')">YTD</button>
+        <button class="rbtn"        id="rbtn-12mo"    onclick="setRange('12mo')">Last 12 mo</button>
+        <button class="rbtn"        id="rbtn-90d"     onclick="setRange('90d')">Last 90 days</button>
+        <button class="rbtn"        id="rbtn-all"     onclick="setRange('all')">All Time</button>
+      </div>
+    </div>
+
+    <div class="usage-types" id="usage-types"></div>
+
+    <div class="usage-split">
+      <div class="sub-card">
+        <div class="sub-title">By Employee <span class="hint" id="by-emp-range"></span></div>
+        <div id="emp-usage"></div>
+      </div>
+      <div class="sub-card">
+        <div class="sub-title">Sick Day Leaderboard <span class="hint">Flag for attendance</span></div>
+        <div id="sick-leaderboard" class="leaderboard"></div>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -620,8 +678,128 @@ function setStore(s) {
   renderAll();
 }
 
+/* ── Usage Dashboards ─────────────────────────── */
+var usageRange = 'ytd';
+
+function setRange(r) {
+  usageRange = r;
+  ['ytd','12mo','90d','all'].forEach(function(k){
+    document.getElementById('rbtn-'+k).classList.toggle('active', k === r);
+  });
+  renderUsage();
+}
+
+function rangeStart() {
+  var now = new Date();
+  if (usageRange === 'ytd')  return now.getFullYear() + '-01-01';
+  if (usageRange === '12mo') { var d = new Date(now); d.setFullYear(d.getFullYear()-1); return d.toISOString().slice(0,10); }
+  if (usageRange === '90d')  { var d2 = new Date(now); d2.setDate(d2.getDate()-90); return d2.toISOString().slice(0,10); }
+  return '1970-01-01';  // all
+}
+function rangeLabel() {
+  if (usageRange === 'ytd')  return 'Jan 1 → today';
+  if (usageRange === '12mo') return 'Last 12 months';
+  if (usageRange === '90d')  return 'Last 90 days';
+  return 'All time';
+}
+
+// Count days within [rangeStart, today] inclusive, clamping to the record's dates
+function daysInRange(r, startISO, todayISO) {
+  var recStart = r.start_date > startISO ? r.start_date : startISO;
+  var recEnd   = r.end_date   < todayISO ? r.end_date   : todayISO;
+  if (recStart > recEnd) return 0;
+  return daysBetween(recStart, recEnd);
+}
+
+function renderUsage() {
+  var startISO = rangeStart();
+  var today    = todayStr();
+  var src = (storeFilter === 'all' ? records : records.filter(function(r){ return r.store_key === storeFilter; }))
+    .filter(function(r){
+      if (r.status === 'denied') return false;
+      // Record must overlap the range
+      return r.end_date >= startISO && r.start_date <= today;
+    });
+
+  // Totals by type
+  var totals = { PTO:0, Sick:0, Personal:0, Vacation:0 };
+  var byEmp  = {};  // name → {PTO, Sick, Personal, Vacation, total, store}
+  src.forEach(function(r) {
+    var d = daysInRange(r, startISO, today);
+    if (!d) return;
+    if (totals[r.type] === undefined) totals[r.type] = 0;
+    totals[r.type] += d;
+    if (!byEmp[r.employee_name]) byEmp[r.employee_name] = { PTO:0, Sick:0, Personal:0, Vacation:0, total:0, stores:{} };
+    if (byEmp[r.employee_name][r.type] === undefined) byEmp[r.employee_name][r.type] = 0;
+    byEmp[r.employee_name][r.type] += d;
+    byEmp[r.employee_name].total   += d;
+    byEmp[r.employee_name].stores[r.store_key] = true;
+  });
+  var totalAll = totals.PTO + totals.Sick + totals.Personal + totals.Vacation;
+
+  // ── Type cards ──
+  var typesHtml = '';
+  typesHtml += '<div class="ut-card total"><div class="ut-val total">'+totalAll+'</div><div class="ut-label">Total Days</div><div class="ut-sub">'+rangeLabel()+'</div></div>';
+  typesHtml += '<div class="ut-card pto"><div class="ut-val pto">'+totals.PTO+'</div><div class="ut-label">PTO</div></div>';
+  typesHtml += '<div class="ut-card vacation"><div class="ut-val vacation">'+totals.Vacation+'</div><div class="ut-label">Vacation</div></div>';
+  typesHtml += '<div class="ut-card personal"><div class="ut-val personal">'+totals.Personal+'</div><div class="ut-label">Personal</div></div>';
+  typesHtml += '<div class="ut-card sick"><div class="ut-val sick">'+totals.Sick+'</div><div class="ut-label">Sick Days</div></div>';
+  document.getElementById('usage-types').innerHTML = typesHtml;
+  document.getElementById('by-emp-range').textContent = rangeLabel();
+
+  // ── By-employee table ──
+  var empRows = Object.keys(byEmp).map(function(name){
+    var d = byEmp[name];
+    return { name: name, pto: d.PTO||0, vac: d.Vacation||0, pers: d.Personal||0, sick: d.Sick||0, total: d.total||0,
+             stores: Object.keys(d.stores).map(function(s){return s==='port-washington'?'PW':'HV';}).join('/') };
+  }).sort(function(a,b){ return b.total - a.total; });
+
+  if (empRows.length === 0) {
+    document.getElementById('emp-usage').innerHTML = '<div class="lb-empty">No time off records in this period.</div>';
+  } else {
+    var empHtml = '<table class="emp-tbl"><thead><tr><th>Employee</th><th></th><th class="num">PTO</th><th class="num">Vac</th><th class="num">Pers</th><th class="num">Sick</th><th class="num">Total</th></tr></thead><tbody>';
+    empRows.forEach(function(r){
+      var sickCls = r.sick >= 3 ? ' class="num sick-high"' : ' class="num"';
+      empHtml += '<tr>' +
+        '<td class="emp">'+esc(r.name)+'</td>' +
+        '<td style="color:#aaa;font-size:0.72rem">'+r.stores+'</td>' +
+        '<td class="num">'+(r.pto||'')+'</td>' +
+        '<td class="num">'+(r.vac||'')+'</td>' +
+        '<td class="num">'+(r.pers||'')+'</td>' +
+        '<td'+sickCls+'>'+(r.sick||'')+'</td>' +
+        '<td class="num" style="font-weight:700">'+r.total+'</td>' +
+      '</tr>';
+    });
+    empHtml += '</tbody></table>';
+    document.getElementById('emp-usage').innerHTML = empHtml;
+  }
+
+  // ── Sick Day Leaderboard ──
+  var sickRows = empRows.filter(function(r){ return r.sick > 0; })
+                         .sort(function(a,b){ return b.sick - a.sick; })
+                         .slice(0, 10);
+  if (sickRows.length === 0) {
+    document.getElementById('sick-leaderboard').innerHTML = '<div class="lb-empty">No sick days logged in this period.</div>';
+  } else {
+    var maxSick = sickRows[0].sick;
+    var lbHtml = sickRows.map(function(r, i){
+      var pct = (r.sick / maxSick) * 100;
+      return '<div class="lb-row">' +
+        '<div class="lb-rank">#'+(i+1)+'</div>' +
+        '<div class="lb-name" title="'+esc(r.name)+'">'+esc(r.name)+'</div>' +
+        '<div class="lb-bar-wrap"><div class="lb-bar" style="width:'+pct.toFixed(1)+'%"></div></div>' +
+        '<div class="lb-val">'+r.sick+'d</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('sick-leaderboard').innerHTML = lbHtml;
+  }
+}
+
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
 function renderAll() {
   renderStats();
+  renderUsage();
   if (currentView === 'list') renderList();
   else renderCalendar();
 }
