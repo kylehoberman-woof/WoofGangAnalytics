@@ -263,22 +263,46 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
     html += '</div></div>';
   }
 
-  // ── TODAY'S CHECKLIST ──
-  var todayTasks = tasks.filter(function(t){return t.day_of_week === tk;});
+  // ── TODAY'S CHECKLIST (weekly for today + monthly + open ad-hoc) ──
+  var todayDom = new Date().getDate();
+  var weeklyToday = tasks.filter(function(t){return (t.frequency||'weekly')==='weekly' && t.day_of_week === tk;});
+  var monthlyTasks = tasks.filter(function(t){
+    if (t.frequency !== 'monthly') return false;
+    // Include if no specific day-of-month, or if today is the scheduled day, or if overdue (dom passed) & not done
+    if (!t.day_of_month) return true;
+    if (t.day_of_month <= todayDom) return true;
+    return false;
+  });
+  var adhocOpen = tasks.filter(function(t){
+    if (t.frequency !== 'adhoc') return false;
+    return !completionFor(t, completions);
+  });
+
   html += '<div class="section">';
   html += '<div class="section-hdr"><div class="section-icon">&#9989;</div><div class="section-title">Today\'s Checklist</div><div class="section-sub">'+todayLabel+'</div></div>';
-  if (todayTasks.length === 0) {
-    html += '<div class="empty-msg">No tasks scheduled for '+todayLabel+' &mdash; enjoy the day.</div>';
+
+  var totalSections = weeklyToday.length + monthlyTasks.length + adhocOpen.length;
+  if (totalSections === 0) {
+    html += '<div class="empty-msg">No tasks scheduled &mdash; enjoy the day.</div>';
   } else {
-    html += '<div class="checklist-today" id="checklist-today">';
-    todayTasks.forEach(function(t){
-      var done = !!completions[t.id];
-      html += '<div class="task-row'+(done?' done':'')+'" onclick="toggleTask('+t.id+')">';
-      html += '<div class="task-check"></div>';
-      html += '<div class="task-title">'+esc(t.title)+'</div>';
+    if (weeklyToday.length) {
+      html += '<div style="font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin:6px 0 4px">Weekly &middot; '+todayLabel+'</div>';
+      html += '<div class="checklist-today">';
+      weeklyToday.forEach(function(t){ html += taskRowHtml(t, completions); });
       html += '</div>';
-    });
-    html += '</div>';
+    }
+    if (monthlyTasks.length) {
+      html += '<div style="font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin:12px 0 4px">Monthly &middot; this month</div>';
+      html += '<div class="checklist-today">';
+      monthlyTasks.forEach(function(t){ html += taskRowHtml(t, completions); });
+      html += '</div>';
+    }
+    if (adhocOpen.length) {
+      html += '<div style="font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin:12px 0 4px">Ad-hoc &middot; open</div>';
+      html += '<div class="checklist-today">';
+      adhocOpen.forEach(function(t){ html += taskRowHtml(t, completions); });
+      html += '</div>';
+    }
   }
   html += '</div>';
 
@@ -403,20 +427,63 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
   document.getElementById('main').innerHTML = html;
 }
 
-// Task toggle
+// Find the most relevant completion for a task based on its frequency:
+//   weekly  → completion whose week_start = this Monday
+//   monthly → completion whose week_start = first of this month
+//   adhoc   → any completion ever (most recent)
+function completionFor(task, completions){
+  var list = (completions._by_task_id || {})[task.id] || [];
+  if (!list.length) return null;
+  var freq = task.frequency || 'weekly';
+  var mon   = mondayISO();
+  var mon1  = month1ISO();
+  for (var i = 0; i < list.length; i++) {
+    var c = list[i];
+    if (freq === 'weekly'  && c.week_start === mon)  return c;
+    if (freq === 'monthly' && c.week_start === mon1) return c;
+    if (freq === 'adhoc')                            return c;
+  }
+  return null;
+}
+
+function taskRowHtml(t, completions){
+  var done = !!completionFor(t, completions);
+  var role = t.assigned_role || 'owner';
+  var roleLabel = role === 'owner' ? 'Owner' : role === 'manager' ? 'Manager' : 'Store';
+  var roleColor = role === 'owner' ? '#C4276E' : role === 'manager' ? '#1B6B6B' : '#b8880a';
+  return '<div class="task-row'+(done?' done':'')+'" onclick="toggleTask('+t.id+')">' +
+    '<div class="task-check"></div>' +
+    '<div class="task-title">'+esc(t.title)+'</div>' +
+    '<span style="font-size:0.62rem;font-weight:800;padding:2px 7px;border-radius:8px;text-transform:uppercase;letter-spacing:0.04em;background:rgba(0,0,0,0.04);color:'+roleColor+'">'+roleLabel+'</span>' +
+  '</div>';
+}
+
+function month1ISO(){
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+}
+
+// Task toggle (frequency-aware)
 var currentState = null;
 function toggleTask(taskId){
   if (!currentState) return;
-  var existing = currentState.completions[taskId];
+  var task = currentState.tasks.find(function(t){return t.id === taskId;});
+  if (!task) return;
+  var existing = completionFor(task, currentState.completions);
   if (existing) {
     sbDelete('checklist_completions', 'id=eq.'+existing.id).then(function(){
-      delete currentState.completions[taskId];
+      var list = currentState.completions._by_task_id[taskId] || [];
+      currentState.completions._by_task_id[taskId] = list.filter(function(c){return c.id !== existing.id;});
       render(currentState.briefing, currentState.tasks, currentState.completions, currentState.shifts, currentState.employees, currentState.timeOff);
     });
   } else {
-    sbPost('checklist_completions', {task_id: taskId, week_start: mondayISO()}).then(function(res){
-      if (Array.isArray(res) && res.length) currentState.completions[taskId] = res[0];
-      else currentState.completions[taskId] = {id: 'pending', task_id: taskId};
+    var key;
+    if (task.frequency === 'weekly')       key = mondayISO();
+    else if (task.frequency === 'monthly') key = month1ISO();
+    else                                   key = todayISO(); // adhoc
+    sbPost('checklist_completions', {task_id: taskId, week_start: key}).then(function(res){
+      var row = Array.isArray(res) && res.length ? res[0] : {id: 'pending', task_id: taskId, week_start: key};
+      currentState.completions._by_task_id[taskId] = (currentState.completions._by_task_id[taskId]||[]).concat([row]);
       render(currentState.briefing, currentState.tasks, currentState.completions, currentState.shifts, currentState.employees, currentState.timeOff);
     });
   }
@@ -425,11 +492,14 @@ function toggleTask(taskId){
 function load(){
   renderGreeting();
   var today = todayISO();
-  var mon = mondayISO();
+  var m1 = month1ISO();
   Promise.all([
     fetch('data/morning_briefing.json?t='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
-    sbGet('/checklist_tasks?is_active=eq.true&select=*&order=sort_order,id'),
-    sbGet('/checklist_completions?week_start=eq.'+mon+'&select=id,task_id'),
+    sbGet('/checklist_tasks?is_active=eq.true&select=*&order=frequency,sort_order,id'),
+    // All completions from 1st of this month forward (covers weekly + monthly)
+    sbGet('/checklist_completions?week_start=gte.'+m1+'&select=id,task_id,week_start,completed_at'),
+    // Plus ALL completions for adhoc tasks (they have no periodic reset)
+    sbGet('/checklist_completions?select=id,task_id,week_start,completed_at&order=completed_at.desc'),
     sbGet('/schedule_shifts?shift_date=eq.'+today+'&select=*'),
     sbGet('/schedule_employees?is_active=eq.true&select=id,name,full_name,role,store,color'),
     sbGet('/time_off?start_date=lte.'+today+'&end_date=gte.'+today+'&status=neq.Rejected&select=employee_name,type,status,store_key')
@@ -440,12 +510,25 @@ function load(){
       return;
     }
     var tasks = Array.isArray(res[1]) ? res[1] : [];
-    var comps = Array.isArray(res[2]) ? res[2] : [];
-    var completions = {};
-    comps.forEach(function(c){ completions[c.task_id] = c; });
-    var shifts = Array.isArray(res[3]) ? res[3] : [];
-    var employees = Array.isArray(res[4]) ? res[4] : [];
-    var timeOff = Array.isArray(res[5]) ? res[5] : [];
+    var recentComps = Array.isArray(res[2]) ? res[2] : [];
+    var allComps    = Array.isArray(res[3]) ? res[3] : [];
+    // Merge dedup by id, then index by task_id
+    var byId = {};
+    recentComps.forEach(function(c){ byId[c.id] = c; });
+    allComps.forEach(function(c){ byId[c.id] = c; });
+    var byTask = {};
+    Object.keys(byId).forEach(function(k){
+      var c = byId[k];
+      (byTask[c.task_id] = byTask[c.task_id] || []).push(c);
+    });
+    // Sort each task's list newest → oldest by completed_at
+    Object.keys(byTask).forEach(function(tid){
+      byTask[tid].sort(function(a,b){return (b.completed_at||'').localeCompare(a.completed_at||'');});
+    });
+    var completions = {_by_task_id: byTask};
+    var shifts = Array.isArray(res[4]) ? res[4] : [];
+    var employees = Array.isArray(res[5]) ? res[5] : [];
+    var timeOff = Array.isArray(res[6]) ? res[6] : [];
 
     currentState = {briefing: briefing, tasks: tasks, completions: completions, shifts: shifts, employees: employees, timeOff: timeOff};
     render(briefing, tasks, completions, shifts, employees, timeOff);
