@@ -132,7 +132,7 @@ function todayISO(){return new Date().toISOString().slice(0,10);}
 function fc(v){if(v==null)return '-';return '$'+Math.round(v).toLocaleString('en-US');}
 function fcFull(v){if(v==null)return '-';return '$'+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function trendPct(cur,prev){if(!prev||prev===0)return null;return ((cur-prev)/prev)*100;}
-function trendBadge(cur,prev){var p=trendPct(cur,prev);if(p==null)return '';var cls=p>=1?'trend-up':p<=-1?'trend-down':'trend-flat';var arrow=p>=1?'&#9650;':p<=-1?'&#9660;':'&middot;';return '<div class="kpi-trend '+cls+'">'+arrow+' '+Math.abs(Math.round(p))+'% vs last wk</div>';}
+function trendBadge(cur,prev,label){label=label||'vs last wk';var p=trendPct(cur,prev);if(p==null)return '';var cls=p>=1?'trend-up':p<=-1?'trend-down':'trend-flat';var arrow=p>=1?'&#9650;':p<=-1?'&#9660;':'&middot;';return '<div class="kpi-trend '+cls+'">'+arrow+' '+Math.abs(Math.round(p))+'% '+label+'</div>';}
 
 function fmtTime(t){
   if(!t)return '';
@@ -230,10 +230,10 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
       html += '<div class="store-block'+cls+'">';
       html += '<div class="store-name">'+s.label+'</div>';
       html += '<div class="kpi-grid">';
-      html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(m.total_rev)+'</div>'+trendBadge(m.total_rev,pm.total_rev)+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+m.appointments+'</div>'+trendBadge(m.appointments,pm.appointments)+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(m.groom_rev)+'</div>'+trendBadge(m.groom_rev,pm.groom_rev)+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(m.retail_rev)+'</div>'+trendBadge(m.retail_rev,pm.retail_rev)+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(m.total_rev)+'</div>'+trendBadge(m.total_rev,pm.total_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+m.appointments+'</div>'+trendBadge(m.appointments,pm.appointments,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(m.groom_rev)+'</div>'+trendBadge(m.groom_rev,pm.groom_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(m.retail_rev)+'</div>'+trendBadge(m.retail_rev,pm.retail_rev,'vs last mo')+'</div>';
       html += '</div></div>';
     });
     html += '</div></div>';
@@ -254,10 +254,10 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
       html += '<div class="store-block'+cls+'">';
       html += '<div class="store-name">'+s.label+'</div>';
       html += '<div class="kpi-grid">';
-      html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(yy.total_rev)+'</div>'+trendBadge(yy.total_rev,py.total_rev)+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+yy.appointments+'</div>'+trendBadge(yy.appointments,py.appointments)+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(yy.groom_rev)+'</div>'+trendBadge(yy.groom_rev,py.groom_rev)+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(yy.retail_rev)+'</div>'+trendBadge(yy.retail_rev,py.retail_rev)+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(yy.total_rev)+'</div>'+trendBadge(yy.total_rev,py.total_rev,'vs last yr')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+yy.appointments+'</div>'+trendBadge(yy.appointments,py.appointments,'vs last yr')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(yy.groom_rev)+'</div>'+trendBadge(yy.groom_rev,py.groom_rev,'vs last yr')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(yy.retail_rev)+'</div>'+trendBadge(yy.retail_rev,py.retail_rev,'vs last yr')+'</div>';
       html += '</div></div>';
     });
     html += '</div></div>';
