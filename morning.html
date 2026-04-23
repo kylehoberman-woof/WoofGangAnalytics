@@ -19,6 +19,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .main{max-width:1100px;margin:24px auto 0;padding:0 20px;display:flex;flex-direction:column;gap:20px}
 
 .section{background:white;border-radius:16px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.section.store-section{border-left:5px solid #C4276E}
+.section.store-section.hv{border-left-color:#1B6B6B}
+.perf-block{background:#FBFBFC;border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.perf-block:last-child{margin-bottom:0}
+.perf-block-hdr{font-size:0.72rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px}
+.section.store-section.hv .perf-block{background:#F3F9F8}
 .section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #FDF0F5}
 .section-icon{font-size:1.5rem}
 .section-title{font-size:1.15rem;font-weight:800;letter-spacing:-0.01em}
@@ -175,69 +181,54 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
     html += '</div>';
   }
 
-  // ── YESTERDAY'S RECAP ──
-  html += '<div class="section">';
-  html += '<div class="section-hdr"><div class="section-icon">&#128176;</div><div class="section-title">Yesterday\'s Recap</div><div class="section-sub">'+yesterdayLabel+', '+briefing.yesterday+'</div></div>';
-  html += '<div class="stores-grid">';
+  // ── PER-STORE PERFORMANCE (PW then HV) ──
   ['port-washington','hicksville'].forEach(function(storeKey){
     var s = briefing.stores[storeKey]; if (!s) return;
-    var y = s.yesterday, prev = s.last_week_same_day;
+    var y = s.yesterday || {}, prev = s.last_week_same_day || {};
+    var w = s.wtd || {}, pw = s.prev_wtd || {};
+    var m = s.mtd || {}, pm = s.prev_mtd || {};
     var cls = storeKey === 'hicksville' ? ' hv' : '';
-    html += '<div class="store-block'+cls+'">';
-    html += '<div class="store-name">'+s.label+'</div>';
+    var icon = storeKey === 'hicksville' ? '&#127981;' : '&#127970;';
+
+    html += '<div class="section store-section'+cls+'">';
+    html += '<div class="section-hdr"><div class="section-icon">'+icon+'</div><div class="section-title">'+s.label+'</div><div class="section-sub">Store performance</div></div>';
+
+    // Yesterday block
+    html += '<div class="perf-block">';
+    html += '<div class="perf-block-hdr">Yesterday &middot; '+yesterdayLabel+', '+briefing.yesterday+'</div>';
     html += '<div class="kpi-grid">';
-    html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(y.total_rev)+'</div>'+trendBadge(y.total_rev,prev.total_rev,'vs same day last wk')+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Transactions</div><div class="kpi-value">'+y.transactions+'</div>'+trendBadge(y.transactions,prev.transactions,'vs same day last wk')+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Grooming Rev</div><div class="kpi-value">'+fc(y.groom_rev)+'</div>'+trendBadge(y.groom_rev,prev.groom_rev,'vs same day last wk')+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(y.retail_rev)+'</div>'+trendBadge(y.retail_rev,prev.retail_rev,'vs same day last wk')+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Grooms / Baths</div><div class="kpi-value">'+y.grooms+' / '+y.baths+'</div></div>';
+    html += '<div class="kpi"><div class="kpi-label">Total Sales</div><div class="kpi-value">'+fc(y.total_rev)+'</div>'+trendBadge(y.total_rev,prev.total_rev,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooming Sales</div><div class="kpi-value">'+fc(y.groom_rev)+'</div>'+trendBadge(y.groom_rev,prev.groom_rev,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Retail Sales</div><div class="kpi-value">'+fc(y.retail_rev)+'</div>'+trendBadge(y.retail_rev,prev.retail_rev,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Transactions</div><div class="kpi-value">'+(y.transactions||0)+'</div>'+trendBadge(y.transactions,prev.transactions,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooms / Baths</div><div class="kpi-value">'+(y.grooms||0)+' / '+(y.baths||0)+'</div></div>';
     html += '<div class="kpi"><div class="kpi-label">Avg Ticket</div><div class="kpi-value">'+fc(y.avg_ticket)+'</div></div>';
     html += '</div></div>';
-  });
-  html += '</div></div>';
 
-  // ── WEEK-TO-DATE ──
-  html += '<div class="section">';
-  html += '<div class="section-hdr"><div class="section-icon">&#128202;</div><div class="section-title">Week-to-Date</div><div class="section-sub">Mon &rarr; Yesterday</div></div>';
-  html += '<div class="stores-grid">';
-  ['port-washington','hicksville'].forEach(function(storeKey){
-    var s = briefing.stores[storeKey]; if (!s) return;
-    var w = s.wtd, pw = s.prev_wtd;
-    var cls = storeKey === 'hicksville' ? ' hv' : '';
-    html += '<div class="store-block'+cls+'">';
-    html += '<div class="store-name">'+s.label+'</div>';
+    // Week over week
+    html += '<div class="perf-block">';
+    html += '<div class="perf-block-hdr">Week-over-Week &middot; Mon &rarr; yesterday vs same days last week</div>';
     html += '<div class="kpi-grid">';
-    html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(w.total_rev)+'</div>'+trendBadge(w.total_rev,pw.total_rev)+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+w.appointments+'</div>'+trendBadge(w.appointments,pw.appointments)+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(w.groom_rev)+'</div>'+trendBadge(w.groom_rev,pw.groom_rev)+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(w.retail_rev)+'</div>'+trendBadge(w.retail_rev,pw.retail_rev)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Total Sales</div><div class="kpi-value">'+fc(w.total_rev)+'</div>'+trendBadge(w.total_rev,pw.total_rev,'vs last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooming Sales</div><div class="kpi-value">'+fc(w.groom_rev)+'</div>'+trendBadge(w.groom_rev,pw.groom_rev,'vs last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Retail Sales</div><div class="kpi-value">'+fc(w.retail_rev)+'</div>'+trendBadge(w.retail_rev,pw.retail_rev,'vs last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+(w.appointments||0)+'</div>'+trendBadge(w.appointments,pw.appointments,'vs last wk')+'</div>';
     html += '</div></div>';
-  });
-  html += '</div></div>';
 
-  // ── MONTH-TO-DATE ──
-  var hasMtd = ['port-washington','hicksville'].some(function(k){return briefing.stores[k] && briefing.stores[k].mtd;});
-  if (hasMtd) {
-    html += '<div class="section">';
-    var mtdLabel = (briefing.stores['port-washington']||{}).mtd_label || 'This month';
-    var prevMtdLabel = (briefing.stores['port-washington']||{}).prev_mtd_label || 'Last month';
-    html += '<div class="section-hdr"><div class="section-icon">&#128197;</div><div class="section-title">Month-to-Date</div><div class="section-sub">'+esc(mtdLabel)+' &nbsp;vs&nbsp; '+esc(prevMtdLabel)+'</div></div>';
-    html += '<div class="stores-grid">';
-    ['port-washington','hicksville'].forEach(function(storeKey){
-      var s = briefing.stores[storeKey]; if (!s || !s.mtd) return;
-      var m = s.mtd, pm = s.prev_mtd;
-      var cls = storeKey === 'hicksville' ? ' hv' : '';
-      html += '<div class="store-block'+cls+'">';
-      html += '<div class="store-name">'+s.label+'</div>';
+    // Month over month (only if data present)
+    if (s.mtd && s.prev_mtd) {
+      html += '<div class="perf-block">';
+      html += '<div class="perf-block-hdr">Month-over-Month &middot; '+esc(s.mtd_label||'this month')+' vs '+esc(s.prev_mtd_label||'last month')+'</div>';
       html += '<div class="kpi-grid">';
-      html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(m.total_rev)+'</div>'+trendBadge(m.total_rev,pm.total_rev,'vs last mo')+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+m.appointments+'</div>'+trendBadge(m.appointments,pm.appointments,'vs last mo')+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(m.groom_rev)+'</div>'+trendBadge(m.groom_rev,pm.groom_rev,'vs last mo')+'</div>';
-      html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(m.retail_rev)+'</div>'+trendBadge(m.retail_rev,pm.retail_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Total Sales</div><div class="kpi-value">'+fc(m.total_rev)+'</div>'+trendBadge(m.total_rev,pm.total_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Grooming Sales</div><div class="kpi-value">'+fc(m.groom_rev)+'</div>'+trendBadge(m.groom_rev,pm.groom_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Retail Sales</div><div class="kpi-value">'+fc(m.retail_rev)+'</div>'+trendBadge(m.retail_rev,pm.retail_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+(m.appointments||0)+'</div>'+trendBadge(m.appointments,pm.appointments,'vs last mo')+'</div>';
       html += '</div></div>';
-    });
-    html += '</div></div>';
-  }
+    }
+
+    html += '</div>';  // /section
+  });
 
   // ── YEAR-TO-DATE ──
   var hasYtd = ['port-washington','hicksville'].some(function(k){return briefing.stores[k] && briefing.stores[k].ytd;});
