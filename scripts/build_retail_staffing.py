@@ -79,9 +79,10 @@ PW_RETAIL = {
     'Christine Brower': {'current_rate': 20.00, 'role': 'retail'},
 }
 
-# HV retail staff + rates (Hailey is current, others terminated but historical data matters)
+# HV retail staff + rates (Hailey + Kayla are current, others terminated but historical data matters)
 HV_RETAIL = {
     'Hailey Imhof':         {'current_rate': 21.00, 'role': 'retail'},
+    'Kayla Moses':          {'current_rate': 19.00, 'role': 'retail'},  # new Apr 2026
     'Christine Brower':     {'current_rate': 20.00, 'role': 'retail'},  # partial HV shifts historically
     'Sophia Kurkowski':     {'current_rate': 19.00, 'role': 'retail'},
     'Naomi Dutes':          {'current_rate': 19.00, 'role': 'retail'},

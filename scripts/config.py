@@ -187,9 +187,9 @@ EXCLUDE_EMPLOYEES = {
     "Cindy Szczudlo",                             # manager (paid from PW only)
     "Jessica G", "Angela R",                      # PW current bathers
     "Isabelle O", "Brian Labianca",               # PW former bathers
-    "Hailey Imhof",                               # HV retail associate
-    "Nicole Alarcon", "Naomi Dutes",              # HV sales associates
-    "Sophia Kurkowski", "Christina Ramkissoon",   # HV sales associates
+    "Hailey Imhof", "Kayla Moses",                # HV retail associates (current)
+    "Nicole Alarcon", "Naomi Dutes",              # HV sales associates (former)
+    "Sophia Kurkowski", "Christina Ramkissoon",   # HV sales associates (former)
     "Sitara Nagrani", "Alize James",              # PW former sales associates
     "Giana Golden", "Parker Spooner",             # PW former sales associates
     "Casey Makowski", "Christine Brower",         # PW current sales associates
@@ -292,6 +292,7 @@ STORE_OPEN_DATES = {
 # HV retail fallbacks — managed in Supabase going forward
 HICKSVILLE_RETAIL_RATES = {
     "Hailey": 21.0,     # $/hr — current
+    "Kayla": 19.0,      # $/hr — current (new Apr 2026)
     "Chris": 20.0,      # $/hr — shared with PW (partial hours)
     "Sophia": 19.0,     # $/hr — fired
     "Naomi": 19.0,      # $/hr — fired
@@ -301,6 +302,7 @@ HICKSVILLE_RETAIL_RATES = {
 
 HICKSVILLE_RETAIL_NAME_MAP = {
     "Hailey Imhof": "Hailey",
+    "Kayla Moses": "Kayla",
     "Christine Brower": "Chris",
     "Sophia Kurkowski": "Sophia",
     "Naomi Dutes": "Naomi",
