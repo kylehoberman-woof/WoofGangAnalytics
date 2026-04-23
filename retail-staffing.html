@@ -74,6 +74,10 @@ tr.current{background:#fff8e1;font-weight:700}
 
 .loading{padding:50px;text-align:center;color:#888}
 .footer-note{font-size:0.78rem;color:#999;font-style:italic;padding:10px 14px;background:#fafafa;border-radius:8px;margin-top:14px;line-height:1.5}
+.store-tabs{background:white;border-bottom:2px solid #eee;padding:10px 20px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.stab{padding:8px 22px;border:2px solid #ddd;border-radius:22px;background:white;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;color:#666;transition:all 0.18s}
+.stab:hover{border-color:#C4276E;color:#C4276E}
+.stab.active{background:#C4276E;color:white;border-color:#C4276E}
 </style>
 </head>
 <body>
@@ -81,7 +85,12 @@ tr.current{background:#fff8e1;font-weight:700}
 <div class="header">
   <a class="back-link" id="portal-back" href="index.html">&larr; Owner Portal</a>
   <h1>&#128100; Retail Staffing Financial</h1>
-  <p>Port Washington retail labor analysis &amp; scenario modeling</p>
+  <p id="header-sub">Retail labor analysis &amp; scenario modeling</p>
+</div>
+
+<div class="store-tabs">
+  <button class="stab active" data-store="port-washington" onclick="setStore('port-washington')">Port Washington</button>
+  <button class="stab"        data-store="hicksville"      onclick="setStore('hicksville')">Hicksville</button>
 </div>
 
 <div class="main" id="main">
@@ -98,18 +107,32 @@ function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'
 
 var data = null;
 var chart = null;
+var currentStore = 'port-washington';
+
+function setStore(k){
+  currentStore = k;
+  document.querySelectorAll('.stab').forEach(function(b){ b.classList.toggle('active', b.dataset.store === k); });
+  render();
+}
 
 function render(){
-  var pw = data.stores['port-washington'];
-  var rows = pw.rows;
-  var summary = pw.summary;
-  var rates = pw.rates;
+  var store = data.stores[currentStore];
+  if (!store) {
+    document.getElementById('main').innerHTML = '<div class="section"><div class="loading">No data for '+currentStore+' yet — run the build script.</div></div>';
+    return;
+  }
+  var rows = store.rows;
+  var summary = store.summary;
+  var rates = store.rates;
+  var hasManager = store.has_manager;
+  var storeLabel = store.label;
+  document.getElementById('header-sub').textContent = storeLabel + ' retail labor analysis' + (hasManager ? ' & scenario modeling' : '');
 
   var html = '';
 
   // ── KPI ROW ──
   html += '<div class="section">';
-  html += '<div class="section-hdr"><div class="section-title">&#128200; Current Snapshot</div><div class="section-sub">Port Washington</div></div>';
+  html += '<div class="section-hdr"><div class="section-title">&#128200; Current Snapshot</div><div class="section-sub">'+esc(storeLabel)+'</div></div>';
   html += '<div class="kpi-grid">';
 
   var latest = summary.latest_complete_month;
@@ -152,7 +175,7 @@ function render(){
   html += '</div></div>';
 
   // ── FORWARD PROJECTION (schedule-based) ──
-  var fwd = pw.forward_projection || {months: []};
+  var fwd = store.forward_projection || {months: []};
   if (fwd.months && fwd.months.length > 0) {
     html += '<div class="section">';
     html += '<div class="section-hdr"><div class="section-title">&#128197; Schedule-Based Projection</div><div class="section-sub">From live staff schedule</div></div>';
@@ -178,12 +201,12 @@ function render(){
       });
     });
     html += '</tbody></table></div></div>';
-    html += '<div class="footer-note">Projections use actual scheduled shifts from the Staff Schedule (Supabase). Add/edit shifts there to refine these numbers. Cindy\'s salary is fixed ($'+Math.round(rates.cindy_annual/12).toLocaleString()+'/mo, no bonus).</div>';
+    html += '<div class="footer-note">Projections use actual scheduled shifts from the Staff Schedule (Supabase). Add/edit shifts there to refine these numbers.'+(hasManager ? ' Cindy\'s salary is fixed ($'+Math.round(rates.cindy_annual/12).toLocaleString()+'/mo, no bonus).' : ' No manager cost allocated to this store (Cindy 100% on PW books).')+'</div>';
     html += '</div>';
   }
 
   // ── VARIANCES (actual vs scheduled + punch creep) ──
-  var variances = pw.variances || [];
+  var variances = store.variances || [];
   html += '<div class="section">';
   html += '<div class="section-hdr"><div class="section-title">&#9888;&#65039; Hours Variance &amp; Punch Creep</div><div class="section-sub">Last 30 days</div></div>';
   if (variances.length === 0) {
@@ -255,12 +278,13 @@ function render(){
 
   // ── TABLE ──
   html += '<div class="section">';
-  html += '<div class="section-hdr"><div class="section-title">&#128221; Monthly Detail</div><div class="section-sub">Since Jun 2025</div></div>';
+  var sinceLabel = rows.length ? rows[0].month_label : '';
+  html += '<div class="section-hdr"><div class="section-title">&#128221; Monthly Detail</div><div class="section-sub">Since '+esc(sinceLabel)+'</div></div>';
   html += '<div class="tbl-wrap"><table><thead><tr>';
   html += '<th>Month</th>';
-  html += '<th class="num">Casey hrs</th><th class="num">Casey $</th>';
-  html += '<th class="num">Chris hrs</th><th class="num">Chris $</th>';
-  html += '<th class="num">Retail $</th><th class="num">Cindy $</th>';
+  html += '<th class="num">Retail Hrs</th>';
+  html += '<th class="num">Retail $</th>';
+  if (hasManager) html += '<th class="num">Mgr $</th>';
   html += '<th class="num">Total Labor</th>';
   html += '<th class="num">Sales</th>';
   html += '<th class="num">Labor %</th>';
@@ -273,12 +297,12 @@ function render(){
     if (best && r.month === best.month) cls = 'best';
     else if (worst && r.month === worst.month) cls = 'worst';
     else if (current && r.month === current.month) cls = 'current';
+    var peopleTip = (r.people||[]).map(function(p){return p.name+': '+p.hrs+'h @ $'+p.rate+' = '+fc(p.cost);}).join('\n');
     html += '<tr'+(cls ? ' class="'+cls+'"' : '')+'>';
     html += '<td><strong>'+r.month_label+'</strong>'+(r.closures > 0 ? '<br><span style="font-size:0.7rem;color:#e65100">'+r.closures+' closure'+(r.closures>1?'s':'')+'</span>' : '')+'</td>';
-    html += '<td class="num">'+r.casey_hrs+'</td><td class="num">'+fc(r.casey_cost)+'</td>';
-    html += '<td class="num">'+(r.chris_hrs || '-')+'</td><td class="num">'+(r.chris_cost > 0 ? fc(r.chris_cost) : '-')+'</td>';
+    html += '<td class="num" title="'+esc(peopleTip)+'">'+(r.retail_hrs||0).toFixed(1)+'</td>';
     html += '<td class="num">'+fc(r.retail_cost)+'</td>';
-    html += '<td class="num">'+fc(r.cindy_cost)+'</td>';
+    if (hasManager) html += '<td class="num">'+fc(r.mgr_cost||r.cindy_cost||0)+'</td>';
     html += '<td class="num"><strong>'+fc(r.total_labor)+'</strong></td>';
     html += '<td class="num">'+fc(r.sales)+'</td>';
     var pctCls = r.labor_pct_sales <= 11 ? 'style="color:#2E7D32;font-weight:800"' : r.labor_pct_sales >= 14 ? 'style="color:#e53935;font-weight:800"' : 'style="font-weight:700"';
@@ -288,10 +312,12 @@ function render(){
     html += '</tr>';
   });
   html += '</tbody></table></div>';
-  html += '<div class="footer-note">Green row = best labor % month &middot; Red row = worst &middot; Yellow row = current (partial) month. Cindy\'s salary is 100% on PW\'s books (the $2K March bonus is excluded as a one-time exception).</div>';
+  var noteExtra = hasManager ? ' Manager salary is 100% on this store\'s books (one-time bonus excluded).' : ' No manager cost allocated to this store (Cindy 100% on PW).';
+  html += '<div class="footer-note">Green row = best labor % month &middot; Red row = worst &middot; Yellow row = current (partial) month. Hover Retail Hrs to see per-person breakdown.'+noteExtra+'</div>';
   html += '</div>';
 
-  // ── SCENARIO CALCULATOR ──
+  // ── SCENARIO CALCULATOR (PW only) ──
+  if (currentStore === 'port-washington') {
   html += '<div class="section">';
   html += '<div class="section-hdr"><div class="section-title">&#128300; Scenario Calculator</div><div class="section-sub">Model future staffing cost</div></div>';
   html += '<div class="calc-grid">';
@@ -329,29 +355,55 @@ function render(){
   // Results
   html += '<div class="calc-results" id="calc-results"></div>';
   html += '</div></div>';
+  }  // end PW-only scenario calc
 
   document.getElementById('main').innerHTML = html;
 
-  // Render chart
-  renderChart(rows);
-  // Wire up calculator
-  wireCalc(rates, latest ? latest.labor_pct_sales : null, latest ? latest.total_labor : null);
+  // Render chart (store-aware)
+  renderChart(rows, hasManager);
+  // Wire up calculator only if rendered (PW only)
+  if (currentStore === 'port-washington') {
+    wireCalc(rates, latest ? latest.labor_pct_sales : null, latest ? latest.total_labor : null);
+  }
 }
 
-function renderChart(rows){
+function renderChart(rows, hasManager){
   var ctx = document.getElementById('trend-chart').getContext('2d');
   if (chart) chart.destroy();
+
+  // Build per-person dataset from each row's people array
+  var nameSet = {};
+  rows.forEach(function(r){(r.people||[]).forEach(function(p){nameSet[p.name]=true;});});
+  var names = Object.keys(nameSet);
+  var palette = ['rgba(196,39,110,0.7)','rgba(107,53,32,0.7)','rgba(27,107,107,0.7)','rgba(76,175,80,0.7)','rgba(255,152,0,0.7)','rgba(156,39,176,0.7)'];
+  var datasets = names.map(function(nm, i){
+    return {
+      label: nm,
+      data: rows.map(function(r){
+        var p = (r.people||[]).find(function(x){return x.name===nm;});
+        return p ? p.cost : 0;
+      }),
+      backgroundColor: palette[i % palette.length],
+      stack: 'labor', order: 2, yAxisID: 'y'
+    };
+  });
+  if (hasManager) {
+    datasets.unshift({
+      label: 'Manager',
+      data: rows.map(function(r){return r.mgr_cost || r.cindy_cost || 0;}),
+      backgroundColor: 'rgba(92,107,192,0.7)', stack: 'labor', order: 2, yAxisID: 'y'
+    });
+  }
+  datasets.push({
+    label: 'Labor % of Sales', data: rows.map(function(r){return r.labor_pct_sales;}),
+    type: 'line', borderColor: '#2E7D32', backgroundColor: '#2E7D32',
+    borderWidth: 3, pointRadius: 5, pointBackgroundColor: '#2E7D32', tension: 0.3,
+    yAxisID: 'y1', order: 1, fill: false
+  });
+
   chart = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: rows.map(function(r){return r.month_label;}),
-      datasets: [
-        {label: 'Cindy', data: rows.map(function(r){return r.cindy_cost;}), backgroundColor: 'rgba(92,107,192,0.7)', stack: 'labor', order: 2, yAxisID: 'y'},
-        {label: 'Chris', data: rows.map(function(r){return r.chris_cost;}), backgroundColor: 'rgba(107,53,32,0.7)', stack: 'labor', order: 2, yAxisID: 'y'},
-        {label: 'Casey', data: rows.map(function(r){return r.casey_cost;}), backgroundColor: 'rgba(196,39,110,0.7)', stack: 'labor', order: 2, yAxisID: 'y'},
-        {label: 'Labor % of Sales', data: rows.map(function(r){return r.labor_pct_sales;}), type: 'line', borderColor: '#2E7D32', backgroundColor: '#2E7D32', borderWidth: 3, pointRadius: 5, pointBackgroundColor: '#2E7D32', tension: 0.3, yAxisID: 'y1', order: 1, fill: false},
-      ],
-    },
+    data: { labels: rows.map(function(r){return r.month_label;}), datasets: datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,

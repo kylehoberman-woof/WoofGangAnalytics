@@ -79,7 +79,34 @@ PW_RETAIL = {
     'Christine Brower': {'current_rate': 20.00, 'role': 'retail'},
 }
 
-PW_OPEN = STORE_OPEN_DATES['port-washington']
+# HV retail staff + rates (Hailey is current, others terminated but historical data matters)
+HV_RETAIL = {
+    'Hailey Imhof':         {'current_rate': 21.00, 'role': 'retail'},
+    'Christine Brower':     {'current_rate': 20.00, 'role': 'retail'},  # partial HV shifts historically
+    'Sophia Kurkowski':     {'current_rate': 19.00, 'role': 'retail'},
+    'Naomi Dutes':          {'current_rate': 19.00, 'role': 'retail'},
+    'Nicole Alarcon':       {'current_rate': 19.00, 'role': 'retail'},
+    'Christina Ramkissoon': {'current_rate': 19.00, 'role': 'retail'},
+}
+
+# Per-store config
+STORE_CFG = {
+    'port-washington': {
+        'label': 'Port Washington',
+        'retail': PW_RETAIL,
+        'open_date': STORE_OPEN_DATES['port-washington'],
+        'include_manager': True,   # Cindy paid 100% from PW
+        'start_month': '2025-06',  # first month with meaningful staffing data
+    },
+    'hicksville': {
+        'label': 'Hicksville',
+        'retail': HV_RETAIL,
+        'open_date': STORE_OPEN_DATES['hicksville'],
+        'include_manager': False,  # Cindy is 100% PW — no manager cost on HV books
+        'start_month': '2025-12',  # HV opened Dec 11 2025
+    },
+}
+
 CLOSURES = set(KNOWN_CLOSURES)
 
 
@@ -93,14 +120,14 @@ def parse_hours(ti, to):
         return 0
 
 
-def days_open_in_month(y, m, today):
+def days_open_in_month(y, m, today, open_date):
     first_day = date(y, m, 1)
     last_day = date(y, m, monthrange(y, m)[1])
     if last_day > today:
         last_day = today
-    if last_day < PW_OPEN:
+    if last_day < open_date:
         return 0, 0
-    start_day = max(first_day, PW_OPEN)
+    start_day = max(first_day, open_date)
     if start_day > last_day:
         return 0, 0
     open_count = 0
@@ -139,24 +166,28 @@ def manager_salary_for_month(y, m, today, include_bonus=False):
     return round(total, 2)
 
 
-def build_pw_staffing():
-    """Build monthly PW staffing data from June 2025 onward."""
-    pw = STORES['port-washington']
-    with open(pw.data_dir / 'all_data.json') as f:
+def build_store_staffing(store_key):
+    """Build monthly staffing data for either PW or HV."""
+    cfg = STORE_CFG[store_key]
+    retail_cfg = cfg['retail']
+    open_date = cfg['open_date']
+    include_manager = cfg['include_manager']
+    START = cfg['start_month']
+
+    store = STORES[store_key]
+    with open(store.data_dir / 'all_data.json') as f:
         data = json.load(f)
 
     clocks = data.get('time_clocks', [])
     items = data.get('order_items', [])
     today = date.today()
 
-    START = '2025-06'  # first month Casey ramped up
-
-    # Monthly retail hours per person (PW clocks, filter to PW_RETAIL names)
+    # Monthly retail hours per person
     monthly_hours = defaultdict(lambda: defaultdict(float))
     for c in clocks:
         emp = (c.get('EmployeeName') or '').strip()
         ti = c.get('TimeIn', '')
-        if not ti or emp not in PW_RETAIL:
+        if not ti or emp not in retail_cfg:
             continue
         if ti[:7] < START:
             continue
@@ -181,35 +212,51 @@ def build_pw_staffing():
     rows = []
     for m in months:
         y, mo = int(m[:4]), int(m[5:7])
-        casey_hrs = monthly_hours[m].get('Casey Makowski', 0)
-        chris_hrs = monthly_hours[m].get('Christine Brower', 0)
-        casey_cost = round(casey_hrs * PW_RETAIL['Casey Makowski']['current_rate'], 2)
-        chris_cost = round(chris_hrs * PW_RETAIL['Christine Brower']['current_rate'], 2)
-        retail_cost = round(casey_cost + chris_cost, 2)
-        cindy_cost = manager_salary_for_month(y, mo, today, include_bonus=False)
-        total_labor = round(retail_cost + cindy_cost, 2)
-        days_open, closures = days_open_in_month(y, mo, today)
+
+        # Per-person hours + costs
+        people = []
+        retail_hrs = 0
+        retail_cost = 0.0
+        for nm, info in retail_cfg.items():
+            hrs = monthly_hours[m].get(nm, 0)
+            if hrs <= 0:
+                continue
+            rate = info['current_rate']
+            cost = round(hrs * rate, 2)
+            retail_hrs += hrs
+            retail_cost += cost
+            people.append({'name': nm, 'hrs': round(hrs, 1), 'rate': rate, 'cost': cost})
+        retail_cost = round(retail_cost, 2)
+
+        mgr_cost = manager_salary_for_month(y, mo, today, include_bonus=False) if include_manager else 0.0
+        total_labor = round(retail_cost + mgr_cost, 2)
+        days_open, closures = days_open_in_month(y, mo, today, open_date)
         sales = round(monthly_sales.get(m, 0), 2)
         labor_pct = round((total_labor / sales) * 100, 2) if sales else 0
         cost_per_day = round(total_labor / days_open, 2) if days_open else 0
 
-        rows.append({
+        row = {
             'month': m,
             'month_label': datetime.strptime(m, '%Y-%m').strftime('%b %Y'),
-            'casey_hrs': round(casey_hrs, 1),
-            'casey_cost': casey_cost,
-            'chris_hrs': round(chris_hrs, 1),
-            'chris_cost': chris_cost,
-            'retail_hrs': round(casey_hrs + chris_hrs, 1),
+            'people': sorted(people, key=lambda x: -x['cost']),
+            'retail_hrs': round(retail_hrs, 1),
             'retail_cost': retail_cost,
-            'cindy_cost': cindy_cost,
+            'mgr_cost': round(mgr_cost, 2),
             'total_labor': total_labor,
             'sales': sales,
             'labor_pct_sales': labor_pct,
             'days_open': days_open,
             'closures': closures,
             'cost_per_open_day': cost_per_day,
-        })
+        }
+        # Back-compat for existing PW-only JS: keep Casey/Chris/Cindy aliases
+        if store_key == 'port-washington':
+            row['casey_hrs']  = round(monthly_hours[m].get('Casey Makowski', 0), 1)
+            row['casey_cost'] = round(monthly_hours[m].get('Casey Makowski', 0) * PW_RETAIL['Casey Makowski']['current_rate'], 2)
+            row['chris_hrs']  = round(monthly_hours[m].get('Christine Brower', 0), 1)
+            row['chris_cost'] = round(monthly_hours[m].get('Christine Brower', 0) * PW_RETAIL['Christine Brower']['current_rate'], 2)
+            row['cindy_cost'] = row['mgr_cost']
+        rows.append(row)
 
     # Summary stats (excluding partial current month)
     current_month = today.strftime('%Y-%m')
@@ -225,13 +272,22 @@ def build_pw_staffing():
         best = worst = None
         ytd_labor = ytd_sales = ytd_pct = 0
 
-    # Current month snapshot (partial)
     current_row = next((r for r in rows if r['month'] == current_month), None)
     latest_complete = full_rows[-1] if full_rows else None
 
+    rates_block = {nm: info['current_rate'] for nm, info in retail_cfg.items()}
+    if include_manager:
+        rates_block['cindy_annual'] = MANAGER_SALARY_NEW
+        rates_block['cindy_daily']  = round(MANAGER_SALARY_NEW / 365, 2)
+    # Back-compat aliases for PW
+    if store_key == 'port-washington':
+        rates_block['casey'] = PW_RETAIL['Casey Makowski']['current_rate']
+        rates_block['chris'] = PW_RETAIL['Christine Brower']['current_rate']
+
     return {
-        'store': 'port-washington',
-        'label': 'Port Washington',
+        'store': store_key,
+        'label': cfg['label'],
+        'has_manager': include_manager,
         'rows': rows,
         'summary': {
             'best_month': {
@@ -256,13 +312,13 @@ def build_pw_staffing():
                 'labor_pct': ytd_pct,
             },
         },
-        'rates': {
-            'casey': PW_RETAIL['Casey Makowski']['current_rate'],
-            'chris': PW_RETAIL['Christine Brower']['current_rate'],
-            'cindy_annual': MANAGER_SALARY_NEW,
-            'cindy_daily': round(MANAGER_SALARY_NEW / 365, 2),
-        },
+        'rates': rates_block,
     }
+
+
+def build_pw_staffing():
+    """Back-compat wrapper — PW only."""
+    return build_store_staffing('port-washington')
 
 
 def _hhmm_to_mins(hhmm):
@@ -294,7 +350,7 @@ def _mins_to_hhmm(mins):
     return f"{h:02d}:{m:02d}"
 
 
-def compute_variances(today):
+def compute_variances(today, store_key='port-washington'):
     """Compare actual hours (from time_clocks) vs scheduled hours (from Supabase)
     for the last N days. Flag any day where:
       - Total hours variance exceeds VARIANCE_THRESHOLD_HRS, OR
@@ -321,8 +377,8 @@ def compute_variances(today):
             role_by_name[nm] = e.get('role', 'retail')
     track_names = {nm for nm, role in role_by_name.items() if role == 'retail'}  # skip Cindy (salaried)
 
-    # Fetch scheduled shifts for PW last 30 days
-    shifts = sb_get(f"/schedule_shifts?store=eq.port-washington&shift_date=gte.{start_iso}&shift_date=lte.{yesterday_iso}&select=emp_id,shift_date,start_time,end_time")
+    # Fetch scheduled shifts for this store (last 30 days)
+    shifts = sb_get(f"/schedule_shifts?store=eq.{store_key}&shift_date=gte.{start_iso}&shift_date=lte.{yesterday_iso}&select=emp_id,shift_date,start_time,end_time")
 
     # For each (name, date): total scheduled hrs, earliest start, latest end
     scheduled_hrs = defaultdict(lambda: defaultdict(float))
@@ -344,8 +400,8 @@ def compute_variances(today):
         scheduled_end[nm][d] = et_mins if cur_end is None else max(cur_end, et_mins)
 
     # For each (name, date): total actual hrs, earliest TimeIn, latest TimeOut
-    pw = STORES['port-washington']
-    with open(pw.data_dir / 'all_data.json') as f:
+    store = STORES[store_key]
+    with open(store.data_dir / 'all_data.json') as f:
         data = json.load(f)
     clocks = data.get('time_clocks', [])
 
@@ -433,7 +489,7 @@ def compute_variances(today):
     return variances
 
 
-def compute_forward_projection(today):
+def compute_forward_projection(today, store_key='port-washington'):
     """Project upcoming retail labor cost based on scheduled shifts in Supabase.
     Looks at the rest of this month + next month."""
     if _httpx is None:
@@ -457,8 +513,8 @@ def compute_forward_projection(today):
             role_by_name[nm] = e.get('role', 'retail')
     retail_names = {nm for nm, role in role_by_name.items() if role == 'retail'}
 
-    # Fetch scheduled shifts for PW
-    shifts = sb_get(f"/schedule_shifts?store=eq.port-washington&shift_date=gte.{start_iso}&shift_date=lte.{end_iso}&select=emp_id,shift_date,start_time,end_time")
+    # Fetch scheduled shifts for this store
+    shifts = sb_get(f"/schedule_shifts?store=eq.{store_key}&shift_date=gte.{start_iso}&shift_date=lte.{end_iso}&select=emp_id,shift_date,start_time,end_time")
 
     # Aggregate by month → name → hours
     monthly = defaultdict(lambda: defaultdict(float))
@@ -486,8 +542,9 @@ def compute_forward_projection(today):
             retail_hrs += hrs
             people.append({'name': nm, 'hrs': round(hrs, 1), 'rate': rate, 'cost': round(cost, 2)})
 
-        # Manager cost for that month (excl. bonus)
-        mgr_cost = manager_salary_for_month(y, mo, date(y, mo, monthrange(y, mo)[1]), include_bonus=False)
+        # Manager cost for that month (excl. bonus) — only for PW (Cindy 100% there)
+        include_mgr = STORE_CFG[store_key]['include_manager']
+        mgr_cost = manager_salary_for_month(y, mo, date(y, mo, monthrange(y, mo)[1]), include_bonus=False) if include_mgr else 0.0
         total = retail_cost + mgr_cost
 
         results.append({
@@ -506,50 +563,42 @@ def compute_forward_projection(today):
 def main():
     from zoneinfo import ZoneInfo
     et = ZoneInfo('America/New_York')
-
     today = date.today()
 
-    print('Building PW retail staffing data...')
-    pw_data = build_pw_staffing()
+    stores_output = {}
+    for store_key in ['port-washington', 'hicksville']:
+        print(f'\n=== Building {STORE_CFG[store_key]["label"]} retail staffing data ===')
+        store_data = build_store_staffing(store_key)
 
-    print('\nComputing variances (actual vs scheduled)...')
-    variances = compute_variances(today)
-    print(f"  {len(variances)} variance flags in last {VARIANCE_LOOKBACK_DAYS} days")
-    if variances[:3]:
+        print(f'  Computing variances (actual vs scheduled)...')
+        variances = compute_variances(today, store_key)
+        print(f"    {len(variances)} variance flags in last {VARIANCE_LOOKBACK_DAYS} days")
         for v in variances[:3]:
-            print(f"    {v['date']} {v['employee']}: sched {v['scheduled_hrs']}h, actual {v['actual_hrs']}h → {v['variance_hrs']:+.1f}h (${v['variance_cost']:+.0f})")
+            print(f"      {v['date']} {v['employee']}: sched {v['scheduled_hrs']}h, actual {v['actual_hrs']}h → {v['variance_hrs']:+.1f}h (${v['variance_cost']:+.0f})")
 
-    print('\nBuilding forward schedule projection...')
-    forward = compute_forward_projection(today)
-    print(f"  {len(forward['months'])} upcoming months projected")
-    for m in forward['months']:
-        print(f"    {m['month_label']}: {m['retail_hrs']}h retail ${m['retail_cost']:,.0f} + mgr ${m['mgr_cost']:,.0f} = ${m['total_labor']:,.0f}")
+        print(f'  Building forward schedule projection...')
+        forward = compute_forward_projection(today, store_key)
+        print(f"    {len(forward['months'])} upcoming months projected")
+        for m in forward['months']:
+            print(f"      {m['month_label']}: {m['retail_hrs']}h retail ${m['retail_cost']:,.0f} + mgr ${m['mgr_cost']:,.0f} = ${m['total_labor']:,.0f}")
 
-    pw_data['variances'] = variances
-    pw_data['forward_projection'] = forward
+        store_data['variances'] = variances
+        store_data['forward_projection'] = forward
+        stores_output[store_key] = store_data
+
+        print(f"  Months tracked: {len(store_data['rows'])}")
+        if store_data['summary']['latest_complete_month']:
+            l = store_data['summary']['latest_complete_month']
+            print(f"  Latest complete: {l['month_label']} — ${l['total_labor']:,.0f} labor ({l['labor_pct_sales']}% of sales)")
 
     output = {
         'generated_at': datetime.now(et).isoformat(),
         'today': today.isoformat(),
-        'stores': {
-            'port-washington': pw_data,
-        },
+        'stores': stores_output,
     }
 
     with open(OUT_FILE, 'w') as f:
         json.dump(output, f, indent=2)
-
-    # Print summary
-    print(f"  PW months tracked: {len(pw_data['rows'])}")
-    if pw_data['summary']['latest_complete_month']:
-        l = pw_data['summary']['latest_complete_month']
-        print(f"  Latest complete: {l['month_label']} — ${l['total_labor']:,.0f} labor ({l['labor_pct_sales']}% of sales)")
-    if pw_data['summary']['best_month']:
-        b = pw_data['summary']['best_month']
-        print(f"  Best labor %: {b['label']} — {b['labor_pct']}%")
-    if pw_data['summary']['worst_month']:
-        w = pw_data['summary']['worst_month']
-        print(f"  Worst labor %: {w['label']} — {w['labor_pct']}%")
     print(f"\nWritten: {OUT_FILE}")
 
 
