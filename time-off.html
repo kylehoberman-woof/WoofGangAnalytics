@@ -56,6 +56,7 @@ tr:hover td{background:#fef7fa}
 .b-pw{background:#FDF0F5;color:#C4276E}.b-hv{background:#e0f2f1;color:#1B6B6B}
 .b-pto{background:#FDF0F5;color:#C4276E}.b-sick{background:#fce4ec;color:#c62828}
 .b-personal{background:#e0f2f1;color:#1B6B6B}.b-vacation{background:#e8f5e9;color:#2E7D32}
+.b-leftearly{background:#fff3e0;color:#E65100}
 .b-approved{background:#e8f5e9;color:#2E7D32}.b-pending{background:#fff8e1;color:#b8880a}.b-denied{background:#fce4ec;color:#c62828}
 .btn-sm{padding:4px 9px;border-radius:5px;font-family:inherit;font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.2s;border:1px solid #ddd;background:white;color:#666;margin-right:3px}
 .btn-sm:hover{background:#f0f0f0}
@@ -71,9 +72,9 @@ tr:hover td{background:#fef7fa}
 .rbtn:not(.active):hover{border-color:#C4276E;color:#C4276E}
 .usage-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
 .ut-card{background:white;border-radius:10px;padding:14px 12px;border:2px solid #f0f0f0;text-align:center}
-.ut-card.pto{border-color:#C4276E}.ut-card.sick{border-color:#c62828}.ut-card.personal{border-color:#1B6B6B}.ut-card.vacation{border-color:#2E7D32}.ut-card.total{border-color:#6B3520}
+.ut-card.pto{border-color:#C4276E}.ut-card.sick{border-color:#c62828}.ut-card.personal{border-color:#1B6B6B}.ut-card.vacation{border-color:#2E7D32}.ut-card.total{border-color:#6B3520}.ut-card.leftearly{border-color:#E65100}
 .ut-val{font-size:1.8rem;font-weight:800;line-height:1.1}
-.ut-val.pto{color:#C4276E}.ut-val.sick{color:#c62828}.ut-val.personal{color:#1B6B6B}.ut-val.vacation{color:#2E7D32}.ut-val.total{color:#6B3520}
+.ut-val.pto{color:#C4276E}.ut-val.sick{color:#c62828}.ut-val.personal{color:#1B6B6B}.ut-val.vacation{color:#2E7D32}.ut-val.total{color:#6B3520}.ut-val.leftearly{color:#E65100}
 .ut-label{font-size:0.7rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin-top:4px}
 .ut-sub{font-size:0.68rem;color:#aaa;margin-top:3px}
 .usage-split{display:grid;grid-template-columns:1fr;gap:18px}
@@ -111,6 +112,7 @@ tr:hover td{background:#fef7fa}
 .cal-chip{font-size:0.63rem;font-weight:600;padding:1px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:1.5}
 .chip-pto{background:#FDF0F5;color:#C4276E}.chip-sick{background:#fce4ec;color:#c62828}
 .chip-personal{background:#e0f2f1;color:#1B6B6B}.chip-vacation{background:#e8f5e9;color:#2E7D32}
+.chip-leftearly{background:#fff3e0;color:#E65100}
 /* Setup notice */
 .notice{background:#fff8e1;border:2px solid #F9A825;border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:0.88rem;line-height:1.7;color:#7a5c00}
 .notice code{background:#f0e8c0;padding:1px 5px;border-radius:4px;font-size:0.82rem}
@@ -204,6 +206,7 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
           <option value="Vacation">Vacation</option>
           <option value="Sick">Sick Day</option>
           <option value="Personal">Personal</option>
+          <option value="Left Early">Left Early</option>
         </select>
       </div>
       <div class="fg">
@@ -260,6 +263,7 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
             <option value="Vacation">Vacation</option>
             <option value="Sick">Sick Day</option>
             <option value="Personal">Personal</option>
+            <option value="Left Early">Left Early</option>
           </select>
           <select class="filter-sel" id="filter-status" onchange="renderAll()">
             <option value="">All Statuses</option>
@@ -343,7 +347,7 @@ function daysBetween(a, b) {
 }
 function storeName(k) { return k === 'port-washington' ? 'Port Washington' : 'Hicksville'; }
 function typeBadge(t) {
-  var m = {PTO:'pto',Sick:'sick',Personal:'personal',Vacation:'vacation'};
+  var m = {PTO:'pto',Sick:'sick',Personal:'personal',Vacation:'vacation','Left Early':'leftearly'};
   return '<span class="badge b-'+(m[t]||'pto')+'">'+t+'</span>';
 }
 function storeBadge(k) {
@@ -633,7 +637,7 @@ function renderCalendar() {
       ? '<div class="cal-num today-num">'+d+'</div>'
       : '<div class="cal-num">'+d+'</div>';
     var chips = ents.slice(0,3).map(function(e){
-      var cls = 'chip-' + e.type.toLowerCase().replace(' day','');
+      var cls = 'chip-' + e.type.toLowerCase().replace(' day','').replace(/\s+/g,'');
       var short = e.name.split(' ')[0];
       return '<span class="cal-chip '+cls+'" title="'+e.name+' ('+e.type+')">'+short+'</span>';
     }).join('');
@@ -722,20 +726,20 @@ function renderUsage() {
     });
 
   // Totals by type
-  var totals = { PTO:0, Sick:0, Personal:0, Vacation:0 };
-  var byEmp  = {};  // name → {PTO, Sick, Personal, Vacation, total, store}
+  var totals = { PTO:0, Sick:0, Personal:0, Vacation:0, 'Left Early':0 };
+  var byEmp  = {};  // name → {PTO, Sick, Personal, Vacation, LeftEarly, total, store}
   src.forEach(function(r) {
     var d = daysInRange(r, startISO, today);
     if (!d) return;
     if (totals[r.type] === undefined) totals[r.type] = 0;
     totals[r.type] += d;
-    if (!byEmp[r.employee_name]) byEmp[r.employee_name] = { PTO:0, Sick:0, Personal:0, Vacation:0, total:0, stores:{} };
+    if (!byEmp[r.employee_name]) byEmp[r.employee_name] = { PTO:0, Sick:0, Personal:0, Vacation:0, 'Left Early':0, total:0, stores:{} };
     if (byEmp[r.employee_name][r.type] === undefined) byEmp[r.employee_name][r.type] = 0;
     byEmp[r.employee_name][r.type] += d;
     byEmp[r.employee_name].total   += d;
     byEmp[r.employee_name].stores[r.store_key] = true;
   });
-  var totalAll = totals.PTO + totals.Sick + totals.Personal + totals.Vacation;
+  var totalAll = totals.PTO + totals.Sick + totals.Personal + totals.Vacation + totals['Left Early'];
 
   // ── Type cards ──
   var typesHtml = '';
@@ -744,22 +748,24 @@ function renderUsage() {
   typesHtml += '<div class="ut-card vacation"><div class="ut-val vacation">'+totals.Vacation+'</div><div class="ut-label">Vacation</div></div>';
   typesHtml += '<div class="ut-card personal"><div class="ut-val personal">'+totals.Personal+'</div><div class="ut-label">Personal</div></div>';
   typesHtml += '<div class="ut-card sick"><div class="ut-val sick">'+totals.Sick+'</div><div class="ut-label">Sick Days</div></div>';
+  typesHtml += '<div class="ut-card leftearly"><div class="ut-val leftearly">'+totals['Left Early']+'</div><div class="ut-label">Left Early</div></div>';
   document.getElementById('usage-types').innerHTML = typesHtml;
   document.getElementById('by-emp-range').textContent = rangeLabel();
 
   // ── By-employee table ──
   var empRows = Object.keys(byEmp).map(function(name){
     var d = byEmp[name];
-    return { name: name, pto: d.PTO||0, vac: d.Vacation||0, pers: d.Personal||0, sick: d.Sick||0, total: d.total||0,
+    return { name: name, pto: d.PTO||0, vac: d.Vacation||0, pers: d.Personal||0, sick: d.Sick||0, early: d['Left Early']||0, total: d.total||0,
              stores: Object.keys(d.stores).map(function(s){return s==='port-washington'?'PW':'HV';}).join('/') };
   }).sort(function(a,b){ return b.total - a.total; });
 
   if (empRows.length === 0) {
     document.getElementById('emp-usage').innerHTML = '<div class="lb-empty">No time off records in this period.</div>';
   } else {
-    var empHtml = '<table class="emp-tbl"><thead><tr><th>Employee</th><th></th><th class="num">PTO</th><th class="num">Vac</th><th class="num">Pers</th><th class="num">Sick</th><th class="num">Total</th></tr></thead><tbody>';
+    var empHtml = '<table class="emp-tbl"><thead><tr><th>Employee</th><th></th><th class="num">PTO</th><th class="num">Vac</th><th class="num">Pers</th><th class="num">Sick</th><th class="num">Early</th><th class="num">Total</th></tr></thead><tbody>';
     empRows.forEach(function(r){
       var sickCls = r.sick >= 3 ? ' class="num sick-high"' : ' class="num"';
+      var earlyCls = r.early >= 3 ? ' class="num sick-high"' : ' class="num"';
       empHtml += '<tr>' +
         '<td class="emp">'+esc(r.name)+'</td>' +
         '<td style="color:#aaa;font-size:0.72rem">'+r.stores+'</td>' +
@@ -767,6 +773,7 @@ function renderUsage() {
         '<td class="num">'+(r.vac||'')+'</td>' +
         '<td class="num">'+(r.pers||'')+'</td>' +
         '<td'+sickCls+'>'+(r.sick||'')+'</td>' +
+        '<td'+earlyCls+'>'+(r.early||'')+'</td>' +
         '<td class="num" style="font-weight:700">'+r.total+'</td>' +
       '</tr>';
     });
