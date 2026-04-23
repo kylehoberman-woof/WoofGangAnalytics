@@ -73,6 +73,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .edit-mode .task-row:hover{background:transparent}
 
 .section-hdr{grid-column:1/-1;font-size:0.85rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;padding:8px 4px 2px;margin-top:4px}
+.big-section-hdr{font-size:1.15rem;font-weight:800;color:#1a1a2e;letter-spacing:-0.01em;padding:16px 4px 10px;margin-top:8px;display:flex;align-items:baseline;gap:12px;border-bottom:2px solid #FDF0F5;margin-bottom:14px}
+.big-section-hdr:first-child{margin-top:0}
+.big-section-hdr .bsh-sub{font-size:0.78rem;font-weight:600;color:#888;letter-spacing:0}
 
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
 .overlay.active{display:flex}
@@ -111,7 +114,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 </div>
 
 <div class="tabs">
-  <button class="tab active" id="tab-weekly"  onclick="setView('weekly')">Weekly</button>
+  <button class="tab active" id="tab-all"     onclick="setView('all')">All</button>
+  <button class="tab"        id="tab-weekly"  onclick="setView('weekly')">Weekly</button>
   <button class="tab"        id="tab-monthly" onclick="setView('monthly')">Monthly</button>
   <button class="tab"        id="tab-adhoc"   onclick="setView('adhoc')">Ad-hoc</button>
 </div>
@@ -237,7 +241,7 @@ var MONTHS = ['January','February','March','April','May','June','July','August',
 // State
 var tasks = [];            // all active tasks
 var completions = [];      // all completions for active tasks
-var currentView = 'weekly';
+var currentView = 'all';
 var roleFilter = '';
 var editMode = false;
 var editingTask = null;
@@ -303,9 +307,11 @@ function completionFor(task){
 }
 
 // Filter tasks for current view + role
-function visibleTasks(){
+function visibleTasks(freq){
+  // freq = optional explicit frequency filter (used in 'all' view to scope per section)
+  var requiredFreq = freq || (currentView === 'all' ? null : currentView);
   return tasks.filter(function(t){
-    if (t.frequency !== currentView) return false;
+    if (requiredFreq && t.frequency !== requiredFreq) return false;
     if (roleFilter && t.assigned_role !== roleFilter) return false;
     return true;
   });
@@ -314,14 +320,17 @@ function visibleTasks(){
 // ── Render ──
 function render(){
   // Period label
+  var dMon = new Date(monthStart+'T12:00:00');
   var label;
   if (currentView === 'weekly') {
     label = 'Week of ' + fmtDate(weekStart) + ' – ' + fmtDate(addDays(weekStart,6));
   } else if (currentView === 'monthly') {
-    var d = new Date(monthStart+'T12:00:00');
-    label = MONTHS[d.getMonth()] + ' ' + d.getFullYear();
-  } else {
+    label = MONTHS[dMon.getMonth()] + ' ' + dMon.getFullYear();
+  } else if (currentView === 'adhoc') {
     label = 'Ongoing / one-time tasks';
+  } else {
+    // all
+    label = 'Week of ' + fmtDate(weekStart) + ' · ' + MONTHS[dMon.getMonth()] + ' ' + dMon.getFullYear() + ' · Ad-hoc';
   }
   document.getElementById('period-label').textContent = label;
 
@@ -338,8 +347,19 @@ function render(){
     html = renderWeeklyGrid(list);
   } else if (currentView === 'monthly') {
     html = renderMonthlyList(list);
-  } else {
+  } else if (currentView === 'adhoc') {
     html = renderAdhocList(list);
+  } else {
+    // all — stack all three sections with big headers
+    var weeklyList  = visibleTasks('weekly');
+    var monthlyList = visibleTasks('monthly');
+    var adhocList   = visibleTasks('adhoc');
+    html += '<div class="big-section-hdr">&#128197; Weekly <span class="bsh-sub">Week of '+fmtDate(weekStart)+' – '+fmtDate(addDays(weekStart,6))+' &middot; '+weeklyList.filter(isDone).length+'/'+weeklyList.length+'</span></div>';
+    html += renderWeeklyGrid(weeklyList);
+    html += '<div class="big-section-hdr">&#128198; Monthly <span class="bsh-sub">'+MONTHS[dMon.getMonth()]+' '+dMon.getFullYear()+' &middot; '+monthlyList.filter(isDone).length+'/'+monthlyList.length+'</span></div>';
+    html += renderMonthlyList(monthlyList);
+    html += '<div class="big-section-hdr">&#128204; Ad-hoc <span class="bsh-sub">'+adhocList.filter(isDone).length+'/'+adhocList.length+' complete</span></div>';
+    html += renderAdhocList(adhocList);
   }
   container.innerHTML = html;
 }
@@ -482,7 +502,7 @@ function toggleEdit(){
 
 function setView(v){
   currentView = v;
-  ['weekly','monthly','adhoc'].forEach(function(k){
+  ['all','weekly','monthly','adhoc'].forEach(function(k){
     document.getElementById('tab-'+k).classList.toggle('active', k===v);
   });
   render();
