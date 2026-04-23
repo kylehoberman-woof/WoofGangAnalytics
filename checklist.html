@@ -66,6 +66,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .role-owner{background:#FDF0F5;color:#C4276E}
 .role-manager{background:#e0f2f1;color:#1B6B6B}
 .role-store{background:#fff8e1;color:#b8880a}
+.task-freq{font-size:0.58rem;font-weight:800;padding:2px 6px;border-radius:8px;text-transform:uppercase;letter-spacing:0.04em;flex-shrink:0}
+.freq-weekly{background:#e3f2fd;color:#1976D2}
+.freq-monthly{background:#f3e5f5;color:#7B1FA2}
+.freq-adhoc{background:#fff3e0;color:#E65100}
 .task-edit-btn{display:none;background:none;border:none;color:#ccc;font-size:0.85rem;cursor:pointer;padding:2px 6px;border-radius:4px}
 .task-edit-btn:hover{color:#C4276E;background:#FDF0F5}
 .edit-mode .task-edit-btn{display:inline-block}
@@ -350,18 +354,86 @@ function render(){
   } else if (currentView === 'adhoc') {
     html = renderAdhocList(list);
   } else {
-    // all — stack all three sections with big headers
-    var weeklyList  = visibleTasks('weekly');
-    var monthlyList = visibleTasks('monthly');
-    var adhocList   = visibleTasks('adhoc');
-    html += '<div class="big-section-hdr">&#128197; Weekly <span class="bsh-sub">Week of '+fmtDate(weekStart)+' – '+fmtDate(addDays(weekStart,6))+' &middot; '+weeklyList.filter(isDone).length+'/'+weeklyList.length+'</span></div>';
-    html += renderWeeklyGrid(weeklyList);
-    html += '<div class="big-section-hdr">&#128198; Monthly <span class="bsh-sub">'+MONTHS[dMon.getMonth()]+' '+dMon.getFullYear()+' &middot; '+monthlyList.filter(isDone).length+'/'+monthlyList.length+'</span></div>';
-    html += renderMonthlyList(monthlyList);
-    html += '<div class="big-section-hdr">&#128204; Ad-hoc <span class="bsh-sub">'+adhocList.filter(isDone).length+'/'+adhocList.length+' complete</span></div>';
-    html += renderAdhocList(adhocList);
+    html = renderUnifiedDaily();
   }
   container.innerHTML = html;
+}
+
+// Unified daily view: one 7-day grid where each day shows weekly tasks for
+// that day-of-week + monthly tasks whose day_of_month matches that calendar
+// date in the current week. Below the grid: "Any time this month" + "Ad-hoc — open".
+function renderUnifiedDaily(){
+  var tk = todayKey();
+  var allTasks = visibleTasks();  // role-filtered (no frequency filter in 'all' mode)
+  var weekly  = allTasks.filter(function(t){return (t.frequency||'weekly')==='weekly';});
+  var monthly = allTasks.filter(function(t){return t.frequency==='monthly';});
+  var adhoc   = allTasks.filter(function(t){return t.frequency==='adhoc';});
+
+  var html = '<div class="days-grid'+(editMode?' edit-mode':'')+'">';
+  DAYS.forEach(function(day, idx){
+    var dayDate = addDays(weekStart, idx);
+    var dayDom = parseInt(dayDate.slice(8,10), 10);   // day-of-month for this calendar day
+    var inThisMonth = dayDate.slice(0,7) === monthStart.slice(0,7);
+
+    // Weekly tasks for this day-of-week
+    var weeklyForDay = weekly.filter(function(t){return t.day_of_week === day.key;});
+    // Monthly tasks whose day_of_month lands on this calendar date (only if the date is in current month)
+    var monthlyForDay = inThisMonth
+      ? monthly.filter(function(t){return t.day_of_month && t.day_of_month === dayDom;})
+      : [];
+
+    var dayTasks = weeklyForDay.concat(monthlyForDay);
+    var dayDone = dayTasks.filter(isDone).length;
+    var allDone = dayTasks.length > 0 && dayDone === dayTasks.length;
+    var isToday = day.key === tk;
+
+    html += '<div class="card'+(isToday?' today':'')+'">';
+    html += '<div class="card-hdr">';
+    html += '<div><div class="card-name">'+day.label+'</div><div class="card-date">'+fmtDate(dayDate)+'</div></div>';
+    if (dayTasks.length > 0) html += '<div class="card-count'+(allDone?' complete':'')+'">'+dayDone+'/'+dayTasks.length+'</div>';
+    html += '</div>';
+
+    if (dayTasks.length === 0) {
+      html += '<div class="task-list empty">No tasks</div>';
+    } else {
+      html += '<div class="task-list">';
+      dayTasks.forEach(function(t){ html += taskRowHtml(t); });
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // "Any time this month" (monthly with no day_of_month)
+  var anyMonth = monthly.filter(function(t){return !t.day_of_month;});
+  if (anyMonth.length) {
+    var doneAny = anyMonth.filter(isDone).length;
+    html += '<div class="big-section-hdr">&#128198; Any Time This Month <span class="bsh-sub">'+MONTHS[new Date(monthStart+"T12:00:00").getMonth()]+' '+new Date(monthStart+"T12:00:00").getFullYear()+' &middot; '+doneAny+'/'+anyMonth.length+'</span></div>';
+    html += '<div class="list-grid">';
+    html += '<div class="card" style="grid-column:1/-1"><div class="task-list">';
+    anyMonth.forEach(function(t){ html += taskRowHtml(t); });
+    html += '</div></div></div>';
+  }
+
+  // Ad-hoc open (not yet complete) + completed below
+  var adhocOpen = adhoc.filter(function(t){return !isDone(t);});
+  var adhocDone = adhoc.filter(isDone);
+  if (adhoc.length) {
+    html += '<div class="big-section-hdr">&#128204; Ad-hoc <span class="bsh-sub">'+adhocDone.length+'/'+adhoc.length+' complete</span></div>';
+    html += '<div class="list-grid">';
+    html += '<div class="card"><div class="card-hdr"><div class="card-name">Open</div><div class="card-count">'+adhocOpen.length+'</div></div><div class="task-list">';
+    if (adhocOpen.length === 0) html += '<div class="task-list empty">All done &mdash; nice.</div>';
+    else adhocOpen.forEach(function(t){ html += taskRowHtml(t); });
+    html += '</div></div>';
+    if (adhocDone.length) {
+      html += '<div class="card"><div class="card-hdr"><div class="card-name">Completed</div><div class="card-count complete">'+adhocDone.length+'</div></div><div class="task-list">';
+      adhocDone.forEach(function(t){ html += taskRowHtml(t); });
+      html += '</div></div>';
+    }
+    html += '</div>';
+  }
+
+  return html;
 }
 
 function renderWeeklyGrid(list){
@@ -454,13 +526,18 @@ function renderAdhocList(list){
   return html;
 }
 
-function taskRowHtml(t){
+function taskRowHtml(t, opts){
+  opts = opts || {};
   var done = isDone(t);
   var role = t.assigned_role || 'owner';
   var roleLabel = role === 'owner' ? 'Owner' : role === 'manager' ? 'Manager' : 'Store';
+  var freq = t.frequency || 'weekly';
+  var freqLabel = freq === 'weekly' ? 'Wk' : freq === 'monthly' ? 'Mo' : 'Ad';
+  var showFreq = opts.showFreq !== false;  // default true
   return '<div class="task-row'+(done?' done':'')+'" onclick="handleTaskClick(event,'+t.id+')">' +
     '<div class="task-check"></div>' +
     '<div class="task-title">'+esc(t.title)+'</div>' +
+    (showFreq ? '<span class="task-freq freq-'+freq+'">'+freqLabel+'</span>' : '') +
     '<span class="task-role role-'+role+'">'+roleLabel+'</span>' +
     '<button class="task-edit-btn" onclick="event.stopPropagation();openEditModal('+t.id+')">&#9998;</button>' +
   '</div>';
