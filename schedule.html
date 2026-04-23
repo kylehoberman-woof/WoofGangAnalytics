@@ -227,10 +227,11 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
     <button id="btn-both" onclick="setStore('all')">Both Stores</button>
   </div>
   <div class="tab-bar">
-    <button class="tab-btn active" id="tab-week"     onclick="setTab('week')">Week</button>
-    <button class="tab-btn"        id="tab-month"    onclick="setTab('month')">Month</button>
-    <button class="tab-btn"        id="tab-roster"   onclick="setTab('roster')">Employees</button>
-    <button class="tab-btn"        id="tab-coverage" onclick="setTab('coverage')">Coverage</button>
+    <button class="tab-btn active" id="tab-week"      onclick="setTab('week')">Week</button>
+    <button class="tab-btn"        id="tab-month"     onclick="setTab('month')">Month</button>
+    <button class="tab-btn"        id="tab-roster"    onclick="setTab('roster')">Employees</button>
+    <button class="tab-btn"        id="tab-coverage"  onclick="setTab('coverage')">Coverage</button>
+    <button class="tab-btn"        id="tab-retail"    onclick="setTab('retail')">Retail Hours</button>
   </div>
 </div>
 
@@ -288,6 +289,17 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
       </div>
     </div>
     <div class="emp-list" id="emp-list"></div>
+  </div>
+</div>
+
+<!-- RETAIL HOURS VIEW -->
+<div id="view-retail" class="hidden">
+  <div class="roster-main">
+    <div class="roster-header">
+      <h2>Retail — Projected Weekly Hours</h2>
+      <div style="font-size:0.78rem;color:#888;font-weight:600">Based on each employee&rsquo;s default schedule</div>
+    </div>
+    <div id="retail-content"></div>
   </div>
 </div>
 
@@ -662,7 +674,7 @@ function setStore(key){
 }
 function setTab(tab){
   currentTab=tab;
-  ['week','month','roster','coverage'].forEach(function(t){
+  ['week','month','roster','coverage','retail'].forEach(function(t){
     document.getElementById('view-'+t).classList.toggle('hidden',t!==tab);
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
@@ -673,6 +685,7 @@ function refreshCurrent(){
   if(currentTab==='month')    renderMonth();
   if(currentTab==='roster')   renderRoster();
   if(currentTab==='coverage') renderCoverage();
+  if(currentTab==='retail')   renderRetail();
 }
 
 /* ════════════════════════════════════════
@@ -1175,6 +1188,119 @@ function toggleInactive(){
   btn.style.borderColor=showInactive?'#C4276E':'#ddd';
   renderRoster();
 }
+/* ════════════════════════════════════════
+   RETAIL HOURS VIEW
+════════════════════════════════════════ */
+function _recurringHours(rec, weekLetter){
+  // weekLetter: 'A' or 'B'. Sums hours across 7 days for that week only.
+  if (!rec || typeof rec !== 'object') return 0;
+  var total = 0;
+  DAY_KEYS.forEach(function(key){
+    var r = rec[key];
+    if (!r || !r.start || !r.end) return;
+    var w = r.weeks || 'all';
+    if (w !== 'all' && w !== weekLetter) return;
+    var sh = parseInt(r.start.slice(0,2),10), sm = parseInt(r.start.slice(3,5),10);
+    var eh = parseInt(r.end.slice(0,2),10),   em = parseInt(r.end.slice(3,5),10);
+    var h = (eh * 60 + em - sh * 60 - sm) / 60;
+    if (h > 0 && h <= 16) total += h;
+  });
+  return total;
+}
+function _hasBiweekly(rec){
+  if (!rec) return false;
+  return DAY_KEYS.some(function(k){return rec[k] && rec[k].weeks && rec[k].weeks !== 'all';});
+}
+function renderRetail(){
+  var rows = employees.filter(function(e){return (e.role==='retail') && e.is_active!==false;});
+  // Filter by store when not "all"
+  if (currentStore !== 'all') rows = rows.filter(function(e){return e.store===currentStore || e.store==='both';});
+
+  // Compute per-employee projection
+  rows = rows.map(function(e){
+    var weekA = _recurringHours(e.recurring, 'A');
+    var weekB = _recurringHours(e.recurring, 'B');
+    var biweekly = _hasBiweekly(e.recurring);
+    var avg = biweekly ? (weekA + weekB) / 2 : weekA;
+    var rate = parseFloat(e.hourly_rate) || 0;
+    var weeklyCost = avg * rate;
+    return {
+      emp: e,
+      weekA: weekA, weekB: weekB, biweekly: biweekly,
+      avgPerWeek: avg, rate: rate,
+      weeklyCost: weeklyCost,
+      monthlyCost: weeklyCost * 4.33,
+      annualCost: weeklyCost * 52,
+    };
+  });
+  // Sort: active biweekly/most hours first
+  rows.sort(function(a,b){return b.avgPerWeek - a.avgPerWeek;});
+
+  var totAvg = rows.reduce(function(s,r){return s + r.avgPerWeek;}, 0);
+  var totWeekly = rows.reduce(function(s,r){return s + r.weeklyCost;}, 0);
+  var totMonthly = rows.reduce(function(s,r){return s + r.monthlyCost;}, 0);
+  var storeLabel = currentStore==='all'?'All Stores':currentStore==='port-washington'?'Port Washington':'Hicksville';
+
+  var html = '';
+  html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">';
+  html += '<div style="background:#FDF0F5;border-left:4px solid #C4276E;border-radius:8px;padding:12px 16px;flex:1;min-width:180px">' +
+    '<div style="font-size:0.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.04em">Total Retail Hours / Week</div>' +
+    '<div style="font-size:1.6rem;font-weight:800;color:#C4276E;margin-top:2px">'+totAvg.toFixed(1)+' hrs</div>' +
+    '<div style="font-size:0.72rem;color:#888">'+storeLabel+' &middot; '+rows.length+' employee'+(rows.length===1?'':'s')+'</div></div>';
+  if (totWeekly > 0) {
+    html += '<div style="background:#e8f5e9;border-left:4px solid #2E7D32;border-radius:8px;padding:12px 16px;flex:1;min-width:180px">' +
+      '<div style="font-size:0.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.04em">Weekly Labor Cost</div>' +
+      '<div style="font-size:1.6rem;font-weight:800;color:#2E7D32;margin-top:2px">$'+Math.round(totWeekly).toLocaleString()+'</div>' +
+      '<div style="font-size:0.72rem;color:#888">&asymp; $'+Math.round(totMonthly).toLocaleString()+'/mo</div></div>';
+    html += '<div style="background:#e0f2f1;border-left:4px solid #1B6B6B;border-radius:8px;padding:12px 16px;flex:1;min-width:180px">' +
+      '<div style="font-size:0.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.04em">Annualized</div>' +
+      '<div style="font-size:1.6rem;font-weight:800;color:#1B6B6B;margin-top:2px">$'+Math.round(totWeekly*52).toLocaleString()+'</div>' +
+      '<div style="font-size:0.72rem;color:#888">52 weeks of scheduled hours</div></div>';
+  }
+  html += '</div>';
+
+  if (rows.length === 0) {
+    html += '<div style="text-align:center;padding:40px;color:#aaa;font-size:0.88rem;background:white;border-radius:10px">No retail employees with default schedules yet.<br><span style="font-size:0.78rem">Set a default schedule via Employees tab → ⟳ Default Schedule.</span></div>';
+    document.getElementById('retail-content').innerHTML = html;
+    return;
+  }
+
+  html += '<div style="background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04)">';
+  html += '<table style="width:100%;border-collapse:collapse;font-size:0.88rem">';
+  html += '<thead><tr style="background:#fafafa">' +
+    '<th style="text-align:left;padding:11px 12px;font-size:0.72rem;font-weight:800;color:#666;text-transform:uppercase;letter-spacing:0.04em">Employee</th>' +
+    '<th style="text-align:left;padding:11px 12px;font-size:0.72rem;font-weight:800;color:#666;text-transform:uppercase;letter-spacing:0.04em">Store</th>' +
+    '<th style="text-align:right;padding:11px 12px;font-size:0.72rem;font-weight:800;color:#666;text-transform:uppercase;letter-spacing:0.04em">Week A</th>' +
+    '<th style="text-align:right;padding:11px 12px;font-size:0.72rem;font-weight:800;color:#666;text-transform:uppercase;letter-spacing:0.04em">Week B</th>' +
+    '<th style="text-align:right;padding:11px 12px;font-size:0.72rem;font-weight:800;color:#666;text-transform:uppercase;letter-spacing:0.04em">Avg/Week</th>' +
+    '<th style="text-align:right;padding:11px 12px;font-size:0.72rem;font-weight:800;color:#666;text-transform:uppercase;letter-spacing:0.04em">Rate</th>' +
+    '<th style="text-align:right;padding:11px 12px;font-size:0.72rem;font-weight:800;color:#666;text-transform:uppercase;letter-spacing:0.04em">Weekly $</th>' +
+    '<th style="text-align:right;padding:11px 12px;font-size:0.72rem;font-weight:800;color:#666;text-transform:uppercase;letter-spacing:0.04em">Monthly $</th>' +
+  '</tr></thead><tbody>';
+
+  rows.forEach(function(r){
+    var e = r.emp;
+    var storeBadge = e.store==='port-washington' ? '<span style="background:#FDF0F5;color:#C4276E;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.04em">PW</span>' :
+                     e.store==='hicksville'      ? '<span style="background:#e0f2f1;color:#1B6B6B;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.04em">HV</span>' :
+                                                    '<span style="background:#efebe9;color:#6B3520;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.04em">BOTH</span>';
+    var biBadge = r.biweekly ? ' <span style="background:#FDF0F5;color:#C4276E;padding:1px 6px;border-radius:6px;font-size:0.62rem;font-weight:800">BI-WEEKLY</span>' : '';
+    html += '<tr style="border-top:1px solid #f4f4f4">' +
+      '<td style="padding:11px 12px"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:24px;background:'+(e.color||'#ccc')+';border-radius:3px"></div><div><div style="font-weight:700">'+esc(e.name)+biBadge+'</div>'+(e.full_name && e.full_name!==e.name ? '<div style="font-size:0.7rem;color:#aaa">FranPOS: '+esc(e.full_name)+'</div>':'')+'</div></div></td>' +
+      '<td style="padding:11px 12px">'+storeBadge+'</td>' +
+      '<td style="padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums">'+r.weekA.toFixed(1)+'h</td>' +
+      '<td style="padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums;color:'+(r.biweekly?'#1a1a2e':'#bbb')+'">'+(r.biweekly?r.weekB.toFixed(1)+'h':'—')+'</td>' +
+      '<td style="padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums;font-weight:800">'+r.avgPerWeek.toFixed(1)+'h</td>' +
+      '<td style="padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums">'+(r.rate ? '$'+r.rate.toFixed(2) : '—')+'</td>' +
+      '<td style="padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums">'+(r.weeklyCost ? '$'+Math.round(r.weeklyCost).toLocaleString() : '—')+'</td>' +
+      '<td style="padding:11px 12px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:#2E7D32">'+(r.monthlyCost ? '$'+Math.round(r.monthlyCost).toLocaleString() : '—')+'</td>' +
+    '</tr>';
+  });
+  html += '</tbody></table></div>';
+  html += '<div style="font-size:0.76rem;color:#999;font-style:italic;margin-top:14px;line-height:1.5">Hours projected from each employee&rsquo;s default (recurring) schedule. Bi-weekly rotations averaged across Week A + Week B. Monthly cost uses 4.33 weeks/mo.</div>';
+
+  document.getElementById('retail-content').innerHTML = html;
+}
+
 function renderRoster(){
   var emps=storeEmployees();
   if(!showInactive) emps=emps.filter(function(e){return e.is_active!==false;});
