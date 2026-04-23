@@ -186,10 +186,10 @@ function render(briefing, tasks, completions, shifts, employees, timeOff){
     html += '<div class="store-block'+cls+'">';
     html += '<div class="store-name">'+s.label+'</div>';
     html += '<div class="kpi-grid">';
-    html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(y.total_rev)+'</div>'+trendBadge(y.total_rev,prev.total_rev)+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Transactions</div><div class="kpi-value">'+y.transactions+'</div>'+trendBadge(y.transactions,prev.transactions)+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Grooming Rev</div><div class="kpi-value">'+fc(y.groom_rev)+'</div>'+trendBadge(y.groom_rev,prev.groom_rev)+'</div>';
-    html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(y.retail_rev)+'</div>'+trendBadge(y.retail_rev,prev.retail_rev)+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(y.total_rev)+'</div>'+trendBadge(y.total_rev,prev.total_rev,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Transactions</div><div class="kpi-value">'+y.transactions+'</div>'+trendBadge(y.transactions,prev.transactions,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooming Rev</div><div class="kpi-value">'+fc(y.groom_rev)+'</div>'+trendBadge(y.groom_rev,prev.groom_rev,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(y.retail_rev)+'</div>'+trendBadge(y.retail_rev,prev.retail_rev,'vs same day last wk')+'</div>';
     html += '<div class="kpi"><div class="kpi-label">Grooms / Baths</div><div class="kpi-value">'+y.grooms+' / '+y.baths+'</div></div>';
     html += '<div class="kpi"><div class="kpi-label">Avg Ticket</div><div class="kpi-value">'+fc(y.avg_ticket)+'</div></div>';
     html += '</div></div>';
