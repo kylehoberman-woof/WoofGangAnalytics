@@ -97,6 +97,13 @@ tr:hover td{background:#fef7fa}
 .lb-bar{height:100%;background:#c62828;border-radius:4px}
 .lb-val{font-weight:800;color:#c62828;font-size:0.92rem;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
 .lb-empty{text-align:center;padding:18px;color:#aaa;font-size:0.85rem}
+/* Edit modal */
+.edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.edit-overlay.hidden{display:none}
+.edit-modal{background:white;border-radius:14px;padding:24px;width:100%;max-width:560px;box-shadow:0 10px 40px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto}
+.btn-cancel{padding:9px 18px;background:white;border:2px solid #ddd;color:#888;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer}
+.btn-cancel:hover{border-color:#C4276E;color:#C4276E}
+.btn-edit:hover{background:#FDF0F5;color:#C4276E;border-color:#f0c4d8}
 /* Calendar */
 .cal-nav{display:flex;align-items:center;gap:14px;margin-bottom:14px}
 .cal-arrow{padding:5px 14px;border:2px solid #ddd;border-radius:6px;cursor:pointer;font-size:1rem;background:white;transition:border-color 0.2s;font-family:inherit}
@@ -294,6 +301,61 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
 </div>
 
 <div class="toast hidden" id="toast"></div>
+
+<!-- Edit modal -->
+<div class="edit-overlay hidden" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
+  <div class="edit-modal">
+    <h2 style="font-size:1.1rem;font-weight:800;margin-bottom:16px">Edit Time Off</h2>
+    <input type="hidden" id="e-id">
+    <div class="form-grid">
+      <div class="fg">
+        <label>Store *</label>
+        <select id="e-store" onchange="updateEditEmployees()">
+          <option value="port-washington">Port Washington</option>
+          <option value="hicksville">Hicksville</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Employee *</label>
+        <select id="e-employee"></select>
+      </div>
+      <div class="fg">
+        <label>Start Date *</label>
+        <input type="date" id="e-start">
+      </div>
+      <div class="fg">
+        <label>End Date *</label>
+        <input type="date" id="e-end">
+      </div>
+      <div class="fg">
+        <label>Type</label>
+        <select id="e-type">
+          <option value="PTO">PTO</option>
+          <option value="Vacation">Vacation</option>
+          <option value="Sick">Sick Day</option>
+          <option value="Personal">Personal</option>
+          <option value="Left Early">Left Early</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Status</label>
+        <select id="e-status">
+          <option value="approved">Approved</option>
+          <option value="pending">Pending</option>
+          <option value="denied">Denied</option>
+        </select>
+      </div>
+      <div class="fg span-full">
+        <label>Notes</label>
+        <textarea id="e-notes" placeholder="Optional notes..."></textarea>
+      </div>
+      <div class="fg span-full" style="display:flex;gap:10px;justify-content:flex-end">
+        <button type="button" class="btn-cancel" onclick="closeEdit()">Cancel</button>
+        <button type="button" class="btn-primary" id="e-save" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ── Config ───────────────────────────────────── */
@@ -551,6 +613,7 @@ function renderList() {
       '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#777">'+(r.notes||'–')+'</td>' +
       '<td>' +
         (r.status !== 'approved' ? '<button class="btn-sm btn-approve" onclick="doApprove(\''+r.id+'\')">&#10003; Approve</button>' : '') +
+        '<button class="btn-sm btn-edit" onclick="doEdit(\''+r.id+'\')">&#9998; Edit</button>' +
         '<button class="btn-sm btn-del" onclick="doDelete(\''+r.id+'\')">&#10005;</button>' +
       '</td>' +
       '</tr>';
@@ -586,6 +649,75 @@ function doApprove(id) {
     .catch(function(e) {
       console.error(e);
       showToast('Update failed', 'error');
+    });
+}
+
+/* ── Edit ─────────────────────────────────────── */
+function updateEditEmployees() {
+  var store = document.getElementById('e-store').value;
+  var sel = document.getElementById('e-employee');
+  var current = sel.value;  // preserve if still valid
+  var emps = empsByStore[store] || [];
+  sel.innerHTML = emps.map(function(e){ return '<option value="'+e+'">'+e+'</option>'; }).join('');
+  if (emps.indexOf(current) !== -1) sel.value = current;
+}
+
+function doEdit(id) {
+  var rec = records.find(function(r){ return String(r.id) === String(id); });
+  if (!rec) { showToast('Record not found','error'); return; }
+  document.getElementById('e-id').value = rec.id;
+  document.getElementById('e-store').value = rec.store_key;
+  updateEditEmployees();
+  // If employee not in list (legacy/removed), add as option
+  var empSel = document.getElementById('e-employee');
+  if (Array.from(empSel.options).every(function(o){return o.value !== rec.employee_name;})) {
+    var opt = document.createElement('option');
+    opt.value = rec.employee_name; opt.textContent = rec.employee_name + ' (inactive)';
+    empSel.appendChild(opt);
+  }
+  empSel.value = rec.employee_name;
+  document.getElementById('e-start').value = rec.start_date;
+  document.getElementById('e-end').value = rec.end_date;
+  document.getElementById('e-type').value = rec.type;
+  document.getElementById('e-status').value = rec.status;
+  document.getElementById('e-notes').value = rec.notes || '';
+  document.getElementById('edit-overlay').classList.remove('hidden');
+}
+
+function closeEdit() {
+  document.getElementById('edit-overlay').classList.add('hidden');
+}
+
+function saveEdit() {
+  var id = document.getElementById('e-id').value;
+  var start = document.getElementById('e-start').value;
+  var end = document.getElementById('e-end').value;
+  if (end < start) { showToast('End date must be on or after start date', 'error'); return; }
+  var body = {
+    store_key: document.getElementById('e-store').value,
+    employee_name: document.getElementById('e-employee').value,
+    start_date: start,
+    end_date: end,
+    type: document.getElementById('e-type').value,
+    status: document.getElementById('e-status').value,
+    notes: document.getElementById('e-notes').value.trim() || null
+  };
+  var btn = document.getElementById('e-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  patchRecord(id, body)
+    .then(function() {
+      var idx = records.findIndex(function(r){ return String(r.id) === String(id); });
+      if (idx >= 0) records[idx] = Object.assign({}, records[idx], body);
+      closeEdit();
+      renderAll();
+      showToast('Updated');
+    })
+    .catch(function(e) {
+      console.error(e);
+      showToast('Update failed — ' + e.message, 'error');
+    })
+    .finally(function() {
+      btn.disabled = false; btn.textContent = 'Save Changes';
     });
 }
 
