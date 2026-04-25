@@ -251,8 +251,8 @@ now = datetime.now(et).strftime("%B %d, %Y at %I:%M %p ET")
 top50_rows = make_rows(top50)
 all_rows = make_rows(results)
 
-# Reorder recommendations (4-week supply)
-REORDER_WEEKS = 4
+# Reorder recommendations (3-week supply — lowered Apr 25 2026 to improve cash flow)
+REORDER_WEEKS = 3
 reorder_by_vendor = defaultdict(list)
 for r in results:
     if r["status"] not in ("out","critical","low"): continue
@@ -753,7 +753,7 @@ html = f"""<!DOCTYPE html>
   <div id=\"p-top50\" class=\"panel active\"><table><thead><tr>{TH}</tr></thead><tbody id=\"b-top50\">{top50_rows}</tbody></table></div>
   <div id=\"p-all\" class=\"panel\"><table><thead><tr>{TH}</tr></thead><tbody id=\"b-all\">{all_rows}</tbody></table></div>
   <div id=\"p-nocost\" class=\"panel\"><table><thead><tr>{TH2}</tr></thead><tbody id=\"b-nocost\">{nocost_rows}</tbody></table></div>
-  <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px 8px 16px\">Reorder Recommendations (4-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3>{reorder_html}</div>
+  <div id=\"p-reorder\" class=\"panel\"><h3 style=\"padding:8px 8px 16px\">Reorder Recommendations (3-week supply) &middot; Est. Total ${reorder_total:,.0f}</h3>{reorder_html}</div>
   <div id=\"p-negative\" class=\"panel\"><table><thead><tr>{TH_NEG}</tr></thead><tbody id=\"b-negative\">{neg_rows}</tbody></table></div>
   <div id=\"p-requests\" class=\"panel\" style=\"padding:16px 40px 40px\">
     <div class=\"req-toolbar\">
