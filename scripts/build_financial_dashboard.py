@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from config import (
     get_store, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
-    BATHER_RATE,
+    BATHER_RATE, PAYROLL_TAX_RATE,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
     get_royalty_rate, get_monthly_rent, PORTAL_BACK_JS,
@@ -261,7 +261,8 @@ while m_start <= TODAY:
     cc_fees, cc_txn_count, cc_volume = get_monthly_cc_fees(m_start, m_end)
 
     gross_profit = round(net_rev - retail_cogs - comm_paid, 2)
-    total_opex = round(mgr + bather_pay + retail_pay + royalties + rent + owner_exp + operating_exp + cc_fees, 2)
+    payroll_tax = round((mgr + bather_pay + retail_pay + comm_paid) * PAYROLL_TAX_RATE, 2)
+    total_opex = round(mgr + bather_pay + retail_pay + payroll_tax + royalties + rent + owner_exp + operating_exp + cc_fees, 2)
     net_margin = round(gross_profit - total_opex, 2)
     net_margin_pct = round(net_margin / total_rev * 100, 1) if total_rev else 0
 
@@ -289,6 +290,7 @@ while m_start <= TODAY:
         "mgr": mgr,
         "bather_pay": bather_pay,
         "retail_pay": retail_pay,
+        "payroll_tax": payroll_tax,
         "royalties": royalties,
         "rent": rent,
         "owner_exp": owner_exp,
@@ -319,7 +321,7 @@ ytd = [m for m in monthly if m["year"] == 2026]
 ytd_sums = {}
 for key in ["groom_rev", "retail_rev", "total_rev", "groom_disc", "net_rev",
             "retail_cogs", "comm_paid", "gross_profit", "mgr", "bather_pay",
-            "retail_pay", "royalties", "rent", "owner_exp", "operating_exp", "cc_fees", "total_opex", "net_margin", "tips"]:
+            "retail_pay", "payroll_tax", "royalties", "rent", "owner_exp", "operating_exp", "cc_fees", "total_opex", "net_margin", "tips"]:
     ytd_sums[key] = round(sum(m[key] for m in ytd), 2)
 ytd_sums["net_margin_pct"] = round(ytd_sums["net_margin"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
 ytd_sums["gross_margin_pct"] = round(ytd_sums["gross_profit"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
@@ -443,6 +445,7 @@ for m in monthly:
       <td class="n">{fc(m["mgr"])}</td>
       <td class="n">{fc(m["bather_pay"])}</td>
       <td class="n">{fc(m["retail_pay"])}</td>
+      <td class="n">{fc(m["payroll_tax"])}</td>
       <td class="n">{fc(m["royalties"])}</td>
       <td class="n">{fc(m["rent"])}</td>
       <td class="n" style="color:#E65100">{fc(m["owner_exp"])}</td>
@@ -468,6 +471,7 @@ CMP_KPIS = [
     ("mgr", "Manager", False),
     ("bather_pay", "Bather Pay", False),
     ("retail_pay", "Retail Staff", False),
+    ("payroll_tax", "Payroll Tax", False),
     ("royalties", "Royalties", False),
     ("rent", "Rent", False),
     ("owner_exp", "Owner Expenses", False),
@@ -585,6 +589,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
     {kpi("Manager Salary", fc(ytd_sums["mgr"]), "#5C6BC0")}
     {kpi("Bather Pay", fc(ytd_sums["bather_pay"]), "#00796B")}
     {kpi("Retail Staff Pay", fc(ytd_sums["retail_pay"]), "#6A1B9A")}
+    {kpi("Payroll Tax", fc(ytd_sums["payroll_tax"]), "#8E24AA")}
     {kpi("Royalties + Marketing", fc(ytd_sums["royalties"]), "#AD1457")}
     {kpi("Rent", fc(ytd_sums["rent"]), "#6D4C41")}
     {kpi("Owner Expenses", fc(ytd_sums["owner_exp"]), "#E65100")}
@@ -646,7 +651,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
         <th style="text-align:left">Month</th>
         <th>Groom Rev</th><th>Retail Rev</th><th>Total Rev</th>
         <th>Discounts</th><th>Retail COGS</th><th>Commission</th><th>Gross Profit</th>
-        <th>Manager</th><th>Bather</th><th>Retail Staff</th><th>Royalties</th><th>Rent</th>
+        <th>Manager</th><th>Bather</th><th>Retail Staff</th><th>Payroll Tax</th><th>Royalties</th><th>Rent</th>
         <th>Owner Exp</th><th>Oper. Costs</th><th>CC Fees</th>
         <th>Net Margin</th>
       </tr></thead>

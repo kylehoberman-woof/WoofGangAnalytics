@@ -131,6 +131,11 @@ FDD_GROOM_COGS_PCT = 51.5     # Grooming cost (commission/labor) as % of groom r
 COMMISSION_RATE = 0.50
 BATHER_RATE = 17.0  # $/hr — fallback if per-employee rate not set in Supabase
 
+# Employer payroll tax rate (NY/Nassau County)
+# = FICA 7.65% + FUTA effective 0.4% + NY SUI ~3% + MCTMT 0.11% + Re-employment fund 0.075%
+# Update the SUI portion when actual experience-rated rate is confirmed by accountant
+PAYROLL_TAX_RATE = 0.1125
+
 # Guarantees fallback: {name: (daily_rate, start_date, end_date)}
 # These are used when Supabase has no groomer records.
 # Add new groomers via the Staff Schedule Employees tab instead of editing here.
