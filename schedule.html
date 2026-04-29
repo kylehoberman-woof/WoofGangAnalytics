@@ -1388,17 +1388,21 @@ function saveShift(){
   var empId=document.getElementById('sm-emp').value;
   if(!empId){showToast('Select an employee','error');return;}
   var date=editShiftDate||addShiftDate;
-  // Prevent same employee being scheduled twice on the same day (across both stores)
-  var existing=shifts[date]||[];
-  var dup=existing.some(function(s){return sEmpId(s)===empId && s.id!==editShiftId;});
-  if(dup){
-    var emp=empById(empId);
-    showToast((emp?emp.name:'This employee')+' is already scheduled on this day','error');
-    return;
-  }
   var btn=document.getElementById('sm-save'); btn.disabled=true; btn.textContent='Saving…';
   var shiftStore=addShiftStore||currentStore;
   if(shiftStore==='all') shiftStore='port-washington';
+  // Prevent same employee being scheduled twice on the same day IN THE SAME STORE.
+  // Cross-store split shifts (e.g. Cindy 9-12 HV, 2-7 PW) are allowed.
+  var existingSame=(shifts[date]||[]).filter(function(s){return s.store===shiftStore;});
+  var existingOther=(otherShifts[date]||[]).filter(function(s){return s.store===shiftStore;});
+  var dup=existingSame.concat(existingOther).some(function(s){return sEmpId(s)===empId && s.id!==editShiftId;});
+  if(dup){
+    btn.disabled=false; btn.textContent='Save Shift';
+    var emp=empById(empId);
+    var storeLabel=shiftStore==='port-washington'?'Port Washington':'Hicksville';
+    showToast((emp?emp.name:'This employee')+' is already scheduled at '+storeLabel+' on this day','error');
+    return;
+  }
   var body={emp_id:empId,store:shiftStore,shift_date:date,start_time:document.getElementById('sm-start').value,end_time:document.getElementById('sm-end').value,notes:document.getElementById('sm-notes').value.trim()};
 
   var p = editShiftId
