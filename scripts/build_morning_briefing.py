@@ -10,7 +10,7 @@ Usage:
     python3 scripts/build_morning_briefing.py
 """
 
-import json, sys, os
+import json, sys, os, subprocess
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
@@ -18,6 +18,17 @@ from collections import defaultdict
 sys.path.insert(0, str(Path(__file__).parent))
 from config import STORES, PROJ_ROOT, UNTRACKED_SKUS, SUPABASE_URL, SUPABASE_ANON_KEY
 from classifier import classify_item
+
+# Refresh retail_staffing.json before generating the briefing. Piggybacks here
+# because the standalone Retail Staffing step isn't yet wired into the
+# GitHub Actions workflow (PAT lacks workflow scope to add it).
+_staffing_script = Path(__file__).parent / "build_retail_staffing.py"
+if _staffing_script.exists():
+    print("Refreshing retail_staffing.json…")
+    try:
+        subprocess.run([sys.executable, str(_staffing_script)], check=True, timeout=300)
+    except Exception as _e:
+        print(f"  [warn] retail staffing build failed: {_e}", file=sys.stderr)
 
 
 def fetch_store_supplies_needed():
