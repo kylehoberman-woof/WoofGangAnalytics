@@ -71,8 +71,12 @@ def get_store_pay_data(store_key):
 
     bather_rate_map: {short_name: rate} per-employee rates.
     Use BATHER_RATE_MAP.get(name, config.BATHER_RATE) as fallback in pay calculations.
+
+    NOTE: includes inactive (terminated) employees so their HISTORICAL hours and
+    commissions still match against FranPOS clock/order data. Active-only filtering
+    is for forward-looking schedule UI, not historical financial dashboards.
     """
-    employees = fetch_employees(store=store_key)
+    employees = fetch_employees(store=store_key, active_only=False)
 
     retail_emps  = [e for e in employees if e.get("role") == "retail"]
     bather_emps  = [e for e in employees if e.get("role") == "bather"]
