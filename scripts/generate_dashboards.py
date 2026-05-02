@@ -442,11 +442,15 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
     n_periods = len(periods)
     monthly_rev = list(periods_data(df, periods, "net_sales"))
 
-    # Pro-rate the current partial month everywhere (slope, chart, run rate)
+    # Pro-rate the current partial month using day-of-week weighting from
+    # trailing 90 days of historical data. A naive (MTD/days × days_in_month)
+    # projection over-states months with heavy weekends remaining and
+    # under-states months with slow weekdays remaining.
     _rr_prorated = False
-    _partial_raw = 0.0      # keep the raw value for the chart annotation
+    _rr_method = "naive"          # 'naive' | 'dow_weighted'
+    _partial_raw = 0.0            # actual MTD revenue (unprojected)
     if monthly_rev and periods:
-        from datetime import date as _d_rr
+        from datetime import date as _d_rr, timedelta as _td_rr
         import calendar as _cal_rr
         _last_p = periods[-1]
         _today_rr = _d_rr.today()
@@ -456,15 +460,50 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
             _days_in_month = _cal_rr.monthrange(_today_rr.year, _today_rr.month)[1]
             if _days_elapsed > 0 and _days_elapsed < _days_in_month:
                 _partial_raw = monthly_rev[-1]
-                monthly_rev[-1] = monthly_rev[-1] / _days_elapsed * _days_in_month
-                _rr_prorated = True
+
+                # Build per-day-of-week mean revenue from trailing 90 days
+                # of complete data (exclude the current partial month so
+                # the partial pattern doesn't bias the weights).
+                _month_start = _d_rr(_last_data_dt.year, _last_data_dt.month, 1)
+                _hist_start = _month_start - _td_rr(days=90)
+                _hist_mask = (df["created"].dt.date >= _hist_start) & (df["created"].dt.date < _month_start)
+                _hist_df = df.loc[_hist_mask]
+
+                if len(_hist_df) > 0:
+                    # Sum revenue per calendar day, then reindex to a full
+                    # date range so closed days contribute 0 to the
+                    # corresponding day-of-week average (preserving the
+                    # expected closure pattern). Then mean by dow.
+                    _daily = _hist_df.groupby(_hist_df["created"].dt.date)["net_sales"].sum()
+                    _full_idx = pd.date_range(_hist_start, _month_start - _td_rr(days=1), freq="D").date
+                    _daily = _daily.reindex(_full_idx, fill_value=0.0)
+                    _dow_idx = pd.DatetimeIndex(_daily.index).dayofweek
+                    _dow_avg = pd.Series(_daily.values).groupby(_dow_idx).mean()
+                    _overall_avg = float(_dow_avg.mean()) if len(_dow_avg) else 0.0
+
+                    # Project remaining days using their day-of-week averages.
+                    _remaining_proj = 0.0
+                    for _d_offset in range(_days_elapsed + 1, _days_in_month + 1):
+                        _proj_date = _d_rr(_last_data_dt.year, _last_data_dt.month, _d_offset)
+                        _dow = _proj_date.weekday()
+                        _remaining_proj += float(_dow_avg.get(_dow, _overall_avg))
+
+                    monthly_rev[-1] = _partial_raw + _remaining_proj
+                    _rr_prorated = True
+                    _rr_method = "dow_weighted"
+                else:
+                    # Fallback to naive pro-rata if no usable history
+                    monthly_rev[-1] = _partial_raw / _days_elapsed * _days_in_month
+                    _rr_prorated = True
+                    _rr_method = "naive"
 
     # Last-quarter average (last 3 periods or all if < 3)
     lq_count = min(3, n_periods)
     lq_months = list(monthly_rev[-lq_count:]) if lq_count else []
     lq_avg = sum(lq_months) / len(lq_months) if lq_months else 0
     lq_annualized = lq_avg * 12
-    _rr_sub = f"Last {lq_count}mo avg: {fc(lq_avg)}" + (" (partial mo. pro-rated)" if _rr_prorated else "")
+    _rr_method_note = " (DOW-weighted projection)" if _rr_method == "dow_weighted" else (" (partial mo. pro-rated)" if _rr_prorated else "")
+    _rr_sub = f"Last {lq_count}mo avg: {fc(lq_avg)}" + _rr_method_note
 
     # Linear trend — only meaningful with 6+ months of data
     months_x = list(range(1, n_periods + 1))
@@ -598,7 +637,7 @@ def generate_main_dashboard(df, df_orders, output_path, body_only=False, year_su
             (f"{_yr_label} Net Sales", fc(total_net), f"{n_periods} months of data", ""),
             ("Annual Forecast (Conservative)", fc(conservative_forecast), f"Trend: {fc(forecast_next_yr)}", "green"),
             ("Recent Run Rate (Annualized)", fc(lq_annualized), _rr_sub, "accent"),
-            ("Monthly Growth Rate", f"+{fc(slope)}/mo", f"Trajectory: {fp(slope/monthly_rev[0]*100 if monthly_rev[0] else 0)}/mo from baseline" + (" (partial mo. pro-rated)" if _rr_prorated else ""), "green"),
+            ("Monthly Growth Rate", f"+{fc(slope)}/mo", f"Trajectory: {fp(slope/monthly_rev[0]*100 if monthly_rev[0] else 0)}/mo from baseline" + _rr_method_note, "green"),
         ]
     for label, value, sub, cls in kpis:
         html += f'<div class="kpi-card {cls}"><div class="kpi-label">{label}</div><div class="kpi-value">{value}</div><div class="kpi-sub">{sub}</div></div>\n'

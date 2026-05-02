@@ -181,7 +181,16 @@ def build_store_staffing(store_key):
 
     clocks = data.get('time_clocks', [])
     items = data.get('order_items', [])
+
+    # Cap "today" at the latest day with actual sales data. The nightly
+    # data dump runs after close, so before the store opens on day N+1 the
+    # data only contains transactions through day N. Counting day N+1
+    # before any business has happened would inflate manager salary days
+    # and days_open by 1 (and show a row for a day that hasn't occurred).
     today = date.today()
+    _max_data_date = max(((it.get('CreatedOn') or '')[:10] for it in items), default='')
+    if _max_data_date:
+        today = min(today, date.fromisoformat(_max_data_date))
 
     # Monthly retail hours per person
     monthly_hours = defaultdict(lambda: defaultdict(float))
@@ -208,8 +217,10 @@ def build_store_staffing(store_key):
             continue
         monthly_sales[created[:7]] += (price - disc)
 
-    # Assemble monthly rows
-    months = sorted(monthly_hours.keys())
+    # Assemble monthly rows. Include any month with EITHER hours or sales so
+    # the current month appears even before retail staff first clock in
+    # (e.g., early-month days when only the salaried manager / bathers worked).
+    months = sorted(set(monthly_hours.keys()) | set(monthly_sales.keys()))
     rows = []
     for m in months:
         y, mo = int(m[:4]), int(m[5:7])

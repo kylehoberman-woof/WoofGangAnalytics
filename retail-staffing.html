@@ -149,9 +149,10 @@ function render(){
   }
 
   if (current && current.total_labor > 0) {
-    html += '<div class="kpi"><div class="kpi-label">'+current.month_label+' (partial)</div>';
+    var ccls = current.labor_pct_sales <= 11 ? 'good' : current.labor_pct_sales <= 13 ? '' : current.labor_pct_sales <= 14 ? 'warn' : 'danger';
+    html += '<div class="kpi '+ccls+'"><div class="kpi-label">'+current.month_label+' (partial)</div>';
     html += '<div class="kpi-val">'+fc(current.total_labor)+'</div>';
-    html += '<div class="kpi-sub">'+current.days_open+' days open so far</div></div>';
+    html += '<div class="kpi-sub">'+current.labor_pct_sales.toFixed(1)+'% of $'+Math.round(current.sales).toLocaleString()+' sales &middot; '+current.days_open+' day'+(current.days_open===1?'':'s')+' open</div></div>';
   }
 
   if (ytd.labor > 0) {

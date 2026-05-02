@@ -168,6 +168,14 @@ def get_guarantee(groomer, day_str):
 with open(DATA_DIR / "all_data.json") as f:
     data = json.load(f)
 
+# Cap TODAY at the latest day with actual sales data. The nightly data dump
+# runs after close, so before the store opens on day N+1 the data only
+# contains transactions through day N. Counting day N+1 before any business
+# has happened inflates current-month rollups by a partial day.
+_max_data_date = max(((it.get("CreatedOn") or "")[:10] for it in data.get("order_items", [])), default="")
+if _max_data_date:
+    TODAY = min(TODAY, date.fromisoformat(_max_data_date))
+
 # Classify items and build daily aggregates
 groom_rev_by_day = defaultdict(float)
 groom_disc_by_day_total = defaultdict(float)
