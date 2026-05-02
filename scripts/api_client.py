@@ -9,7 +9,12 @@ from collections import defaultdict
 
 import httpx
 
-from config import BASE_URL, PAGE_SIZE, ET_BUFFER_DAYS, INCREMENTAL_DAYS, KNOWN_CLOSURES
+from config import BASE_URL, PAGE_SIZE, ET_BUFFER_DAYS, INCREMENTAL_DAYS, KNOWN_CLOSURES, STORES
+
+try:
+    from fetch_closures import fetch_closures
+except ImportError:
+    fetch_closures = None
 
 
 def api_get(endpoint, params=None, timeout=60, *, token, base_url=BASE_URL):
@@ -121,9 +126,15 @@ def extract_paginated(endpoint_template, start, end, label="data", id_field="Ord
     return all_data
 
 
-def _gap_detection(data, start_date, location_id, token):
-    """Detect and patch dates with suspiciously few orders."""
+def _gap_detection(data, start_date, location_id, token, closures=None):
+    """Detect and patch dates with suspiciously few orders.
+
+    closures: optional set of ISO date strings to skip. Falls back to
+    KNOWN_CLOSURES if not provided.
+    """
     print("\n[Gap detection] Checking for missing data...")
+    if closures is None:
+        closures = KNOWN_CLOSURES
 
     daily_orders = defaultdict(set)
     for it in data["order_items"]:
@@ -137,7 +148,7 @@ def _gap_detection(data, start_date, location_id, token):
     gap_dates = []
     while cur <= today:
         day = str(cur)
-        if day not in KNOWN_CLOSURES and len(daily_orders.get(day, set())) < 15:
+        if day not in closures and len(daily_orders.get(day, set())) < 15:
             gap_dates.append(day)
         cur += timedelta(days=1)
 
@@ -347,8 +358,11 @@ def extract_all_data(store):
     data["orders"] = orders
     print(f"  TOTAL: {len(orders)} orders")
 
-    # Gap detection
-    _gap_detection(data, store.start_date, location_id, token)
+    # Gap detection — fetch per-store closures from Supabase (falls back to
+    # KNOWN_CLOSURES if Supabase unreachable or fetch_closures unavailable).
+    _store_key = next((k for k, v in STORES.items() if v.location_id == location_id), None)
+    _store_closures = fetch_closures(_store_key) if (fetch_closures and _store_key) else None
+    _gap_detection(data, store.start_date, location_id, token, _store_closures)
 
     # Time clocks
     print("\n[5/6] Time clocks...")

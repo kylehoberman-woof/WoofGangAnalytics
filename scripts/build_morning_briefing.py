@@ -512,6 +512,31 @@ def main():
             output["stores"][store_key]["supplies_needed"] = items
             print(f"  {store_key}: {len(items)} supplies flagged")
 
+    # Attach upcoming closures (next 14 days) per store
+    print("\nFetching upcoming store closures...")
+    try:
+        from fetch_closures import fetch_closures_with_reasons
+        today_d = date.today()
+        horizon = today_d + timedelta(days=14)
+        for store_key in output["stores"]:
+            if "error" in output["stores"][store_key]:
+                continue
+            cls_map = fetch_closures_with_reasons(store_key)
+            upcoming = []
+            for iso, reason in cls_map.items():
+                try:
+                    cd = date.fromisoformat(iso)
+                except (ValueError, TypeError):
+                    continue
+                if today_d <= cd <= horizon:
+                    upcoming.append({"date": iso, "reason": reason})
+            upcoming.sort(key=lambda x: x["date"])
+            output["stores"][store_key]["upcoming_closures"] = upcoming
+            if upcoming:
+                print(f"  {store_key}: {len(upcoming)} upcoming closure(s)")
+    except Exception as _ce:
+        print(f"  [closures] error: {_ce}")
+
     # Generate executive summary via Claude
     output["summary_text"] = generate_executive_summary(output)
 

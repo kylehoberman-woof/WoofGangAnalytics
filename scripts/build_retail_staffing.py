@@ -108,6 +108,13 @@ STORE_CFG = {
     },
 }
 
+try:
+    from fetch_closures import fetch_closures
+except ImportError:
+    fetch_closures = None
+
+# CLOSURES is now per-store, populated lazily inside build_store_staffing.
+# Falls back to KNOWN_CLOSURES if Supabase is unavailable.
 CLOSURES = set(KNOWN_CLOSURES)
 
 
@@ -121,7 +128,14 @@ def parse_hours(ti, to):
         return 0
 
 
-def days_open_in_month(y, m, today, open_date):
+def days_open_in_month(y, m, today, open_date, closures=None):
+    """Count days the store was open vs. closed in a given month.
+
+    closures: optional set of ISO date strings. Falls back to module-level
+    CLOSURES (KNOWN_CLOSURES) if not provided — used for backward compat.
+    """
+    if closures is None:
+        closures = CLOSURES
     first_day = date(y, m, 1)
     last_day = date(y, m, monthrange(y, m)[1])
     if last_day > today:
@@ -135,7 +149,7 @@ def days_open_in_month(y, m, today, open_date):
     closure_count = 0
     d = start_day
     while d <= last_day:
-        if d.isoformat() in CLOSURES:
+        if d.isoformat() in closures:
             closure_count += 1
         else:
             open_count += 1
@@ -178,6 +192,9 @@ def build_store_staffing(store_key):
     store = STORES[store_key]
     with open(store.data_dir / 'all_data.json') as f:
         data = json.load(f)
+
+    # Per-store closures from Supabase (merges KNOWN_CLOSURES as fallback)
+    store_closures = fetch_closures(store_key) if fetch_closures else CLOSURES
 
     clocks = data.get('time_clocks', [])
     items = data.get('order_items', [])
@@ -242,7 +259,7 @@ def build_store_staffing(store_key):
 
         mgr_cost = manager_salary_for_month(y, mo, today, include_bonus=False) if include_manager else 0.0
         total_labor = round(retail_cost + mgr_cost, 2)
-        days_open, closures = days_open_in_month(y, mo, today, open_date)
+        days_open, closures = days_open_in_month(y, mo, today, open_date, store_closures)
         sales = round(monthly_sales.get(m, 0), 2)
         labor_pct = round((total_labor / sales) * 100, 2) if sales else 0
         cost_per_day = round(total_labor / days_open, 2) if days_open else 0
