@@ -16,8 +16,17 @@ from pathlib import Path
 from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import STORES, PROJ_ROOT, UNTRACKED_SKUS, SUPABASE_URL, SUPABASE_ANON_KEY
+from config import (
+    STORES, PROJ_ROOT, UNTRACKED_SKUS, SUPABASE_URL, SUPABASE_ANON_KEY,
+    EXCLUDE_EMPLOYEES, BATHER_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
+)
 from classifier import classify_item
+
+# Per-store bather rosters (PW has bathers, HV currently has none)
+_BATHERS_BY_STORE = {
+    "port-washington": set(BATHER_NAME_MAP.keys()),
+    "hicksville": set(HICKSVILLE_BATHER_NAME_MAP.keys()),
+}
 
 # Refresh retail_staffing.json before generating the briefing. Piggybacks here
 # because the standalone Retail Staffing step isn't yet wired into the
@@ -93,6 +102,169 @@ OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 def monday_of_week(d):
     """Return Monday of the week containing d."""
     return d - timedelta(days=d.weekday())
+
+
+def _parse_clock_hours(ti, to):
+    """Return decimal hours from a time clock pair, or 0 if malformed."""
+    if not ti or not to:
+        return 0.0
+    try:
+        dt_in = datetime.fromisoformat(ti.replace("Z", ""))
+        dt_out = datetime.fromisoformat(to.replace("Z", ""))
+        h = (dt_out - dt_in).total_seconds() / 3600
+        return h if 0 < h <= 16 else 0.0
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def compute_capacity_for_range(items, time_clocks, start_iso, end_iso, store_key, closures=None):
+    """Capacity stats over [start_iso, end_iso] (inclusive).
+
+    Returns:
+      groomer_days: sum across the range of (count of distinct active groomers per day)
+      unique_groomers: count of distinct groomers who generated revenue
+      groomer_names: sorted list of those names
+      groom_rev: total grooming revenue in the range (excludes excluded employees)
+      rev_per_groomer_day: groom_rev / groomer_days
+      bather_hours: total bather hours from time clocks (PW only — HV has no bathers)
+      operating_days: open days in the range (excludes closures)
+    """
+    closures = closures or set()
+    bather_set = _BATHERS_BY_STORE.get(store_key, set())
+    daily_groomers = defaultdict(set)
+    groom_rev_total = 0.0
+
+    for it in items:
+        c = (it.get("CreatedOn") or "")[:10]
+        if not c or c < start_iso or c > end_iso:
+            continue
+        person = (it.get("SalesPerson") or "").strip()
+        if not person or person in EXCLUDE_EMPLOYEES:
+            continue
+        nm = it.get("Name") or ""
+        sku = str(it.get("Sku") or "")
+        cls = classify_item(nm, sku)
+        if not cls.get("is_groom"):
+            continue
+        try:
+            price = float(it.get("Price") or 0) * float(it.get("Quantity") or 1) - float(it.get("Discount") or 0)
+        except (ValueError, TypeError):
+            continue
+        if price <= 0:
+            continue
+        daily_groomers[c].add(person)
+        groom_rev_total += price
+
+    groomer_days = sum(len(g) for g in daily_groomers.values())
+    distinct_groomers = set()
+    for g in daily_groomers.values():
+        distinct_groomers.update(g)
+
+    bather_hrs = 0.0
+    for c in time_clocks:
+        emp = (c.get("EmployeeName") or "").strip()
+        if emp not in bather_set:
+            continue
+        ti = c.get("TimeIn") or ""
+        if not ti or ti[:10] < start_iso or ti[:10] > end_iso:
+            continue
+        bather_hrs += _parse_clock_hours(ti, c.get("TimeOut") or "")
+
+    # Count operating days in the range (excludes closures)
+    operating_days = 0
+    try:
+        d = date.fromisoformat(start_iso)
+        end = date.fromisoformat(end_iso)
+        while d <= end:
+            if d.isoformat() not in closures:
+                operating_days += 1
+            d += timedelta(days=1)
+    except (ValueError, TypeError):
+        pass
+
+    return {
+        "groomer_days": groomer_days,
+        "unique_groomers": len(distinct_groomers),
+        "groomer_names": sorted(distinct_groomers),
+        "groom_rev": round(groom_rev_total, 2),
+        "rev_per_groomer_day": round(groom_rev_total / groomer_days, 2) if groomer_days else 0,
+        "bather_hours": round(bather_hrs, 1),
+        "operating_days": operating_days,
+        "avg_groomers_per_day": round(groomer_days / operating_days, 2) if operating_days else 0,
+        "avg_bather_hours_per_day": round(bather_hrs / operating_days, 1) if operating_days else 0,
+    }
+
+
+def fetch_scheduled_capacity(store_key, start_iso, end_iso):
+    """Fetch scheduled groomer + bather coverage from Supabase schedule_shifts.
+
+    Returns dict keyed by ISO date: {date: {groomers: int, bathers: int, groomer_hours, bather_hours}}.
+    """
+    try:
+        import httpx as _httpx
+        h = {"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}"}
+        # Get employees first to map id → role
+        emp_resp = _httpx.get(
+            f"{SUPABASE_URL}/rest/v1/schedule_employees?select=id,name,role,store",
+            headers=h, timeout=15
+        )
+        emp_resp.raise_for_status()
+        emps = {e["id"]: e for e in emp_resp.json()}
+
+        # Get shifts in range
+        sh_resp = _httpx.get(
+            f"{SUPABASE_URL}/rest/v1/schedule_shifts?store=eq.{store_key}"
+            f"&shift_date=gte.{start_iso}&shift_date=lte.{end_iso}"
+            f"&select=emp_id,shift_date,start_time,end_time",
+            headers=h, timeout=15,
+        )
+        sh_resp.raise_for_status()
+        shifts = sh_resp.json()
+    except Exception as e:
+        print(f"  [capacity] Supabase unavailable: {e}")
+        return {}
+
+    by_day = defaultdict(lambda: {"groomers": set(), "bathers": set(), "groomer_hours": 0.0, "bather_hours": 0.0})
+    for s in shifts:
+        emp = emps.get(s.get("emp_id"))
+        if not emp:
+            continue
+        role = (emp.get("role") or "").lower()
+        d = s.get("shift_date")
+        if not d:
+            continue
+        # Compute shift duration
+        try:
+            st = s.get("start_time", "")
+            en = s.get("end_time", "")
+            if st and en:
+                # Times like "09:00:00"
+                sh, sm = int(st[:2]), int(st[3:5])
+                eh, em = int(en[:2]), int(en[3:5])
+                hrs = (eh + em / 60) - (sh + sm / 60)
+                if hrs < 0:
+                    hrs = 0
+            else:
+                hrs = 0
+        except (ValueError, TypeError, IndexError):
+            hrs = 0
+
+        if role == "groomer":
+            by_day[d]["groomers"].add(emp["id"])
+            by_day[d]["groomer_hours"] += hrs
+        elif role == "bather":
+            by_day[d]["bathers"].add(emp["id"])
+            by_day[d]["bather_hours"] += hrs
+
+    return {
+        d: {
+            "groomers": len(v["groomers"]),
+            "bathers": len(v["bathers"]),
+            "groomer_hours": round(v["groomer_hours"], 1),
+            "bather_hours": round(v["bather_hours"], 1),
+        }
+        for d, v in by_day.items()
+    }
 
 
 def compute_day_stats(items, target_date_iso):
@@ -330,6 +502,31 @@ def build_store_briefing(store_key, store_cfg):
     prev_ytd_start = ytd_start.replace(year=ytd_start.year - 1)
     prev_ytd_end = prev_ytd_start + timedelta(days=days_into_year)
 
+    # Capacity: who actually generated revenue (active groomers/day) + bather hours
+    time_clocks = raw.get("time_clocks", [])
+    # Closures for accurate operating-day denominators
+    try:
+        from fetch_closures import fetch_closures
+        store_closures = fetch_closures(store_key)
+    except Exception:
+        store_closures = set()
+
+    yesterday_cap = compute_capacity_for_range(items, time_clocks, yesterday.isoformat(), yesterday.isoformat(), store_key, store_closures)
+    mtd_cap = compute_capacity_for_range(items, time_clocks, mtd_start.isoformat(), mtd_end.isoformat(), store_key, store_closures)
+    prev_mtd_cap = compute_capacity_for_range(items, time_clocks, prev_mtd_start.isoformat(), prev_mtd_end.isoformat(), store_key, store_closures)
+    # Trailing 30-day baseline (excluding today's partial)
+    trailing_start = (yesterday - timedelta(days=29)).isoformat()
+    trailing_cap = compute_capacity_for_range(items, time_clocks, trailing_start, yesterday.isoformat(), store_key, store_closures)
+
+    # Forward-looking capacity from schedule_shifts
+    sched_today = fetch_scheduled_capacity(store_key, today.isoformat(), today.isoformat()).get(today.isoformat(), {"groomers": 0, "bathers": 0, "groomer_hours": 0, "bather_hours": 0})
+    sched_tomorrow_d = (today + timedelta(days=1)).isoformat()
+    sched_tomorrow = fetch_scheduled_capacity(store_key, sched_tomorrow_d, sched_tomorrow_d).get(sched_tomorrow_d, {"groomers": 0, "bathers": 0, "groomer_hours": 0, "bather_hours": 0})
+    next7_end = (today + timedelta(days=6)).isoformat()
+    next7_map = fetch_scheduled_capacity(store_key, today.isoformat(), next7_end)
+    next7_groomer_days = sum(v["groomers"] for v in next7_map.values())
+    next7_bather_hours = sum(v["bather_hours"] for v in next7_map.values())
+
     briefing = {
         "label": "Port Washington" if store_key == "port-washington" else "Hicksville",
         "yesterday": compute_day_stats(items, yesterday.isoformat()),
@@ -345,10 +542,51 @@ def build_store_briefing(store_key, store_cfg):
         "ytd_label": f"Jan 1 → {ytd_end.strftime('%b %-d, %Y')}",
         "prev_ytd_label": f"Jan 1 → {prev_ytd_end.strftime('%b %-d, %Y')}",
         "low_stock": compute_low_stock(items, stock_levels, sku_brands),
+        # Capacity-aware metrics
+        "capacity": {
+            "yesterday": {
+                "active_groomers": yesterday_cap["unique_groomers"],
+                "groomer_names": yesterday_cap["groomer_names"],
+                "groom_rev": yesterday_cap["groom_rev"],
+                "rev_per_groomer": yesterday_cap["rev_per_groomer_day"],
+                "bather_hours": yesterday_cap["bather_hours"],
+            },
+            "mtd": {
+                "groomer_days": mtd_cap["groomer_days"],
+                "rev_per_groomer_day": mtd_cap["rev_per_groomer_day"],
+                "avg_groomers_per_day": mtd_cap["avg_groomers_per_day"],
+                "bather_hours": mtd_cap["bather_hours"],
+                "avg_bather_hours_per_day": mtd_cap["avg_bather_hours_per_day"],
+            },
+            "prev_mtd": {
+                "groomer_days": prev_mtd_cap["groomer_days"],
+                "rev_per_groomer_day": prev_mtd_cap["rev_per_groomer_day"],
+                "avg_groomers_per_day": prev_mtd_cap["avg_groomers_per_day"],
+                "bather_hours": prev_mtd_cap["bather_hours"],
+                "avg_bather_hours_per_day": prev_mtd_cap["avg_bather_hours_per_day"],
+            },
+            "trailing_30d": {
+                "rev_per_groomer_day": trailing_cap["rev_per_groomer_day"],
+                "avg_groomers_per_day": trailing_cap["avg_groomers_per_day"],
+                "avg_bather_hours_per_day": trailing_cap["avg_bather_hours_per_day"],
+            },
+            "today_scheduled": sched_today,
+            "tomorrow_scheduled": sched_tomorrow,
+            "next_7_days": {
+                "groomer_days": next7_groomer_days,
+                "bather_hours": round(next7_bather_hours, 1),
+            },
+        },
     }
     print(f"  Yesterday: ${briefing['yesterday']['total_rev']:,.0f} rev, "
           f"{briefing['yesterday']['appointments']} appts, "
           f"{briefing['yesterday']['transactions']} txns")
+    print(f"  Capacity yesterday: {yesterday_cap['unique_groomers']} groomers active "
+          f"(${yesterday_cap['rev_per_groomer_day']:,.0f}/groomer), "
+          f"{yesterday_cap['bather_hours']:.1f} bather hours")
+    print(f"  Trailing 30d baseline: ${trailing_cap['rev_per_groomer_day']:,.0f}/groomer/day "
+          f"with {trailing_cap['avg_groomers_per_day']:.1f} avg groomers/day")
+    print(f"  Today scheduled: {sched_today['groomers']} groomers, {sched_today['bather_hours']:.1f}h bathers")
     print(f"  WTD: ${briefing['wtd']['total_rev']:,.0f} rev (vs prev: ${briefing['prev_wtd']['total_rev']:,.0f})")
     print(f"  MTD: ${briefing['mtd']['total_rev']:,.0f} rev (vs prev month same period: ${briefing['prev_mtd']['total_rev']:,.0f})")
     print(f"  YTD: ${briefing['ytd']['total_rev']:,.0f} rev (vs prev year same period: ${briefing['prev_ytd']['total_rev']:,.0f})")
@@ -421,6 +659,29 @@ def generate_executive_summary(output):
             lines.append(f"Year-to-date ({store.get('ytd_label','YTD')}) vs same period last year ({store.get('prev_ytd_label','')}):")
             lines.append(f"  - {_trend_line(ytd['total_rev'], pytd['total_rev'], 'Revenue')}")
             lines.append(f"  - {_trend_line(ytd['appointments'], pytd['appointments'], 'Appointments', fmt='int')}")
+        # Capacity & coverage — the master driver. Frame revenue in terms of staffing.
+        cap = store.get("capacity", {})
+        if cap:
+            cy = cap.get("yesterday", {}) or {}
+            ct = cap.get("trailing_30d", {}) or {}
+            cs = cap.get("today_scheduled", {}) or {}
+            ctm = cap.get("tomorrow_scheduled", {}) or {}
+            cm = cap.get("mtd", {}) or {}
+            cpm = cap.get("prev_mtd", {}) or {}
+            n7 = cap.get("next_7_days", {}) or {}
+            lines.append(f"Capacity & coverage (groomers per day is THE driver):")
+            if cy.get("active_groomers"):
+                lines.append(f"  - Yesterday: {cy['active_groomers']} active groomer(s) producing ${cy['rev_per_groomer']:,.0f}/groomer; trailing-30d baseline ${ct.get('rev_per_groomer_day',0):,.0f}/groomer/day")
+                if cy.get("groomer_names"):
+                    lines.append(f"    On the floor: {', '.join(cy['groomer_names'])}")
+            if cy.get("bather_hours") is not None:
+                lines.append(f"  - Bather hours yesterday: {cy['bather_hours']:.1f}h (trailing-30d avg {ct.get('avg_bather_hours_per_day',0):.1f}h/day)")
+            if cm.get("groomer_days") and cpm.get("groomer_days"):
+                lines.append(f"  - MTD groomer-days: {cm['groomer_days']} ({cm['avg_groomers_per_day']:.1f}/day) vs prev-mo {cpm['groomer_days']} ({cpm['avg_groomers_per_day']:.1f}/day)")
+                lines.append(f"  - MTD $/groomer-day: ${cm['rev_per_groomer_day']:,.0f} vs prev-mo ${cpm['rev_per_groomer_day']:,.0f}")
+            lines.append(f"  - Today scheduled: {cs.get('groomers',0)} groomer(s), {cs.get('bather_hours',0):.1f}h bathers")
+            lines.append(f"  - Tomorrow scheduled: {ctm.get('groomers',0)} groomer(s), {ctm.get('bather_hours',0):.1f}h bathers")
+            lines.append(f"  - Next 7 days scheduled: {n7.get('groomer_days',0)} groomer-days, {n7.get('bather_hours',0):.1f}h bathers")
         low = store.get("low_stock", [])
         out = sum(1 for x in low if x["status"] == "out")
         crit = sum(1 for x in low if x["status"] == "critical")
@@ -445,7 +706,11 @@ def generate_executive_summary(output):
 
 Write his morning briefing. Model your style on the way a trusted chief of staff would brief Jeff Bezos: direct, specific, strategic, efficient. No fluff. Lead with what matters most. Highlight one thing he should be proud of and one thing he should pay attention to. If you notice a pattern across both stores, name it. If something is concerning, say so plainly. If something is going well, say so.
 
-Write 3-4 short paragraphs, prose only — no bullet points, no headers, no markdown. Keep it under 180 words total. Address him by name (Kyle) once at the start.
+CRITICAL FRAMING: The number of groomers working each day is THE driver of revenue at this business. Always interpret revenue numbers through the lens of capacity. If yesterday's revenue was down but only 2 groomers worked vs the typical 4, that is a capacity issue, not a performance issue. If revenue per active groomer is above the trailing-30d baseline, the team is running hot regardless of total dollars. Use $/groomer-day as your primary productivity yardstick. When you reference today's or tomorrow's outlook, mention how many groomers are scheduled — Kyle wants to know if today is staffed for a strong number.
+
+End the briefing with a single explicit "Capacity & coverage" sentence (just one sentence) calling out today's and tomorrow's scheduled groomer count and bather hours, plus next 7 days groomer-days. This sentence is required even on slow news days.
+
+Write 3-4 short paragraphs, prose only — no bullet points, no headers, no markdown. Keep it under 220 words total. Address him by name (Kyle) once at the start.
 
 Here is the data:
 
