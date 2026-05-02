@@ -208,6 +208,17 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .cal-holiday-label{font-size:0.62rem;font-weight:700;color:#C62828;background:#FFEBEE;border-radius:4px;padding:1px 4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cov-day.holiday .cov-day-hdr{background:#FFF5F5}
 .cov-holiday-label{font-size:0.72rem;font-weight:700;color:#C62828;padding:12px 16px;text-align:center}
+/* Per-store custom closures (different from federal holidays) */
+.day-store-section.closed{background:#f5f0ee;position:relative}
+.day-store-section.closed .closure-banner{background:linear-gradient(135deg,#6B3520,#5A2C1A);color:white;text-align:center;border-radius:6px;padding:8px 6px;font-size:0.72rem;font-weight:700;margin:2px 0 4px}
+.day-store-section.closed .closure-banner .cls-name{display:block;font-size:0.7rem;letter-spacing:0.02em;margin-bottom:2px}
+.day-store-section.closed .closure-banner .cls-tag{display:block;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;opacity:0.85;font-weight:800}
+.day-store-section.closed .shift-card{opacity:0.45;text-decoration:line-through;text-decoration-color:#C62828;text-decoration-thickness:1.5px}
+.day-store-section.closed .shift-card .shift-emp,.day-store-section.closed .shift-card .shift-time{color:#888}
+.btn-closure{background:transparent;border:1px dashed #ccc;color:#888;font-size:0.62rem;font-weight:700;padding:4px 6px;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em;margin-top:2px}
+.btn-closure:hover{border-color:#6B3520;color:#6B3520;background:#faf6f4}
+.btn-reopen{background:#6B3520;color:white;border:none;font-size:0.62rem;font-weight:700;padding:4px 8px;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em}
+.btn-reopen:hover{background:#5A2C1A}
 </style>
 </head>
 <body>
@@ -504,6 +515,53 @@ function isHoliday(iso){return !!getHoliday(iso);}
 function holidayIcon(name){return({'New Year\'s Day':'\uD83C\uDF86','Memorial Day':'\uD83C\uDDFA\uD83C\uDDF8','Independence Day':'\uD83C\uDF86','Labor Day':'\uD83C\uDDFA\uD83C\uDDF8','Thanksgiving':'\uD83E\uDD83','Christmas Day':'\uD83C\uDF84'})[name]||'\uD83C\uDFE0';}
 
 /* ════════════════════════════════════════
+   STORE CLOSURES (per-store, Supabase-backed)
+   Federal holidays close BOTH stores via getHoliday().
+   These are PER-STORE custom closures (snow days, repairs, etc.)
+════════════════════════════════════════ */
+var storeClosures={};  // keyed by 'store|YYYY-MM-DD' → {id, reason}
+function fetchClosures(){
+  return sbGet('/store_closures?select=id,store,closure_date,reason').then(function(rows){
+    storeClosures={};
+    (rows||[]).forEach(function(r){
+      storeClosures[r.store+'|'+r.closure_date]={id:r.id,reason:r.reason||'Closed'};
+    });
+  });
+}
+function isClosed(storeKey,iso){return !!storeClosures[storeKey+'|'+iso];}
+function getClosureReason(storeKey,iso){var c=storeClosures[storeKey+'|'+iso];return c?c.reason:null;}
+function markClosed(storeKey,iso,reason){
+  return sbPost('store_closures',{store:storeKey,closure_date:iso,reason:reason||'Closed'}).then(function(rows){
+    var row=Array.isArray(rows)?rows[0]:rows;
+    if(row&&row.id) storeClosures[storeKey+'|'+iso]={id:row.id,reason:row.reason||'Closed'};
+  });
+}
+function unmarkClosed(storeKey,iso){
+  var c=storeClosures[storeKey+'|'+iso];
+  if(!c) return Promise.resolve();
+  return sbDelete('store_closures','id=eq.'+c.id).then(function(){
+    delete storeClosures[storeKey+'|'+iso];
+  });
+}
+function toggleClosure(storeKey,iso){
+  if(isClosed(storeKey,iso)){
+    var label=storeKey==='port-washington'?'Port Washington':'Hicksville';
+    if(!confirm('Reopen '+label+' on '+iso+'?')) return;
+    startLoad();
+    unmarkClosed(storeKey,iso).then(function(){endLoad();repaintWeek();renderMonth&&renderMonth();showToast('Reopened');})
+      .catch(function(){endLoad();showToast('Failed to reopen','error');});
+  } else {
+    var reason=prompt('Reason for closing '+iso+'? (e.g. Snow, Repair, Family event)','Closed');
+    if(reason===null) return;  // user cancelled
+    var existing=(shifts[iso]||[]).filter(function(s){return s.store===storeKey;});
+    if(existing.length>0 && !confirm(existing.length+' shift(s) already scheduled. Mark closed anyway? Shifts will show with strikethrough.')) return;
+    startLoad();
+    markClosed(storeKey,iso,reason.trim()||'Closed').then(function(){endLoad();repaintWeek();renderMonth&&renderMonth();showToast('Marked closed');})
+      .catch(function(){endLoad();showToast('Failed to mark closed','error');});
+  }
+}
+
+/* ════════════════════════════════════════
    STATE
 ════════════════════════════════════════ */
 var currentStore  = localStorage.getItem('wg_sched_store')||'port-washington';
@@ -781,8 +839,14 @@ function _paintWeek(ws,we,today){
       crossShifts=roleFilter?day.allOther.filter(function(s){var e=empById(sEmpId(s));return e&&matchesRole(e.role);}):day.allOther;
     }
 
-    var h='<div class="day-store-section '+st.cls+'">';
+    var closed=isClosed(st.key,day.iso);
+    var h='<div class="day-store-section '+st.cls+(closed?' closed':'')+'">';
     h+='<div class="day-store-label '+st.cls+'">'+st.label+'</div>';
+
+    if(closed){
+      var reason=getClosureReason(st.key,day.iso);
+      h+='<div class="closure-banner"><span class="cls-name">'+esc(reason)+'</span><span class="cls-tag">Closed</span></div>';
+    }
 
     // Time-off pills for this store on this day
     var storeOffs=(day.offs||[]).filter(function(o){return o.store_key===st.key;});
@@ -790,7 +854,7 @@ function _paintWeek(ws,we,today){
       h+='<div class="time-off-pill">🏖 '+esc(o.employee_name)+' <span class="to-type">'+esc(o.type||'off')+'</span></div>';
     });
 
-    if(storeShifts.length===0 && crossShifts.length===0){
+    if(storeShifts.length===0 && crossShifts.length===0 && !closed){
       h+='<div style="font-size:0.72rem;color:#ccc;font-style:italic;padding:4px">No shifts</div>';
     }
     storeShifts.forEach(function(s){
@@ -813,7 +877,12 @@ function _paintWeek(ws,we,today){
       h+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
       h+='</div>';
     });
-    h+='<button class="btn-add-shift" onclick="openAddShift(\''+day.iso+'\',\''+st.key+'\')">+ Add</button>';
+    if(!closed){
+      h+='<button class="btn-add-shift" onclick="openAddShift(\''+day.iso+'\',\''+st.key+'\')">+ Add</button>';
+      h+='<button class="btn-closure" onclick="toggleClosure(\''+st.key+'\',\''+day.iso+'\')">✕ Mark closed</button>';
+    } else {
+      h+='<button class="btn-reopen" onclick="toggleClosure(\''+st.key+'\',\''+day.iso+'\')">↻ Reopen</button>';
+    }
     h+='</div>';
     return h;
   }
@@ -868,6 +937,7 @@ function copyLastWeek(){
       var srcISO=toISO(addDays(lastStart,i));
       var dstISO=toISO(addDays(thisStart,i));
       if(isHoliday(dstISO)) continue;
+      if(isClosed(currentStore,dstISO)) continue;
       var existing=shifts[dstISO]||[];
       var seenEmps={};
       existing.forEach(function(x){seenEmps[sEmpId(x)]=true;});
@@ -905,9 +975,11 @@ function fillRecurring(){
       if(rWeeks!=='all' && rWeeks!==wkLetter){ skippedBiweekly++; return; }
       var iso=toISO(addDays(ws,i));
       if(isHoliday(iso)) return;
+      var shiftStoreCheck=r.store||currentStore;
+      if(isClosed(shiftStoreCheck,iso)) return;
       var existing=shifts[iso]||[];
       var dup=existing.some(function(x){return sEmpId(x)===e.id;});
-      if(!dup) posts.push({emp_id:e.id,store:r.store||currentStore,shift_date:iso,start_time:r.start,end_time:r.end,notes:''});
+      if(!dup) posts.push({emp_id:e.id,store:shiftStoreCheck,shift_date:iso,start_time:r.start,end_time:r.end,notes:''});
     });
   });
 
@@ -969,9 +1041,15 @@ function _paintMonth(year,month,todayISO,filterEmp){
       var hol=getHoliday(iso);
       html+='<div class="cal-day'+(inMonth?'':' other-month')+(isToday?' cal-today':'')+(hol?' holiday':'')+'" onclick="jumpToWeek('+weekOff+')">';
       html+='<div class="cal-day-num">'+cur.getDate()+'</div>';
+      // Custom closure check — only relevant when filtered to a specific store
+      var customClosed=currentStore!=='all' && isClosed(currentStore,iso);
       if(hol){
         html+='<div class="cal-holiday-label">'+esc(hol)+'</div>';
         html+='<div style="font-size:0.62rem;color:#C62828;font-weight:600">Closed</div>';
+      } else if(customClosed){
+        var rsn=getClosureReason(currentStore,iso);
+        html+='<div class="cal-holiday-label" style="color:#6B3520;background:#f5f0ee">'+esc(rsn)+'</div>';
+        html+='<div style="font-size:0.62rem;color:#6B3520;font-weight:600">Closed</div>';
       } else {
         dayShifts.slice(0,3).forEach(function(s){
           var e=empById(sEmpId(s))||{name:'?',color:'#aaa'};
@@ -1403,6 +1481,15 @@ function saveShift(){
     showToast((emp?emp.name:'This employee')+' is already scheduled at '+storeLabel+' on this day','error');
     return;
   }
+  // Warn (but don't block) if scheduling on a day marked closed
+  if(isClosed(shiftStore,date)){
+    var storeLbl=shiftStore==='port-washington'?'Port Washington':'Hicksville';
+    var reason=getClosureReason(shiftStore,date);
+    if(!confirm(storeLbl+' is marked closed on '+date+' ('+reason+'). Save shift anyway?')){
+      btn.disabled=false; btn.textContent='Save Shift';
+      return;
+    }
+  }
   var body={emp_id:empId,store:shiftStore,shift_date:date,start_time:document.getElementById('sm-start').value,end_time:document.getElementById('sm-end').value,notes:document.getElementById('sm-notes').value.trim()};
 
   var p = editShiftId
@@ -1669,7 +1756,7 @@ document.getElementById('btn-pw').className=currentStore==='port-washington'?'ac
 document.getElementById('btn-hv').className=currentStore==='hicksville'?'active':'';
 document.getElementById('btn-both').className=currentStore==='all'?'active':'';
 startLoad();
-fetchEmployees().then(function(){
+Promise.all([fetchEmployees(),fetchClosures()]).then(function(){
   endLoad();
   renderWeek();
 });
