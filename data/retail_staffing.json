@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-02T09:13:37.430919-04:00",
-  "today": "2026-05-02",
+  "generated_at": "2026-05-02T22:12:13.204765-04:00",
+  "today": "2026-05-03",
   "stores": {
     "port-washington": {
       "store": "port-washington",
@@ -332,21 +332,28 @@
         {
           "month": "2026-05",
           "month_label": "May 2026",
-          "people": [],
-          "retail_hrs": 0,
-          "retail_cost": 0.0,
-          "mgr_cost": 183.56,
-          "total_labor": 183.56,
-          "sales": 4386.29,
-          "labor_pct_sales": 4.18,
-          "days_open": 1,
+          "people": [
+            {
+              "name": "Casey Makowski",
+              "hrs": 10.0,
+              "rate": 19.0,
+              "cost": 189.37
+            }
+          ],
+          "retail_hrs": 10.0,
+          "retail_cost": 189.37,
+          "mgr_cost": 367.12,
+          "total_labor": 556.49,
+          "sales": 6649.03,
+          "labor_pct_sales": 8.37,
+          "days_open": 2,
           "closures": 0,
-          "cost_per_open_day": 183.56,
-          "casey_hrs": 0,
-          "casey_cost": 0.0,
+          "cost_per_open_day": 278.25,
+          "casey_hrs": 10.0,
+          "casey_cost": 189.37,
           "chris_hrs": 0,
           "chris_cost": 0.0,
-          "cindy_cost": 183.56
+          "cindy_cost": 367.12
         }
       ],
       "summary": {
@@ -399,21 +406,28 @@
         "current_month": {
           "month": "2026-05",
           "month_label": "May 2026",
-          "people": [],
-          "retail_hrs": 0,
-          "retail_cost": 0.0,
-          "mgr_cost": 183.56,
-          "total_labor": 183.56,
-          "sales": 4386.29,
-          "labor_pct_sales": 4.18,
-          "days_open": 1,
+          "people": [
+            {
+              "name": "Casey Makowski",
+              "hrs": 10.0,
+              "rate": 19.0,
+              "cost": 189.37
+            }
+          ],
+          "retail_hrs": 10.0,
+          "retail_cost": 189.37,
+          "mgr_cost": 367.12,
+          "total_labor": 556.49,
+          "sales": 6649.03,
+          "labor_pct_sales": 8.37,
+          "days_open": 2,
           "closures": 0,
-          "cost_per_open_day": 183.56,
-          "casey_hrs": 0,
-          "casey_cost": 0.0,
+          "cost_per_open_day": 278.25,
+          "casey_hrs": 10.0,
+          "casey_cost": 189.37,
           "chris_hrs": 0,
           "chris_cost": 0.0,
-          "cindy_cost": 183.56
+          "cindy_cost": 367.12
         },
         "ytd_2026": {
           "labor": 42013.54,
@@ -619,15 +633,15 @@
             "people": [
               {
                 "name": "Casey Makowski",
-                "hrs": 165.5,
+                "hrs": 155.5,
                 "rate": 19.0,
-                "cost": 3144.5
+                "cost": 2954.5
               }
             ],
-            "retail_hrs": 165.5,
-            "retail_cost": 3144.5,
+            "retail_hrs": 155.5,
+            "retail_cost": 2954.5,
             "mgr_cost": 5690.41,
-            "total_labor": 8834.91
+            "total_labor": 8644.91
           },
           {
             "month": "2026-06",
@@ -662,7 +676,7 @@
             "total_labor": 5851.91
           }
         ],
-        "generated_at": "2026-05-02"
+        "generated_at": "2026-05-03"
       }
     },
     "hicksville": {
@@ -838,11 +852,11 @@
           "retail_cost": 194.95,
           "mgr_cost": 0.0,
           "total_labor": 194.95,
-          "sales": 1278.88,
-          "labor_pct_sales": 15.24,
-          "days_open": 1,
+          "sales": 2291.61,
+          "labor_pct_sales": 8.51,
+          "days_open": 2,
           "closures": 0,
-          "cost_per_open_day": 194.95
+          "cost_per_open_day": 97.47
         }
       ],
       "summary": {
@@ -908,11 +922,11 @@
           "retail_cost": 194.95,
           "mgr_cost": 0.0,
           "total_labor": 194.95,
-          "sales": 1278.88,
-          "labor_pct_sales": 15.24,
-          "days_open": 1,
+          "sales": 2291.61,
+          "labor_pct_sales": 8.51,
+          "days_open": 2,
           "closures": 0,
-          "cost_per_open_day": 194.95
+          "cost_per_open_day": 97.47
         },
         "ytd_2026": {
           "labor": 15898.8,
@@ -1349,26 +1363,6 @@
           "late_out_cost": 0,
           "punch_bonus_mins": 15,
           "punch_bonus_cost": 5.25
-        },
-        {
-          "date": "2026-04-02",
-          "day_name": "Thu",
-          "employee": "Hailey Imhof",
-          "scheduled_hrs": 9.0,
-          "actual_hrs": 9.27,
-          "variance_hrs": 0.27,
-          "variance_cost": 5.6,
-          "status": "over",
-          "scheduled_start": "09:00",
-          "actual_start": "08:44",
-          "scheduled_end": "18:00",
-          "actual_end": "18:00",
-          "early_in_mins": 16,
-          "late_out_mins": 0,
-          "early_in_cost": 5.6,
-          "late_out_cost": 0,
-          "punch_bonus_mins": 16,
-          "punch_bonus_cost": 5.6
         }
       ],
       "forward_projection": {
@@ -1434,7 +1428,7 @@
             "total_labor": 504.0
           }
         ],
-        "generated_at": "2026-05-02"
+        "generated_at": "2026-05-03"
       }
     }
   }
