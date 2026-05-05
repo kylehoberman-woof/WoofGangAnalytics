@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-04T19:36:49.420213-04:00",
-  "today": "2026-05-04",
+  "generated_at": "2026-05-05T02:34:10.875968-04:00",
+  "today": "2026-05-05",
   "stores": {
     "port-washington": {
       "store": "port-washington",
@@ -603,26 +603,6 @@
           "late_out_cost": 0,
           "punch_bonus_mins": 0,
           "punch_bonus_cost": 0
-        },
-        {
-          "date": "2026-04-04",
-          "day_name": "Sat",
-          "employee": "Casey Makowski",
-          "scheduled_hrs": 8.0,
-          "actual_hrs": 8.28,
-          "variance_hrs": 0.28,
-          "variance_cost": 5.38,
-          "status": "over",
-          "scheduled_start": "09:00",
-          "actual_start": "08:56",
-          "scheduled_end": "17:00",
-          "actual_end": "17:46",
-          "early_in_mins": 4,
-          "late_out_mins": 46,
-          "early_in_cost": 1.27,
-          "late_out_cost": 14.57,
-          "punch_bonus_mins": 50,
-          "punch_bonus_cost": 15.83
         }
       ],
       "forward_projection": {
@@ -633,15 +613,15 @@
             "people": [
               {
                 "name": "Casey Makowski",
-                "hrs": 147.5,
+                "hrs": 137.0,
                 "rate": 19.0,
-                "cost": 2802.5
+                "cost": 2603.0
               }
             ],
-            "retail_hrs": 147.5,
-            "retail_cost": 2802.5,
+            "retail_hrs": 137.0,
+            "retail_cost": 2603.0,
             "mgr_cost": 5690.41,
-            "total_labor": 8492.91
+            "total_labor": 8293.41
           },
           {
             "month": "2026-06",
@@ -665,18 +645,18 @@
             "people": [
               {
                 "name": "Casey Makowski",
-                "hrs": 16.5,
+                "hrs": 27.0,
                 "rate": 19.0,
-                "cost": 313.5
+                "cost": 513.0
               }
             ],
-            "retail_hrs": 16.5,
-            "retail_cost": 313.5,
+            "retail_hrs": 27.0,
+            "retail_cost": 513.0,
             "mgr_cost": 5690.41,
-            "total_labor": 6003.91
+            "total_labor": 6203.41
           }
         ],
-        "generated_at": "2026-05-04"
+        "generated_at": "2026-05-05"
       }
     },
     "hicksville": {
@@ -956,6 +936,26 @@
         "Christina Ramkissoon": 19.0
       },
       "variances": [
+        {
+          "date": "2026-05-04",
+          "day_name": "Mon",
+          "employee": "Kayla Moses",
+          "scheduled_hrs": 9.0,
+          "actual_hrs": 9.1,
+          "variance_hrs": 0.1,
+          "variance_cost": 1.9,
+          "status": "over",
+          "scheduled_start": "09:00",
+          "actual_start": "08:54",
+          "scheduled_end": "18:00",
+          "actual_end": "18:00",
+          "early_in_mins": 6,
+          "late_out_mins": 0,
+          "early_in_cost": 1.9,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 6,
+          "punch_bonus_cost": 1.9
+        },
         {
           "date": "2026-05-03",
           "day_name": "Sun",
@@ -1295,26 +1295,6 @@
           "late_out_cost": 0,
           "punch_bonus_mins": 15,
           "punch_bonus_cost": 5.25
-        },
-        {
-          "date": "2026-04-04",
-          "day_name": "Sat",
-          "employee": "Hailey Imhof",
-          "scheduled_hrs": 9.0,
-          "actual_hrs": 9.22,
-          "variance_hrs": 0.22,
-          "variance_cost": 4.55,
-          "status": "over",
-          "scheduled_start": "09:00",
-          "actual_start": "08:45",
-          "scheduled_end": "18:00",
-          "actual_end": "17:58",
-          "early_in_mins": 15,
-          "late_out_mins": 0,
-          "early_in_cost": 5.25,
-          "late_out_cost": 0,
-          "punch_bonus_mins": 15,
-          "punch_bonus_cost": 5.25
         }
       ],
       "forward_projection": {
@@ -1331,15 +1311,15 @@
               },
               {
                 "name": "Kayla Moses",
-                "hrs": 55.0,
+                "hrs": 46.0,
                 "rate": 19.0,
-                "cost": 1045.0
+                "cost": 874.0
               }
             ],
-            "retail_hrs": 217.0,
-            "retail_cost": 4447.0,
+            "retail_hrs": 208.0,
+            "retail_cost": 4276.0,
             "mgr_cost": 0.0,
-            "total_labor": 4447.0
+            "total_labor": 4276.0
           },
           {
             "month": "2026-06",
@@ -1386,7 +1366,7 @@
             "total_labor": 637.0
           }
         ],
-        "generated_at": "2026-05-04"
+        "generated_at": "2026-05-05"
       }
     }
   }
