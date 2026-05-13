@@ -10,7 +10,7 @@ Usage:
     python3 scripts/build_morning_briefing.py
 """
 
-import json, sys, os, subprocess
+import json, sys, os, subprocess, calendar
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
@@ -21,6 +21,90 @@ from config import (
     EXCLUDE_EMPLOYEES, BATHER_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
 )
 from classifier import classify_item
+
+# ─── Holiday & event calendar ─────────────────────────────────────────────
+# Days that materially affect grooming bookings (US, NY metro).
+# Most holidays DEPRESS bookings; few exceptions (pre-Thanksgiving boosts as
+# customers groom before family gatherings).
+
+def _nth_weekday(year, month, weekday, n):
+    """Return date of nth weekday in month. weekday: 0=Mon, 6=Sun. n=1..5 or -1 for last."""
+    if n > 0:
+        first = date(year, month, 1)
+        offset = (weekday - first.weekday()) % 7
+        return date(year, month, 1 + offset + (n-1)*7)
+    else:
+        last_day = calendar.monthrange(year, month)[1]
+        last = date(year, month, last_day)
+        offset = (last.weekday() - weekday) % 7
+        return date(year, month, last_day - offset)
+
+
+def get_holidays_for_year(year):
+    """Return dict: date → (label, effect_direction, effect_magnitude_pct).
+    effect_direction: 'depress' | 'boost'
+    effect_magnitude_pct: rough expected revenue impact on that day vs typical for that DOW
+    """
+    h = {}
+    h[date(year, 1, 1)] = ("New Year's Day", "depress", -60)
+    h[_nth_weekday(year, 1, 0, 3)] = ("MLK Day", "depress", -15)
+    h[_nth_weekday(year, 2, 0, 3)] = ("Presidents Day", "depress", -15)
+    h[_nth_weekday(year, 5, 6, 2)] = ("Mother's Day", "depress", -25)   # 2nd Sunday in May
+    h[_nth_weekday(year, 5, 0, -1)] = ("Memorial Day", "depress", -30)  # last Monday in May
+    h[date(year, 6, 19)] = ("Juneteenth", "depress", -10)
+    h[_nth_weekday(year, 6, 6, 3)] = ("Father's Day", "depress", -15)
+    h[date(year, 7, 4)] = ("Independence Day", "depress", -50)
+    h[_nth_weekday(year, 9, 0, 1)] = ("Labor Day", "depress", -30)
+    h[_nth_weekday(year, 10, 0, 2)] = ("Columbus Day", "depress", -10)
+    h[date(year, 10, 31)] = ("Halloween", "depress", -10)
+    thx = _nth_weekday(year, 11, 3, 4)
+    h[thx] = ("Thanksgiving", "depress", -85)
+    h[thx + timedelta(days=1)] = ("Black Friday", "boost", +20)
+    h[date(year, 12, 24)] = ("Christmas Eve", "depress", -40)
+    h[date(year, 12, 25)] = ("Christmas Day", "depress", -95)
+    h[date(year, 12, 31)] = ("New Year's Eve", "depress", -25)
+    h[thx - timedelta(days=1)] = ("Day before Thanksgiving", "boost", +25)
+    h[thx - timedelta(days=2)] = ("Two days before Thanksgiving", "boost", +15)
+    return h
+
+
+def holiday_context(target_iso, window_days=3):
+    """Return a human-readable context dict about nearby holidays, or None.
+    Looks ±window_days from target date."""
+    try:
+        target = date.fromisoformat(target_iso)
+    except (ValueError, TypeError):
+        return None
+    hol = get_holidays_for_year(target.year)
+    if target.month == 1:
+        hol.update({d: v for d, v in get_holidays_for_year(target.year - 1).items()
+                    if d.month == 12})
+    if target.month == 12:
+        hol.update({d: v for d, v in get_holidays_for_year(target.year + 1).items()
+                    if d.month == 1})
+
+    for d, (label, direction, magnitude) in hol.items():
+        diff = (d - target).days
+        if abs(diff) <= window_days:
+            if diff == 0:
+                when = f"is today ({target.strftime('%A %b %d')})"
+            elif diff == 1:
+                when = "is tomorrow"
+            elif diff == -1:
+                when = "was yesterday"
+            elif diff > 0:
+                when = f"is in {diff} days ({d.strftime('%A %b %d')})"
+            else:
+                when = f"was {abs(diff)} days ago ({d.strftime('%A %b %d')})"
+            return {
+                "label": label,
+                "when_text": when,
+                "direction": direction,
+                "magnitude_pct": magnitude,
+                "diff_days": diff,
+            }
+    return None
+
 
 # Per-store bather rosters (PW has bathers, HV currently has none)
 _BATHERS_BY_STORE = {
@@ -268,12 +352,20 @@ def fetch_scheduled_capacity(store_key, start_iso, end_iso):
 
 
 def compute_day_stats(items, target_date_iso):
-    """Aggregate revenue/appointments for a single day."""
+    """Aggregate revenue/appointments for a single day.
+
+    Returns base fields plus add-on split:
+        core_groom_rev, addon_rev, addon_count, addon_attach_rate, addon_avg_value
+    """
     order_ids_groom = set()
     order_ids_bath = set()
     order_ids_all = set()
+    orders_with_addon = set()
     total_rev = 0.0
     groom_rev = 0.0
+    core_groom_rev = 0.0
+    addon_rev = 0.0
+    addon_count = 0
     retail_rev = 0.0
 
     for item in items:
@@ -296,7 +388,9 @@ def compute_day_stats(items, target_date_iso):
         cls = classify_item(name, sku)
         if cls.get("is_groom"):
             groom_rev += price
-            if cls.get("groom_category") == "core":
+            cat = cls.get("groom_category")
+            if cat == "core":
+                core_groom_rev += price
                 svc = (cls.get("service_type") or "").lower()
                 if "bath" in svc:
                     if oid:
@@ -304,29 +398,47 @@ def compute_day_stats(items, target_date_iso):
                 else:
                     if oid:
                         order_ids_groom.add(oid)
+            elif cat in ("addon", "spa"):
+                addon_rev += price
+                addon_count += 1
+                if oid:
+                    orders_with_addon.add(oid)
         elif cls.get("is_retail"):
             retail_rev += price
 
     txn_count = len(order_ids_all)
+    core_appt_count = len(order_ids_groom) + len(order_ids_bath)
+    attach_rate = (len(orders_with_addon) / core_appt_count * 100) if core_appt_count else 0
+    avg_addon = (addon_rev / addon_count) if addon_count else 0
+
     return {
         "total_rev": round(total_rev, 2),
         "groom_rev": round(groom_rev, 2),
+        "core_groom_rev": round(core_groom_rev, 2),
+        "addon_rev": round(addon_rev, 2),
+        "addon_count": addon_count,
+        "addon_attach_rate": round(attach_rate, 1),
+        "addon_avg_value": round(avg_addon, 2),
         "retail_rev": round(retail_rev, 2),
         "grooms": len(order_ids_groom),
         "baths": len(order_ids_bath),
-        "appointments": len(order_ids_groom) + len(order_ids_bath),
+        "appointments": core_appt_count,
         "transactions": txn_count,
         "avg_ticket": round(total_rev / txn_count, 2) if txn_count else 0,
     }
 
 
 def compute_range_stats(items, start_iso, end_iso):
-    """Aggregate stats over a date range (inclusive)."""
+    """Aggregate stats over a date range (inclusive), including add-on split."""
     order_ids_groom = set()
     order_ids_bath = set()
     order_ids_all = set()
+    orders_with_addon = set()
     total_rev = 0.0
     groom_rev = 0.0
+    core_groom_rev = 0.0
+    addon_rev = 0.0
+    addon_count = 0
     retail_rev = 0.0
 
     for item in items:
@@ -349,7 +461,9 @@ def compute_range_stats(items, start_iso, end_iso):
         cls = classify_item(name, sku)
         if cls.get("is_groom"):
             groom_rev += price
-            if cls.get("groom_category") == "core":
+            cat = cls.get("groom_category")
+            if cat == "core":
+                core_groom_rev += price
                 svc = (cls.get("service_type") or "").lower()
                 if "bath" in svc:
                     if oid:
@@ -357,16 +471,30 @@ def compute_range_stats(items, start_iso, end_iso):
                 else:
                     if oid:
                         order_ids_groom.add(oid)
+            elif cat in ("addon", "spa"):
+                addon_rev += price
+                addon_count += 1
+                if oid:
+                    orders_with_addon.add(oid)
         elif cls.get("is_retail"):
             retail_rev += price
+
+    core_appt_count = len(order_ids_groom) + len(order_ids_bath)
+    attach_rate = (len(orders_with_addon) / core_appt_count * 100) if core_appt_count else 0
+    avg_addon = (addon_rev / addon_count) if addon_count else 0
 
     return {
         "total_rev": round(total_rev, 2),
         "groom_rev": round(groom_rev, 2),
+        "core_groom_rev": round(core_groom_rev, 2),
+        "addon_rev": round(addon_rev, 2),
+        "addon_count": addon_count,
+        "addon_attach_rate": round(attach_rate, 1),
+        "addon_avg_value": round(avg_addon, 2),
         "retail_rev": round(retail_rev, 2),
         "grooms": len(order_ids_groom),
         "baths": len(order_ids_bath),
-        "appointments": len(order_ids_groom) + len(order_ids_bath),
+        "appointments": core_appt_count,
         "transactions": len(order_ids_all),
     }
 
@@ -443,6 +571,190 @@ def compute_low_stock(items, stock_levels, sku_brands, limit=20):
     status_order = {"out": 0, "critical": 1, "low": 2}
     alerts.sort(key=lambda x: (status_order.get(x["status"], 9), -x["velocity_monthly"]))
     return alerts[:limit]
+
+
+def compute_dow_adjusted_expectation(items, start_iso, end_iso, weeks_back=8):
+    """Given a date range, compute what revenue SHOULD have been based on the
+    trailing N-week average revenue for each DOW in the range.
+
+    Returns: {
+        'expected_total_rev': float,
+        'expected_appointments': int,
+        'dow_baseline': {0: rev/day, ..., 6: rev/day},
+        'dow_counts_in_range': {0: 2, 1: 1, ...},
+    }
+    """
+    try:
+        start = date.fromisoformat(start_iso)
+        end = date.fromisoformat(end_iso)
+    except (ValueError, TypeError):
+        return {"expected_total_rev": 0, "expected_appointments": 0,
+                "dow_baseline": {}, "dow_counts_in_range": {}}
+
+    baseline_end = start - timedelta(days=1)
+    baseline_start = baseline_end - timedelta(days=weeks_back * 7 - 1)
+
+    by_dow = defaultdict(lambda: {"rev": 0.0, "appts": 0, "days": set()})
+    for item in items:
+        created_str = (item.get("CreatedOn") or "")[:10]
+        if not created_str:
+            continue
+        try:
+            created = date.fromisoformat(created_str)
+        except ValueError:
+            continue
+        if created < baseline_start or created > baseline_end:
+            continue
+        try:
+            price = float(item.get("Price") or 0) * float(item.get("Quantity") or 1)
+            price -= float(item.get("Discount") or 0)
+        except (ValueError, TypeError):
+            price = 0.0
+        dow = created.weekday()
+        by_dow[dow]["rev"] += price
+        by_dow[dow]["days"].add(created)
+        cls = classify_item(item.get("Name") or "", item.get("Sku") or "")
+        if cls.get("is_groom") and cls.get("groom_category") == "core":
+            by_dow[dow]["appts"] += 1
+
+    dow_rev = {dow: (v["rev"] / len(v["days"])) if v["days"] else 0.0
+               for dow, v in by_dow.items()}
+    dow_appts = {dow: (v["appts"] / len(v["days"])) if v["days"] else 0.0
+                 for dow, v in by_dow.items()}
+
+    dow_counts = defaultdict(int)
+    cur = start
+    while cur <= end:
+        dow_counts[cur.weekday()] += 1
+        cur += timedelta(days=1)
+
+    expected_rev = sum(dow_rev.get(dow, 0) * cnt for dow, cnt in dow_counts.items())
+    expected_appts = sum(dow_appts.get(dow, 0) * cnt for dow, cnt in dow_counts.items())
+
+    return {
+        "expected_total_rev": round(expected_rev, 2),
+        "expected_appointments": round(expected_appts, 0),
+        "dow_baseline": {int(k): round(v, 2) for k, v in dow_rev.items()},
+        "dow_counts_in_range": {int(k): v for k, v in dow_counts.items()},
+    }
+
+
+def compute_visit_cadence_distribution(items, lookback_days=90):
+    """For recurring grooming customers, compute distribution of days between
+    consecutive visits during the last lookback_days window."""
+    from statistics import mean, median
+
+    today = date.today()
+    window_start = today - timedelta(days=lookback_days)
+
+    customer_visits = defaultdict(set)
+    for item in items:
+        cls = classify_item(item.get("Name") or "", item.get("Sku") or "")
+        if not (cls.get("is_groom") and cls.get("groom_category") == "core"):
+            continue
+        cid = item.get("CustomerId")
+        if not cid:
+            continue
+        try:
+            dt = date.fromisoformat((item.get("CreatedOn") or "")[:10])
+        except (ValueError, TypeError):
+            continue
+        customer_visits[cid].add(dt)
+
+    gaps = []
+    for visits in customer_visits.values():
+        sorted_v = sorted(visits)
+        for i in range(1, len(sorted_v)):
+            if not (window_start <= sorted_v[i] <= today):
+                continue
+            gap_days = (sorted_v[i] - sorted_v[i-1]).days
+            if 14 <= gap_days <= 180:
+                gaps.append(gap_days)
+
+    if not gaps:
+        return None
+
+    def bucket_of(g):
+        if g <= 21: return "2-3wk"
+        if g <= 28: return "3-4wk"
+        if g <= 42: return "4-6wk"
+        if g <= 56: return "6-8wk"
+        if g <= 84: return "8-12wk"
+        return "12wk+"
+
+    counts = defaultdict(int)
+    for g in gaps:
+        counts[bucket_of(g)] += 1
+    total = len(gaps)
+    dist = {b: round(counts.get(b, 0) / total * 100, 1)
+            for b in ["2-3wk", "3-4wk", "4-6wk", "6-8wk", "8-12wk", "12wk+"]}
+
+    return {
+        "window_days": lookback_days,
+        "total_gaps": total,
+        "mean_gap": round(mean(gaps), 1),
+        "median_gap": round(median(gaps), 1),
+        "distribution": dist,
+    }
+
+
+def compute_lapse_pool(items):
+    """Compute the recoverable lapse pool: customers who haven't visited in
+    60-365 days, with at least 2 prior grooming visits.
+
+    Returns drifting/lapsed/dormant buckets with count and annual value.
+    """
+    today = date.today()
+    cust = defaultdict(lambda: {"visits": [], "revenue": 0.0})
+
+    for item in items:
+        cls = classify_item(item.get("Name") or "", item.get("Sku") or "")
+        if not (cls.get("is_groom") and cls.get("groom_category") == "core"):
+            continue
+        cid = item.get("CustomerId")
+        if not cid:
+            continue
+        try:
+            dt = date.fromisoformat((item.get("CreatedOn") or "")[:10])
+            price = float(item.get("Price") or 0) * float(item.get("Quantity") or 1)
+            price -= float(item.get("Discount") or 0)
+        except (ValueError, TypeError):
+            continue
+        cust[cid]["visits"].append(dt)
+        cust[cid]["revenue"] += price
+
+    buckets = {
+        "drifting": {"count": 0, "annual_value": 0.0},  # 60-89d
+        "lapsed":   {"count": 0, "annual_value": 0.0},  # 90-179d
+        "dormant":  {"count": 0, "annual_value": 0.0},  # 180-365d
+    }
+    for d in cust.values():
+        if len(d["visits"]) < 2:
+            continue
+        last = max(d["visits"])
+        first = min(d["visits"])
+        days_since = (today - last).days
+        span_years = max((last - first).days / 365.0, 0.25)
+        annual_val = d["revenue"] / span_years
+        if 60 <= days_since < 90:
+            buckets["drifting"]["count"] += 1
+            buckets["drifting"]["annual_value"] += annual_val
+        elif 90 <= days_since < 180:
+            buckets["lapsed"]["count"] += 1
+            buckets["lapsed"]["annual_value"] += annual_val
+        elif 180 <= days_since < 365:
+            buckets["dormant"]["count"] += 1
+            buckets["dormant"]["annual_value"] += annual_val
+
+    for k in buckets:
+        buckets[k]["annual_value"] = round(buckets[k]["annual_value"], 0)
+    total_pool = sum(b["count"] for b in buckets.values())
+    total_val = sum(b["annual_value"] for b in buckets.values())
+    return {
+        **buckets,
+        "total_pool": total_pool,
+        "total_annual_value": total_val,
+    }
 
 
 def build_store_briefing(store_key, store_cfg):
@@ -527,6 +839,55 @@ def build_store_briefing(store_key, store_cfg):
     next7_groomer_days = sum(v["groomers"] for v in next7_map.values())
     next7_bather_hours = sum(v["bather_hours"] for v in next7_map.values())
 
+    # DOW-adjusted MTD expectation — what revenue SHOULD have been given the
+    # specific DOW mix elapsed so far. Isolates real performance from calendar mix.
+    mtd_dow_adj = compute_dow_adjusted_expectation(
+        items, mtd_start.isoformat(), mtd_end.isoformat()
+    )
+    prev_mtd_dow_adj = compute_dow_adjusted_expectation(
+        items, prev_mtd_start.isoformat(), prev_mtd_end.isoformat()
+    )
+
+    # Visit cadence & lapse pool — recomputed monthly, cached to data dir
+    month_key = today.strftime("%Y-%m")
+    cadence_cache = data_dir / f"cadence_{month_key}.json"
+    lapse_cache = data_dir / f"lapse_{month_key}.json"
+
+    if not cadence_cache.exists():
+        cadence = compute_visit_cadence_distribution(items, lookback_days=90)
+        if cadence:
+            with open(cadence_cache, "w") as _f:
+                json.dump(cadence, _f, indent=2)
+    else:
+        try:
+            with open(cadence_cache) as _f:
+                cadence = json.load(_f)
+        except (json.JSONDecodeError, OSError):
+            cadence = None
+
+    if cadence:
+        # Attach prior-month cadence (if available) for delta comparison
+        prior_month_key = (today.replace(day=1) - timedelta(days=1)).strftime("%Y-%m")
+        prior_cadence_cache = data_dir / f"cadence_{prior_month_key}.json"
+        if prior_cadence_cache.exists():
+            try:
+                with open(prior_cadence_cache) as _f:
+                    cadence["prior_month"] = json.load(_f)
+            except (json.JSONDecodeError, OSError):
+                pass
+
+    if not lapse_cache.exists():
+        lapse_pool = compute_lapse_pool(items)
+        if lapse_pool:
+            with open(lapse_cache, "w") as _f:
+                json.dump(lapse_pool, _f, indent=2)
+    else:
+        try:
+            with open(lapse_cache) as _f:
+                lapse_pool = json.load(_f)
+        except (json.JSONDecodeError, OSError):
+            lapse_pool = None
+
     briefing = {
         "label": "Port Washington" if store_key == "port-washington" else "Hicksville",
         "yesterday": compute_day_stats(items, yesterday.isoformat()),
@@ -542,6 +903,12 @@ def build_store_briefing(store_key, store_cfg):
         "ytd_label": f"Jan 1 → {ytd_end.strftime('%b %-d, %Y')}",
         "prev_ytd_label": f"Jan 1 → {prev_ytd_end.strftime('%b %-d, %Y')}",
         "low_stock": compute_low_stock(items, stock_levels, sku_brands),
+        # DOW-adjusted MTD expectation (isolates calendar mix from performance)
+        "mtd_dow_adjusted_expected": mtd_dow_adj["expected_total_rev"],
+        "prev_mtd_dow_adjusted_expected": prev_mtd_dow_adj["expected_total_rev"],
+        # Visit cadence + lapse pool (monthly cached signals)
+        "cadence": cadence,
+        "lapse_pool": lapse_pool,
         # Capacity-aware metrics
         "capacity": {
             "yesterday": {
@@ -630,6 +997,16 @@ def generate_executive_summary(output):
     lines.append(f"Data represents {yesterday_label}'s performance (yesterday).")
     lines.append("")
 
+    # Holiday context for the briefing window (yesterday, today, tomorrow)
+    tomorrow_iso = (date.fromisoformat(output["today"]) + timedelta(days=1)).isoformat()
+    for d_iso in [output["yesterday"], output["today"], tomorrow_iso]:
+        hc = holiday_context(d_iso, window_days=2)
+        if hc:
+            dow_name = datetime.fromisoformat(d_iso).strftime("%A")
+            lines.append(f"Holiday note: {hc['label']} {hc['when_text']} — typically {hc['direction']}es revenue ~{abs(hc['magnitude_pct'])}% vs a typical {dow_name}.")
+            lines.append("")
+            break
+
     for store_key, store in output.get("stores", {}).items():
         if "error" in store:
             continue
@@ -641,6 +1018,9 @@ def generate_executive_summary(output):
         lines.append(f"Yesterday:")
         lines.append(f"  - {_trend_line(y['total_rev'], prev['total_rev'], 'Total revenue')}")
         lines.append(f"  - {_trend_line(y['groom_rev'], prev['groom_rev'], 'Grooming revenue')}")
+        # Addon split — surfaces upsell discipline as separate signal from core grooms
+        lines.append(f"  - Core grooms rev: ${y.get('core_groom_rev',0):,.0f} vs same day last wk ${prev.get('core_groom_rev',0):,.0f}")
+        lines.append(f"  - Add-on rev: ${y.get('addon_rev',0):,.0f} vs ${prev.get('addon_rev',0):,.0f}; attach {y.get('addon_attach_rate',0):.0f}% vs {prev.get('addon_attach_rate',0):.0f}%")
         lines.append(f"  - {_trend_line(y['retail_rev'], prev['retail_rev'], 'Retail revenue')}")
         lines.append(f"  - {_trend_line(y['transactions'], prev['transactions'], 'Transactions', fmt='int')}")
         lines.append(f"  - Grooms: {y['grooms']}, Baths: {y['baths']}, Avg ticket: ${y['avg_ticket']:.0f}")
@@ -653,6 +1033,12 @@ def generate_executive_summary(output):
             lines.append(f"Month-to-date ({store.get('mtd_label','this month')}) vs same period last month ({store.get('prev_mtd_label','')}):")
             lines.append(f"  - {_trend_line(mtd['total_rev'], pmtd['total_rev'], 'Revenue')}")
             lines.append(f"  - {_trend_line(mtd['appointments'], pmtd['appointments'], 'Appointments', fmt='int')}")
+            # DOW-adjusted MTD expectation — isolates calendar mix from real performance
+            dow_exp = store.get("mtd_dow_adjusted_expected") or 0
+            if dow_exp:
+                actual = mtd.get("total_rev", 0)
+                diff_pct = (actual - dow_exp) / dow_exp * 100 if dow_exp else 0
+                lines.append(f"  - DOW-adjusted expectation: actual ${actual:,.0f} vs expected ${dow_exp:,.0f} ({diff_pct:+.1f}% — isolates real performance from calendar mix)")
         ytd = store.get("ytd", {})
         pytd = store.get("prev_ytd", {})
         if ytd:
@@ -698,6 +1084,26 @@ def generate_executive_summary(output):
             top_sup = [x["item_name"] for x in supplies[:4] if x["status"] in ("out","order")]
             if top_sup:
                 lines.append(f"  Supplies to reorder: {', '.join(top_sup)}")
+        # Cadence drift — leading indicator of stealth churn or retention recovery
+        cad = store.get("cadence")
+        if cad and isinstance(cad, dict):
+            dist = cad.get("distribution", {})
+            prior = cad.get("prior_month") or {}
+            prior_dist = prior.get("distribution", {}) if isinstance(prior, dict) else {}
+            if prior_dist:
+                cur_long = dist.get("12wk+", 0)
+                prev_long = prior_dist.get("12wk+", 0)
+                delta_long = cur_long - prev_long
+                if abs(delta_long) >= 1.5:
+                    direction = "growing" if delta_long > 0 else "shrinking"
+                    signal = "stealth churn" if delta_long > 0 else "retention recovery"
+                    lines.append(f"Visit-cadence drift: 12+ wk bucket {direction} ({prev_long:.1f}% → {cur_long:.1f}%, {delta_long:+.1f} pp) — leading indicator of {signal}")
+            elif dist:
+                lines.append(f"Visit-cadence distribution (last 90d): 12+ wk bucket at {dist.get('12wk+',0):.1f}%, median gap {cad.get('median_gap',0):.0f} days")
+        # Lapse pool — reactivation opportunity
+        lp = store.get("lapse_pool")
+        if lp and isinstance(lp, dict) and lp.get("total_pool"):
+            lines.append(f"Lapse pool: {lp['total_pool']} customers ({lp['drifting']['count']} drifting / {lp['lapsed']['count']} lapsed / {lp['dormant']['count']} dormant), combined annual value ${lp['total_annual_value']:,.0f}")
         lines.append("")
 
     data_brief = "\n".join(lines)
@@ -706,11 +1112,21 @@ def generate_executive_summary(output):
 
 Write his morning briefing. Model your style on the way a trusted chief of staff would brief Jeff Bezos: direct, specific, strategic, efficient. No fluff. Lead with what matters most. Highlight one thing he should be proud of and one thing he should pay attention to. If you notice a pattern across both stores, name it. If something is concerning, say so plainly. If something is going well, say so.
 
-CRITICAL FRAMING: The number of groomers working each day is THE driver of revenue at this business. Always interpret revenue numbers through the lens of capacity. If yesterday's revenue was down but only 2 groomers worked vs the typical 4, that is a capacity issue, not a performance issue. If revenue per active groomer is above the trailing-30d baseline, the team is running hot regardless of total dollars. Use $/groomer-day as your primary productivity yardstick. When you reference today's or tomorrow's outlook, mention how many groomers are scheduled — Kyle wants to know if today is staffed for a strong number.
+CRITICAL FRAMING — capacity is the master driver: The number of groomers working each day is THE driver of revenue at this business. Always interpret revenue numbers through the lens of capacity. If yesterday's revenue was down but only 2 groomers worked vs the typical 4, that is a capacity issue, not a performance issue. If revenue per active groomer is above the trailing-30d baseline, the team is running hot regardless of total dollars. Use $/groomer-day as your primary productivity yardstick.
+
+CAUSE ATTRIBUTION — the second most important skill: When revenue is up or down, identify WHY. Kyle does not want raw deltas — he wants attribution. Specifically:
+  1. If MTD is behind prior month, ALWAYS compare actual MTD to the DOW-adjusted expectation (provided in the data). If the gap is calendar-driven (DOW mix unfavorable, holiday landed differently), say so and quantify it. If it's real performance loss, say that plainly.
+  2. If a holiday occurred in the last 3 days or is coming in the next 3 days (see "Holiday note" in the data), factor it into your commentary. Mother's Day, Memorial Day, July 4th, Thanksgiving, and Christmas all materially affect bookings — don't sound an alarm about a dip that was a holiday.
+  3. If ONE line item moved disproportionately to the rest (e.g., add-on revenue down 21% while core grooms down 8%), flag it as a specific operational signal, not a generic miss. Add-on divergence = upsell discipline. Retail divergence = front-of-house focus.
+  4. Distinguish "structural" from "operational" causes. Calendar/holiday/DOW mix are structural — don't blame the team. Capacity drops, upsell drops, retail miss are operational — name the area.
+
+LEADING INDICATORS — surface these when they move:
+  - Visit-cadence drift: when the 12+ week visit-gap bucket grows, customers are stretching out (stealth churn). When it shrinks, retention is improving.
+  - Lapse pool: customers 60-365 days dormant who could be reactivated. Frame as opportunity, not loss.
 
 End the briefing with a single explicit "Capacity & coverage" sentence (just one sentence) calling out today's and tomorrow's scheduled groomer count and bather hours, plus next 7 days groomer-days. This sentence is required even on slow news days.
 
-Write 3-4 short paragraphs, prose only — no bullet points, no headers, no markdown. Keep it under 220 words total. Address him by name (Kyle) once at the start.
+Write 3-4 short paragraphs, prose only — no bullet points, no headers, no markdown. Keep it under 240 words total. Address him by name (Kyle) once at the start.
 
 Here is the data:
 
