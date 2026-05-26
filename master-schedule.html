@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Woof Gang — Default Weekly Schedules</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, Arial, sans-serif;
+    font-size: 11px;
+    color: #1a1a1a;
+    background: #fff;
+    padding: 16px 20px;
+  }
+
+  h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .subtitle {
+    font-size: 10.5px;
+    color: #666;
+    margin-bottom: 14px;
+  }
+
+  .stores-wrap {
+    display: block;
+  }
+
+  .store-block {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .store-heading {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 5px 8px;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: 0;
+  }
+  .store-heading.pw { background: #e8f0fe; color: #1a4db3; border-bottom: 2px solid #1a4db3; }
+  .store-heading.hv { background: #e8f6ef; color: #1a6b3a; border-bottom: 2px solid #1a6b3a; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5px;
+  }
+
+  thead th {
+    background: #f5f5f5;
+    padding: 4px 5px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid #d0d0d0;
+  }
+  thead th:first-child { text-align: left; width: 80px; }
+  thead th:nth-child(2) { width: 52px; }
+
+  tbody tr:nth-child(even) { background: #fafafa; }
+  tbody tr:hover { background: #f0f4ff; }
+
+  .section-divider td {
+    background: #f0f0f0;
+    font-weight: 700;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #555;
+    padding: 3px 5px;
+    border: 1px solid #d0d0d0;
+  }
+
+  td {
+    padding: 3.5px 4px;
+    border: 1px solid #e0e0e0;
+    vertical-align: middle;
+  }
+  td:first-child { font-weight: 600; }
+  td:nth-child(2) { text-align: center; }
+
+  .shift-cell {
+    text-align: center;
+    white-space: nowrap;
+    font-size: 9.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .shift-cell.off { color: #ccc; }
+  .shift-cell.has-shift { color: #1a1a1a; font-weight: 500; }
+  .shift-cell .note { font-size: 8.5px; color: #888; display: block; }
+
+  /* Role badges */
+  .role-badge {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .role-groomer  { background: #fce4ec; color: #880e4f; }
+  .role-bather   { background: #efebe9; color: #4e342e; }
+  .role-retail   { background: #e0f2f1; color: #00695c; }
+  .role-manager  { background: #fce4ec; color: #880e4f; }
+
+  /* Cindy section */
+  .cindy-wrap {
+    margin-top: 14px;
+  }
+  .cindy-heading {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 5px 8px;
+    background: #fce4ec;
+    color: #880e4f;
+    border-bottom: 2px solid #c4276e;
+    border-radius: 4px 4px 0 0;
+  }
+  .cindy-wrap table th { background: #fdf2f7; }
+
+  .store-tag {
+    font-size: 8.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 1px 4px;
+    border-radius: 2px;
+    display: block;
+    margin-top: 1px;
+  }
+  .tag-pw { background: #e8f0fe; color: #1a4db3; }
+  .tag-hv { background: #e8f6ef; color: #1a6b3a; }
+
+  /* Week-B note */
+  .wkb { font-size: 8.5px; color: #888; display: block; }
+
+  /* Groomer count row */
+  .count-row td {
+    background: #f0f4ff;
+    font-weight: 700;
+    font-size: 9px;
+    color: #3949ab;
+    border-color: #c5cae9;
+    padding: 2px 4px;
+  }
+  .count-row td:first-child { font-style: normal; }
+  .count-cell { text-align: center; }
+
+  hr.divider {
+    border: none;
+    border-top: 1px dashed #ccc;
+    margin: 14px 0;
+  }
+
+  footer {
+    margin-top: 14px;
+    font-size: 9.5px;
+    color: #999;
+    text-align: right;
+  }
+
+  @media print {
+    body { padding: 6px 8px; font-size: 10px; }
+    h1 { font-size: 15px; }
+    .store-block { margin-bottom: 8px; }
+    .cindy-wrap { margin-top: 8px; }
+    hr.divider { margin: 8px 0; }
+    footer { display: none; }
+    .no-print { display: none !important; }
+    @page { size: landscape; margin: 0.4in; }
+  }
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:3px">
+  <h1>Woof Gang — Default Weekly Schedules</h1>
+  <button onclick="window.print()" style="font-size:11px;font-weight:600;padding:5px 14px;border:none;border-radius:5px;background:#c4276e;color:#fff;cursor:pointer;font-family:inherit;flex-shrink:0;margin-left:12px" class="no-print">🖨 Print</button>
+</div>
+<div class="subtitle">Active staff · recurring defaults only · individual weeks may vary &nbsp;·&nbsp; Sue M's Monday = <strong>Week B only</strong></div>
+
+<!-- STORES -->
+<div class="stores-wrap">
+
+  <!-- PORT WASHINGTON -->
+  <div class="store-block pw">
+    <div class="store-heading pw">Port Washington</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- GROOMERS -->
+        <tr class="section-divider"><td colspan="9">Groomers</td></tr>
+
+        <!-- Sue M: Mon(B)/Tue/Wed/Thu/Fri 8:30–5 -->
+        <tr>
+          <td>Sue M</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell has-shift">8:30–5<span class="wkb">Wk B only</span></td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Joyce P: Mon/Wed/Thu/Fri/Sat 9–4 -->
+        <tr>
+          <td>Joyce P</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Danielle L: Tue/Wed/Thu/Fri 9–4:30 -->
+        <tr>
+          <td>Danielle L</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–4:30</td>
+          <td class="shift-cell has-shift">9–4:30</td>
+          <td class="shift-cell has-shift">9–4:30</td>
+          <td class="shift-cell has-shift">9–4:30</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Ingrid R: Tue/Thu/Fri 8:30–4, Sat 9–4 -->
+        <tr>
+          <td>Ingrid R</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">8:30–4</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">8:30–4</td>
+          <td class="shift-cell has-shift">8:30–4</td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Jackie G: Mon/Fri/Sat 9–5 -->
+        <tr>
+          <td>Jackie G</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Maria C: Mon/Tue 9:30–5 -->
+        <tr>
+          <td>Maria C</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell has-shift">9:30–5</td>
+          <td class="shift-cell has-shift">9:30–5</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Marie D: Mon/Wed 9–4 -->
+        <tr>
+          <td>Marie D</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Olivia M: Tue/Wed/Thu/Fri 8:30–5 -->
+        <tr>
+          <td>Olivia M</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Paige: Tue/Wed/Thu/Fri/Sat 9–5 -->
+        <tr>
+          <td>Paige</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Groomer count -->
+        <tr class="count-row">
+          <td colspan="2">Groomers on floor</td>
+          <td class="count-cell">4<span class="wkb" style="color:#3949ab">5 Wk B</span></td>
+          <td class="count-cell">6</td>
+          <td class="count-cell">5</td>
+          <td class="count-cell">6</td>
+          <td class="count-cell">7</td>
+          <td class="count-cell">4</td>
+          <td class="count-cell">—</td>
+        </tr>
+
+        <!-- BATHERS -->
+        <tr class="section-divider"><td colspan="9">Bathers</td></tr>
+
+        <!-- Angela R: Sat 9–5 -->
+        <tr>
+          <td>Angela R</td>
+          <td><span class="role-badge role-bather">Bather</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–5</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Jessica G: Mon/Wed/Thu/Fri/Sun 10–5 -->
+        <tr>
+          <td>Jessica G</td>
+          <td><span class="role-badge role-bather">Bather</span></td>
+          <td class="shift-cell has-shift">10–5</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">10–5</td>
+          <td class="shift-cell has-shift">10–5</td>
+          <td class="shift-cell has-shift">10–5</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">10–5</td>
+        </tr>
+
+        <!-- RETAIL -->
+        <tr class="section-divider"><td colspan="9">Retail</td></tr>
+
+        <!-- Casey: Mon 8:30–7, Tue 8:30–5, Wed 2–7, Thu 8:30–5, Sun 10–6 -->
+        <tr>
+          <td>Casey</td>
+          <td><span class="role-badge role-retail">Retail</span></td>
+          <td class="shift-cell has-shift">8:30–7</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell has-shift">2–7</td>
+          <td class="shift-cell has-shift">8:30–5</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">10–6</td>
+        </tr>
+
+        <!-- Trinity: Tue/Thu/Fri/Sat 2–7 -->
+        <tr>
+          <td>Trinity</td>
+          <td><span class="role-badge role-retail">Retail</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">2–7</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">2–7</td>
+          <td class="shift-cell has-shift">2–7</td>
+          <td class="shift-cell has-shift">2–7</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div><!-- /pw -->
+
+  <!-- HICKSVILLE -->
+  <div class="store-block hv">
+    <div class="store-heading hv">Hicksville</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+          <th>Sun</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- GROOMERS -->
+        <tr class="section-divider"><td colspan="9">Groomers</td></tr>
+
+        <!-- Carol W: Tue/Wed/Thu/Fri 9–5:30 -->
+        <tr>
+          <td>Carol W</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–5:30</td>
+          <td class="shift-cell has-shift">9–5:30</td>
+          <td class="shift-cell has-shift">9–5:30</td>
+          <td class="shift-cell has-shift">9–5:30</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Julia B: Mon/Tue split (school 10:30–2), Thu/Fri/Sat 9–4:30 -->
+        <tr>
+          <td>Julia B</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell has-shift">9–10:30<span class="wkb" style="color:#888">school 10:30–2</span>2–5</td>
+          <td class="shift-cell has-shift">9–10:30<span class="wkb" style="color:#888">school 10:30–2</span>2–5</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–4:30</td>
+          <td class="shift-cell has-shift">9–4:30</td>
+          <td class="shift-cell has-shift">9–4:30</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Maria V: Wed 9:30–4, Sat 9:30–5 -->
+        <tr>
+          <td>Maria V</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9:30–4</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9:30–5</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Victoria: Thu/Fri 9–4 -->
+        <tr>
+          <td>Victoria</td>
+          <td><span class="role-badge role-groomer">Groomer</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell has-shift">9–4</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Groomer count -->
+        <tr class="count-row">
+          <td colspan="2">Groomers on floor</td>
+          <td class="count-cell">1</td>
+          <td class="count-cell">2</td>
+          <td class="count-cell">2</td>
+          <td class="count-cell">3</td>
+          <td class="count-cell">3</td>
+          <td class="count-cell">2</td>
+          <td class="count-cell">—</td>
+        </tr>
+
+        <!-- RETAIL -->
+        <tr class="section-divider"><td colspan="9">Retail</td></tr>
+
+        <!-- Hailey: Tue/Thu 12–6, Wed/Fri/Sat 9–6 -->
+        <tr>
+          <td>Hailey</td>
+          <td><span class="role-badge role-retail">Retail</span></td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">12–6</td>
+          <td class="shift-cell has-shift">9–6</td>
+          <td class="shift-cell has-shift">12–6</td>
+          <td class="shift-cell has-shift">9–6</td>
+          <td class="shift-cell has-shift">9–6</td>
+          <td class="shift-cell off">—</td>
+        </tr>
+
+        <!-- Kayla: Mon 9–6, Sun 10–5 -->
+        <tr>
+          <td>Kayla</td>
+          <td><span class="role-badge role-retail">Retail</span></td>
+          <td class="shift-cell has-shift">9–6</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell off">—</td>
+          <td class="shift-cell has-shift">10–5</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div><!-- /hv -->
+
+</div><!-- /stores-wrap -->
+
+<hr class="divider">
+
+<!-- CINDY — BOTH STORES -->
+<div class="cindy-wrap">
+  <div class="cindy-heading">Manager — Cindy Szczudlo</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+        <th>Sun</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Cindy</td>
+        <td><span class="role-badge role-manager">Manager</span></td>
+        <td class="shift-cell off">—</td>
+        <td class="shift-cell has-shift">9–12:30<span class="store-tag tag-hv">Hicksville</span></td>
+        <td class="shift-cell has-shift">8:30–5:30<span class="store-tag tag-pw">Port Wash</span></td>
+        <td class="shift-cell has-shift">9–12:30<span class="store-tag tag-hv">Hicksville</span></td>
+        <td class="shift-cell has-shift">8:30–5:30<span class="store-tag tag-pw">Port Wash</span></td>
+        <td class="shift-cell has-shift">9–5<span class="store-tag tag-pw">Port Wash</span></td>
+        <td class="shift-cell off">—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<footer>Generated May 26, 2026 · Woof Gang Pet Salon</footer>
+
+</body>
+</html>
