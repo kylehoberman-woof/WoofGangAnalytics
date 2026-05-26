@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-25T04:36:10.832011-04:00",
-  "today": "2026-05-25",
+  "generated_at": "2026-05-26T03:28:28.325405-04:00",
+  "today": "2026-05-26",
   "stores": {
     "port-washington": {
       "store": "port-washington",
@@ -445,6 +445,26 @@
       },
       "variances": [
         {
+          "date": "2026-05-25",
+          "day_name": "Mon",
+          "employee": "Casey Makowski",
+          "scheduled_hrs": 10.5,
+          "actual_hrs": 0,
+          "variance_hrs": -10.5,
+          "variance_cost": -199.5,
+          "status": "under",
+          "scheduled_start": "08:30",
+          "actual_start": "",
+          "scheduled_end": "19:00",
+          "actual_end": "",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
+        },
+        {
           "date": "2026-05-24",
           "day_name": "Sun",
           "employee": "Casey Makowski",
@@ -673,9 +693,9 @@
             "people": [
               {
                 "name": "Casey Makowski",
-                "hrs": 40.5,
+                "hrs": 30.0,
                 "rate": 19.0,
-                "cost": 769.5
+                "cost": 570.0
               },
               {
                 "name": "Trinity Rivera",
@@ -684,10 +704,10 @@
                 "cost": 315.0
               }
             ],
-            "retail_hrs": 55.5,
-            "retail_cost": 1084.5,
+            "retail_hrs": 45.0,
+            "retail_cost": 885.0,
             "mgr_cost": 5690.41,
-            "total_labor": 6774.91
+            "total_labor": 6575.41
           },
           {
             "month": "2026-06",
@@ -734,7 +754,7 @@
             "total_labor": 9877.41
           }
         ],
-        "generated_at": "2026-05-25"
+        "generated_at": "2026-05-26"
       }
     },
     "hicksville": {
@@ -1057,26 +1077,6 @@
         {
           "date": "2026-05-21",
           "day_name": "Thu",
-          "employee": "Kayla Moses",
-          "scheduled_hrs": 3.0,
-          "actual_hrs": 0,
-          "variance_hrs": -3.0,
-          "variance_cost": -57.0,
-          "status": "under",
-          "scheduled_start": "09:00",
-          "actual_start": "",
-          "scheduled_end": "12:00",
-          "actual_end": "",
-          "early_in_mins": 0,
-          "late_out_mins": 0,
-          "early_in_cost": 0,
-          "late_out_cost": 0,
-          "punch_bonus_mins": 0,
-          "punch_bonus_cost": 0
-        },
-        {
-          "date": "2026-05-21",
-          "day_name": "Thu",
           "employee": "Hailey Imhof",
           "scheduled_hrs": 6.0,
           "actual_hrs": 9.27,
@@ -1093,6 +1093,26 @@
           "late_out_cost": 0,
           "punch_bonus_mins": 196,
           "punch_bonus_cost": 68.6
+        },
+        {
+          "date": "2026-05-21",
+          "day_name": "Thu",
+          "employee": "Kayla Moses",
+          "scheduled_hrs": 3.0,
+          "actual_hrs": 0,
+          "variance_hrs": -3.0,
+          "variance_cost": -57.0,
+          "status": "under",
+          "scheduled_start": "09:00",
+          "actual_start": "",
+          "scheduled_end": "12:00",
+          "actual_end": "",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-05-20",
@@ -1157,26 +1177,6 @@
         {
           "date": "2026-05-16",
           "day_name": "Sat",
-          "employee": "Kayla Moses",
-          "scheduled_hrs": 0,
-          "actual_hrs": 2.17,
-          "variance_hrs": 2.17,
-          "variance_cost": 41.17,
-          "status": "over",
-          "scheduled_start": "",
-          "actual_start": "15:50",
-          "scheduled_end": "",
-          "actual_end": "18:00",
-          "early_in_mins": 0,
-          "late_out_mins": 0,
-          "early_in_cost": 0,
-          "late_out_cost": 0,
-          "punch_bonus_mins": 0,
-          "punch_bonus_cost": 0
-        },
-        {
-          "date": "2026-05-16",
-          "day_name": "Sat",
           "employee": "Hailey Imhof",
           "scheduled_hrs": 9.0,
           "actual_hrs": 7.07,
@@ -1193,6 +1193,26 @@
           "late_out_cost": 0,
           "punch_bonus_mins": 15,
           "punch_bonus_cost": 5.25
+        },
+        {
+          "date": "2026-05-16",
+          "day_name": "Sat",
+          "employee": "Kayla Moses",
+          "scheduled_hrs": 0,
+          "actual_hrs": 2.17,
+          "variance_hrs": 2.17,
+          "variance_cost": 41.17,
+          "status": "over",
+          "scheduled_start": "",
+          "actual_start": "15:50",
+          "scheduled_end": "",
+          "actual_end": "18:00",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
         },
         {
           "date": "2026-05-15",
@@ -1504,7 +1524,7 @@
             "total_labor": 4006.0
           }
         ],
-        "generated_at": "2026-05-25"
+        "generated_at": "2026-05-26"
       }
     }
   }

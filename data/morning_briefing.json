@@ -1,30 +1,30 @@
 {
-  "generated_at": "2026-05-25T04:36:10.903297-04:00",
-  "today": "2026-05-25",
-  "yesterday": "2026-05-24",
+  "generated_at": "2026-05-26T03:28:28.395978-04:00",
+  "today": "2026-05-26",
+  "yesterday": "2026-05-25",
   "week_start": "2026-05-25",
   "stores": {
     "port-washington": {
       "label": "Port Washington",
       "yesterday": {
-        "total_rev": 462.68,
-        "groom_rev": 340.0,
-        "retail_rev": 122.68,
-        "grooms": 0,
-        "baths": 4,
-        "appointments": 4,
-        "transactions": 10,
-        "avg_ticket": 46.27
-      },
-      "last_week_same_day": {
-        "total_rev": 324.62,
+        "total_rev": 0.0,
         "groom_rev": 0.0,
-        "retail_rev": 324.62,
+        "retail_rev": 0.0,
         "grooms": 0,
         "baths": 0,
         "appointments": 0,
-        "transactions": 12,
-        "avg_ticket": 27.05
+        "transactions": 0,
+        "avg_ticket": 0
+      },
+      "last_week_same_day": {
+        "total_rev": 2336.86,
+        "groom_rev": 1791.0,
+        "retail_rev": 545.86,
+        "grooms": 13,
+        "baths": 4,
+        "appointments": 17,
+        "transactions": 32,
+        "avg_ticket": 73.03
       },
       "wtd": {
         "total_rev": 0.0,
@@ -54,16 +54,16 @@
         "transactions": 801
       },
       "prev_mtd": {
-        "total_rev": 70608.41,
-        "groom_rev": 59322.5,
-        "retail_rev": 11260.91,
-        "grooms": 413,
-        "baths": 129,
-        "appointments": 542,
-        "transactions": 872
+        "total_rev": 73179.96,
+        "groom_rev": 61082.5,
+        "retail_rev": 12072.46,
+        "grooms": 422,
+        "baths": 134,
+        "appointments": 556,
+        "transactions": 909
       },
-      "mtd_label": "May 1 \u2192 May 24",
-      "prev_mtd_label": "Apr 1 \u2192 Apr 24",
+      "mtd_label": "May 1 \u2192 May 25",
+      "prev_mtd_label": "Apr 1 \u2192 Apr 25",
       "ytd": {
         "total_rev": 392107.0,
         "groom_rev": 319909.42,
@@ -74,23 +74,23 @@
         "transactions": 4900
       },
       "prev_ytd": {
-        "total_rev": 252850.97,
-        "groom_rev": 188025.25,
-        "retail_rev": 64319.72,
+        "total_rev": 253816.7,
+        "groom_rev": 188435.25,
+        "retail_rev": 64875.45,
         "grooms": 1355,
-        "baths": 502,
-        "appointments": 1857,
-        "transactions": 3829
+        "baths": 508,
+        "appointments": 1863,
+        "transactions": 3850
       },
-      "ytd_label": "Jan 1 \u2192 May 24, 2026",
-      "prev_ytd_label": "Jan 1 \u2192 May 24, 2025",
+      "ytd_label": "Jan 1 \u2192 May 25, 2026",
+      "prev_ytd_label": "Jan 1 \u2192 May 25, 2025",
       "low_stock": [
         {
           "sku": "857555008148",
           "name": "Jack&Pup Braided Bully 12\"",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 19.5,
+          "velocity_monthly": 17.5,
           "status": "out",
           "vendor": "Jack&Pup"
         },
@@ -108,7 +108,7 @@
           "name": "WGB Chips - Chicken Chips (16 oz)",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 9.5,
+          "velocity_monthly": 9.2,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -131,6 +131,15 @@
           "vendor": "Fromm"
         },
         {
+          "sku": "1009",
+          "name": "Peanut Butter Cup",
+          "stock": -15.0,
+          "weeks_of_supply": -9.3,
+          "velocity_monthly": 7.0,
+          "status": "out",
+          "vendor": "Bosco & Roxy"
+        },
+        {
           "sku": "810153750208",
           "name": "WGB Collagen wrapped Stick Chicken",
           "stock": 0.0,
@@ -147,15 +156,6 @@
           "velocity_monthly": 5.8,
           "status": "out",
           "vendor": "WOOF"
-        },
-        {
-          "sku": "1009",
-          "name": "Peanut Butter Cup",
-          "stock": -15.0,
-          "weeks_of_supply": -13.0,
-          "velocity_monthly": 5.0,
-          "status": "out",
-          "vendor": "Bosco & Roxy"
         },
         {
           "sku": "1007",
@@ -272,42 +272,42 @@
           "groomer_names": [],
           "groom_rev": 0.0,
           "rev_per_groomer": 0,
-          "bather_hours": 5.4
+          "bather_hours": 0.0
         },
         "mtd": {
           "groomer_days": 93,
           "rev_per_groomer_day": 519.72,
-          "avg_groomers_per_day": 3.88,
+          "avg_groomers_per_day": 3.72,
           "bather_hours": 126.2,
-          "avg_bather_hours_per_day": 5.3
+          "avg_bather_hours_per_day": 5.0
         },
         "prev_mtd": {
-          "groomer_days": 99,
-          "rev_per_groomer_day": 521.22,
-          "avg_groomers_per_day": 4.12,
-          "bather_hours": 107.0,
-          "avg_bather_hours_per_day": 4.5
+          "groomer_days": 101,
+          "rev_per_groomer_day": 522.48,
+          "avg_groomers_per_day": 4.04,
+          "bather_hours": 115.3,
+          "avg_bather_hours_per_day": 4.6
         },
         "trailing_30d": {
-          "rev_per_groomer_day": 521.76,
-          "avg_groomers_per_day": 3.87,
-          "avg_bather_hours_per_day": 5.3
+          "rev_per_groomer_day": 520.65,
+          "avg_groomers_per_day": 3.8,
+          "avg_bather_hours_per_day": 5.0
         },
         "today_scheduled": {
-          "groomers": 0,
-          "bathers": 0,
-          "groomer_hours": 0,
-          "bather_hours": 0
-        },
-        "tomorrow_scheduled": {
           "groomers": 6,
           "bathers": 0,
           "groomer_hours": 47.5,
           "bather_hours": 0.0
         },
+        "tomorrow_scheduled": {
+          "groomers": 6,
+          "bathers": 1,
+          "groomer_hours": 46.0,
+          "bather_hours": 7.0
+        },
         "next_7_days": {
-          "groomer_days": 26,
-          "bather_hours": 36.0
+          "groomer_days": 29,
+          "bather_hours": 43.0
         }
       },
       "supplies_needed": [
@@ -389,24 +389,24 @@
     "hicksville": {
       "label": "Hicksville",
       "yesterday": {
-        "total_rev": 143.15,
+        "total_rev": 0.0,
         "groom_rev": 0.0,
-        "retail_rev": 143.15,
+        "retail_rev": 0.0,
         "grooms": 0,
         "baths": 0,
         "appointments": 0,
-        "transactions": 6,
-        "avg_ticket": 23.86
+        "transactions": 0,
+        "avg_ticket": 0
       },
       "last_week_same_day": {
-        "total_rev": 542.83,
-        "groom_rev": 275.0,
-        "retail_rev": 267.83,
-        "grooms": 3,
-        "baths": 0,
+        "total_rev": 540.57,
+        "groom_rev": 475.0,
+        "retail_rev": 65.57,
+        "grooms": 2,
+        "baths": 1,
         "appointments": 3,
-        "transactions": 12,
-        "avg_ticket": 45.24
+        "transactions": 6,
+        "avg_ticket": 90.1
       },
       "wtd": {
         "total_rev": 0.0,
@@ -436,16 +436,16 @@
         "transactions": 356
       },
       "prev_mtd": {
-        "total_rev": 23095.91,
-        "groom_rev": 18773.0,
-        "retail_rev": 4322.91,
-        "grooms": 164,
-        "baths": 24,
-        "appointments": 188,
-        "transactions": 400
+        "total_rev": 24579.18,
+        "groom_rev": 19873.0,
+        "retail_rev": 4706.18,
+        "grooms": 175,
+        "baths": 25,
+        "appointments": 200,
+        "transactions": 425
       },
-      "mtd_label": "May 1 \u2192 May 24",
-      "prev_mtd_label": "Apr 1 \u2192 Apr 24",
+      "mtd_label": "May 1 \u2192 May 25",
+      "prev_mtd_label": "Apr 1 \u2192 Apr 25",
       "ytd": {
         "total_rev": 108976.9,
         "groom_rev": 82993.0,
@@ -464,15 +464,24 @@
         "appointments": 0,
         "transactions": 0
       },
-      "ytd_label": "Jan 1 \u2192 May 24, 2026",
-      "prev_ytd_label": "Jan 1 \u2192 May 24, 2025",
+      "ytd_label": "Jan 1 \u2192 May 25, 2026",
+      "prev_ytd_label": "Jan 1 \u2192 May 25, 2025",
       "low_stock": [
         {
           "sku": "1001",
           "name": "X-Small Treat Table",
           "stock": -16.0,
           "weeks_of_supply": -1.8,
-          "velocity_monthly": 39.5,
+          "velocity_monthly": 39.2,
+          "status": "out",
+          "vendor": "Woof Gang Bakery"
+        },
+        {
+          "sku": "810153750192",
+          "name": "WGB Collagen Spring",
+          "stock": -1.0,
+          "weeks_of_supply": -0.4,
+          "velocity_monthly": 10.0,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -502,15 +511,6 @@
           "velocity_monthly": 6.0,
           "status": "out",
           "vendor": "Bosco & Roxy's"
-        },
-        {
-          "sku": "810153750192",
-          "name": "WGB Collagen Spring",
-          "stock": -1.0,
-          "weeks_of_supply": -0.8,
-          "velocity_monthly": 5.5,
-          "status": "out",
-          "vendor": "Woof Gang Bakery"
         },
         {
           "sku": "811048022943",
@@ -585,15 +585,6 @@
           "vendor": "Preppy Puppy"
         },
         {
-          "sku": "810017531264",
-          "name": "PB Cupcake",
-          "stock": -12.0,
-          "weeks_of_supply": -26.0,
-          "velocity_monthly": 2.0,
-          "status": "out",
-          "vendor": "Preppy Puppy"
-        },
-        {
           "sku": "81907",
           "name": "Pink 4\" Birthday Bundt Cake",
           "stock": -4.0,
@@ -646,6 +637,15 @@
           "velocity_monthly": 2.0,
           "status": "out",
           "vendor": "Preppy Puppy"
+        },
+        {
+          "sku": "857253003711",
+          "name": "No Hide Chicken - Stix",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 2.0,
+          "status": "out",
+          "vendor": "Earth Animal"
         }
       ],
       "capacity": {
@@ -659,36 +659,36 @@
         "mtd": {
           "groomer_days": 46,
           "rev_per_groomer_day": 386.74,
-          "avg_groomers_per_day": 1.92,
+          "avg_groomers_per_day": 1.84,
           "bather_hours": 0.0,
           "avg_bather_hours_per_day": 0.0
         },
         "prev_mtd": {
-          "groomer_days": 47,
-          "rev_per_groomer_day": 396.45,
-          "avg_groomers_per_day": 1.96,
+          "groomer_days": 50,
+          "rev_per_groomer_day": 394.66,
+          "avg_groomers_per_day": 2.0,
           "bather_hours": 0.0,
           "avg_bather_hours_per_day": 0.0
         },
         "trailing_30d": {
-          "rev_per_groomer_day": 386.16,
-          "avg_groomers_per_day": 1.87,
+          "rev_per_groomer_day": 387.26,
+          "avg_groomers_per_day": 1.77,
           "avg_bather_hours_per_day": 0.0
         },
         "today_scheduled": {
-          "groomers": 0,
-          "bathers": 0,
-          "groomer_hours": 0,
-          "bather_hours": 0
-        },
-        "tomorrow_scheduled": {
           "groomers": 2,
           "bathers": 0,
           "groomer_hours": 16.0,
           "bather_hours": 0.0
         },
+        "tomorrow_scheduled": {
+          "groomers": 2,
+          "bathers": 0,
+          "groomer_hours": 15.0,
+          "bather_hours": 0.0
+        },
         "next_7_days": {
-          "groomer_days": 10,
+          "groomer_days": 11,
           "bather_hours": 0.0
         }
       },
@@ -761,5 +761,5 @@
       "upcoming_closures": []
     }
   },
-  "summary_text": "Kyle, you're running strong year-over-year\u2014up 55% in revenue and 57% in appointments through May 24th\u2014which is excellent momentum. Port Washington delivered a standout day yesterday at $463 (up 43%) with solid per-groomer productivity, though the grooming mix shifted entirely to baths; Hicksville struggled at $143 (down 74%) with zero grooming or bath activity. Both stores are down month-to-date versus April, but the pattern is staffing-related, not performance-related: you're running 3-4% fewer groomer-days this month while maintaining essentially flat per-groomer economics ($520 vs $521 at Port Washington, down slightly to $387 from $396 at Hicksville).\n\nThe immediate concern is today's schedule: zero groomers and zero bathers across both locations means today will be a retail-only day with minimal revenue. This appears to be a holiday scheduling gap (Memorial Day context). Tomorrow resets with 6 groomers at Port Washington and 2 at Hicksville, which should recover momentum. Over the next 7 days you've got 36 groomer-days scheduled, which is solid run rate.\n\nInventory pressure exists at both locations\u201420 items out of stock each\u2014with notable gaps on bestsellers like Jack & Pup Bully Sticks at Port Washington (zero left, 20/month velocity) and X-Small Treat Tables critically negative at Hicksville (-16 units). Reorder these immediately to avoid leaving revenue on the table. Store supplies need attention too: hypoallergenic shampoo, brown paper bags, and laundry detergent are depleted or low.\n\n**Capacity & coverage:** Today is zero groomer-days and zero bather hours across both locations; tomorrow adds 8 groomer-days and 0 bather hours; next 7 days scheduled at 36 groomer-days and 36 bather hours total."
+  "summary_text": "Kyle, yesterday both locations were closed \u2014 Memorial Day. This is expected and doesn't represent operational performance.\n\nWhat you should feel good about: year-to-date, Port Washington is crushing it. You're up 54% in revenue and 56% in appointments versus the same five months last year. That's real momentum. The business is growing meaningfully.\n\nWhat needs your attention: both locations are running below capacity this month. Port Washington is averaging 3.7 groomer-days per day (down from 4.0 last month), and Hicksville is at 1.8 (down from 2.0). This isn't a productivity problem \u2014 your $/groomer-day metrics are actually holding steady \u2014 it's a staffing issue. You're leaving revenue on the table because you don't have enough hands scheduled. Additionally, both stores have inventory gaps. Hicksville's X-Small Treat Tables are in backorder territory (negative 16 units), and Port Washington has three fast-moving retail items completely out of stock. These gaps create friction at checkout.\n\nThe pattern across both locations is the same: staffing is below your trailing baseline, which means your ceiling for May revenue is lower than April's by design. Restock your critical inventory this week, and let's talk about the groomer scheduling \u2014 you may have hiring or scheduling flexibility that's worth exploring.\n\n**Capacity & coverage: Today you have 8 groomer-days scheduled (6 Port + 2 Hicksville) with 0 bather hours; tomorrow, 8 groomer-days with 7 bather hours; next 7 days, 40 groomer-days and 43 bather hours.**"
 }
