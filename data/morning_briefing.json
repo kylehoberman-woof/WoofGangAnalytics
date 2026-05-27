@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-27T09:32:31.632065-04:00",
+  "generated_at": "2026-05-27T11:32:56.267461-04:00",
   "today": "2026-05-27",
   "yesterday": "2026-05-26",
   "week_start": "2026-05-25",
@@ -9,6 +9,11 @@
       "yesterday": {
         "total_rev": 3383.51,
         "groom_rev": 2855.0,
+        "core_groom_rev": 2700.0,
+        "addon_rev": 155.0,
+        "addon_count": 12,
+        "addon_attach_rate": 45.8,
+        "addon_avg_value": 12.92,
         "retail_rev": 528.51,
         "grooms": 20,
         "baths": 4,
@@ -19,6 +24,11 @@
       "last_week_same_day": {
         "total_rev": 3360.08,
         "groom_rev": 2970.0,
+        "core_groom_rev": 2745.0,
+        "addon_rev": 210.0,
+        "addon_count": 16,
+        "addon_attach_rate": 56.0,
+        "addon_avg_value": 13.12,
         "retail_rev": 390.08,
         "grooms": 23,
         "baths": 2,
@@ -29,6 +39,11 @@
       "wtd": {
         "total_rev": 3383.51,
         "groom_rev": 2855.0,
+        "core_groom_rev": 2700.0,
+        "addon_rev": 155.0,
+        "addon_count": 12,
+        "addon_attach_rate": 45.8,
+        "addon_avg_value": 12.92,
         "retail_rev": 528.51,
         "grooms": 20,
         "baths": 4,
@@ -38,6 +53,11 @@
       "prev_wtd": {
         "total_rev": 5696.94,
         "groom_rev": 4761.0,
+        "core_groom_rev": 4368.0,
+        "addon_rev": 338.0,
+        "addon_count": 26,
+        "addon_attach_rate": 50.0,
+        "addon_avg_value": 13.0,
         "retail_rev": 935.94,
         "grooms": 36,
         "baths": 6,
@@ -47,6 +67,11 @@
       "mtd": {
         "total_rev": 71008.68,
         "groom_rev": 58834.0,
+        "core_groom_rev": 53711.0,
+        "addon_rev": 4658.0,
+        "addon_count": 363,
+        "addon_attach_rate": 55.8,
+        "addon_avg_value": 12.83,
         "retail_rev": 12174.68,
         "grooms": 392,
         "baths": 115,
@@ -56,6 +81,11 @@
       "prev_mtd": {
         "total_rev": 73949.83,
         "groom_rev": 61427.5,
+        "core_groom_rev": 55461.5,
+        "addon_rev": 5616.0,
+        "addon_count": 422,
+        "addon_attach_rate": 58.9,
+        "addon_avg_value": 13.31,
         "retail_rev": 12497.33,
         "grooms": 422,
         "baths": 138,
@@ -67,6 +97,11 @@
       "ytd": {
         "total_rev": 395490.51,
         "groom_rev": 322764.42,
+        "core_groom_rev": 292852.42,
+        "addon_rev": 27557.0,
+        "addon_count": 2134,
+        "addon_attach_rate": 56.6,
+        "addon_avg_value": 12.91,
         "retail_rev": 72531.09,
         "grooms": 2231,
         "baths": 702,
@@ -76,6 +111,11 @@
       "prev_ytd": {
         "total_rev": 254422.63,
         "groom_rev": 188770.25,
+        "core_groom_rev": 176421.03,
+        "addon_rev": 12036.22,
+        "addon_count": 1004,
+        "addon_attach_rate": 43.9,
+        "addon_avg_value": 11.99,
         "retail_rev": 65146.38,
         "grooms": 1358,
         "baths": 508,
@@ -266,6 +306,38 @@
           "vendor": "Preppy Puppy"
         }
       ],
+      "mtd_dow_adjusted_expected": 73227.19,
+      "prev_mtd_dow_adjusted_expected": 72826.4,
+      "cadence": {
+        "window_days": 90,
+        "total_gaps": 1595,
+        "mean_gap": 55.5,
+        "median_gap": 47,
+        "distribution": {
+          "2-3wk": 7.8,
+          "3-4wk": 11.2,
+          "4-6wk": 25.6,
+          "6-8wk": 20.2,
+          "8-12wk": 20.0,
+          "12wk+": 15.3
+        }
+      },
+      "lapse_pool": {
+        "drifting": {
+          "count": 129,
+          "annual_value": 84040.0
+        },
+        "lapsed": {
+          "count": 159,
+          "annual_value": 105802.0
+        },
+        "dormant": {
+          "count": 171,
+          "annual_value": 111218.0
+        },
+        "total_pool": 459,
+        "total_annual_value": 301060.0
+      },
       "capacity": {
         "yesterday": {
           "active_groomers": 6,
@@ -398,6 +470,11 @@
       "yesterday": {
         "total_rev": 758.89,
         "groom_rev": 685.0,
+        "core_groom_rev": 665.0,
+        "addon_rev": 20.0,
+        "addon_count": 3,
+        "addon_attach_rate": 40.0,
+        "addon_avg_value": 6.67,
         "retail_rev": 73.89,
         "grooms": 5,
         "baths": 0,
@@ -408,6 +485,11 @@
       "last_week_same_day": {
         "total_rev": 973.82,
         "groom_rev": 870.0,
+        "core_groom_rev": 805.0,
+        "addon_rev": 50.0,
+        "addon_count": 5,
+        "addon_attach_rate": 50.0,
+        "addon_avg_value": 10.0,
         "retail_rev": 103.82,
         "grooms": 9,
         "baths": 1,
@@ -418,6 +500,11 @@
       "wtd": {
         "total_rev": 758.89,
         "groom_rev": 685.0,
+        "core_groom_rev": 665.0,
+        "addon_rev": 20.0,
+        "addon_count": 3,
+        "addon_attach_rate": 40.0,
+        "addon_avg_value": 6.67,
         "retail_rev": 73.89,
         "grooms": 5,
         "baths": 0,
@@ -427,6 +514,11 @@
       "prev_wtd": {
         "total_rev": 1514.4,
         "groom_rev": 1345.0,
+        "core_groom_rev": 1230.0,
+        "addon_rev": 100.0,
+        "addon_count": 7,
+        "addon_attach_rate": 46.2,
+        "addon_avg_value": 14.29,
         "retail_rev": 169.4,
         "grooms": 11,
         "baths": 2,
@@ -436,6 +528,11 @@
       "mtd": {
         "total_rev": 23030.82,
         "groom_rev": 18395.0,
+        "core_groom_rev": 17085.0,
+        "addon_rev": 1220.0,
+        "addon_count": 96,
+        "addon_attach_rate": 41.3,
+        "addon_avg_value": 12.71,
         "retail_rev": 4635.82,
         "grooms": 159,
         "baths": 20,
@@ -445,6 +542,11 @@
       "prev_mtd": {
         "total_rev": 24895.01,
         "groom_rev": 19873.0,
+        "core_groom_rev": 18763.0,
+        "addon_rev": 960.0,
+        "addon_count": 78,
+        "addon_attach_rate": 33.5,
+        "addon_avg_value": 12.31,
         "retail_rev": 5022.01,
         "grooms": 175,
         "baths": 25,
@@ -456,6 +558,11 @@
       "ytd": {
         "total_rev": 109781.75,
         "groom_rev": 83678.0,
+        "core_groom_rev": 78353.0,
+        "addon_rev": 4770.0,
+        "addon_count": 398,
+        "addon_attach_rate": 36.7,
+        "addon_avg_value": 11.98,
         "retail_rev": 25803.75,
         "grooms": 768,
         "baths": 98,
@@ -465,6 +572,11 @@
       "prev_ytd": {
         "total_rev": 0.0,
         "groom_rev": 0.0,
+        "core_groom_rev": 0.0,
+        "addon_rev": 0.0,
+        "addon_count": 0,
+        "addon_attach_rate": 0,
+        "addon_avg_value": 0,
         "retail_rev": 0.0,
         "grooms": 0,
         "baths": 0,
@@ -655,6 +767,38 @@
           "vendor": "Earth Animal"
         }
       ],
+      "mtd_dow_adjusted_expected": 22766.73,
+      "prev_mtd_dow_adjusted_expected": 19898.75,
+      "cadence": {
+        "window_days": 90,
+        "total_gaps": 273,
+        "mean_gap": 51.3,
+        "median_gap": 48,
+        "distribution": {
+          "2-3wk": 4.4,
+          "3-4wk": 6.6,
+          "4-6wk": 28.9,
+          "6-8wk": 29.7,
+          "8-12wk": 22.0,
+          "12wk+": 8.4
+        }
+      },
+      "lapse_pool": {
+        "drifting": {
+          "count": 23,
+          "annual_value": 16820.0
+        },
+        "lapsed": {
+          "count": 15,
+          "annual_value": 8060.0
+        },
+        "dormant": {
+          "count": 0,
+          "annual_value": 0.0
+        },
+        "total_pool": 38,
+        "total_annual_value": 24880.0
+      },
       "capacity": {
         "yesterday": {
           "active_groomers": 2,
@@ -771,5 +915,5 @@
       "upcoming_closures": []
     }
   },
-  "summary_text": "Kyle, yesterday was mixed operationally but reveals a concerning pattern across both locations. Port Washington held flat revenue at $3,384 despite running 6 groomers at $476 per groomer\u201411% below your 30-day baseline of $518, signaling the team is underperforming relative to capacity. Hicksville dropped 22% to $759 on just 2 groomers producing $342 each, also 11% below its baseline of $386. This isn't a scheduling problem; this is a productivity problem. Both stores are hitting the same efficiency gap simultaneously, which suggests either a demand softness, booking issue, or execution gap worth investigating.\n\nWhat's working: your year-to-date trajectory is exceptional\u2014up 55% in revenue and 57% in appointments versus last year. The retail team at Port Washington delivered a strong 35% spike in revenue yesterday, showing customers are buying when they're in the door. You should be proud of the growth trajectory and the retail discipline.\n\nWhat needs attention: week-to-date at Port Washington is down 41% in revenue, and Hicksville is down 50%. This is not normal seasonal variance. Confirm whether next week's booking calendar shows recovery or if you're facing a demand problem heading into the long weekend. Port Washington also ran zero bather hours yesterday when your baseline is 4.8 hours daily\u2014that's missing a lever to drive groomer throughput.\n\nToday Port Washington is scheduled with 6 groomers and 7.0 bather hours; Hicksville has 2 groomers and 0 bather hours; across the next 7 days you have 40 groomer-days scheduled (29 Port Washington, 11 Hicksville) and 43 bather hours total."
+  "summary_text": "Kyle, yesterday was Memorial Day \u2014 a structural 30% revenue headwind \u2014 and both stores performed within expectation given the holiday. Port Washington held flat at $3,384 despite the calendar hit, and Hicksville's 22% decline tracks the expected holiday dip. What matters: neither location broke down on a forced-rest day.\n\nThe real story is capacity. Port Washington ran 6 groomers yesterday at $476/groomer, 8% below the trailing-30-day baseline of $518. Hicksville ran 2 groomers at $342/groomer, down 11% from its $386 baseline. Both stores are running softer per-groomer productivity than their own norms, and add-on attach is down across the board \u2014 Port Washington at 46% vs 56% last week, Hicksville at 40% vs 50%. This is an upsell discipline signal, not a holiday artifact. You should be proud of Port Washington's retail pivot: up 35% while transactions fell 18% means your team is selling smarter at the front of house.\n\nMonth-to-date, Port Washington is down 4% vs April, but calendar-adjusted it's only 3% behind expectation \u2014 performance is real but modest. Hicksville is actually beating DOW-adjusted expectation by 1.2%, a genuine bright spot. Year-to-date, Port Washington is up 55% and Hicksville is 10 weeks in; the trajectory is solid. The concern: visit-cadence drift at Port Washington (12+ week bucket at 15.3%) suggests customers are spacing out. Monitor whether this accelerates post-holiday.\n\n**Capacity & coverage:** Today you have 8 groomer-days across both stores (6 Port Washington, 2 Hicksville) with 7 bather hours at Port Washington; tomorrow 7 groomer-days with 7 bather hours Port Washington; next 7 days: 40 groomer-days total, 43 bather hours."
 }
