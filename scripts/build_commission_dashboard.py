@@ -1156,7 +1156,9 @@ function renderPayPeriod(ppId) {{
   var sorted = GROOMERS.slice().sort(function(a,b) {{ return (data[b]||{{total:0}}).total - (data[a]||{{total:0}}).total; }});
   var rows = '';
   sorted.forEach(function(g) {{
-    var d = data[g]; if (!d || (d.rev===0 && d.tips===0)) return;
+    var ptoPay = getPtoPayout(g, ppId);
+    var d = data[g] || {{rev:0,disc:0,comm:0,paid:0,tips:0,total:0,working_days:0,guar_days:0,daily:[]}};
+    if (d.rev===0 && d.tips===0 && ptoPay===0) return;
     // Recompute paid/total respecting guarantee overrides + commission adjustments
     var adjPaid = 0, adjTotal = 0;
     if (d.daily && d.daily.length) {{
