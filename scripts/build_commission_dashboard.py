@@ -392,6 +392,7 @@ def summary_table(data_dict, show_groomers=None):
           <td style="text-align:right;color:#888">{fc(d["comm"])}</td>
           <td style="text-align:right;color:#1565c0;font-weight:600">{fc(d["paid"])}{"<br><span style='font-size:0.72rem;color:#1565c0'>↑ "+str(d['guar_days'])+" guar days</span>" if d["guar_days"] else ""}</td>
           <td style="text-align:right;color:#f57c00">{fc(d["tips"])}</td>
+          <td style="text-align:right;color:#16a34a">—</td>
           <td style="text-align:right;font-weight:700;color:#C4276E">{fc(d["total"])}</td>
           <td style="text-align:right;color:#888;font-size:0.82rem">{fc(d["total"]/d["working_days"]) if d["working_days"] else "—"}</td>
         </tr>'''
