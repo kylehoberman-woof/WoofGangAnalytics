@@ -402,7 +402,7 @@ def daily_detail_rows(data_dict):
     for g in sorted(groomers, key=lambda x: -data_dict[x]["total"]):
         d = data_dict[g]
         if not d["daily"]: continue
-        rows += f'<tr style="background:#f8f7f4"><td colspan="9" style="padding:10px 14px;font-weight:700">{groomer_badge(g)}</td></tr>'
+        rows += f'<tr style="background:#f8f7f4"><td colspan="10" style="padding:10px 14px;font-weight:700">{groomer_badge(g)}</td></tr>'
         for day in d["daily"]:
             gflag = '<span style="background:#e3f2fd;color:#1565c0;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px">guarantee</span>' if day["guar_applied"] else ""
             wflag = '<span style="background:#fce4ec;color:#c62828;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:4px">waive</span>' if day["guar_applied"] else ""
@@ -414,6 +414,7 @@ def daily_detail_rows(data_dict):
               <td style="text-align:right;color:#888">{fc(day["comm"])}</td>
               <td style="text-align:right;color:#1565c0">{fc(day["paid"])}{gflag}{wflag}</td>
               <td style="text-align:right;color:#f57c00">{fc(day["tips"])}</td>
+              <td style="text-align:right;color:#16a34a">—</td>
               <td style="text-align:right;font-weight:600;color:#C4276E">{fc(day["total"])}</td>
               <td></td>
             </tr>'''
@@ -576,6 +577,7 @@ TABLE_HEADER = '''<thead><tr>
   <th style="text-align:right">50% Comm</th>
   <th style="text-align:right">Comm Paid</th>
   <th style="text-align:right">Tips</th>
+  <th style="text-align:right;color:#16a34a">PTO</th>
   <th style="text-align:right">Total Pay</th>
   <th style="text-align:right">Avg/Day</th>
 </tr></thead>'''
@@ -1173,7 +1175,6 @@ function renderPayPeriod(ppId) {{
     var avgDay = d.working_days ? fc(adjTotal/d.working_days) : '—';
     var discCell = (d.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(d.disc)+'</span>' : '—';
     var ptoPay = getPtoPayout(g, ppId);
-    var ptoNote = ptoPay > 0 ? '<br><span style="font-size:0.72rem;color:#16a34a;font-weight:700">+'+fc(ptoPay)+' PTO</span>' : '';
     rows += '<tr>'+
       '<td>'+groomerBadge(g)+'</td>'+
       '<td style="text-align:right;color:#888;font-weight:600">'+d.working_days+'</td>'+
@@ -1182,7 +1183,8 @@ function renderPayPeriod(ppId) {{
       '<td style="text-align:right;color:#888">'+fc(d.comm)+'</td>'+
       '<td style="text-align:right;color:#1565c0;font-weight:600">'+fc(adjPaid)+guarNote+'</td>'+
       '<td style="text-align:right;color:#f57c00">'+fc(d.tips)+'</td>'+
-      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(adjTotal)+ptoNote+'</td>'+
+      '<td style="text-align:right;color:#16a34a;font-weight:600">'+(ptoPay>0?fc(ptoPay):'—')+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(adjTotal+ptoPay)+'</td>'+
       '<td style="text-align:right;color:#888;font-size:0.82rem">'+avgDay+'</td>'+
       '</tr>';
   }});
@@ -1192,7 +1194,7 @@ function renderPayPeriod(ppId) {{
   var detailRows = '';
   sorted.forEach(function(g) {{
     var d = data[g]; if (!d || !d.daily || !d.daily.length) return;
-    detailRows += '<tr style="background:#f8f7f4"><td colspan="9" style="padding:10px 14px;font-weight:700">'+groomerBadge(g)+'</td></tr>';
+    detailRows += '<tr style="background:#f8f7f4"><td colspan="10" style="padding:10px 14px;font-weight:700">'+groomerBadge(g)+'</td></tr>';
     d.daily.forEach(function(day) {{
       var guar = getGuarRate(g, day.date);
       var overrideKey = 'guar_override_'+day.date+'_'+g;
@@ -1226,14 +1228,17 @@ function renderPayPeriod(ppId) {{
         '<td style="text-align:right;color:#888">'+fc(day.comm)+'</td>'+
         '<td style="text-align:right;color:#1565c0">'+fc(actualPaid)+gflag+commAdjTag+editCommBtn+'</td>'+
         '<td style="text-align:right;color:#f57c00">'+fc(tipsVal)+tipsAdjTag+editTipsBtn+'</td>'+
+        '<td style="text-align:right;color:#16a34a">—</td>'+
         '<td style="text-align:right;font-weight:600;color:#C4276E">'+fc(actualTotal)+'</td>'+
         '<td></td></tr>';
     }});
     var _ptoPay = getPtoPayout(g, ppId);
     if (_ptoPay > 0) {{
-      detailRows += '<tr style="background:#f0fdf4"><td colspan="2" style="padding-left:24px;color:#15803d;font-size:0.82rem;font-weight:600">PTO stipend</td>'+
-        '<td colspan="5"></td>'+
-        '<td style="text-align:right;color:#15803d;font-weight:700">'+fc(_ptoPay)+'</td>'+
+      detailRows += '<tr style="background:#f0fdf4">'+
+        '<td colspan="2" style="padding-left:24px;color:#15803d;font-size:0.82rem;font-weight:600">PTO stipend</td>'+
+        '<td colspan="4"></td>'+
+        '<td style="text-align:right;color:#16a34a;font-weight:700">'+fc(_ptoPay)+'</td>'+
+        '<td style="text-align:right;color:#16a34a;font-weight:700">'+fc(_ptoPay)+'</td>'+
         '<td></td></tr>';
     }}
   }});
