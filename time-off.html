@@ -130,6 +130,25 @@ tr:hover td{background:#fef7fa}
 .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;color:white;font-weight:700;font-size:0.88rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);z-index:999;transition:opacity 0.4s;pointer-events:none}
 .toast.hidden{opacity:0}.toast.success{background:#2E7D32}.toast.error{background:#c62828}
 .hidden{display:none!important}
+/* Paid PTO */
+.pto-paid-box{background:#f0fdf4;border:2px solid #16a34a;border-radius:8px;padding:11px 14px}
+.pto-paid-lbl{display:flex;align-items:center;gap:8px;font-weight:600;color:#15803d;cursor:pointer;font-size:0.88rem}
+.pto-paid-lbl input[type=checkbox]{width:15px;height:15px;accent-color:#16a34a;cursor:pointer;flex-shrink:0}
+.pto-payout-info{margin-top:7px;font-size:0.82rem;color:#15803d;line-height:1.6}
+.pto-warn{color:#dc2626;font-weight:700}
+.pto-badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:0.72rem;font-weight:700;background:#dcfce7;color:#166534;margin-left:5px;white-space:nowrap}
+/* PTO Balance section */
+.pto-bal-title{font-size:0.82rem;font-weight:700;color:#555;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;margin-top:22px;border-top:1px solid #eee;padding-top:16px}
+.pto-bal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px}
+.pto-bal-card{background:white;border:2px solid #e5e7eb;border-radius:10px;padding:12px 14px}
+.pto-bal-card.depleted{border-color:#dc2626}
+.pto-bal-name{font-weight:700;font-size:0.87rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pto-bal-store{font-size:0.69rem;color:#aaa;margin-bottom:6px}
+.pto-bar-wrap{background:#f3f4f6;border-radius:4px;height:5px;margin:5px 0}
+.pto-bar{border-radius:4px;height:5px}
+.pto-bar.ok{background:#16a34a}.pto-bar.warn{background:#dc2626}
+.pto-bal-stat{font-size:0.75rem;color:#555}
+.pto-bal-payout{font-size:0.75rem;color:#15803d;font-weight:600;margin-top:2px}
 @media(max-width:700px){
   .header{padding:24px 16px 20px}
   .back-link{position:static;transform:none;display:inline-block;margin-bottom:10px;font-size:0.75rem}
@@ -202,15 +221,15 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
       </div>
       <div class="fg">
         <label>Start Date *</label>
-        <input type="date" id="f-start" required>
+        <input type="date" id="f-start" required onchange="updatePtoPayout()">
       </div>
       <div class="fg">
         <label>End Date *</label>
-        <input type="date" id="f-end" required>
+        <input type="date" id="f-end" required onchange="updatePtoPayout()">
       </div>
       <div class="fg">
         <label>Type</label>
-        <select id="f-type">
+        <select id="f-type" onchange="onTypeChange()">
           <option value="PTO">PTO</option>
           <option value="Vacation">Vacation</option>
           <option value="Sick">Sick Day</option>
@@ -226,6 +245,15 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
           <option value="pending">Pending</option>
           <option value="denied">Denied</option>
         </select>
+      </div>
+      <div class="fg span-full hidden" id="pto-paid-section">
+        <div class="pto-paid-box">
+          <label class="pto-paid-lbl">
+            <input type="checkbox" id="f-paid-pto" onchange="updatePtoPayout()">
+            Redeeming paid PTO? ($100/day · 5 days/year for groomers)
+          </label>
+          <div id="pto-payout-info" style="display:none" class="pto-payout-info"></div>
+        </div>
       </div>
       <div class="fg span-full">
         <label>Notes (optional)</label>
@@ -258,6 +286,10 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
       <div class="sub-card">
         <div class="sub-title">Sick Day Leaderboard <span class="hint">Flag for attendance</span></div>
         <div id="sick-leaderboard" class="leaderboard"></div>
+      </div>
+      <div class="sub-card" id="pto-balances-card" style="display:none">
+        <div class="sub-title">Groomer PTO Balances <span class="hint">5 days · $100/day · resets Jan 1</span></div>
+        <div id="pto-balances"></div>
       </div>
     </div>
   </div>
@@ -333,7 +365,7 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
       </div>
       <div class="fg">
         <label>Type</label>
-        <select id="e-type">
+        <select id="e-type" onchange="onEditTypeChange()">
           <option value="PTO">PTO</option>
           <option value="Vacation">Vacation</option>
           <option value="Sick">Sick Day</option>
@@ -349,6 +381,14 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
           <option value="pending">Pending</option>
           <option value="denied">Denied</option>
         </select>
+      </div>
+      <div class="fg span-full hidden" id="pto-edit-paid-section">
+        <div class="pto-paid-box">
+          <label class="pto-paid-lbl">
+            <input type="checkbox" id="e-paid-pto">
+            Redeeming paid PTO? ($100/day)
+          </label>
+        </div>
       </div>
       <div class="fg span-full">
         <label>Notes</label>
@@ -370,20 +410,24 @@ var SB_HDR  = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-
 
 /* ── Employee lists (loaded from Supabase) ────── */
 var empsByStore = { 'port-washington': [], 'hicksville': [] };
+var groomersSet = {}; // label → store
 
 function loadEmployees() {
-  sbFetch('/rest/v1/schedule_employees?is_active=eq.true&order=name&select=name,full_name,store')
+  sbFetch('/rest/v1/schedule_employees?is_active=eq.true&order=name&select=name,full_name,store,role,is_full_time')
     .then(function(r){ return r.ok ? r.json() : []; })
     .then(function(data){
       empsByStore = { 'port-washington': [], 'hicksville': [] };
+      groomersSet = {};
       data.forEach(function(e){
         var label = e.full_name || e.name;
         if(e.store === 'port-washington' || e.store === 'both')
           empsByStore['port-washington'].push(label);
         if(e.store === 'hicksville' || e.store === 'both')
           empsByStore['hicksville'].push(label);
+        if(e.role === 'groomer' && e.is_full_time) groomersSet[label] = e.store;
       });
       updateEmployees();
+      if (records.length > 0) renderUsage();
     })
     .catch(function(){ /* keep empty on error */ });
 }
@@ -488,6 +532,66 @@ function patchRecord(id, data) {
   });
 }
 
+/* ── Paid PTO ─────────────────────────────────── */
+var PTO_DAYS = 5;
+var PTO_RATE = 100;
+
+function onTypeChange() {
+  var type = document.getElementById('f-type').value;
+  var emp = document.getElementById('f-emp').value;
+  var eligible = type === 'PTO' && !!groomersSet[emp];
+  document.getElementById('pto-paid-section').classList.toggle('hidden', !eligible);
+  if (!eligible) {
+    document.getElementById('f-paid-pto').checked = false;
+    document.getElementById('pto-payout-info').style.display = 'none';
+  } else {
+    updatePtoPayout();
+  }
+}
+
+function onEditTypeChange() {
+  var type = document.getElementById('e-type').value;
+  var emp = document.getElementById('e-employee').value;
+  var eligible = type === 'PTO' && !!groomersSet[emp];
+  document.getElementById('pto-edit-paid-section').classList.toggle('hidden', !eligible);
+  if (!eligible) document.getElementById('e-paid-pto').checked = false;
+}
+
+function getPtoDaysUsed(empName, year, excludeId) {
+  return records.filter(function(r) {
+    return r.employee_name === empName &&
+           r.type === 'PTO' &&
+           r.paid_pto === true &&
+           r.status !== 'denied' &&
+           r.start_date.slice(0,4) === String(year) &&
+           (excludeId === null || String(r.id) !== String(excludeId));
+  }).reduce(function(acc, r) {
+    return acc + daysBetween(r.start_date, r.end_date);
+  }, 0);
+}
+
+function updatePtoPayout() {
+  var paid   = document.getElementById('f-paid-pto').checked;
+  var infoEl = document.getElementById('pto-payout-info');
+  if (!paid) { infoEl.style.display = 'none'; return; }
+  var start  = document.getElementById('f-start').value;
+  var end    = document.getElementById('f-end').value;
+  var emp    = document.getElementById('f-employee').value;
+  if (!start || !end || !emp || end < start) { infoEl.style.display = 'none'; return; }
+  var days   = daysBetween(start, end);
+  var year   = start.slice(0,4);
+  var used   = getPtoDaysUsed(emp, year, null);
+  var rem    = PTO_DAYS - used;
+  infoEl.style.display = 'block';
+  infoEl.innerHTML =
+    '<strong>' + days + ' day' + (days!==1?'s':'') + ' &times; $' + PTO_RATE +
+    ' = <span style="font-size:1rem">$' + (days * PTO_RATE).toLocaleString() + '</span></strong><br>' +
+    used + ' of ' + PTO_DAYS + ' days already used this year &nbsp;·&nbsp; ' +
+    (days > rem
+      ? '<span class="pto-warn">&#9888; Only ' + Math.max(0,rem) + ' day' + (rem!==1?'s':'') + ' remaining!</span>'
+      : rem - days + ' day' + ((rem-days)!==1?'s':'') + ' remaining after this');
+}
+
 /* ── Form ─────────────────────────────────────── */
 function updateEmployees() {
   var store = document.getElementById('f-store').value;
@@ -516,11 +620,14 @@ function handleSubmit(e) {
   var btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
 
-  addRecord({ store_key: store, employee_name: employee, start_date: start, end_date: end, type: type, notes: notes||null, status: status })
+  var paidPto = (type === 'PTO' && document.getElementById('f-paid-pto').checked);
+  addRecord({ store_key: store, employee_name: employee, start_date: start, end_date: end, type: type, notes: notes||null, status: status, paid_pto: paidPto })
     .then(function(rec) {
       records.unshift(rec);
       renderAll();
       document.getElementById('add-form').reset();
+      document.getElementById('pto-paid-section').classList.add('hidden');
+      document.getElementById('pto-payout-info').style.display = 'none';
       // Re-apply store default if tab is filtered
       if (storeFilter !== 'all') {
         document.getElementById('f-store').value = storeFilter;
@@ -613,7 +720,7 @@ function renderList() {
       '<td>'+fmtDate(r.start_date)+'</td>' +
       '<td>'+fmtDate(r.end_date)+'</td>' +
       '<td style="font-weight:700;color:#C4276E">'+days+'d</td>' +
-      '<td>'+typeBadge(r.type)+'</td>' +
+      '<td>'+typeBadge(r.type)+(r.paid_pto ? '<span class="pto-badge">$'+(days*100)+'</span>' : '')+'</td>' +
       '<td>'+statusBadge(r.status)+'</td>' +
       '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#777">'+(r.notes||'–')+'</td>' +
       '<td>' +
@@ -686,6 +793,8 @@ function doEdit(id) {
   document.getElementById('e-type').value = rec.type;
   document.getElementById('e-status').value = rec.status;
   document.getElementById('e-notes').value = rec.notes || '';
+  document.getElementById('e-paid-pto').checked = !!rec.paid_pto;
+  document.getElementById('pto-edit-paid-section').classList.toggle('hidden', rec.type !== 'PTO' || !groomersSet[rec.employee_name]);
   document.getElementById('edit-overlay').classList.remove('hidden');
 }
 
@@ -705,7 +814,8 @@ function saveEdit() {
     end_date: end,
     type: document.getElementById('e-type').value,
     status: document.getElementById('e-status').value,
-    notes: document.getElementById('e-notes').value.trim() || null
+    notes: document.getElementById('e-notes').value.trim() || null,
+    paid_pto: (document.getElementById('e-type').value === 'PTO' && document.getElementById('e-paid-pto').checked)
   };
   var btn = document.getElementById('e-save');
   btn.disabled = true; btn.textContent = 'Saving…';
@@ -920,6 +1030,37 @@ function renderUsage() {
     empHtml += '</tbody></table>';
     document.getElementById('emp-usage').innerHTML = empHtml;
   }
+
+  // ── PTO Balance (groomers, current year) ──
+  var curYear = NOW.getFullYear();
+  var groomerNames = Object.keys(groomersSet);
+  var balHtml = '';
+  if (groomerNames.length > 0) {
+    balHtml += '<div class="pto-bal-title">&#128176; Paid PTO Balances — Groomers (' + curYear + ') &nbsp;<span style="font-weight:400;font-size:0.75rem;color:#aaa">5 days / $100 per day</span></div>';
+    balHtml += '<div class="pto-bal-grid">';
+    groomerNames.sort().forEach(function(name) {
+      var used = getPtoDaysUsed(name, curYear, null);
+      var pend = records.filter(function(r){
+        return r.employee_name === name && r.type === 'PTO' && r.paid_pto === true &&
+               r.status === 'pending' && r.start_date.slice(0,4) === String(curYear);
+      }).reduce(function(acc,r){ return acc + daysBetween(r.start_date, r.end_date); }, 0);
+      var appr = used - pend;
+      var rem  = Math.max(0, PTO_DAYS - used);
+      var pct  = Math.min(100, (used / PTO_DAYS) * 100);
+      var store = groomersSet[name];
+      var storeLabel = store === 'port-washington' ? 'Port Washington' : store === 'hicksville' ? 'Hicksville' : 'Both';
+      balHtml += '<div class="pto-bal-card' + (rem === 0 ? ' depleted' : '') + '">' +
+        '<div class="pto-bal-name" title="'+esc(name)+'">'+esc(name)+'</div>' +
+        '<div class="pto-bal-store">'+storeLabel+'</div>' +
+        '<div class="pto-bar-wrap"><div class="pto-bar '+(rem===0?'warn':'ok')+'" style="width:'+pct.toFixed(0)+'%"></div></div>' +
+        '<div class="pto-bal-stat">' + used + ' / ' + PTO_DAYS + ' days used' + (pend > 0 ? ' <span style="color:#f59e0b">('+pend+' pending)</span>' : '') + '</div>' +
+        '<div class="pto-bal-payout">$' + (appr * PTO_RATE) + ' paid out' + (rem > 0 ? ' · $' + (rem * PTO_RATE) + ' remaining' : ' · Fully used') + '</div>' +
+      '</div>';
+    });
+    balHtml += '</div>';
+  }
+  document.getElementById('pto-balances').innerHTML = balHtml;
+  document.getElementById('pto-balances-card').style.display = groomerNames.length > 0 ? '' : 'none';
 
   // ── Sick Day Leaderboard ──
   var sickRows = empRows.filter(function(r){ return r.sick > 0; })

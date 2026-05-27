@@ -93,7 +93,7 @@ tr:hover td{background:#fafaf8!important}
 </head>
 <body>
 <div class="header">
-    <div class="header-timestamp">Updated May 27, 2026 at 09:24 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
+    <div class="header-timestamp">Updated May 27, 2026 at 10:42 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
     <h1>Woof Gang Hicksville</h1>
     <div class="subtitle">Groomer Commission Dashboard</div>
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
@@ -2924,6 +2924,7 @@ var MONTHLY_DATA = [{"month": "Sep 2024", "year": 2024, "rev": 0, "paid": 0, "ti
 var COLORS = {"Alex  I": "#C4276E", "April Y": "#1976D2", "Carol W": "#388E3C", "Debra N": "#F57C00", "Julia B": "#7B1FA2", "Maria V": "#00838F", "Sereena C": "#D32F2F", "Victoria C.": "#455A64"};
 var GUARANTEES = {"Alex I": {"rate": 200.0, "start": "2026-01-19", "end": "2026-04-18"}, "Carol W": {"rate": 200.0, "start": "2025-12-12", "end": "2026-03-11"}, "Debra N": {"rate": 200.0, "start": "2026-04-04", "end": "2026-07-03"}, "Julia B": {"rate": 200.0, "start": "2026-02-03", "end": "2026-05-04"}, "Maria V": {"rate": 200.0, "start": "2025-12-13", "end": "2026-03-12"}, "Sereena C": {"rate": 200.0, "start": "2025-12-15", "end": "2026-03-14"}, "Victoria C.": {"rate": 200.0, "start": "2026-05-07", "end": "2026-08-05"}};
 var SUE_WEEKLY = [];
+var PP_DATES = {"pp_0": {"start": "2026-05-23", "end": "2026-05-29"}, "pp_1": {"start": "2026-05-16", "end": "2026-05-22"}, "pp_2": {"start": "2026-05-09", "end": "2026-05-15"}, "pp_3": {"start": "2026-05-02", "end": "2026-05-08"}, "pp_4": {"start": "2026-04-25", "end": "2026-05-01"}, "pp_5": {"start": "2026-04-18", "end": "2026-04-24"}, "pp_6": {"start": "2026-04-11", "end": "2026-04-17"}, "pp_7": {"start": "2026-04-04", "end": "2026-04-10"}, "pp_8": {"start": "2026-03-28", "end": "2026-04-03"}, "pp_9": {"start": "2026-03-21", "end": "2026-03-27"}, "pp_10": {"start": "2026-03-14", "end": "2026-03-20"}, "pp_11": {"start": "2026-03-07", "end": "2026-03-13"}, "pp_12": {"start": "2026-02-28", "end": "2026-03-06"}, "pp_13": {"start": "2026-02-21", "end": "2026-02-27"}, "pp_14": {"start": "2026-02-14", "end": "2026-02-20"}, "pp_15": {"start": "2026-02-07", "end": "2026-02-13"}, "pp_16": {"start": "2026-01-31", "end": "2026-02-06"}, "pp_17": {"start": "2026-01-24", "end": "2026-01-30"}, "pp_18": {"start": "2026-01-17", "end": "2026-01-23"}, "pp_19": {"start": "2026-01-10", "end": "2026-01-16"}, "pp_20": {"start": "2026-01-03", "end": "2026-01-09"}, "pp_21": {"start": "2025-12-27", "end": "2026-01-02"}, "pp_22": {"start": "2025-12-20", "end": "2025-12-26"}, "pp_23": {"start": "2025-12-13", "end": "2025-12-19"}, "pp_24": {"start": "2025-12-06", "end": "2025-12-12"}};
 
 function fc(v) { return '$' + parseFloat(v).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}); }
 
@@ -3005,6 +3006,41 @@ function getOverride(key) {
 function getAdj(g, date, type) {
   return (_adjMap[g] && _adjMap[g][date] && _adjMap[g][date][type] !== undefined) ? _adjMap[g][date][type] : null;
 }
+
+// ── PTO Payouts (live from Supabase time_off) ─────────────────────────────────
+var PTO_RECORDS = [];
+var _PTO_LOADED = false;
+function _loadPto(cb) {
+  if (_PTO_LOADED) { if (cb) cb(); return; }
+  fetch(_sbUrl + '/rest/v1/time_off?store_key=eq.' + _storeKey + '&paid_pto=eq.true&status=eq.approved&select=employee_name,start_date,end_date', {
+    headers: { 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey }
+  }).then(function(r){ return r.ok ? r.json() : []; }).then(function(d){
+    PTO_RECORDS = d || [];
+    _PTO_LOADED = true;
+    if (cb) cb();
+  }).catch(function(){ _PTO_LOADED = true; if (cb) cb(); });
+}
+function getPtoPayout(groomer, ppId) {
+  // Show payout in the pay period where the PTO starts (avoids splitting across periods)
+  var dates = PP_DATES[ppId];
+  if (!dates) return 0;
+  var ppStart = dates.start, ppEnd = dates.end;
+  var payout = 0;
+  PTO_RECORDS.forEach(function(r) {
+    if (r.employee_name !== groomer) return;
+    if (r.start_date >= ppStart && r.start_date <= ppEnd) {
+      var days = Math.round((new Date(r.end_date) - new Date(r.start_date)) / 86400000) + 1;
+      payout += Math.min(days, 5) * 100;
+    }
+  });
+  return payout;
+}
+_loadPto(function() {
+  var ppPanel = document.getElementById('panel-pp');
+  if (ppPanel && ppPanel.classList.contains('active')) {
+    renderPayPeriod(document.getElementById('pp-select').value);
+  }
+});
 
 function _parseOverrideKey(key) {
   // key format: guar_override_YYYY-MM-DD_Groomer Name
@@ -3126,6 +3162,8 @@ function renderPayPeriod(ppId) {
   var totRetailPay = Object.values(retailPay).reduce(function(a,b){return a+b;}, 0);
   var totMargin = totRev - totDisc - totPaid - totRoyalties - totRent - totManager - totBatherPay - totRetailPay;
   var totMarginPct = totRev > 0 ? (totMargin / totRev * 100).toFixed(1) : '0.0';
+  var totPtoPay = 0;
+  GROOMERS.forEach(function(g) { totPtoPay += getPtoPayout(g, ppId); });
 
   document.getElementById('pp-kpis').innerHTML =
     '<div class="kpi"><div class="kpi-val">'+fc(totRev)+'</div><div class="kpi-label">Groom Revenue</div></div>'+
@@ -3139,7 +3177,8 @@ function renderPayPeriod(ppId) {
     '<div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">'+fc(totRoyalties)+'</div><div class="kpi-label">Royalties + Marketing</div></div>'+
     '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totRent)+'</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">'+PP_LENGTH+' days</div></div>'+
     '<div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">'+fc(totMargin)+'</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">'+totMarginPct+'%</div></div>'+
-    '<div class="kpi grey"><div class="kpi-val">'+totGuar+'</div><div class="kpi-label">Guarantee Days</div></div>';
+    '<div class="kpi grey"><div class="kpi-val">'+totGuar+'</div><div class="kpi-label">Guarantee Days</div></div>'+
+    (totPtoPay > 0 ? '<div class="kpi" style="border-color:#16a34a"><div class="kpi-val" style="color:#16a34a">'+fc(totPtoPay)+'</div><div class="kpi-label">PTO Payouts</div></div>' : '');
 
   // Summary rows
   var sorted = GROOMERS.slice().sort(function(a,b) { return (data[b]||{total:0}).total - (data[a]||{total:0}).total; });
@@ -3164,6 +3203,8 @@ function renderPayPeriod(ppId) {
     var guarNote = d.guar_days ? '<br><span style="font-size:0.72rem;color:#1565c0">↑ '+d.guar_days+' guar days</span>' : '';
     var avgDay = d.working_days ? fc(adjTotal/d.working_days) : '—';
     var discCell = (d.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(d.disc)+'</span>' : '—';
+    var ptoPay = getPtoPayout(g, ppId);
+    var ptoNote = ptoPay > 0 ? '<br><span style="font-size:0.72rem;color:#16a34a;font-weight:700">+'+fc(ptoPay)+' PTO</span>' : '';
     rows += '<tr>'+
       '<td>'+groomerBadge(g)+'</td>'+
       '<td style="text-align:right;color:#888;font-weight:600">'+d.working_days+'</td>'+
@@ -3172,7 +3213,7 @@ function renderPayPeriod(ppId) {
       '<td style="text-align:right;color:#888">'+fc(d.comm)+'</td>'+
       '<td style="text-align:right;color:#1565c0;font-weight:600">'+fc(adjPaid)+guarNote+'</td>'+
       '<td style="text-align:right;color:#f57c00">'+fc(d.tips)+'</td>'+
-      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(adjTotal)+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(adjTotal)+ptoNote+'</td>'+
       '<td style="text-align:right;color:#888;font-size:0.82rem">'+avgDay+'</td>'+
       '</tr>';
   });
@@ -3219,6 +3260,13 @@ function renderPayPeriod(ppId) {
         '<td style="text-align:right;font-weight:600;color:#C4276E">'+fc(actualTotal)+'</td>'+
         '<td></td></tr>';
     });
+    var _ptoPay = getPtoPayout(g, ppId);
+    if (_ptoPay > 0) {
+      detailRows += '<tr style="background:#f0fdf4"><td colspan="2" style="padding-left:24px;color:#15803d;font-size:0.82rem;font-weight:600">PTO stipend</td>'+
+        '<td colspan="5"></td>'+
+        '<td style="text-align:right;color:#15803d;font-weight:700">'+fc(_ptoPay)+'</td>'+
+        '<td></td></tr>';
+    }
   });
   document.getElementById('pp-detail-tbody').innerHTML = detailRows;
 

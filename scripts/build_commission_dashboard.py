@@ -488,6 +488,10 @@ def _sanitize(obj):
         return obj.replace('\\', '\\\\').replace('"', '\\"')
     return obj
 pp_json = _json.dumps(pp_data)
+pp_dates_json = _json.dumps({
+    f"pp_{i}": {"start": s.isoformat(), "end": e.isoformat()}
+    for i, (s, e) in enumerate(pay_periods)
+})
 groomers_json = _json.dumps(groomers)
 groomer_colors_json = _json.dumps(groomer_color)
 # Convert guarantees to JS-friendly format: {name: {rate, start, end}}
@@ -889,6 +893,7 @@ var MONTHLY_DATA = {monthly_json};
 var COLORS = {groomer_colors_json};
 var GUARANTEES = {guarantees_json};
 var SUE_WEEKLY = {sue_weekly_json};
+var PP_DATES = {pp_dates_json};
 
 function fc(v) {{ return '$' + parseFloat(v).toLocaleString('en-US', {{minimumFractionDigits:2,maximumFractionDigits:2}}); }}
 
@@ -970,6 +975,41 @@ function getOverride(key) {{
 function getAdj(g, date, type) {{
   return (_adjMap[g] && _adjMap[g][date] && _adjMap[g][date][type] !== undefined) ? _adjMap[g][date][type] : null;
 }}
+
+// ── PTO Payouts (live from Supabase time_off) ─────────────────────────────────
+var PTO_RECORDS = [];
+var _PTO_LOADED = false;
+function _loadPto(cb) {{
+  if (_PTO_LOADED) {{ if (cb) cb(); return; }}
+  fetch(_sbUrl + '/rest/v1/time_off?store_key=eq.' + _storeKey + '&paid_pto=eq.true&status=eq.approved&select=employee_name,start_date,end_date', {{
+    headers: {{ 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey }}
+  }}).then(function(r){{ return r.ok ? r.json() : []; }}).then(function(d){{
+    PTO_RECORDS = d || [];
+    _PTO_LOADED = true;
+    if (cb) cb();
+  }}).catch(function(){{ _PTO_LOADED = true; if (cb) cb(); }});
+}}
+function getPtoPayout(groomer, ppId) {{
+  // Show payout in the pay period where the PTO starts (avoids splitting across periods)
+  var dates = PP_DATES[ppId];
+  if (!dates) return 0;
+  var ppStart = dates.start, ppEnd = dates.end;
+  var payout = 0;
+  PTO_RECORDS.forEach(function(r) {{
+    if (r.employee_name !== groomer) return;
+    if (r.start_date >= ppStart && r.start_date <= ppEnd) {{
+      var days = Math.round((new Date(r.end_date) - new Date(r.start_date)) / 86400000) + 1;
+      payout += Math.min(days, 5) * 100;
+    }}
+  }});
+  return payout;
+}}
+_loadPto(function() {{
+  var ppPanel = document.getElementById('panel-pp');
+  if (ppPanel && ppPanel.classList.contains('active')) {{
+    renderPayPeriod(document.getElementById('pp-select').value);
+  }}
+}});
 
 function _parseOverrideKey(key) {{
   // key format: guar_override_YYYY-MM-DD_Groomer Name
@@ -1091,6 +1131,8 @@ function renderPayPeriod(ppId) {{
   var totRetailPay = Object.values(retailPay).reduce(function(a,b){{return a+b;}}, 0);
   var totMargin = totRev - totDisc - totPaid - totRoyalties - totRent - totManager - totBatherPay - totRetailPay;
   var totMarginPct = totRev > 0 ? (totMargin / totRev * 100).toFixed(1) : '0.0';
+  var totPtoPay = 0;
+  GROOMERS.forEach(function(g) {{ totPtoPay += getPtoPayout(g, ppId); }});
 
   document.getElementById('pp-kpis').innerHTML =
     '<div class="kpi"><div class="kpi-val">'+fc(totRev)+'</div><div class="kpi-label">Groom Revenue</div></div>'+
@@ -1104,7 +1146,8 @@ function renderPayPeriod(ppId) {{
     '<div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">'+fc(totRoyalties)+'</div><div class="kpi-label">Royalties + Marketing</div></div>'+
     '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totRent)+'</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">'+PP_LENGTH+' days</div></div>'+
     '<div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">'+fc(totMargin)+'</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">'+totMarginPct+'%</div></div>'+
-    '<div class="kpi grey"><div class="kpi-val">'+totGuar+'</div><div class="kpi-label">Guarantee Days</div></div>';
+    '<div class="kpi grey"><div class="kpi-val">'+totGuar+'</div><div class="kpi-label">Guarantee Days</div></div>'+
+    (totPtoPay > 0 ? '<div class="kpi" style="border-color:#16a34a"><div class="kpi-val" style="color:#16a34a">'+fc(totPtoPay)+'</div><div class="kpi-label">PTO Payouts</div></div>' : '');
 
   // Summary rows
   var sorted = GROOMERS.slice().sort(function(a,b) {{ return (data[b]||{{total:0}}).total - (data[a]||{{total:0}}).total; }});
@@ -1129,6 +1172,8 @@ function renderPayPeriod(ppId) {{
     var guarNote = d.guar_days ? '<br><span style="font-size:0.72rem;color:#1565c0">↑ '+d.guar_days+' guar days</span>' : '';
     var avgDay = d.working_days ? fc(adjTotal/d.working_days) : '—';
     var discCell = (d.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(d.disc)+'</span>' : '—';
+    var ptoPay = getPtoPayout(g, ppId);
+    var ptoNote = ptoPay > 0 ? '<br><span style="font-size:0.72rem;color:#16a34a;font-weight:700">+'+fc(ptoPay)+' PTO</span>' : '';
     rows += '<tr>'+
       '<td>'+groomerBadge(g)+'</td>'+
       '<td style="text-align:right;color:#888;font-weight:600">'+d.working_days+'</td>'+
@@ -1137,7 +1182,7 @@ function renderPayPeriod(ppId) {{
       '<td style="text-align:right;color:#888">'+fc(d.comm)+'</td>'+
       '<td style="text-align:right;color:#1565c0;font-weight:600">'+fc(adjPaid)+guarNote+'</td>'+
       '<td style="text-align:right;color:#f57c00">'+fc(d.tips)+'</td>'+
-      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(adjTotal)+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(adjTotal)+ptoNote+'</td>'+
       '<td style="text-align:right;color:#888;font-size:0.82rem">'+avgDay+'</td>'+
       '</tr>';
   }});
@@ -1184,6 +1229,13 @@ function renderPayPeriod(ppId) {{
         '<td style="text-align:right;font-weight:600;color:#C4276E">'+fc(actualTotal)+'</td>'+
         '<td></td></tr>';
     }});
+    var _ptoPay = getPtoPayout(g, ppId);
+    if (_ptoPay > 0) {{
+      detailRows += '<tr style="background:#f0fdf4"><td colspan="2" style="padding-left:24px;color:#15803d;font-size:0.82rem;font-weight:600">PTO stipend</td>'+
+        '<td colspan="5"></td>'+
+        '<td style="text-align:right;color:#15803d;font-weight:700">'+fc(_ptoPay)+'</td>'+
+        '<td></td></tr>';
+    }}
   }});
   document.getElementById('pp-detail-tbody').innerHTML = detailRows;
 

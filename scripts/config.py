@@ -165,6 +165,7 @@ GUARANTEES = {
 RETAIL_RATES = {
     "Chris": 20.0,      # $/hr
     "Casey": 19.0,      # $/hr
+    "Trinity": 21.0,    # $/hr
     "Sitara": 19.0,     # $/hr (former)
     "Ali": 19.0,        # $/hr (former)
     "Giana": 19.0,      # $/hr (former)
@@ -174,6 +175,7 @@ RETAIL_RATES = {
 RETAIL_NAME_MAP = {
     "Christine Brower": "Chris",
     "Casey Makowski": "Casey",
+    "Trinity  Rivera": "Trinity",
     "Sitara Nagrani": "Sitara",
     "Alize James": "Ali",
     "Giana Golden": "Giana",
@@ -197,7 +199,7 @@ EXCLUDE_EMPLOYEES = {
     "Sophia Kurkowski", "Christina Ramkissoon",   # HV sales associates (former)
     "Sitara Nagrani", "Alize James",              # PW former sales associates
     "Giana Golden", "Parker Spooner",             # PW former sales associates
-    "Casey Makowski", "Christine Brower",         # PW current sales associates
+    "Casey Makowski", "Christine Brower", "Trinity  Rivera",  # PW current/recent sales associates
 }
 
 
