@@ -93,7 +93,7 @@ tr:hover td{background:#fafaf8!important}
 </head>
 <body>
 <div class="header">
-    <div class="header-timestamp">Updated May 29, 2026 at 08:12 PM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
+    <div class="header-timestamp">Updated May 30, 2026 at 02:59 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
     <h1>Woof Gang Hicksville</h1>
     <div class="subtitle">Groomer Commission Dashboard</div>
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
@@ -3578,7 +3578,9 @@ function renderPayPeriod(ppId) {
   var sorted = GROOMERS.slice().sort(function(a,b) { return (data[b]||{total:0}).total - (data[a]||{total:0}).total; });
   var rows = '';
   sorted.forEach(function(g) {
-    var d = data[g]; if (!d || (d.rev===0 && d.tips===0)) return;
+    var ptoPay = getPtoPayout(g, ppId);
+    var d = data[g] || {rev:0,disc:0,comm:0,paid:0,tips:0,total:0,working_days:0,guar_days:0,daily:[]};
+    if (d.rev===0 && d.tips===0 && ptoPay===0) return;
     // Recompute paid/total respecting guarantee overrides + commission adjustments
     var adjPaid = 0, adjTotal = 0;
     if (d.daily && d.daily.length) {
