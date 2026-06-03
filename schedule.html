@@ -1985,6 +1985,23 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeShiftM
 /* ════════════════════════════════════════
    INIT
 ════════════════════════════════════════ */
+// Store portal: lock to assigned store and hide financial tab
+if (portalLevel === 'store') {
+  var _ps = sessionStorage.getItem('wg_portal_store');
+  if (_ps) {
+    currentStore = _ps;
+    localStorage.setItem('wg_sched_store', _ps);
+  }
+  document.getElementById('tab-retail').style.display = 'none';
+  if (currentStore === 'port-washington') {
+    document.getElementById('btn-hv').style.display   = 'none';
+    document.getElementById('btn-both').style.display = 'none';
+  } else {
+    document.getElementById('btn-pw').style.display   = 'none';
+    document.getElementById('btn-both').style.display = 'none';
+  }
+}
+
 document.getElementById('btn-pw').className=currentStore==='port-washington'?'active':'';
 document.getElementById('btn-hv').className=currentStore==='hicksville'?'active':'';
 document.getElementById('btn-both').className=currentStore==='all'?'active':'';
