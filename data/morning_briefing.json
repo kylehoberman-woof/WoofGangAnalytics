@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-18T04:54:44.147018-04:00",
+  "generated_at": "2026-06-18T18:26:26.273393-04:00",
   "today": "2026-06-18",
   "yesterday": "2026-06-17",
   "week_start": "2026-06-15",
@@ -130,7 +130,7 @@
           "name": "X-Small Treat Table",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 29.5,
+          "velocity_monthly": 31.5,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -151,15 +151,6 @@
           "velocity_monthly": 5.8,
           "status": "out",
           "vendor": "Preppy Puppy"
-        },
-        {
-          "sku": "810153750673",
-          "name": "WGB Turkey Tendons Half Strip - 3oz",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 5.0,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
         },
         {
           "sku": "852301008076",
@@ -218,6 +209,15 @@
         {
           "sku": "81907",
           "name": "Preppy Puppy Pink 4\" Birthday Cake",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 3.5,
+          "status": "out",
+          "vendor": "Preppy Puppy"
+        },
+        {
+          "sku": "810017530137",
+          "name": "PP - Signature Pastry - Corgi Cannoli",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
           "velocity_monthly": 3.5,
@@ -642,9 +642,9 @@
         {
           "sku": "1001",
           "name": "X-Small Treat Table",
-          "stock": -52.0,
-          "weeks_of_supply": -5.7,
-          "velocity_monthly": 39.8,
+          "stock": -54.0,
+          "weeks_of_supply": -5.8,
+          "velocity_monthly": 40.2,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -932,17 +932,9 @@
           "status": "out"
         },
         {
-          "item_name": "Large brown paper bags",
-          "category": "Bag and Packaging",
-          "current_quantity": 0.5,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "order"
-        },
-        {
           "item_name": "Masks",
           "category": "Grooming",
-          "current_quantity": 0.5,
+          "current_quantity": 0.25,
           "reorder_level": 0.5,
           "unit": "Boxes",
           "status": "order"
@@ -956,9 +948,17 @@
           "status": "order"
         },
         {
+          "item_name": "Small pink plastic bags",
+          "category": "Bag and Packaging",
+          "current_quantity": 0.5,
+          "reorder_level": 0.5,
+          "unit": "Boxes",
+          "status": "order"
+        },
+        {
           "item_name": "Tooth Paste",
           "category": "Grooming",
-          "current_quantity": 1.0,
+          "current_quantity": 0.75,
           "reorder_level": 2.0,
           "unit": "Bottles",
           "status": "order"
@@ -966,14 +966,30 @@
         {
           "item_name": "Woof Gang Shampoo",
           "category": "Grooming",
-          "current_quantity": 3.25,
+          "current_quantity": 3.0,
           "reorder_level": 4.0,
           "unit": "Bottles",
           "status": "order"
         },
         {
+          "item_name": "Ear Cleaner",
+          "category": "Grooming",
+          "current_quantity": 0.75,
+          "reorder_level": 0.5,
+          "unit": "Bottles",
+          "status": "low"
+        },
+        {
           "item_name": "Gloves",
           "category": "Grooming",
+          "current_quantity": 0.75,
+          "reorder_level": 0.5,
+          "unit": "Boxes",
+          "status": "low"
+        },
+        {
+          "item_name": "Large pink plastic bags",
+          "category": "Bag and Packaging",
           "current_quantity": 0.75,
           "reorder_level": 0.5,
           "unit": "Boxes",
@@ -983,5 +999,5 @@
       "upcoming_closures": []
     }
   },
-  "summary_text": "Kyle, yesterday was mixed \u2014 Port Washington absorbed a mid-week dip driven entirely by capacity and Juneteenth proximity, while Hicksville outperformed expectations and is running hot on fundamentals.\n\nPort Washington: The 15% revenue drop and 24% transaction decline were real, but not alarming. You had 5 groomers producing $531 per groomer \u2014 above your 30-day baseline of $501 \u2014 which means the team executed well against constrained capacity. The issue is appointment count: down 19% week-to-date and 24% yesterday specifically. This is structural: Juneteenth lands tomorrow, and Wednesday bookings always compress ahead of a holiday weekend. Your DOW-adjusted expectation shows you're only 1.4% below trend for the month. One operational flag: add-on attach rate collapsed from 55% to 38%, and add-on revenue dropped 36%. This suggests front-of-house upsell discipline softened \u2014 worth a conversation with your lead on floor positioning. The good news: year-to-date you're up 52% in revenue and 53% in appointments against last year. That's not noise.\n\nHicksville is the story. Despite running at 3 groomers (vs Port's 5), you posted 11% revenue growth, 17% grooming growth, and beat DOW-adjusted expectations by nearly 10 percentage points. Per-groomer productivity is down slightly at $348 (baseline $389), but that's noise against the booking surge \u2014 you're up 21% appointments week-to-date and 17% month-to-date. The retail miss (down 20%) and add-on collapse (50% to 20% attach) are parallel operational signals: front-of-house focus is needed at both stores. One concern: Hicksville's 12+ week visit bucket is drifting (up 1.8 pp to 10.2%), a leading indicator of stealth churn in a smaller customer base.\n\nToday you're running 5 and 2 groomers respectively; tomorrow jumps to 6 and 2 ahead of Juneteenth. Next 7 days: 39 total groomer-days split (30 Port, 9 Hicksville) \u2014 Port is properly staffed, Hicksville is chronically under-capacity at 1.3 groomer-days per day."
+  "summary_text": "Kyle,\n\nPort Washington is running ahead of plan year-to-date\u2014up 52% in revenue and 53% in appointments versus last year\u2014which is the one thing to be proud of here. Month-to-date, the store is tracking just 1.4% below DOW-adjusted expectation, so calendar mix accounts for the gap; yesterday's 15% dip is structural (Juneteenth in two days typically depresses bookings by ~10%), not operational. The real operational signal is add-on attach rate: it collapsed from 55% last Wednesday to 38% yesterday. That's a upsell discipline problem on the grooming floor. Core groom revenue fell 15%, but with only 5 active groomers producing $531 per groomer (above the 30-day baseline of $501), the team is running hot. The unit needs to recover upsell rigor before Juneteenth hits tomorrow.\n\nHicksville is outperforming expectations\u2014up 9.9% versus DOW-adjusted forecast and up 5% month-to-date\u2014but is signaling structural risk. Yesterday's add-on revenue was $30 against a typical $45 (33% miss), and critically, the 12+ week visit-gap cohort is growing (8.4% to 10.2%), indicating customers are stretching intervals and drifting quietly. With just 2 groomers scheduled through the weekend and zero bather hours, Hicksville is capacity-constrained and cannot service demand to retain that lapse pool. That's the thing to pay attention to. The 58-customer lapse pool ($39,960 annual value) is reachable, but only if you staff to answer the phone.\n\n**Capacity & coverage:** Today you have 7 active groomer-days across both stores with 7.0h bathers at Port Washington and 0h at Hicksville; tomorrow 8 groomer-days with the same bath split; next 7 days 39 scheduled groomer-days total, which should carry you through Juneteenth but leaves Hicksville thin."
 }
