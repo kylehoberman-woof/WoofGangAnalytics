@@ -164,7 +164,7 @@ GUARANTEES = {
 # PW retail/bather fallbacks — managed in Supabase going forward
 RETAIL_RATES = {
     "Chris": 20.0,      # $/hr
-    "Casey": 19.0,      # $/hr
+    "Casey": 21.0,      # $/hr — anniversary raise effective 2026-06-20
     "Trinity": 21.0,    # $/hr
     "Sitara": 19.0,     # $/hr (former)
     "Ali": 19.0,        # $/hr (former)

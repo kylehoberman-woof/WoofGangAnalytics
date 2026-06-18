@@ -73,9 +73,9 @@ def shift_hours(start_time, end_time):
 OUT_FILE = PROJ_ROOT / "data" / "retail_staffing.json"
 OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-# Retail staff + rates at PW (Casey's raise to $20 pending — we track actual history)
+# Retail staff + rates at PW
 PW_RETAIL = {
-    'Casey Makowski': {'current_rate': 19.00, 'role': 'retail'},
+    'Casey Makowski': {'current_rate': 21.00, 'role': 'retail'},
     'Christine Brower': {'current_rate': 20.00, 'role': 'retail'},
 }
 
