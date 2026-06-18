@@ -161,10 +161,36 @@ GUARANTEES = {
     "Julia B":         (200.0, "2026-02-03", "2026-05-04"),
 }
 
+# Rate change history for employees with mid-employment raises.
+# Keyed by both short name and full name so callers don't need to normalize.
+# Each entry is a list of {"rate": float, "effective": "YYYY-MM-DD"} sorted ascending.
+RETAIL_RATE_CHANGES = {
+    "Casey":           [{"rate": 19.0, "effective": "2025-06-20"}, {"rate": 21.0, "effective": "2026-06-20"}],
+    "Casey Makowski":  [{"rate": 19.0, "effective": "2025-06-20"}, {"rate": 21.0, "effective": "2026-06-20"}],
+}
+
+
+def get_retail_rate(name: str, work_date: str, fallback_rates: dict) -> float:
+    """Return the correct hourly rate for an employee on a given YYYY-MM-DD date.
+
+    Accepts either the short name ('Casey') or full name ('Casey Makowski').
+    """
+    history = RETAIL_RATE_CHANGES.get(name)
+    if history:
+        rate = history[0]["rate"]
+        for step in history:
+            if work_date >= step["effective"]:
+                rate = step["rate"]
+            else:
+                break
+        return rate
+    return fallback_rates.get(name, 0.0)
+
+
 # PW retail/bather fallbacks — managed in Supabase going forward
 RETAIL_RATES = {
     "Chris": 20.0,      # $/hr
-    "Casey": 21.0,      # $/hr — anniversary raise effective 2026-06-20
+    "Casey": 21.0,      # $/hr — current rate (use get_retail_rate for historical accuracy)
     "Trinity": 21.0,    # $/hr
     "Sitara": 19.0,     # $/hr (former)
     "Ali": 19.0,        # $/hr (former)

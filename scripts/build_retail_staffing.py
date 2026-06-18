@@ -27,6 +27,7 @@ from config import (
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_START, STORE_OPEN_DATES,
     SUPABASE_URL, SUPABASE_ANON_KEY,
+    get_retail_rate,
 )
 
 try:
@@ -209,8 +210,9 @@ def build_store_staffing(store_key):
     if _max_data_date:
         today = min(today, date.fromisoformat(_max_data_date))
 
-    # Monthly retail hours per person
+    # Monthly retail hours + costs per person (costs use date-aware rates)
     monthly_hours = defaultdict(lambda: defaultdict(float))
+    monthly_costs = defaultdict(lambda: defaultdict(float))
     for c in clocks:
         emp = (c.get('EmployeeName') or '').strip()
         ti = c.get('TimeIn', '')
@@ -219,7 +221,10 @@ def build_store_staffing(store_key):
         if ti[:7] < START:
             continue
         hrs = parse_hours(ti, c.get('TimeOut', ''))
+        fallback = {nm: info['current_rate'] for nm, info in retail_cfg.items()}
+        rate = get_retail_rate(emp, ti[:10], fallback)
         monthly_hours[ti[:7]][emp] += hrs
+        monthly_costs[ti[:7]][emp] += hrs * rate
 
     # Monthly sales (total net revenue)
     monthly_sales = defaultdict(float)
@@ -242,7 +247,7 @@ def build_store_staffing(store_key):
     for m in months:
         y, mo = int(m[:4]), int(m[5:7])
 
-        # Per-person hours + costs
+        # Per-person hours + costs (costs from monthly_costs which use date-aware rates)
         people = []
         retail_hrs = 0
         retail_cost = 0.0
@@ -250,11 +255,11 @@ def build_store_staffing(store_key):
             hrs = monthly_hours[m].get(nm, 0)
             if hrs <= 0:
                 continue
-            rate = info['current_rate']
-            cost = round(hrs * rate, 2)
+            cost = round(monthly_costs[m].get(nm, 0), 2)
+            effective_rate = round(cost / hrs, 2) if hrs else info['current_rate']
             retail_hrs += hrs
             retail_cost += cost
-            people.append({'name': nm, 'hrs': round(hrs, 1), 'rate': rate, 'cost': cost})
+            people.append({'name': nm, 'hrs': round(hrs, 1), 'rate': effective_rate, 'cost': cost})
         retail_cost = round(retail_cost, 2)
 
         mgr_cost = manager_salary_for_month(y, mo, today, include_bonus=False) if include_manager else 0.0
@@ -281,9 +286,9 @@ def build_store_staffing(store_key):
         # Back-compat for existing PW-only JS: keep Casey/Chris/Cindy aliases
         if store_key == 'port-washington':
             row['casey_hrs']  = round(monthly_hours[m].get('Casey Makowski', 0), 1)
-            row['casey_cost'] = round(monthly_hours[m].get('Casey Makowski', 0) * PW_RETAIL['Casey Makowski']['current_rate'], 2)
+            row['casey_cost'] = round(monthly_costs[m].get('Casey Makowski', 0), 2)
             row['chris_hrs']  = round(monthly_hours[m].get('Christine Brower', 0), 1)
-            row['chris_cost'] = round(monthly_hours[m].get('Christine Brower', 0) * PW_RETAIL['Christine Brower']['current_rate'], 2)
+            row['chris_cost'] = round(monthly_costs[m].get('Christine Brower', 0), 2)
             row['cindy_cost'] = row['mgr_cost']
         rows.append(row)
 

@@ -17,6 +17,7 @@ from config import (
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
     get_royalty_rate, get_monthly_rent, PORTAL_BACK_JS,
+    get_retail_rate,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data
@@ -137,6 +138,22 @@ def get_hours_from_clocks(clocks, name_map, period_start, period_end):
             hrs = c.get("TotalTimeClockHoursDecimal") or 0
             hours[short_name] = hours.get(short_name, 0) + hrs
     return {k: round(v, 2) for k, v in hours.items()}
+
+
+def get_pay_from_clocks(clocks, name_map, period_start, period_end, flat_rates):
+    """Like get_hours_from_clocks but returns total pay using date-aware rates."""
+    pay = {}
+    for c in clocks:
+        full_name = c.get("EmployeeName", "")
+        short_name = name_map.get(full_name)
+        if not short_name:
+            continue
+        time_in = (c.get("TimeIn") or "")[:10]
+        if period_start <= time_in <= period_end:
+            hrs = c.get("TotalTimeClockHoursDecimal") or 0
+            rate = get_retail_rate(short_name, time_in, flat_rates)
+            pay[short_name] = pay.get(short_name, 0) + hrs * rate
+    return {k: round(v, 2) for k, v in pay.items()}
 
 
 def manager_salary_for_range(start, end):
@@ -261,7 +278,7 @@ while m_start <= TODAY:
     bather_hrs = get_hours_from_clocks(data.get("time_clocks", []), BATHER_NAME_MAP, s, e)
     bather_pay = round(sum(h * BATHER_RATE_MAP.get(name, BATHER_RATE) for name, h in bather_hrs.items()), 2)
     retail_hrs = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s, e)
-    retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in retail_hrs.items()), 2)
+    retail_pay = round(sum(get_pay_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, s, e, RETAIL_RATES).values()), 2)
     _royalty_rate = get_royalty_rate(_store_name, m_start)
     royalties = round(total_rev * _royalty_rate, 2)
     rent = get_monthly_rent(_store_name, m_start)
