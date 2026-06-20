@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T04:04:35.013124-04:00",
+  "generated_at": "2026-06-20T16:22:23.860100-04:00",
   "today": "2026-06-20",
   "yesterday": "2026-06-19",
   "week_start": "2026-06-15",
@@ -130,7 +130,7 @@
           "name": "X-Small Treat Table",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 32.5,
+          "velocity_monthly": 33.0,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -148,7 +148,7 @@
           "name": "Preppy Puppy Cannoli",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 6.7,
+          "velocity_monthly": 7.3,
           "status": "out",
           "vendor": "Preppy Puppy"
         },
@@ -162,13 +162,13 @@
           "vendor": "Woof Gang Private Label"
         },
         {
-          "sku": "072705115273",
-          "name": "Fromm Gold Dog Dry Adult 5#",
+          "sku": "810153750611",
+          "name": "WGB Yak Cheese Medium",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 4.3,
+          "velocity_monthly": 4.0,
           "status": "out",
-          "vendor": "Fromm"
+          "vendor": "Woof Gang Private Label"
         },
         {
           "sku": "810153750710",
@@ -196,15 +196,6 @@
           "velocity_monthly": 4.0,
           "status": "out",
           "vendor": "Other"
-        },
-        {
-          "sku": "810153750611",
-          "name": "WGB Yak Cheese Medium",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 3.8,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
         },
         {
           "sku": "852301008076",
@@ -259,6 +250,15 @@
           "velocity_monthly": 3.0,
           "status": "out",
           "vendor": "Fromm"
+        },
+        {
+          "sku": "810153751083",
+          "name": "WGB Freeze Dried Chicken Breast 3oz",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 3.0,
+          "status": "out",
+          "vendor": "Woof Gang Private Label"
         },
         {
           "sku": "784369487060",
@@ -404,14 +404,6 @@
       },
       "supplies_needed": [
         {
-          "item_name": "Treat bags",
-          "category": "Bag and Packaging",
-          "current_quantity": 0.0,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "out"
-        },
-        {
           "item_name": "Cotton Balls",
           "category": "Grooming",
           "current_quantity": 0.25,
@@ -420,31 +412,7 @@
           "status": "order"
         },
         {
-          "item_name": "Disinfectant",
-          "category": "Cleaning",
-          "current_quantity": 0.5,
-          "reorder_level": 0.5,
-          "unit": "Bottles",
-          "status": "order"
-        },
-        {
-          "item_name": "Gloves",
-          "category": "Grooming",
-          "current_quantity": 0.5,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "order"
-        },
-        {
-          "item_name": "Masks",
-          "category": "Grooming",
-          "current_quantity": 0.5,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "order"
-        },
-        {
-          "item_name": "Moisturizing Shampoo",
+          "item_name": "Hypo allergenic Conditioner (calming lavender)",
           "category": "Grooming",
           "current_quantity": 0.5,
           "reorder_level": 0.5,
@@ -460,26 +428,18 @@
           "status": "order"
         },
         {
-          "item_name": "Small brown paper bags",
-          "category": "Bag and Packaging",
-          "current_quantity": 0.5,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "order"
-        },
-        {
           "item_name": "Tooth Brush",
           "category": "Grooming",
-          "current_quantity": 0.5,
+          "current_quantity": 1.0,
           "reorder_level": 1.0,
           "unit": "Bottles",
           "status": "order"
         },
         {
-          "item_name": "Windex",
-          "category": "Cleaning",
-          "current_quantity": 0.5,
-          "reorder_level": 0.5,
+          "item_name": "Tooth Paste",
+          "category": "Grooming",
+          "current_quantity": 2.0,
+          "reorder_level": 2.0,
           "unit": "Bottles",
           "status": "order"
         },
@@ -492,26 +452,18 @@
           "status": "order"
         },
         {
-          "item_name": "Hypo allergenic Conditioner (calming lavender)",
-          "category": "Grooming",
+          "item_name": "Windex",
+          "category": "Cleaning",
           "current_quantity": 0.75,
           "reorder_level": 0.5,
           "unit": "Bottles",
           "status": "low"
         },
         {
-          "item_name": "Tooth Paste",
+          "item_name": "Woof Gang Shampoo",
           "category": "Grooming",
-          "current_quantity": 3.0,
-          "reorder_level": 2.0,
-          "unit": "Bottles",
-          "status": "low"
-        },
-        {
-          "item_name": "Volumizing",
-          "category": "Grooming",
-          "current_quantity": 0.75,
-          "reorder_level": 0.5,
+          "current_quantity": 6.0,
+          "reorder_level": 4.0,
           "unit": "Bottles",
           "status": "low"
         }
@@ -642,9 +594,9 @@
         {
           "sku": "1001",
           "name": "X-Small Treat Table",
-          "stock": -55.0,
-          "weeks_of_supply": -6.1,
-          "velocity_monthly": 39.0,
+          "stock": -62.0,
+          "weeks_of_supply": -6.6,
+          "velocity_monthly": 40.8,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -999,5 +951,5 @@
       "upcoming_closures": []
     }
   },
-  "summary_text": "Kyle,\n\nPort Washington is performing well against the calendar and showing real momentum year-to-date, but yesterday's 12% revenue miss was Juneteenth-driven \u2014 the holiday depressed bookings roughly as expected. Stripping that out, your DOW-adjusted performance sits at \u20131.1%, which is essentially flat. Month-to-date you're up 10% on revenue and 13% on appointments versus May, a genuine operational win. Year-to-date growth of 51% in revenue on 53% more appointments is the story: you're scaling. Yesterday's $478/groomer is 5% below your 30-day baseline of $505, but that's noise in a single day; your team is running hot across the month at 4.2 groomer-days daily versus 3.8 last month.\n\nHicksville is the watch. Yesterday's 20% revenue drop looks worse than it is \u2014 after DOW adjustment you're actually +9.4% month-to-date, which is solid. But your visit-cadence data is flashing yellow: the 12+ week gap bucket grew from 8.4% to 10.2% in recent weeks, signaling customers are stretching intervals. That's stealth churn. Add-ons underperformed at Hicksville (31% attach versus 27% last week) while retail popped 43%, suggesting front-of-house focus is mixed. The good news: you're $420/groomer yesterday versus a 30-day baseline of $389, so your three groomers are punching above their weight.\n\nOne operational concern across both stores: Hicksville has zero bather hours scheduled today and tomorrow, and only 9 groomer-days over the next week \u2014 that's skeletal. Port Washington's tomorrow is also bare (zero groomers, one day out). This weekend coverage gap will bottleneck revenue.\n\n**Capacity & coverage: Port Washington has 3 groomers + 8.0 bather hours today, zero groomers tomorrow; Hicksville has 1 groomer today, zero tomorrow; next 7 days: 39 combined groomer-days across both locations.**"
+  "summary_text": "Kyle,\n\nYesterday's revenue miss is Juneteenth\u2014not execution. Port Washington landed at \u20131.1% versus the DOW-adjusted expectation; Hicksville actually beat it by 9.4%. Juneteenth depressed bookings as expected. What matters is the underlying trend: Port is on pace to grow June double-digit YoY, with appointment volume up 13% MTD; Hicksville is tracking 12% revenue growth and 24% appointment growth MTD, and your team at that location is running hot\u2014$420 per groomer yesterday against a $389 trailing baseline. The real strength here is capacity deployment: you're running 4.2 groomer-days per day at Port (up from 3.8 last month) and 2.2 at Hicksville (up from 1.8), and both stores are monetizing that growth.\n\nOne concern: Hicksville's visit-cadence bucket is drifting. The 12+ week gap cohort grew from 8.4% to 10.2%\u2014a subtle sign customers are stretching their intervals. With only 58 total lapsed customers (vs. Port's 486), this is a smaller pool, but the trajectory warrants attention. At Port, retail is holding steady and add-on attach is actually climbing (62% vs. 59% last week), so upsell discipline is sound there.\n\nInventory reorder is urgent at both locations\u2014you're short on X-Small Treat Tables and Cannoli (top performers) and running negative stock on some items. Port's bather hours yesterday were strong (6.6h), giving you throughput cushion. Hicksville has zero bather coverage, which is artificially constraining groomer capacity.\n\n**Capacity & coverage: Today you have 4 groomer-days (3 Port, 1 Hicksville) with 8h bather support at Port and zero at Hicksville; tomorrow is a zero-groomer Saturday (holiday bleed); next 7 days you have 39 groomer-days scheduled (30 Port, 9 Hicksville) with 43h bather hours (all Port).**"
 }
