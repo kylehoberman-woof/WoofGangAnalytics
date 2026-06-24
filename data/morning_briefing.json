@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-24T03:29:29.043731-04:00",
+  "generated_at": "2026-06-24T18:01:04.144410-04:00",
   "today": "2026-06-24",
   "yesterday": "2026-06-23",
   "week_start": "2026-06-22",
@@ -130,7 +130,7 @@
           "name": "X-Small Treat Table",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 34.0,
+          "velocity_monthly": 35.0,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -153,6 +153,15 @@
           "vendor": "Preppy Puppy"
         },
         {
+          "sku": "072705115273",
+          "name": "Fromm Gold Dog Dry Adult 5#",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 5.7,
+          "status": "out",
+          "vendor": "Fromm"
+        },
+        {
           "sku": "810153750611",
           "name": "WGB Yak Cheese Medium",
           "stock": 0.0,
@@ -169,6 +178,15 @@
           "velocity_monthly": 5.0,
           "status": "out",
           "vendor": "Stella & Chewy's"
+        },
+        {
+          "sku": "072705115570",
+          "name": "Fromm Gold Dog Dry Puppy 5#",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 5.0,
+          "status": "out",
+          "vendor": "Fromm"
         },
         {
           "sku": "810153750376",
@@ -207,11 +225,20 @@
           "vendor": "Stella & Chewy's"
         },
         {
+          "sku": "616312421497",
+          "name": "WGB Collagen Small Roll (5\") Beef  (2 pack)",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 4.0,
+          "status": "out",
+          "vendor": "Woof Gang Bakery"
+        },
+        {
           "sku": "810017530137",
           "name": "PP - Signature Pastry - Corgi Cannoli",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 3.5,
+          "velocity_monthly": 4.0,
           "status": "out",
           "vendor": "Preppy Puppy"
         },
@@ -277,33 +304,6 @@
           "velocity_monthly": 3.0,
           "status": "out",
           "vendor": "Pet First"
-        },
-        {
-          "sku": "810153750802",
-          "name": "WGB Functional Hip & Joint- 4oz",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 2.8,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
-        },
-        {
-          "sku": "812121031418",
-          "name": "Earth Animal Dog Treat No Hide Peanut Butter Sma",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 2.7,
-          "status": "out",
-          "vendor": "Earth Animal"
-        },
-        {
-          "sku": "850067859666",
-          "name": "Woof Honest Chew Antler Medium",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 2.7,
-          "status": "out",
-          "vendor": "WOOF"
         }
       ],
       "mtd_dow_adjusted_expected": 67169.43,
@@ -387,9 +387,9 @@
           "avg_bather_hours_per_day": 5.0
         },
         "today_scheduled": {
-          "groomers": 6,
+          "groomers": 5,
           "bathers": 1,
-          "groomer_hours": 46.0,
+          "groomer_hours": 38.5,
           "bather_hours": 7.0
         },
         "tomorrow_scheduled": {
@@ -399,7 +399,7 @@
           "bather_hours": 7.0
         },
         "next_7_days": {
-          "groomer_days": 29,
+          "groomer_days": 28,
           "bather_hours": 43.0
         }
       },
@@ -474,19 +474,19 @@
     "hicksville": {
       "label": "Hicksville",
       "yesterday": {
-        "total_rev": 1307.35,
+        "total_rev": 1309.85,
         "groom_rev": 1205.0,
         "core_groom_rev": 1130.0,
         "addon_rev": 75.0,
         "addon_count": 6,
         "addon_attach_rate": 36.4,
         "addon_avg_value": 12.5,
-        "retail_rev": 102.35,
+        "retail_rev": 104.85,
         "grooms": 11,
         "baths": 0,
         "appointments": 11,
-        "transactions": 16,
-        "avg_ticket": 81.71
+        "transactions": 17,
+        "avg_ticket": 77.05
       },
       "last_week_same_day": {
         "total_rev": 1047.9,
@@ -504,18 +504,18 @@
         "avg_ticket": 69.86
       },
       "wtd": {
-        "total_rev": 1820.39,
+        "total_rev": 1822.89,
         "groom_rev": 1540.0,
         "core_groom_rev": 1435.0,
         "addon_rev": 105.0,
         "addon_count": 8,
         "addon_attach_rate": 42.9,
         "addon_avg_value": 13.12,
-        "retail_rev": 280.39,
+        "retail_rev": 282.89,
         "grooms": 14,
         "baths": 0,
         "appointments": 14,
-        "transactions": 22
+        "transactions": 23
       },
       "prev_wtd": {
         "total_rev": 1388.91,
@@ -532,18 +532,18 @@
         "transactions": 23
       },
       "mtd": {
-        "total_rev": 22553.14,
+        "total_rev": 22555.64,
         "groom_rev": 18633.0,
         "core_groom_rev": 17363.0,
         "addon_rev": 1045.0,
         "addon_count": 82,
         "addon_attach_rate": 33.0,
         "addon_avg_value": 12.74,
-        "retail_rev": 3895.14,
+        "retail_rev": 3897.64,
         "grooms": 162,
         "baths": 23,
         "appointments": 185,
-        "transactions": 345
+        "transactions": 346
       },
       "prev_mtd": {
         "total_rev": 22082.82,
@@ -562,18 +562,18 @@
       "mtd_label": "Jun 1 \u2192 Jun 23",
       "prev_mtd_label": "May 1 \u2192 May 23",
       "ytd": {
-        "total_rev": 137277.7,
+        "total_rev": 137280.2,
         "groom_rev": 106426.0,
         "core_groom_rev": 99621.0,
         "addon_rev": 5980.0,
         "addon_count": 496,
         "addon_attach_rate": 35.9,
         "addon_avg_value": 12.06,
-        "retail_rev": 30526.7,
+        "retail_rev": 30529.2,
         "grooms": 971,
         "baths": 127,
         "appointments": 1098,
-        "transactions": 2429
+        "transactions": 2430
       },
       "prev_ytd": {
         "total_rev": 0.0,
@@ -595,9 +595,9 @@
         {
           "sku": "1001",
           "name": "X-Small Treat Table",
-          "stock": -70.0,
-          "weeks_of_supply": -7.3,
-          "velocity_monthly": 41.5,
+          "stock": -72.0,
+          "weeks_of_supply": -7.4,
+          "velocity_monthly": 42.0,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
@@ -615,7 +615,7 @@
           "name": "Broken But Delicious",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 7.8,
+          "velocity_monthly": 8.2,
           "status": "out",
           "vendor": "Other"
         },
@@ -692,6 +692,15 @@
           "vendor": "Multipet"
         },
         {
+          "sku": "810153751687",
+          "name": "WGB Toys - Pig Stick",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 2.5,
+          "status": "out",
+          "vendor": "Woof Gang Bakery"
+        },
+        {
           "sku": "810153750000",
           "name": "WGB Bully Stick Regular 6\"",
           "stock": 0.0,
@@ -762,15 +771,6 @@
           "velocity_monthly": 2.0,
           "status": "out",
           "vendor": "Huxley & Kent"
-        },
-        {
-          "sku": "810153751236",
-          "name": "WGB Pink Bags Soft Cookies PEANUT BUTTER & CAROB",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 2.0,
-          "status": "out",
-          "vendor": "Woof Gang Bakery"
         }
       ],
       "mtd_dow_adjusted_expected": 21237.59,
@@ -952,5 +952,5 @@
       "upcoming_closures": []
     }
   },
-  "summary_text": "Kyle, yesterday was a solid day across both locations despite Father's Day dampening Tuesday traffic\u2014Port Washington delivered $4,012 (up 4% YoY adjusted) and Hicksville surged 25% to $1,307, a meaningful rebound. Here's what matters.\n\nPort Washington is performing exactly on trend: MTD you're flat to plan when adjusted for calendar, up 51% year-over-year, and your team ran hot yesterday at $574/groomer against a $503 baseline\u2014that's execution. Core groom revenue is climbing week-to-week, and transaction count jumped 10%, signaling good volume and ticket discipline. One concern: retail revenue dropped 9% and add-on attach fell from 59% to 50%, suggesting front-of-house focus and upsell discipline need tightening. Bather hours were zero yesterday (trailing average 5.0h/day); that's a capacity miss you should notice. You also have 20 retail SKUs out of stock\u2014X-Small Treat Tables and Cannoli are negative inventory, which is leaving money on the table.\n\nHicksville is the story: grooming revenue up 34% week-over-week, $/groomer at $402 (on baseline), and MTD you're actually outperforming expectation by 6.2% when adjusted for calendar. That's real performance. But I'm flagging a leading indicator: your 12+ week visit-gap bucket grew from 8.4% to 10.2%\u2014customers are stretching out their intervals, which is stealth churn. You have 58 dormant customers worth $40k annually; reactivation should be a priority. Like Port Washington, retail cratered 31%, and you have negative inventory on Treat Tables and Cannoli.\n\nToday: Port Washington has 6 groomers and 7.0 bather hours scheduled; Hicksville has 1 groomer and 0 bathers. Next 7 days: 39 total groomer-days split Port (29) and Hicksville (10), with only 43 bather hours all at Port Washington."
+  "summary_text": "Kyle, Port Washington ran hot yesterday post-Father's Day despite expected holiday drag, while Hicksville posted strong comps but shows a staffing cliff ahead.\n\n**Port Washington is firing.** Yesterday's $574/groomer crushes your trailing-30-day baseline of $503\u2014the team executed well with six groomers on the floor and all conversations about productivity belong in the positive column. Week-to-date revenue is up 18% and year-to-date you're +51% appointments versus last year. The one operational note: retail dropped 9% and add-on attach fell from 59% to 50%, suggesting either front-of-house focus slipped or upsell discipline needs tightening. Both are fixable. Month-to-date sits dead flat versus last month after DOW adjustment\u2014acceptable given Father's Day timing\u2014but don't let retail deterioration hide behind the grooming win.\n\n**Hicksville delivered 25% growth yesterday on just three groomers at $402/groomer, exceeding baseline, and month-to-date is +6.2% after calendar normalization.** That's real performance, not calendar luck. The concern: you're scheduled for only one groomer today and two tomorrow, which will crater daily productivity and bookings. Next seven days show just ten groomer-days across Hicksville\u2014a structural capacity constraint that will show up in revenue within days. Additionally, the 12+ week visit gap is drifting wider (8.4% to 10.2%), an early warning that some customers are stretching appointments or lapsing quietly. With a $40K lapse pool, this warrants a reactivation touchpoint.\n\n**Today: Port Washington 5 groomers + 7h bathers; Hicksville 1 groomer + 0h bathers. Next 7 days: Port Washington 28 groomer-days, Hicksville 10 groomer-days\u2014address Hicksville's capacity cliff before it affects June close.**"
 }
