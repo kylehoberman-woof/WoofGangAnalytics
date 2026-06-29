@@ -353,8 +353,14 @@ STORE_OPEN = date(2024, 9, 26)
 # Store-specific pay period settings
 PAY_PERIOD_CONFIG = {
     "port-washington": {
-        "length_days": 14,           # bi-weekly
-        "anchor": date(2026, 2, 23), # Monday
+        "length_days": 7,            # weekly, effective Jun 29 2026
+        "anchor": date(2026, 6, 29), # Monday
+        # Prior to the transition date, PW ran bi-weekly. Periods before
+        # transition_date must keep using the old anchor/length so already-paid
+        # historical periods don't get recomputed with the new weekly grouping.
+        "prior_length_days": 14,
+        "prior_anchor": date(2026, 2, 23),
+        "transition_date": date(2026, 6, 29),
     },
     "hicksville": {
         "length_days": 7,            # weekly

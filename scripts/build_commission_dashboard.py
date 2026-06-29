@@ -179,13 +179,26 @@ def build_pay_periods():
     length = pp_cfg["length_days"]
     anchor = pp_cfg["anchor"]
     store_open = STORE_OPEN_DATES.get(_store_name, STORE_OPEN)
+    transition_date = pp_cfg.get("transition_date")
 
     periods = []
+
+    if transition_date:
+        # Pre-transition history uses the old cadence so already-paid periods
+        # keep their original boundaries.
+        prior_length = pp_cfg["prior_length_days"]
+        prior_anchor = pp_cfg["prior_anchor"]
+        start = prior_anchor
+        while start > store_open:
+            start -= timedelta(days=prior_length)
+        while start < transition_date:
+            end = start + timedelta(days=prior_length - 1)
+            if end >= store_open:
+                periods.append((start, min(end, transition_date - timedelta(days=1))))
+            start += timedelta(days=prior_length)
+
+    # Current cadence, forward from anchor through today.
     start = anchor
-    # Go back to store open
-    while start > store_open:
-        start -= timedelta(days=length)
-    # Build forward
     while start <= TODAY:
         end = start + timedelta(days=length - 1)
         if end >= store_open and start <= TODAY:
