@@ -17,6 +17,7 @@ from config import (
     STORE_RENT, PAY_PERIOD_CONFIG,
     STORE_OPEN_DATES, get_royalty_rate, get_monthly_rent,
     SUPABASE_URL, SUPABASE_ANON_KEY, PORTAL_BACK_JS,
+    STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data, get_exclude_set
@@ -24,12 +25,14 @@ from fetch_employees import get_store_pay_data, get_exclude_set
 SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 _store = get_store(_store_name)
-_store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
+_store_display = get_store_display(_store_name)
 _home_url = "../index.html"
-_other_store = "Hicksville" if _store_name == "port-washington" else "Port Washington"
-_other_dir = "../hicksville" if _store_name == "port-washington" else "../port-washington"
-_other_fn = "Hicksville" if _store_name == "port-washington" else "PortWashington"
-_switch_url = f"{_other_dir}/WoofGang_{_other_fn}_Commission_Dashboard.html"
+_other_keys = get_other_stores(_store_name)
+# Backward-compat single-other-store variables (first other store)
+_other_store = get_store_display(_other_keys[0]) if _other_keys else ""
+_other_dir = f"../{_other_keys[0]}" if _other_keys else ".."
+_other_fn = get_store_fn(_other_keys[0]) if _other_keys else ""
+_switch_url = f"{_other_dir}/WoofGang_{_other_fn}_Commission_Dashboard.html" if _other_keys else ""
 MONTHLY_RENT = STORE_RENT.get(_store_name, _DEFAULT_RENT)
 
 # Load employee maps/rates from Supabase (falls back to config.py if not yet populated)

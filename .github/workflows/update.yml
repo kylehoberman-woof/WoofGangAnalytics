@@ -5,9 +5,24 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+
+# ── To add a new store: ──────────────────────────────────────────────────────
+# 1. Add the store to data/stores.json with its franpos_token_env key
+# 2. Add the token secret to GitHub repo settings
+# 3. Add the store key to the matrix below (one line change)
+# ────────────────────────────────────────────────────────────────────────────
+
 jobs:
-  update:
+  update-store:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        store: [port-washington, hicksville]
+      fail-fast: false
+    env:
+      FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+      FRANPOS_TOKEN_PW: ${{ secrets.FRANPOS_TOKEN }}
+      FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,100 +34,87 @@ jobs:
           python-version: "3.11"
       - run: pip install httpx pandas openpyxl requests
 
-      # ── Port Washington ──
-      - name: Port Washington - Executive dashboard
-        env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+      - name: ${{ matrix.store }} - Fetch data (executive dashboard)
         run: |
           find . -name "*.pyc" -delete
           find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
-          cd scripts && python run.py
-      - name: Port Washington - Commission dashboard
-        run: python3 scripts/build_commission_dashboard.py
-      - name: Port Washington - Fetch stock levels
-        env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
-        run: python3 scripts/fetch_stock.py
-      - name: Port Washington - Fetch brand data
-        env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
-        run: python3 scripts/fetch_brands.py
-      - name: Port Washington - Inventory dashboard
-        run: cd scripts && python generate_inventory_dashboard.py
-      - name: Port Washington - Fetch tickets (payment data)
-        env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
-        run: python3 scripts/fetch_tickets.py
-      - name: Port Washington - Financial dashboard
-        run: python3 scripts/build_financial_dashboard.py
-      - name: Port Washington - Retail dashboard
-        run: cd scripts && python generate_retail_dashboard.py
+          cd scripts && python run.py ${{ matrix.store }}
 
-      # ── Hicksville ──
-      - name: Hicksville - Executive dashboard
-        env:
-          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
-        run: cd scripts && python run.py hicksville
-      - name: Hicksville - Commission dashboard
-        run: python3 scripts/build_commission_dashboard.py hicksville
-      - name: Hicksville - Fetch stock levels
-        env:
-          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
-        run: python3 scripts/fetch_stock.py hicksville
-      - name: Hicksville - Fetch brand data
-        env:
-          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
-        run: python3 scripts/fetch_brands.py hicksville
-      - name: Hicksville - Inventory dashboard
-        run: cd scripts && python generate_inventory_dashboard.py hicksville
-      - name: Hicksville - Fetch tickets (payment data)
-        env:
-          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
-        run: python3 scripts/fetch_tickets.py hicksville
-      - name: Hicksville - Financial dashboard
-        run: python3 scripts/build_financial_dashboard.py hicksville
-      - name: Hicksville - Retail dashboard
-        run: cd scripts && python generate_retail_dashboard.py hicksville
+      - name: ${{ matrix.store }} - Commission dashboard
+        run: python3 scripts/build_commission_dashboard.py ${{ matrix.store }}
 
-      # ── Cross-Store ──
-      - name: Cross-Store Comparison
-        run: python3 scripts/build_crossstore_dashboard.py
+      - name: ${{ matrix.store }} - Fetch stock levels
+        run: python3 scripts/fetch_stock.py ${{ matrix.store }}
 
-      # ── Appointments (for pet-level anomaly tracking) ──
-      - name: Port Washington - Fetch appointments
-        env:
-          FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
-        run: python3 scripts/fetch_appointments.py
-      - name: Hicksville - Fetch appointments
-        env:
-          FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
-        run: python3 scripts/fetch_appointments.py hicksville
+      - name: ${{ matrix.store }} - Fetch brand data
+        run: python3 scripts/fetch_brands.py ${{ matrix.store }}
 
-      # ── Booking Anomalies ──
-      - name: Port Washington - Booking Anomalies
-        run: python3 scripts/build_booking_anomaly_dashboard.py
-      - name: Hicksville - Booking Anomalies
-        run: python3 scripts/build_booking_anomaly_dashboard.py hicksville
+      - name: ${{ matrix.store }} - Inventory dashboard
+        run: cd scripts && python generate_inventory_dashboard.py ${{ matrix.store }}
 
-      # ── Good Morning Woof Gang briefing (with Claude AI summary) ──
-      - name: Morning Briefing
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: python3 scripts/build_morning_briefing.py
-        
-         # ── Commit and push ──
-      - name: Commit and push
+      - name: ${{ matrix.store }} - Fetch tickets (payment data)
+        run: python3 scripts/fetch_tickets.py ${{ matrix.store }}
+
+      - name: ${{ matrix.store }} - Financial dashboard
+        run: python3 scripts/build_financial_dashboard.py ${{ matrix.store }}
+
+      - name: ${{ matrix.store }} - Retail dashboard
+        run: cd scripts && python generate_retail_dashboard.py ${{ matrix.store }}
+
+      - name: ${{ matrix.store }} - Fetch appointments
+        run: python3 scripts/fetch_appointments.py ${{ matrix.store }}
+
+      - name: ${{ matrix.store }} - Booking anomalies
+        run: python3 scripts/build_booking_anomaly_dashboard.py ${{ matrix.store }}
+
+      - name: ${{ matrix.store }} - Commit store data
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git checkout origin/main -- .github/workflows/update.yml
-          git add port-washington/data/
-          git add port-washington/*.html
-          git add hicksville/data/
-          git add hicksville/*.html
+          git add ${{ matrix.store }}/data/
+          git add ${{ matrix.store }}/*.html
           git add data/
-          git diff --staged --quiet || git commit -m "Auto-update dashboards $(date +'%Y-%m-%d')"
+          git diff --staged --quiet || git commit -m "Auto-update ${{ matrix.store }} $(date +'%Y-%m-%d')"
+          git pull --rebase origin main || {
+            git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
+            git diff --name-only --diff-filter=U | xargs -r git add
+            GIT_EDITOR=true git rebase --continue
+          }
+          git push origin HEAD:main
+
+  cross-store:
+    runs-on: ubuntu-latest
+    needs: update-store
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.PAT_TOKEN }}
+          ref: main
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: pip install httpx pandas openpyxl requests
+
+      - name: Cross-Store Comparison
+        run: python3 scripts/build_crossstore_dashboard.py
+
+      - name: Morning Briefing
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 scripts/build_morning_briefing.py
+
+      - name: Retail Staffing
+        run: python3 scripts/build_retail_staffing.py
+
+      - name: Commit cross-store outputs
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add port-washington/*.html hicksville/*.html data/
+          git diff --staged --quiet || git commit -m "Auto-update cross-store dashboards $(date +'%Y-%m-%d')"
           git pull --rebase origin main || {
             git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
             git diff --name-only --diff-filter=U | xargs -r git add

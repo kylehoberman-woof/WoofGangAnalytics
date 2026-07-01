@@ -18,6 +18,7 @@ from collections import defaultdict
 sys.path.insert(0, str(Path(__file__).parent))
 from config import (
     STORES, PROJ_ROOT, UNTRACKED_SKUS, SUPABASE_URL, SUPABASE_ANON_KEY,
+    get_store_display,
 )
 from fetch_employees import fetch_employees, get_exclude_set
 from classifier import classify_item
@@ -891,7 +892,7 @@ def build_store_briefing(store_key, store_cfg):
             lapse_pool = None
 
     briefing = {
-        "label": "Port Washington" if store_key == "port-washington" else "Hicksville",
+        "label": get_store_display(store_key),
         "yesterday": compute_day_stats(items, yesterday.isoformat()),
         "last_week_same_day": compute_day_stats(items, last_week_same_day.isoformat()),
         "wtd": compute_range_stats(items, this_monday.isoformat(), wtd_end.isoformat()),

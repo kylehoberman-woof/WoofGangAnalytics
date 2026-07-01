@@ -15,17 +15,18 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import get_store, PORTAL_BACK_JS
+from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores
 from classifier import classify_item
 import pandas as pd
 
 # ── Store setup ───────────────────────────────────────────────────────────────
 _sn   = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 _st   = get_store(_sn)
-_disp = "Port Washington" if _sn == "port-washington" else "Hicksville"
-_fn   = "PortWashington" if _sn == "port-washington" else "Hicksville"
-_ofn  = "Hicksville" if _sn == "port-washington" else "PortWashington"
-_odir = "../hicksville" if _sn == "port-washington" else "../port-washington"
+_disp = get_store_display(_sn)
+_fn   = get_store_fn(_sn)
+_other_keys = get_other_stores(_sn)
+_ofn  = get_store_fn(_other_keys[0]) if _other_keys else ""
+_odir = f"../{_other_keys[0]}" if _other_keys else ".."
 DATA_DIR   = _st.data_dir
 OUTPUT_DIR = _st.output_dir
 
@@ -385,8 +386,8 @@ brand_rows_html  = build_brand_rows()
 insight_cards_html = build_insight_cards()
 
 # ── Portal back / switch links ────────────────────────────────────────────────
-_switch_url  = f"{_odir}/WoofGang_{_ofn}_Retail_Dashboard.html"
-_switch_name = "Hicksville" if _sn == "port-washington" else "Port Washington"
+_switch_url  = f"{_odir}/WoofGang_{_ofn}_Retail_Dashboard.html" if _other_keys else ""
+_switch_name = get_store_display(_other_keys[0]) if _other_keys else ""
 _home_url    = "../index.html"
 
 # ── CSS ───────────────────────────────────────────────────────────────────────

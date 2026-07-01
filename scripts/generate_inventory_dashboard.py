@@ -6,19 +6,21 @@ from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from config import get_store
+from config import get_store, STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores
 from classifier import is_service, detect_vendor
 from config import PORTAL_BACK_JS
 
 import sys as _sys
 _store_name = _sys.argv[1] if len(_sys.argv) > 1 else "port-washington"
 _store = get_store(_store_name)
-_store_display = "Port Washington" if _store_name == "port-washington" else "Hicksville"
+_store_display = get_store_display(_store_name)
 _home_url = "../index.html"
-_other_store = "Hicksville" if _store_name == "port-washington" else "Port Washington"
-_other_dir = "../hicksville" if _store_name == "port-washington" else "../port-washington"
-_other_fn = "Hicksville" if _store_name == "port-washington" else "PortWashington"
-_switch_url = f"{_other_dir}/WoofGang_{_other_fn}_Inventory_Dashboard.html"
+_other_keys = get_other_stores(_store_name)
+# Backward-compat single-other-store variables (first other store)
+_other_store = get_store_display(_other_keys[0]) if _other_keys else ""
+_other_dir = f"../{_other_keys[0]}" if _other_keys else ".."
+_other_fn = get_store_fn(_other_keys[0]) if _other_keys else ""
+_switch_url = f"{_other_dir}/WoofGang_{_other_fn}_Inventory_Dashboard.html" if _other_keys else ""
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 
@@ -509,7 +511,7 @@ document.addEventListener('click',function(e){
     setTimeout(function(){cell.classList.remove('stock-flash-ok');},1200);
     // Push to Franpos via receiving tool proxy (avoids CORS)
     if(typeof FRANPOS_TOKEN!=='undefined'){
-      fetch('https://scanner.hoberman.io/api/set-stock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,quantity:nv,store:FRANPOS_LOC==='203698'?'port-washington':'hicksville'})})
+      fetch('https://scanner.hoberman.io/api/set-stock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,quantity:nv,store:STORE_KEY})})
         .then(function(r){
           if(!r.ok) throw new Error('HTTP '+r.status);
           cell.classList.remove('stock-flash-ok');
@@ -551,7 +553,7 @@ document.addEventListener('click',function(e){
     cell.textContent='$'+nv.toFixed(2);
     cell.classList.add('stock-flash-ok');
     setTimeout(function(){cell.classList.remove('stock-flash-ok');},1200);
-    fetch('https://scanner.hoberman.io/api/set-cost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,cost:nv,store:FRANPOS_LOC==='203698'?'port-washington':'hicksville'})})
+    fetch('https://scanner.hoberman.io/api/set-cost',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,cost:nv,store:STORE_KEY})})
       .then(function(r){
         if(!r.ok) throw new Error('HTTP '+r.status);
         cell.classList.remove('stock-flash-ok');
@@ -592,7 +594,7 @@ document.addEventListener('click',function(e){
     setTimeout(function(){cell.classList.remove('stock-flash-ok');},1200);
     var row=cell.closest('tr');
     if(row) row.dataset.vendor=nv.toLowerCase();
-    fetch('https://scanner.hoberman.io/api/set-vendor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,vendor:nv,store:FRANPOS_LOC==='203698'?'port-washington':'hicksville'})})
+    fetch('https://scanner.hoberman.io/api/set-vendor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sku:sku,vendor:nv,store:STORE_KEY})})
       .then(function(r){
         if(!r.ok) throw new Error('HTTP '+r.status);
         cell.classList.remove('stock-flash-ok');
@@ -714,6 +716,9 @@ function updateReq(id,status,btn){
 TH = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Wks</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Margin</th><th class=\"num\">Revenue</th><th></th>"
 TH2 = "<th>Status</th><th>SKU</th><th>Product</th><th>Vendor</th><th class=\"num\">Stock</th><th class=\"num\">Pending</th><th class=\"num\">Vel/Mo</th><th class=\"num\">Cost</th><th class=\"num\">Price</th><th class=\"num\">Revenue</th><th></th>"
 
+# Build JS location_id → store_key map from registry (avoids hardcoded 203698/205993)
+_loc_map_js = json.dumps({str(v["location_id"]): k for k, v in STORE_REGISTRY.items()})
+
 html = f"""<!DOCTYPE html>
 <html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">
 <title>Woof Gang - Inventory Dashboard</title>
@@ -794,7 +799,7 @@ html = f"""<!DOCTYPE html>
     </div>
   </div>
 </div>
-<script>const FRANPOS_TOKEN="{_store.token}";const FRANPOS_LOC="{_store.location_id}";const FRANPOS_URL="https://publicapi.franpos.com";const STORE_KEY=FRANPOS_LOC==="203698"?"port-washington":"hicksville";const SB_URL="https://bqzinttbjeeaybywhhet.supabase.co/rest/v1";const SB_KEY="{SUPABASE_ANON_KEY}";{JS}</script></body></html>"""
+<script>const FRANPOS_TOKEN="{_store.token}";const FRANPOS_LOC="{_store.location_id}";const FRANPOS_URL="https://publicapi.franpos.com";const _LOC_MAP={_loc_map_js};const STORE_KEY=_LOC_MAP[String(FRANPOS_LOC)]||"{_store_name}";const SB_URL="https://bqzinttbjeeaybywhhet.supabase.co/rest/v1";const SB_KEY="{SUPABASE_ANON_KEY}";{JS}</script></body></html>"""
 
 _fn_store = _store_display.replace(" ", "")
 out_path = OUTPUT_DIR / f"WoofGang_{_fn_store}_Inventory_Dashboard.html"

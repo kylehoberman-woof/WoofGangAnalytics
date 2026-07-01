@@ -19,10 +19,10 @@ SCRIPTS_DIR = Path(__file__).parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from config import get_store, PROJ_ROOT, PORTAL_BACK_JS
+from config import get_store, PROJ_ROOT, PORTAL_BACK_JS, STORE_REGISTRY, get_store_display, get_store_abbreviation
 from formatting import fc
 
-# ── Load both stores' data ────────────────────────────────────────────────────
+# ── Load all stores' data ─────────────────────────────────────────────────────
 
 def load_store_data(store_name):
     """Load and transform data for a single store, returning (df, df_orders)."""
@@ -43,13 +43,17 @@ def load_store_data(store_name):
     return df, df_orders
 
 
-print("Loading Port Washington data...")
-pw_df, pw_orders = load_store_data("port-washington")
-print(f"  PW: {len(pw_df)} items, {len(pw_orders)} orders")
+# Load data for every registered store dynamically
+_store_data = {}
+for _sk in STORE_REGISTRY:
+    print(f"Loading {get_store_display(_sk)} data...")
+    _df, _orders = load_store_data(_sk)
+    _store_data[_sk] = {"df": _df, "orders": _orders}
+    print(f"  {get_store_abbreviation(_sk)}: {len(_df)} items, {len(_orders)} orders")
 
-print("Loading Hicksville data...")
-hv_df, hv_orders = load_store_data("hicksville")
-print(f"  HV: {len(hv_df)} items, {len(hv_orders)} orders")
+# Backward-compat aliases for the two original stores
+pw_df, pw_orders = _store_data["port-washington"]["df"], _store_data["port-washington"]["orders"]
+hv_df, hv_orders = _store_data["hicksville"]["df"], _store_data["hicksville"]["orders"]
 
 # ── Build comparison data for each store ──────────────────────────────────────
 

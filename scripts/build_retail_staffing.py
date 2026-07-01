@@ -28,6 +28,7 @@ from config import (
     MANAGER_START, STORE_OPEN_DATES,
     SUPABASE_URL, SUPABASE_ANON_KEY,
     get_retail_rate,
+    STORE_REGISTRY, get_store_display,
 )
 from fetch_employees import fetch_employees
 
@@ -107,20 +108,27 @@ def _build_retail_cfg(store_key):
     return fallbacks.get(store_key, {})
 
 
-# Per-store config (retail dict populated dynamically at build time)
+# Per-store config — built from STORE_REGISTRY so adding a new store to
+# data/stores.json automatically adds it here.
+# retail_staffing_start_month in stores.json controls start_month per store.
+def _open_date_from_registry(sk):
+    """Parse open_date string from registry into a date object."""
+    from datetime import date as _date
+    od = STORE_REGISTRY.get(sk, {}).get("open_date", "")
+    try:
+        return _date.fromisoformat(od)
+    except ValueError:
+        return STORE_OPEN_DATES.get(sk, _date(2024, 9, 26))
+
 STORE_CFG = {
-    'port-washington': {
-        'label': 'Port Washington',
-        'open_date': STORE_OPEN_DATES['port-washington'],
-        'include_manager': True,
-        'start_month': '2025-06',
-    },
-    'hicksville': {
-        'label': 'Hicksville',
-        'open_date': STORE_OPEN_DATES['hicksville'],
-        'include_manager': False,
-        'start_month': '2025-12',
-    },
+    sk: {
+        'label': get_store_display(sk),
+        'open_date': _open_date_from_registry(sk),
+        'include_manager': STORE_REGISTRY[sk].get("include_manager", False),
+        'start_month': STORE_REGISTRY[sk].get("retail_staffing_start_month",
+                       _open_date_from_registry(sk).strftime("%Y-%m")),
+    }
+    for sk in STORE_REGISTRY
 }
 
 try:

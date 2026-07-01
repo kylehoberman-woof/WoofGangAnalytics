@@ -65,10 +65,9 @@ def build_guarantee_map(employees):
     return result
 
 
-# System/owner names that are never in Supabase but must always be excluded
-_SYSTEM_NAMES = {
-    "Unknown", "Wgb Port Washington", "Wgb Hicksville",
-    "Kyle Hoberman", "Julie Schorr",
+# System/owner names derived from store registry + fixed owner names
+_SYSTEM_NAMES = {"Unknown", "Kyle Hoberman", "Julie Schorr"} | {
+    f"Wgb {v['display_name']}" for v in config.STORE_REGISTRY.values()
 }
 
 

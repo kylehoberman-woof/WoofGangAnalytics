@@ -1,0 +1,43 @@
+{
+  "_comment": "Store registry — single source of truth for all store metadata. Add a new store here and it will automatically appear in all dashboards, the GitHub Actions workflow, and the nightly build. No code changes required.",
+  "port-washington": {
+    "display_name": "Port Washington",
+    "abbreviation": "PW",
+    "store_number": 264,
+    "location_id": 203698,
+    "franpos_token_env": "FRANPOS_TOKEN_PW",
+    "franpos_token_fallback_env": "FRANPOS_TOKEN",
+    "open_date": "2024-09-26",
+    "include_manager": true,
+    "monthly_rent_schedule": [
+      {"start": "2024-09-27", "monthly_rent": 7560.00},
+      {"start": "2025-09-27", "monthly_rent": 7724.00}
+    ],
+    "pay_period": {
+      "length_days": 7,
+      "anchor": "2026-06-29",
+      "prior_length_days": 14,
+      "prior_anchor": "2026-02-23",
+      "transition_date": "2026-06-29"
+    },
+    "retail_staffing_start_month": "2025-06"
+  },
+  "hicksville": {
+    "display_name": "Hicksville",
+    "abbreviation": "HV",
+    "store_number": 265,
+    "location_id": 205993,
+    "franpos_token_env": "FRANPOS_TOKEN_HV",
+    "franpos_token_fallback_env": "FRANPOS_TOKEN",
+    "open_date": "2025-12-11",
+    "include_manager": false,
+    "monthly_rent_schedule": [
+      {"start": "2025-12-11", "monthly_rent": 6056.07}
+    ],
+    "pay_period": {
+      "length_days": 7,
+      "anchor": "2026-03-28"
+    },
+    "retail_staffing_start_month": "2025-12"
+  }
+}

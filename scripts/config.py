@@ -12,6 +12,39 @@ from pathlib import Path
 PROJ_ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = Path(__file__).resolve().parent
 
+# ─── Store Registry ──────────────────────────────────────────────────────────
+# Single source of truth for all store metadata.
+# Add a new store to data/stores.json — no code changes required.
+
+_STORE_REGISTRY_FILE = PROJ_ROOT / "data" / "stores.json"
+_raw_registry = json.loads(_STORE_REGISTRY_FILE.read_text())
+STORE_REGISTRY = {k: v for k, v in _raw_registry.items() if not k.startswith("_")}
+
+
+def get_store_display(store_key: str) -> str:
+    """Human-readable store name, e.g. 'Port Washington'."""
+    return STORE_REGISTRY.get(store_key, {}).get("display_name", store_key.replace("-", " ").title())
+
+
+def get_store_abbreviation(store_key: str) -> str:
+    """Short abbreviation, e.g. 'PW'."""
+    return STORE_REGISTRY.get(store_key, {}).get("abbreviation", store_key[:2].upper())
+
+
+def get_store_fn(store_key: str) -> str:
+    """CamelCase filename fragment, e.g. 'PortWashington'."""
+    return get_store_display(store_key).replace(" ", "")
+
+
+def get_other_stores(store_key: str) -> list:
+    """Return list of all other store keys (for navigation links)."""
+    return [k for k in STORE_REGISTRY if k != store_key]
+
+
+def store_includes_manager(store_key: str) -> bool:
+    return STORE_REGISTRY.get(store_key, {}).get("include_manager", False)
+
+
 # ─── Store Configuration ────────────────────────────────────────────────────
 
 @dataclass
@@ -53,15 +86,15 @@ STORES = {
 
 
 def get_store(name="port-washington"):
-    """Get store config by name. Token from env var overrides stored token.
-    Checks FRANPOS_TOKEN_HV for hicksville, FRANPOS_TOKEN for port-washington.
-    Falls back to FRANPOS_TOKEN if store-specific var not set."""
+    """Get store config by name. Token resolved from env vars defined in stores.json.
+    Adding a new store: add it to data/stores.json with its franpos_token_env key,
+    then set that env var in GitHub Actions secrets."""
     import copy
     store = copy.copy(STORES[name])
-    if name == "hicksville":
-        env_token = os.environ.get("FRANPOS_TOKEN_HV") or os.environ.get("FRANPOS_TOKEN")
-    else:
-        env_token = os.environ.get("FRANPOS_TOKEN_PW") or os.environ.get("FRANPOS_TOKEN")
+    reg = STORE_REGISTRY.get(name, {})
+    token_env = reg.get("franpos_token_env", "FRANPOS_TOKEN")
+    fallback_env = reg.get("franpos_token_fallback_env", "FRANPOS_TOKEN")
+    env_token = os.environ.get(token_env) or os.environ.get(fallback_env)
     if env_token:
         store.token = env_token
     return store
@@ -284,21 +317,13 @@ def get_royalty_rate(store_name, month_date):
     return royalty + marketing
 
 # Store-specific financial constants
-STORE_RENT = {
-    "port-washington": 7724.0,   # Legacy flat (use get_monthly_rent for accurate tiered)
-    "hicksville": 6056.07,
-}
-
-# Rent schedules: list of (start_date, monthly_rent) — sorted chronologically
+# Rent schedules derived from stores.json — add rent changes there, not here
 STORE_RENT_SCHEDULE = {
-    "port-washington": [
-        (date(2024, 9, 27), 7560.00),   # Year 1
-        (date(2025, 9, 27), 7724.00),   # Year 2
-    ],
-    "hicksville": [
-        (date(2025, 12, 11), 6056.07),  # Year 1
-    ],
+    k: [(date.fromisoformat(r["start"]), r["monthly_rent"]) for r in v["monthly_rent_schedule"]]
+    for k, v in STORE_REGISTRY.items()
 }
+# Legacy flat-rate dict (use get_monthly_rent for tiered accuracy)
+STORE_RENT = {k: v[-1][1] for k, v in STORE_RENT_SCHEDULE.items()}
 
 
 def get_monthly_rent(store_name, month_date):
@@ -321,8 +346,8 @@ def get_monthly_rent(store_name, month_date):
     return rent
 
 STORE_OPEN_DATES = {
-    "port-washington": date(2024, 9, 26),
-    "hicksville": date(2025, 12, 11),
+    k: date.fromisoformat(v["open_date"])
+    for k, v in STORE_REGISTRY.items()
 }
 
 # HV retail fallbacks — managed in Supabase going forward
@@ -353,22 +378,19 @@ HICKSVILLE_BATHER_NAME_MAP = {}  # Hicksville has no bathers
 ANCHOR_START = date(2026, 2, 23)   # PW: Monday anchor (bi-weekly Mon–Sun)
 STORE_OPEN = date(2024, 9, 26)
 
-# Store-specific pay period settings
+def _parse_pay_period(pp: dict) -> dict:
+    """Convert ISO date strings in a pay period config block to date objects."""
+    out = {k: v for k, v in pp.items() if not k.endswith("_date") and k != "anchor" and k != "prior_anchor" and k != "transition_date"}
+    for field in ("anchor", "prior_anchor", "transition_date"):
+        if field in pp:
+            out[field] = date.fromisoformat(pp[field])
+    return out
+
+# Store-specific pay period settings — sourced from data/stores.json
 PAY_PERIOD_CONFIG = {
-    "port-washington": {
-        "length_days": 7,            # weekly, effective Jun 29 2026
-        "anchor": date(2026, 6, 29), # Monday
-        # Prior to the transition date, PW ran bi-weekly. Periods before
-        # transition_date must keep using the old anchor/length so already-paid
-        # historical periods don't get recomputed with the new weekly grouping.
-        "prior_length_days": 14,
-        "prior_anchor": date(2026, 2, 23),
-        "transition_date": date(2026, 6, 29),
-    },
-    "hicksville": {
-        "length_days": 7,            # weekly
-        "anchor": date(2026, 3, 28), # Saturday (Sat–Fri periods)
-    },
+    k: _parse_pay_period(v["pay_period"])
+    for k, v in STORE_REGISTRY.items()
+    if "pay_period" in v
 }
 
 

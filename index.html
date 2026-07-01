@@ -32,9 +32,11 @@
 </div>
 
 <div class="store-selector">
+  <!-- ADD NEW STORES HERE (match key in STORES JS object below) -->
   <select id="store-select" onchange="switchStore(this.value)">
     <option value="port-washington">📍 Port Washington, NY</option>
     <option value="hicksville">📍 Hicksville, NY</option>
+    <!-- <option value="glen-cove">📍 Glen Cove, NY</option> -->
   </select>
 </div>
 
@@ -357,6 +359,12 @@ function initAuth() {
 }
 initAuth();
 
+// ── ADD NEW STORES HERE ───────────────────────────────────────────────────────
+// All Python scripts pick up from data/stores.json automatically.
+// For this JS portal index, add one entry below per new store.
+// Key = store directory name (must match data/stores.json key).
+// "cross" for the primary store = local file; for all others = "../primary/...".
+// ─────────────────────────────────────────────────────────────────────────────
 var STORES = {
   'port-washington': {
     title: 'Woof Gang Port Washington',
@@ -380,6 +388,18 @@ var STORES = {
     anomaly: 'WoofGang_Hicksville_BookingAnomalies.html',
     retail: 'WoofGang_Hicksville_Retail_Dashboard.html'
   }
+  // NEW STORE TEMPLATE (uncomment and fill in):
+  // 'glen-cove': {
+  //   title: 'Woof Gang Glen Cove',
+  //   base: 'glen-cove/',
+  //   exec: 'WoofGang_GlenCove_NY_AllYears_Dashboard.html',
+  //   comm: 'WoofGang_GlenCove_Commission_Dashboard.html',
+  //   inv: 'WoofGang_GlenCove_Inventory_Dashboard.html',
+  //   fin: 'WoofGang_GlenCove_Financial_Dashboard.html',
+  //   cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
+  //   anomaly: 'WoofGang_GlenCove_BookingAnomalies.html',
+  //   retail: 'WoofGang_GlenCove_Retail_Dashboard.html'
+  // }
 };
 
 function switchStore(key) {
