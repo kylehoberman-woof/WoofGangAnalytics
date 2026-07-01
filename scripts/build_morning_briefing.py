@@ -18,8 +18,8 @@ from collections import defaultdict
 sys.path.insert(0, str(Path(__file__).parent))
 from config import (
     STORES, PROJ_ROOT, UNTRACKED_SKUS, SUPABASE_URL, SUPABASE_ANON_KEY,
-    EXCLUDE_EMPLOYEES, BATHER_NAME_MAP, HICKSVILLE_BATHER_NAME_MAP,
 )
+from fetch_employees import fetch_employees, get_exclude_set
 from classifier import classify_item
 
 # ─── Holiday & event calendar ─────────────────────────────────────────────
@@ -106,11 +106,12 @@ def holiday_context(target_iso, window_days=3):
     return None
 
 
-# Per-store bather rosters (PW has bathers, HV currently has none)
-_BATHERS_BY_STORE = {
-    "port-washington": set(BATHER_NAME_MAP.keys()),
-    "hicksville": set(HICKSVILLE_BATHER_NAME_MAP.keys()),
-}
+def _get_bather_set(store_key):
+    """Return set of bather full_names for a store, fetched live from Supabase."""
+    emps = fetch_employees(store=store_key, role="bather", active_only=False)
+    if emps:
+        return {e["full_name"] for e in emps if e.get("full_name")}
+    return set()
 
 # Refresh retail_staffing.json before generating the briefing. Piggybacks here
 # because the standalone Retail Staffing step isn't yet wired into the
@@ -214,7 +215,8 @@ def compute_capacity_for_range(items, time_clocks, start_iso, end_iso, store_key
       operating_days: open days in the range (excludes closures)
     """
     closures = closures or set()
-    bather_set = _BATHERS_BY_STORE.get(store_key, set())
+    bather_set = _get_bather_set(store_key)
+    exclude = get_exclude_set(store_key)
     daily_groomers = defaultdict(set)
     groom_rev_total = 0.0
 
@@ -223,7 +225,7 @@ def compute_capacity_for_range(items, time_clocks, start_iso, end_iso, store_key
         if not c or c < start_iso or c > end_iso:
             continue
         person = (it.get("SalesPerson") or "").strip()
-        if not person or person in EXCLUDE_EMPLOYEES:
+        if not person or person in exclude:
             continue
         nm = it.get("Name") or ""
         sku = str(it.get("Sku") or "")

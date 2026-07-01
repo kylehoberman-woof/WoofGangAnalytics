@@ -65,6 +65,39 @@ def build_guarantee_map(employees):
     return result
 
 
+# System/owner names that are never in Supabase but must always be excluded
+_SYSTEM_NAMES = {
+    "Unknown", "Wgb Port Washington", "Wgb Hicksville",
+    "Kyle Hoberman", "Julie Schorr",
+}
+
+
+def get_exclude_set(store_key):
+    """Return the set of FranPOS SalesPerson names to exclude from groomer commission.
+
+    Dynamically built from all non-groomer employees in Supabase (retail, bather,
+    manager roles — both active and terminated so historical records are clean),
+    plus hardcoded system/owner names that never appear in Supabase.
+
+    Falls back to config.EXCLUDE_EMPLOYEES if Supabase is unavailable.
+    """
+    non_groomers = fetch_employees(store=store_key, active_only=False)
+    non_groomers = [e for e in non_groomers if e.get("role") != "groomer"]
+
+    if non_groomers:
+        exclude = set(_SYSTEM_NAMES)
+        for e in non_groomers:
+            if e.get("full_name"):
+                exclude.add(e["full_name"])
+            if e.get("name"):
+                exclude.add(e["name"])
+        return exclude
+
+    # Supabase unavailable — fall back to config
+    print("[fetch_employees] get_exclude_set: Supabase unavailable, using config fallback", file=sys.stderr)
+    return set(config.EXCLUDE_EMPLOYEES)
+
+
 def get_store_pay_data(store_key):
     """Return (retail_name_map, retail_rates, bather_name_map, bather_rate_map, guarantees)
     for the given store. Falls back to config.py if Supabase is empty.

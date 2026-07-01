@@ -12,7 +12,7 @@ import calendar as _cal
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config import (
-    get_store, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
+    get_store, COMMISSION_RATE,
     BATHER_RATE, PAYROLL_TAX_RATE,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
@@ -20,7 +20,7 @@ from config import (
     get_retail_rate,
 )
 from formatting import fc
-from fetch_employees import get_store_pay_data
+from fetch_employees import get_store_pay_data, get_exclude_set
 
 SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
@@ -42,6 +42,7 @@ STORE_OPEN = STORE_OPEN_DATES.get(_store_name, date(2024, 9, 26))
 
 # Load employee maps/rates from Supabase (falls back to config.py if not yet populated)
 RETAIL_NAME_MAP, RETAIL_RATES, BATHER_NAME_MAP, BATHER_RATE_MAP, GUARANTEES = get_store_pay_data(_store_name)
+EXCLUDE = get_exclude_set(_store_name)
 DAILY_RENT = MONTHLY_RENT * 12 / 365
 
 # ── Fetch operating expenses from Supabase ────────────────────────────────────

@@ -9,7 +9,7 @@ from datetime import datetime, date, timedelta
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config import (
-    get_store, COMMISSION_RATE, EXCLUDE_EMPLOYEES as EXCLUDE,
+    get_store, COMMISSION_RATE,
     BATHER_RATE,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START, MANAGER_NAME,
@@ -19,7 +19,7 @@ from config import (
     SUPABASE_URL, SUPABASE_ANON_KEY, PORTAL_BACK_JS,
 )
 from formatting import fc
-from fetch_employees import get_store_pay_data
+from fetch_employees import get_store_pay_data, get_exclude_set
 
 SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
@@ -34,6 +34,11 @@ MONTHLY_RENT = STORE_RENT.get(_store_name, _DEFAULT_RENT)
 
 # Load employee maps/rates from Supabase (falls back to config.py if not yet populated)
 RETAIL_NAME_MAP, RETAIL_RATES, BATHER_NAME_MAP, BATHER_RATE_MAP, GUARANTEES = get_store_pay_data(_store_name)
+
+# Exclude set built dynamically from Supabase non-groomer employees + system names
+EXCLUDE = get_exclude_set(_store_name)
+# Bather full-names for routing bather revenue to the non-commission bucket
+_BATHER_FULL_NAMES = set(BATHER_NAME_MAP.keys())
 
 DATA_DIR   = _store.data_dir
 OUTPUT_DIR = _store.output_dir
@@ -100,14 +105,14 @@ if True:
                     order_groomer[oid] = person  # fallback
                     if oid not in order_groomer_rev: order_groomer_rev[oid] = {}
                     order_groomer_rev[oid][person] = order_groomer_rev[oid].get(person, 0) + price * qty
-            elif person in {"Jessica G", "Angela R"}:
+            elif person in _BATHER_FULL_NAMES:
                 # Bather revenue counts toward total but no commission
                 groom_by_day["_bather_revenue"][day] += price * qty
                 # Include bathers in tip split so tips are proportional
                 if oid:
                     if oid not in order_groomer_rev: order_groomer_rev[oid] = {}
                     order_groomer_rev[oid][person] = order_groomer_rev[oid].get(person, 0) + price * qty
-            elif person in {"Wgb Port Washington", "Wgb Hicksville"}:
+            elif person.startswith("Wgb "):
                 # Owner-performed bathes / trial grooms — revenue counts toward store
                 # totals but no commission. Routed through _bather_revenue bucket
                 # since that's exactly the non-commission-revenue bucket.

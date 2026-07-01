@@ -3,6 +3,7 @@ Centralized configuration for Woof Gang Store Performance Analysis.
 All store configs, business constants, and brand colors in one place.
 """
 
+import json
 import os
 from dataclasses import dataclass, field
 from datetime import date
@@ -161,13 +162,15 @@ GUARANTEES = {
     "Julia B":         (200.0, "2026-02-03", "2026-05-04"),
 }
 
-# Rate change history for employees with mid-employment raises.
-# Keyed by both short name and full name so callers don't need to normalize.
-# Each entry is a list of {"rate": float, "effective": "YYYY-MM-DD"} sorted ascending.
-RETAIL_RATE_CHANGES = {
-    "Casey":           [{"rate": 19.0, "effective": "2025-06-20"}, {"rate": 21.0, "effective": "2026-06-20"}],
-    "Casey Makowski":  [{"rate": 19.0, "effective": "2025-06-20"}, {"rate": 21.0, "effective": "2026-06-20"}],
-}
+# Rate change history — loaded from data/rate_history.json so raises never require code edits.
+# To record a raise: add a new {"rate": float, "effective": "YYYY-MM-DD"} entry (sorted ascending)
+# for both the short name and full name of the employee in data/rate_history.json.
+_RATE_HISTORY_FILE = PROJ_ROOT / "data" / "rate_history.json"
+try:
+    _raw = json.loads(_RATE_HISTORY_FILE.read_text())
+    RETAIL_RATE_CHANGES = {k: v for k, v in _raw.items() if not k.startswith("_")}
+except Exception:
+    RETAIL_RATE_CHANGES = {}  # no raises recorded yet — all employees get current rate
 
 
 def get_retail_rate(name: str, work_date: str, fallback_rates: dict) -> float:
