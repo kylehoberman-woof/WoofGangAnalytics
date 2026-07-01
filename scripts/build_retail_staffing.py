@@ -29,6 +29,7 @@ from config import (
     SUPABASE_URL, SUPABASE_ANON_KEY,
     get_retail_rate,
 )
+from fetch_employees import fetch_employees
 
 try:
     import httpx as _httpx
@@ -71,41 +72,54 @@ def shift_hours(start_time, end_time):
     except Exception:
         return 0
 
-OUT_FILE = PROJ_ROOT / "data" / "retail_staffing.json"
-OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-# Retail staff + rates at PW
-PW_RETAIL = {
-    'Casey Makowski': {'current_rate': 21.00, 'role': 'retail'},
-    'Christine Brower': {'current_rate': 20.00, 'role': 'retail'},
-}
+def _build_retail_cfg(store_key):
+    """Build retail config dict from Supabase (active_only=False for history).
+    Falls back to hardcoded defaults if Supabase is unavailable."""
+    emps = fetch_employees(store=store_key, role='retail', active_only=False)
+    if emps:
+        return {
+            e['full_name']: {'current_rate': float(e['hourly_rate']), 'role': 'retail'}
+            for e in emps if e.get('full_name') and e.get('hourly_rate')
+        }
+    # Hardcoded fallback — only used if Supabase is down
+    fallbacks = {
+        'port-washington': {
+            'Casey Makowski':  {'current_rate': 21.00, 'role': 'retail'},
+            'Christine Brower':{'current_rate': 20.00, 'role': 'retail'},
+            'Trinity  Rivera': {'current_rate': 21.00, 'role': 'retail'},
+            'Alize James':     {'current_rate': 19.00, 'role': 'retail'},
+            'Sitara Nagrani':  {'current_rate': 19.00, 'role': 'retail'},
+            'Giana Golden':    {'current_rate': 19.00, 'role': 'retail'},
+            'Parker Spooner':  {'current_rate': 19.00, 'role': 'retail'},
+        },
+        'hicksville': {
+            'Hailey Imhof':         {'current_rate': 21.00, 'role': 'retail'},
+            'Kayla Moses':          {'current_rate': 19.00, 'role': 'retail'},
+            'Christine Brower':     {'current_rate': 20.00, 'role': 'retail'},
+            'Sophia Kurkowski':     {'current_rate': 19.00, 'role': 'retail'},
+            'Naomi Dutes':          {'current_rate': 19.00, 'role': 'retail'},
+            'Nicole Alarcon':       {'current_rate': 19.00, 'role': 'retail'},
+            'Christina Ramkissoon': {'current_rate': 19.00, 'role': 'retail'},
+        },
+    }
+    print(f"  [warn] Supabase unavailable for {store_key} retail — using hardcoded fallback")
+    return fallbacks.get(store_key, {})
 
-# HV retail staff + rates (Hailey + Kayla are current, others terminated but historical data matters)
-HV_RETAIL = {
-    'Hailey Imhof':         {'current_rate': 21.00, 'role': 'retail'},
-    'Kayla Moses':          {'current_rate': 19.00, 'role': 'retail'},  # new Apr 2026
-    'Christine Brower':     {'current_rate': 20.00, 'role': 'retail'},  # partial HV shifts historically
-    'Sophia Kurkowski':     {'current_rate': 19.00, 'role': 'retail'},
-    'Naomi Dutes':          {'current_rate': 19.00, 'role': 'retail'},
-    'Nicole Alarcon':       {'current_rate': 19.00, 'role': 'retail'},
-    'Christina Ramkissoon': {'current_rate': 19.00, 'role': 'retail'},
-}
 
-# Per-store config
+# Per-store config (retail dict populated dynamically at build time)
 STORE_CFG = {
     'port-washington': {
         'label': 'Port Washington',
-        'retail': PW_RETAIL,
         'open_date': STORE_OPEN_DATES['port-washington'],
-        'include_manager': True,   # Cindy paid 100% from PW
-        'start_month': '2025-06',  # first month with meaningful staffing data
+        'include_manager': True,
+        'start_month': '2025-06',
     },
     'hicksville': {
         'label': 'Hicksville',
-        'retail': HV_RETAIL,
         'open_date': STORE_OPEN_DATES['hicksville'],
-        'include_manager': False,  # Cindy is 100% PW — no manager cost on HV books
-        'start_month': '2025-12',  # HV opened Dec 11 2025
+        'include_manager': False,
+        'start_month': '2025-12',
     },
 }
 
@@ -185,7 +199,7 @@ def manager_salary_for_month(y, m, today, include_bonus=False):
 def build_store_staffing(store_key):
     """Build monthly staffing data for either PW or HV."""
     cfg = STORE_CFG[store_key]
-    retail_cfg = cfg['retail']
+    retail_cfg = _build_retail_cfg(store_key)
     open_date = cfg['open_date']
     include_manager = cfg['include_manager']
     START = cfg['start_month']
@@ -313,10 +327,13 @@ def build_store_staffing(store_key):
     if include_manager:
         rates_block['cindy_annual'] = MANAGER_SALARY_NEW
         rates_block['cindy_daily']  = round(MANAGER_SALARY_NEW / 365, 2)
-    # Back-compat aliases for PW
+    # Back-compat aliases for PW (derive from retail_cfg so hardcoded names aren't needed)
     if store_key == 'port-washington':
-        rates_block['casey'] = PW_RETAIL['Casey Makowski']['current_rate']
-        rates_block['chris'] = PW_RETAIL['Christine Brower']['current_rate']
+        for full_name, info in retail_cfg.items():
+            if 'Casey' in full_name:
+                rates_block['casey'] = info['current_rate']
+            elif 'Christine' in full_name:
+                rates_block['chris'] = info['current_rate']
 
     return {
         'store': store_key,
