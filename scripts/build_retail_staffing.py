@@ -74,6 +74,10 @@ def shift_hours(start_time, end_time):
         return 0
 
 
+OUT_FILE = PROJ_ROOT / "data" / "retail_staffing.json"
+OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+
 def _build_retail_cfg(store_key):
     """Build retail config dict from Supabase (active_only=False for history).
     Falls back to hardcoded defaults if Supabase is unavailable."""
