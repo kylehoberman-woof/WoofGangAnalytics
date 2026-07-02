@@ -73,11 +73,9 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git checkout origin/main -- .github/workflows/update.yml
-          git add ${{ matrix.store }}/data/
-          git add ${{ matrix.store }}/*.html
-          git add data/
+          git add -A
           git diff --staged --quiet || git commit -m "Auto-update ${{ matrix.store }} $(date +'%Y-%m-%d')"
-          git pull --rebase origin main || {
+          git pull --rebase --autostash origin main || {
             git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
             git diff --name-only --diff-filter=U | xargs -r git add
             GIT_EDITOR=true git rebase --continue
@@ -113,9 +111,11 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add port-washington/*.html hicksville/*.html data/
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/update.yml
+          git add -A
           git diff --staged --quiet || git commit -m "Auto-update cross-store dashboards $(date +'%Y-%m-%d')"
-          git pull --rebase origin main || {
+          git pull --rebase --autostash origin main || {
             git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
             git diff --name-only --diff-filter=U | xargs -r git add
             GIT_EDITOR=true git rebase --continue

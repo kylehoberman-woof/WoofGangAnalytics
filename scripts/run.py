@@ -792,7 +792,7 @@ def main(store_name="port-washington"):
     # 6. Commission dashboard (separate process)
     try:
         result = subprocess.run(
-            ["python3", str(Path(__file__).parent / "build_commission_dashboard.py")],
+            ["python3", str(Path(__file__).parent / "build_commission_dashboard.py"), store_name],
             capture_output=True, text=True,
         )
         print(result.stdout)
