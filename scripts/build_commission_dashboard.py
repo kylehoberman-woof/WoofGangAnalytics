@@ -1143,7 +1143,9 @@ function renderPayPeriod(ppId) {{
   totRev += (data._bather_rev || 0);
   var totRoyalties = totRev * (data._royalty_rate || 0.07);
   var DAILY_RENT = (data._monthly_rent || {MONTHLY_RENT}) * 12 / 365;
-  var PP_LENGTH = {PAY_PERIOD_CONFIG.get(_store_name, PAY_PERIOD_CONFIG["port-washington"])["length_days"]};
+  var ppDates = PP_DATES[ppId];
+  var PP_LENGTH = ppDates ? Math.round((new Date(ppDates.end) - new Date(ppDates.start)) / 86400000) + 1
+                          : {PAY_PERIOD_CONFIG.get(_store_name, PAY_PERIOD_CONFIG["port-washington"])["length_days"]};
   var totRent = DAILY_RENT * PP_LENGTH;
   var totManager = data._manager_salary || 0;
   var batherPay = data._bather_pay || {{}};
