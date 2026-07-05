@@ -1,0 +1,59 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: https://ownerportal.hoberman.io/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      # Only the files the site actually serves — explicitly excludes scripts/
+      # (contains FranPOS API tokens), tests/, and other dev-only files that
+      # the old branch-based Pages build served by accident.
+      - name: Stage public site files only
+        run: |
+          mkdir -p _site
+          cp index.html manager.html store.html schedule.html time-off.html \
+             checklist.html complaints.html expenses.html incidents.html \
+             master-schedule.html march-madness.html morning.html \
+             my-schedule.html onboarding.html retail-staffing.html \
+             supplies.html bonus-tracker.html \
+             portal-auth.js portal.css CNAME _site/
+          cp -r data port-washington hicksville _site/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages (attempt 1)
+        id: deploy1
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Deploy to GitHub Pages (attempt 2)
+        id: deploy2
+        if: steps.deploy1.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+
+      - name: Deploy to GitHub Pages (attempt 3)
+        if: steps.deploy1.outcome == 'failure' && steps.deploy2.outcome == 'failure'
+        uses: actions/deploy-pages@v5
