@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-06T08:15:39.735515-04:00",
-  "today": "2026-07-06",
+  "generated_at": "2026-07-07T03:26:13.854467-04:00",
+  "today": "2026-07-07",
   "stores": {
     "port-washington": {
       "store": "port-washington",
@@ -435,9 +435,9 @@
           "people": [
             {
               "name": "Casey Makowski",
-              "hrs": 21.3,
+              "hrs": 31.8,
               "rate": 21.0,
-              "cost": 447.3
+              "cost": 666.75
             },
             {
               "name": "Trinity  Rivera",
@@ -446,20 +446,20 @@
               "cost": 207.9
             }
           ],
-          "retail_hrs": 31.2,
-          "retail_cost": 655.2,
-          "mgr_cost": 917.81,
-          "total_labor": 1573.01,
-          "sales": 12274.61,
-          "labor_pct_sales": 12.82,
-          "days_open": 5,
+          "retail_hrs": 41.6,
+          "retail_cost": 874.65,
+          "mgr_cost": 1101.37,
+          "total_labor": 1976.02,
+          "sales": 15373.31,
+          "labor_pct_sales": 12.85,
+          "days_open": 6,
           "closures": 0,
-          "cost_per_open_day": 314.6,
-          "casey_hrs": 21.3,
-          "casey_cost": 447.3,
+          "cost_per_open_day": 329.34,
+          "casey_hrs": 31.8,
+          "casey_cost": 666.75,
           "chris_hrs": 0,
           "chris_cost": 0,
-          "cindy_cost": 917.81
+          "cindy_cost": 1101.37
         }
       ],
       "summary": {
@@ -515,9 +515,9 @@
           "people": [
             {
               "name": "Casey Makowski",
-              "hrs": 21.3,
+              "hrs": 31.8,
               "rate": 21.0,
-              "cost": 447.3
+              "cost": 666.75
             },
             {
               "name": "Trinity  Rivera",
@@ -526,20 +526,20 @@
               "cost": 207.9
             }
           ],
-          "retail_hrs": 31.2,
-          "retail_cost": 655.2,
-          "mgr_cost": 917.81,
-          "total_labor": 1573.01,
-          "sales": 12274.61,
-          "labor_pct_sales": 12.82,
-          "days_open": 5,
+          "retail_hrs": 41.6,
+          "retail_cost": 874.65,
+          "mgr_cost": 1101.37,
+          "total_labor": 1976.02,
+          "sales": 15373.31,
+          "labor_pct_sales": 12.85,
+          "days_open": 6,
           "closures": 0,
-          "cost_per_open_day": 314.6,
-          "casey_hrs": 21.3,
-          "casey_cost": 447.3,
+          "cost_per_open_day": 329.34,
+          "casey_hrs": 31.8,
+          "casey_cost": 666.75,
           "chris_hrs": 0,
           "chris_cost": 0,
-          "cindy_cost": 917.81
+          "cindy_cost": 1101.37
         },
         "ytd_2026": {
           "labor": 61241.4,
@@ -561,6 +561,26 @@
         "chris": 20.0
       },
       "variances": [
+        {
+          "date": "2026-07-06",
+          "day_name": "Mon",
+          "employee": "Trinity  Rivera",
+          "scheduled_hrs": 10.5,
+          "actual_hrs": 0,
+          "variance_hrs": -10.5,
+          "variance_cost": -220.5,
+          "status": "under",
+          "scheduled_start": "08:30",
+          "actual_start": "",
+          "scheduled_end": "19:00",
+          "actual_end": "",
+          "early_in_mins": 0,
+          "late_out_mins": 0,
+          "early_in_cost": 0,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 0,
+          "punch_bonus_cost": 0
+        },
         {
           "date": "2026-07-04",
           "day_name": "Sat",
@@ -724,15 +744,15 @@
         {
           "date": "2026-06-16",
           "day_name": "Tue",
-          "employee": "Casey Makowski",
-          "scheduled_hrs": 8.5,
+          "employee": "Trinity  Rivera",
+          "scheduled_hrs": 5.0,
           "actual_hrs": 0,
-          "variance_hrs": -8.5,
-          "variance_cost": -178.5,
+          "variance_hrs": -5.0,
+          "variance_cost": -105.0,
           "status": "under",
-          "scheduled_start": "08:30",
+          "scheduled_start": "14:00",
           "actual_start": "",
-          "scheduled_end": "17:00",
+          "scheduled_end": "19:00",
           "actual_end": "",
           "early_in_mins": 0,
           "late_out_mins": 0,
@@ -744,15 +764,15 @@
         {
           "date": "2026-06-16",
           "day_name": "Tue",
-          "employee": "Trinity  Rivera",
-          "scheduled_hrs": 5.0,
+          "employee": "Casey Makowski",
+          "scheduled_hrs": 8.5,
           "actual_hrs": 0,
-          "variance_hrs": -5.0,
-          "variance_cost": -105.0,
+          "variance_hrs": -8.5,
+          "variance_cost": -178.5,
           "status": "under",
-          "scheduled_start": "14:00",
+          "scheduled_start": "08:30",
           "actual_start": "",
-          "scheduled_end": "19:00",
+          "scheduled_end": "17:00",
           "actual_end": "",
           "early_in_mins": 0,
           "late_out_mins": 0,
@@ -880,26 +900,6 @@
           "late_out_cost": 0,
           "punch_bonus_mins": 6,
           "punch_bonus_cost": 2.1
-        },
-        {
-          "date": "2026-06-06",
-          "day_name": "Sat",
-          "employee": "Trinity  Rivera",
-          "scheduled_hrs": 5.0,
-          "actual_hrs": 3.03,
-          "variance_hrs": -1.97,
-          "variance_cost": -41.3,
-          "status": "under",
-          "scheduled_start": "09:00",
-          "actual_start": "10:59",
-          "scheduled_end": "14:00",
-          "actual_end": "14:01",
-          "early_in_mins": 0,
-          "late_out_mins": 1,
-          "early_in_cost": 0,
-          "late_out_cost": 0.35,
-          "punch_bonus_mins": 1,
-          "punch_bonus_cost": 0.35
         }
       ],
       "forward_projection": {
@@ -910,21 +910,21 @@
             "people": [
               {
                 "name": "Casey Makowski",
-                "hrs": 154.0,
+                "hrs": 143.5,
                 "rate": 21.0,
-                "cost": 3234.0
+                "cost": 3013.5
               },
               {
                 "name": "Trinity  Rivera",
-                "hrs": 85.5,
+                "hrs": 75.0,
                 "rate": 21.0,
-                "cost": 1795.5
+                "cost": 1575.0
               }
             ],
-            "retail_hrs": 239.5,
-            "retail_cost": 5029.5,
+            "retail_hrs": 218.5,
+            "retail_cost": 4588.5,
             "mgr_cost": 5690.41,
-            "total_labor": 10719.91
+            "total_labor": 10278.91
           },
           {
             "month": "2026-08",
@@ -953,25 +953,25 @@
             "month_label": "Sep 2026",
             "people": [
               {
+                "name": "Casey Makowski",
+                "hrs": 27.0,
+                "rate": 21.0,
+                "cost": 567.0
+              },
+              {
                 "name": "Trinity  Rivera",
                 "hrs": 20.0,
                 "rate": 21.0,
                 "cost": 420.0
-              },
-              {
-                "name": "Casey Makowski",
-                "hrs": 16.5,
-                "rate": 21.0,
-                "cost": 346.5
               }
             ],
-            "retail_hrs": 36.5,
-            "retail_cost": 766.5,
+            "retail_hrs": 47.0,
+            "retail_cost": 987.0,
             "mgr_cost": 5506.85,
-            "total_labor": 6273.35
+            "total_labor": 6493.85
           }
         ],
-        "generated_at": "2026-07-06"
+        "generated_at": "2026-07-07"
       }
     },
     "hicksville": {
@@ -1198,20 +1198,20 @@
             },
             {
               "name": "Kayla Moses",
-              "hrs": 7.1,
+              "hrs": 16.2,
               "rate": 19.0,
-              "cost": 135.22
+              "cost": 307.8
             }
           ],
-          "retail_hrs": 25.7,
-          "retail_cost": 525.12,
+          "retail_hrs": 34.8,
+          "retail_cost": 697.7,
           "mgr_cost": 0.0,
-          "total_labor": 525.12,
-          "sales": 5857.74,
-          "labor_pct_sales": 8.96,
-          "days_open": 5,
+          "total_labor": 697.7,
+          "sales": 6484.65,
+          "labor_pct_sales": 10.76,
+          "days_open": 6,
           "closures": 0,
-          "cost_per_open_day": 105.02
+          "cost_per_open_day": 116.28
         }
       ],
       "summary": {
@@ -1268,20 +1268,20 @@
             },
             {
               "name": "Kayla Moses",
-              "hrs": 7.1,
+              "hrs": 16.2,
               "rate": 19.0,
-              "cost": 135.22
+              "cost": 307.8
             }
           ],
-          "retail_hrs": 25.7,
-          "retail_cost": 525.12,
+          "retail_hrs": 34.8,
+          "retail_cost": 697.7,
           "mgr_cost": 0.0,
-          "total_labor": 525.12,
-          "sales": 5857.74,
-          "labor_pct_sales": 8.96,
-          "days_open": 5,
+          "total_labor": 697.7,
+          "sales": 6484.65,
+          "labor_pct_sales": 10.76,
+          "days_open": 6,
           "closures": 0,
-          "cost_per_open_day": 105.02
+          "cost_per_open_day": 116.28
         },
         "ytd_2026": {
           "labor": 24333.81,
@@ -1299,6 +1299,26 @@
         "Sophia Kurkowski": 19.0
       },
       "variances": [
+        {
+          "date": "2026-07-06",
+          "day_name": "Mon",
+          "employee": "Kayla Moses",
+          "scheduled_hrs": 9.0,
+          "actual_hrs": 9.08,
+          "variance_hrs": 0.08,
+          "variance_cost": 1.58,
+          "status": "over",
+          "scheduled_start": "09:00",
+          "actual_start": "08:54",
+          "scheduled_end": "18:00",
+          "actual_end": "17:59",
+          "early_in_mins": 6,
+          "late_out_mins": 0,
+          "early_in_cost": 1.9,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 6,
+          "punch_bonus_cost": 1.9
+        },
         {
           "date": "2026-07-05",
           "day_name": "Sun",
@@ -1462,26 +1482,6 @@
         {
           "date": "2026-06-20",
           "day_name": "Sat",
-          "employee": "Hailey Imhof",
-          "scheduled_hrs": 5.0,
-          "actual_hrs": 5.05,
-          "variance_hrs": 0.05,
-          "variance_cost": 1.05,
-          "status": "over",
-          "scheduled_start": "09:00",
-          "actual_start": "08:49",
-          "scheduled_end": "14:00",
-          "actual_end": "13:52",
-          "early_in_mins": 11,
-          "late_out_mins": 0,
-          "early_in_cost": 3.85,
-          "late_out_cost": 0,
-          "punch_bonus_mins": 11,
-          "punch_bonus_cost": 3.85
-        },
-        {
-          "date": "2026-06-20",
-          "day_name": "Sat",
           "employee": "Kayla Moses",
           "scheduled_hrs": 4.0,
           "actual_hrs": 4.15,
@@ -1498,6 +1498,26 @@
           "late_out_cost": 0,
           "punch_bonus_mins": 10,
           "punch_bonus_cost": 3.17
+        },
+        {
+          "date": "2026-06-20",
+          "day_name": "Sat",
+          "employee": "Hailey Imhof",
+          "scheduled_hrs": 5.0,
+          "actual_hrs": 5.05,
+          "variance_hrs": 0.05,
+          "variance_cost": 1.05,
+          "status": "over",
+          "scheduled_start": "09:00",
+          "actual_start": "08:49",
+          "scheduled_end": "14:00",
+          "actual_end": "13:52",
+          "early_in_mins": 11,
+          "late_out_mins": 0,
+          "early_in_cost": 3.85,
+          "late_out_cost": 0,
+          "punch_bonus_mins": 11,
+          "punch_bonus_cost": 3.85
         },
         {
           "date": "2026-06-19",
@@ -1718,26 +1738,6 @@
           "late_out_cost": 0,
           "punch_bonus_mins": 7,
           "punch_bonus_cost": 2.22
-        },
-        {
-          "date": "2026-06-06",
-          "day_name": "Sat",
-          "employee": "Hailey Imhof",
-          "scheduled_hrs": 9.0,
-          "actual_hrs": 9.3,
-          "variance_hrs": 0.3,
-          "variance_cost": 6.3,
-          "status": "over",
-          "scheduled_start": "09:00",
-          "actual_start": "08:42",
-          "scheduled_end": "18:00",
-          "actual_end": "18:00",
-          "early_in_mins": 18,
-          "late_out_mins": 0,
-          "early_in_cost": 6.3,
-          "late_out_cost": 0,
-          "punch_bonus_mins": 18,
-          "punch_bonus_cost": 6.3
         }
       ],
       "forward_projection": {
@@ -1754,15 +1754,15 @@
               },
               {
                 "name": "Kayla Moses",
-                "hrs": 57.0,
+                "hrs": 48.0,
                 "rate": 19.0,
-                "cost": 1083.0
+                "cost": 912.0
               }
             ],
-            "retail_hrs": 204.0,
-            "retail_cost": 4170.0,
+            "retail_hrs": 195.0,
+            "retail_cost": 3999.0,
             "mgr_cost": 0.0,
-            "total_labor": 4170.0
+            "total_labor": 3999.0
           },
           {
             "month": "2026-08",
@@ -1809,7 +1809,7 @@
             "total_labor": 952.0
           }
         ],
-        "generated_at": "2026-07-06"
+        "generated_at": "2026-07-07"
       }
     }
   }
