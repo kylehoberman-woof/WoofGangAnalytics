@@ -511,10 +511,18 @@ def _sanitize(obj):
         return obj.replace('\\', '\\\\').replace('"', '\\"')
     return obj
 pp_json = _json.dumps(pp_data)
-pp_dates_json = _json.dumps({
+pp_dates = {
     f"pp_{i}": {"start": s.isoformat(), "end": e.isoformat()}
     for i, (s, e) in enumerate(pay_periods)
-})
+}
+pp_dates_json = _json.dumps(pp_dates)
+
+# Export the fully-computed pay period data for downstream consumers (e.g.
+# push_to_gusto.py) so payroll numbers always match what's shown here —
+# no separate re-derivation of commission/tips/guarantee logic.
+with open(DATA_DIR / "pay_periods.json", "w") as _f:
+    _json.dump({"periods": pp_data, "dates": pp_dates}, _f, indent=2)
+
 groomers_json = _json.dumps(groomers)
 groomer_colors_json = _json.dumps(groomer_color)
 # Convert guarantees to JS-friendly format: {name: {rate, start, end}}
