@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T02:28:14.587662-04:00",
+  "generated_at": "2026-07-11T18:20:26.727120-04:00",
   "today": "2026-07-11",
   "yesterday": "2026-07-10",
   "week_start": "2026-07-06",
@@ -130,9 +130,18 @@
           "name": "X-Small Treat Table",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 29.0,
+          "velocity_monthly": 29.7,
           "status": "out",
           "vendor": "Woof Gang Bakery"
+        },
+        {
+          "sku": "810153750116",
+          "name": "WGB 12\" Braided Bully Stick",
+          "stock": -1.0,
+          "weeks_of_supply": -0.2,
+          "velocity_monthly": 26.0,
+          "status": "out",
+          "vendor": "Woof Gang Private Label"
         },
         {
           "sku": "852301008069",
@@ -148,7 +157,7 @@
           "name": "Preppy Puppy Cannoli",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 5.2,
+          "velocity_monthly": 5.5,
           "status": "out",
           "vendor": "Preppy Puppy"
         },
@@ -295,15 +304,6 @@
           "velocity_monthly": 2.5,
           "status": "out",
           "vendor": "Earth Animal"
-        },
-        {
-          "sku": "810153750604",
-          "name": "WGB Yak Cheese Small",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 2.5,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
         }
       ],
       "mtd_dow_adjusted_expected": 32116.58,
@@ -596,9 +596,9 @@
         {
           "sku": "30005",
           "name": "Cannoli",
-          "stock": -39.0,
+          "stock": -44.0,
           "weeks_of_supply": -13.0,
-          "velocity_monthly": 13.0,
+          "velocity_monthly": 14.7,
           "status": "out",
           "vendor": "Preppy Puppy"
         },
@@ -607,7 +607,7 @@
           "name": "Broken But Delicious",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 8.2,
+          "velocity_monthly": 8.8,
           "status": "out",
           "vendor": "Other"
         },
@@ -945,5 +945,5 @@
       "upcoming_closures": []
     }
   },
-  "summary_text": "Kyle, yesterday was mixed\u2014Port Washington holding steady but Hicksville showing real operational stress, and we have a critical scheduling gap coming tomorrow.\n\nPort Washington is firing on cylinders. You're up 50% YTD and yesterday's $583/groomer-day ran 13% hot against your 30-day baseline despite a soft retail day (down 45%, likely seasonal summer lull). Core grooming held flat week-over-week\u2014the team is executing. The concern: add-on revenue cratered to 52% attach from 58%, signaling either front-of-house upsell discipline slipped or client base is lighter-touch this week. Watch it Monday. The bright spot you should own: visit-cadence drift is improving (12+ week bucket down 2.2 points), meaning retention is tightening. That's the result of consistent execution.\n\nHicksville is a different story. Yesterday's 4-groomer day hit $418/groomer\u2014flat to baseline, so no productivity gain\u2014but the real problem is the scheduling cliff: you have zero groomers scheduled for tomorrow (Sunday) and only one on Monday. Transaction count dropped 20% and add-on attach halved to 27%, suggesting either booking discipline broke or client confidence is wavering. Against that, MTD is crushing expectations (+23.6% vs DOW-adjusted) so this week feels like an anomaly, not a trend. But the 12+ week visit-gap bucket is growing (+2.4 points)\u2014that's stealth churn. You need eyes on Hicksville's retention next week.\n\nPort Washington today: 4 groomers, 8 bather hours. Tomorrow: 0 groomers (Sunday coverage gap), 7 bather hours. Next 7 days: 34 groomer-days. Hicksville today: 1 groomer, 0 bather hours. Tomorrow: 0 groomers, 0 bather hours. Next 7 days: 13 groomer-days. You're understaffed heading into the week\u2014confirm Monday coverage now."
+  "summary_text": "Kyle, Port Washington is performing and Hicksville is signaling trouble ahead.\n\nPort Washington delivered exactly what we expect from a 6-groomer day: $583 per groomer, 13% above the 30-day baseline. Yesterday's headline softness\u2014down 6% total\u2014is entirely retail (down 45%) and add-on attachment (52% vs 58%), not core grooming, which stayed flat. The retail miss is real and worth diagnosing at the front line; add-on softness suggests upsell discipline slipped. Week-to-date you're flat despite running 4.7 groomer-days per day (up from 4.2 last month), which means capacity expansion is offsetting a slight per-groomer efficiency dip\u2014that's acceptable given the team is ramping. The bright spot: your 12+ week visit gap is shrinking, a leading indicator that retention is improving. Year-to-date you're up 50% in revenue and 51% in appointments\u2014that's the business working.\n\nHicksville is the concern. Yesterday's 4-groomer day was on baseline at $418/groomer, but the week is down 8% and the pattern is troubling: transaction count down 20%, add-on attach collapsed to 27% (from 42%), retail down 28%. The MTD numbers look strong (up 44% vs June), but that's calendar math\u2014you're running at +23.6% above DOW-adjusted expectation, which is real. However, your visit-cadence drift is growing (10.2% \u2192 12.6%), signaling stealth churn. You have 84 customers dormant or drifting with $61k annual value at risk. Hicksville's scheduling is also fragile: 1 groomer today, 0 tomorrow, only 13 groomer-days next week. That's a capacity cliff that will accelerate the churn signal.\n\nPort Washington (today 4 groomer-days, 8h bathers; tomorrow 0 groomer-days, 7h bathers; next 7 days 34 groomer-days) is adequately covered for the week, but Hicksville (today 1 groomer-day, 0h bathers; tomorrow 0 groomer-days, 0h bathers; next 7 days 13 groomer-days) is understaffed\u2014address scheduling immediately to prevent further appointment leakage."
 }
