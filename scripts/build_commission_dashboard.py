@@ -1162,7 +1162,11 @@ function applyGustoMode(name, commission, tips, bonus, hours) {{
 function downloadPayrollCSV(ppId) {{
   var data = PP_DATA[ppId];
   if (!data) return;
-  var rows = [['Employee Name','Commission','Cash Tips','Bonus','Regular Hours']];
+  // "Paycheck Tips", not "Cash Tips" — these are credit card tips the
+  // business is holding and must actually disburse through payroll.
+  // "Cash Tips" in Gusto means the tip was already handed to the employee
+  // directly, so Gusto would only withhold tax on it without paying it out.
+  var rows = [['Employee Name','Commission','Paycheck Tips','Bonus','Regular Hours']];
 
   function esc(v) {{
     v = String(v);
