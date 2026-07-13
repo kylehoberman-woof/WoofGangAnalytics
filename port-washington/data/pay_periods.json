@@ -35,15 +35,26 @@
         "daily": []
       },
       "Jackie G. ": {
-        "rev": 0,
+        "rev": 110.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "comm": 55.0,
+        "paid": 55.0,
+        "tips": 22.0,
+        "total": 77.0,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-07-13",
+            "rev": 110.0,
+            "disc": 0,
+            "comm": 55.0,
+            "paid": 55.0,
+            "tips": 22.0,
+            "total": 77.0,
+            "guar_applied": false
+          }
+        ]
       },
       "Joant C": {
         "rev": 0,
@@ -123,15 +134,26 @@
         "daily": []
       },
       "Paige F": {
-        "rev": 0,
+        "rev": 275.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
-        "guar_days": 0,
-        "daily": []
+        "comm": 137.5,
+        "paid": 200.0,
+        "tips": 55.0,
+        "total": 255.0,
+        "working_days": 1,
+        "guar_days": 1,
+        "daily": [
+          {
+            "date": "2026-07-13",
+            "rev": 275.0,
+            "disc": 0,
+            "comm": 137.5,
+            "paid": 200.0,
+            "tips": 55.0,
+            "total": 255.0,
+            "guar_applied": true
+          }
+        ]
       },
       "Stacey W": {
         "rev": 0,
@@ -194,15 +216,39 @@
       ],
       "_manager_bonus": 0.0,
       "_bather_rev": 0,
-      "_bather_pay": {},
-      "_bather_hours": {},
-      "_bather_daily": {},
+      "_bather_pay": {
+        "Jessica G": 0.0
+      },
+      "_bather_hours": {
+        "Jessica G": 0
+      },
+      "_bather_daily": {
+        "Jessica G": [
+          {
+            "date": "2026-07-13",
+            "hours": 0
+          }
+        ]
+      },
       "_bather_tips": {},
       "_bather_tips_daily": {},
-      "_retail_pay": {},
-      "_retail_hours": {},
-      "_retail_daily": {},
-      "_retail_rates": {}
+      "_retail_pay": {
+        "Casey": 0.0
+      },
+      "_retail_hours": {
+        "Casey": 0
+      },
+      "_retail_daily": {
+        "Casey": [
+          {
+            "date": "2026-07-13",
+            "hours": 0
+          }
+        ]
+      },
+      "_retail_rates": {
+        "Casey": 21.0
+      }
     },
     "pp_1": {
       "Ashley Fribbley": {
