@@ -93,7 +93,7 @@ tr:hover td{background:#fafaf8!important}
 </head>
 <body>
 <div class="header">
-    <div class="header-timestamp">Updated July 13, 2026 at 11:23 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
+    <div class="header-timestamp">Updated July 13, 2026 at 02:06 PM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
     <h1>Woof Gang Hicksville</h1>
     <div class="subtitle">Groomer Commission Dashboard</div>
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
@@ -4401,6 +4401,7 @@ var COLORS = {"Alex  I": "#C4276E", "April Y": "#1976D2", "Carol W": "#388E3C", 
 var GUARANTEES = {"Alex I": {"rate": 200.0, "start": "2026-01-19", "end": "2026-04-18"}, "Carol W": {"rate": 200.0, "start": "2025-12-12", "end": "2026-03-11"}, "Debra N": {"rate": 200.0, "start": "2026-04-04", "end": "2026-07-03"}, "Julia B": {"rate": 200.0, "start": "2026-02-03", "end": "2026-05-04"}, "Julianne D": {"rate": 200.0, "start": "2026-06-23", "end": "2026-09-21"}, "Maria V": {"rate": 200.0, "start": "2025-12-13", "end": "2026-03-12"}, "Sereena C": {"rate": 200.0, "start": "2025-12-15", "end": "2026-03-14"}, "Victoria C.": {"rate": 200.0, "start": "2026-05-07", "end": "2026-08-05"}};
 var SUE_WEEKLY = [];
 var PP_DATES = {"pp_0": {"start": "2026-07-11", "end": "2026-07-17"}, "pp_1": {"start": "2026-07-04", "end": "2026-07-10"}, "pp_2": {"start": "2026-06-27", "end": "2026-07-03"}, "pp_3": {"start": "2026-06-20", "end": "2026-06-26"}, "pp_4": {"start": "2026-06-13", "end": "2026-06-19"}, "pp_5": {"start": "2026-06-06", "end": "2026-06-12"}, "pp_6": {"start": "2026-05-30", "end": "2026-06-05"}, "pp_7": {"start": "2026-05-23", "end": "2026-05-29"}, "pp_8": {"start": "2026-05-16", "end": "2026-05-22"}, "pp_9": {"start": "2026-05-09", "end": "2026-05-15"}, "pp_10": {"start": "2026-05-02", "end": "2026-05-08"}, "pp_11": {"start": "2026-04-25", "end": "2026-05-01"}, "pp_12": {"start": "2026-04-18", "end": "2026-04-24"}, "pp_13": {"start": "2026-04-11", "end": "2026-04-17"}, "pp_14": {"start": "2026-04-04", "end": "2026-04-10"}, "pp_15": {"start": "2026-03-28", "end": "2026-04-03"}};
+var GUSTO_PAYROLL_CONFIG = {"Alex I": {"mode": "full", "fixed_amount": null}, "Carol W": {"mode": "fixed_amount", "fixed_amount": 100.0}, "Christine Brower": {"mode": "full", "fixed_amount": null}, "Christina Ramkissoon": {"mode": "full", "fixed_amount": null}, "Cindy Szczudlo": {"mode": "full", "fixed_amount": null}, "Debra N": {"mode": "full", "fixed_amount": null}, "Hailey Imhof": {"mode": "full", "fixed_amount": null}, "Julia B": {"mode": "full", "fixed_amount": null}, "Julianne D": {"mode": "full", "fixed_amount": null}, "Kayla Moses": {"mode": "full", "fixed_amount": null}, "Maria V": {"mode": "full", "fixed_amount": null}, "Naomi Dutes": {"mode": "full", "fixed_amount": null}, "Nicole Alarcon": {"mode": "full", "fixed_amount": null}, "Sereena C": {"mode": "full", "fixed_amount": null}, "Sophia Kurkowski": {"mode": "full", "fixed_amount": null}, "Victoria C.": {"mode": "full", "fixed_amount": null}};
 
 function fc(v) { return '$' + parseFloat(v).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}); }
 
@@ -4614,6 +4615,20 @@ function computeGroomerPayout(g, ppId) {
   return {paid: paid, tips: tips};
 }
 
+function applyGustoMode(name, commission, tips, bonus, hours) {
+  // Not everyone's full computed pay goes through Gusto — some are paid
+  // entirely another way (mode "none"), some only get their commission/hours
+  // through Gusto with tips handled separately (mode "commission_only"), and
+  // some get a flat capped amount with the remainder paid by check (mode
+  // "fixed_amount"). Defaults to "full" (unchanged) for anyone not configured.
+  var cfg = GUSTO_PAYROLL_CONFIG[name] || {mode: 'full'};
+  var mode = cfg.mode || 'full';
+  if (mode === 'none') return null;
+  if (mode === 'fixed_amount') return {commission: cfg.fixed_amount || 0, tips: 0, bonus: 0, hours: 0};
+  if (mode === 'commission_only') return {commission: commission, tips: 0, bonus: 0, hours: hours};
+  return {commission: commission, tips: tips, bonus: bonus, hours: hours};
+}
+
 function downloadPayrollCSV(ppId) {
   var data = PP_DATA[ppId];
   if (!data) return;
@@ -4623,28 +4638,39 @@ function downloadPayrollCSV(ppId) {
     v = String(v);
     return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
   }
+  function addRow(name, commission, tips, bonus, hours) {
+    var r = applyGustoMode(name, commission, tips, bonus, hours);
+    if (!r) return; // mode "none" — paid outside Gusto entirely
+    if (!r.commission && !r.tips && !r.bonus && !r.hours) return;
+    rows.push([
+      name,
+      r.commission ? r.commission.toFixed(2) : '',
+      r.tips ? r.tips.toFixed(2) : '',
+      r.bonus ? r.bonus.toFixed(2) : '',
+      r.hours ? r.hours.toFixed(3) : '',
+    ]);
+  }
 
   GROOMERS.forEach(function(g) {
     var d = data[g]; if (!d) return;
     var payout = computeGroomerPayout(g, ppId);
     var pto = getPtoPayout(g, ppId);
-    if (!payout.paid && !payout.tips && !pto) return;
-    rows.push([g, payout.paid.toFixed(2), payout.tips.toFixed(2), pto ? pto.toFixed(2) : '', '']);
+    addRow(g, payout.paid, payout.tips, pto, 0);
   });
 
   var batherHours = data._bather_hours || {};
   var batherTips = data._bather_tips || {};
   Object.keys(batherHours).forEach(function(name) {
-    rows.push([name, '', (batherTips[name] || 0).toFixed(2), '', (batherHours[name] || 0).toFixed(3)]);
+    addRow(name, 0, batherTips[name] || 0, 0, batherHours[name] || 0);
   });
 
   var retailHours = data._retail_hours || {};
   Object.keys(retailHours).forEach(function(name) {
-    rows.push([name, '', '', '', (retailHours[name] || 0).toFixed(3)]);
+    addRow(name, 0, 0, 0, retailHours[name] || 0);
   });
 
   if (data._manager_bonus) {
-    rows.push(['Cindy Szczudlo', '', '', data._manager_bonus.toFixed(2), '']);
+    addRow('Cindy Szczudlo', 0, 0, data._manager_bonus, 0);
   }
 
   var csv = rows.map(function(r) { return r.map(esc).join(','); }).join('\r\n');
