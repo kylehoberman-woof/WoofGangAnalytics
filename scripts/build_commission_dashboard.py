@@ -782,6 +782,7 @@ tr:hover td{{background:#fafaf8!important}}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
+  <button id="download-csv-btn" onclick="downloadPayrollCSV(document.getElementById('pp-select').value)" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:1px solid #2C1A0E;background:#fff;color:#2C1A0E;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">⬇ Payroll CSV</button>
   <button id="save-overrides-btn" onclick="saveOverrides()" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:none;background:#C4276E;color:#fff;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">💾 Save Overrides</button>
 </div>
 
@@ -936,6 +937,7 @@ function showTab(id, btn) {{
   btn.classList.add('active');
   var sel = document.getElementById('pp-select');
   sel.style.display = id === 'pp' ? 'block' : 'none';
+  document.getElementById('download-csv-btn').style.display = id === 'pp' ? 'inline-block' : 'none';
   if (id === 'pp') renderPayPeriod(sel.value);
   if (id === 'exec') renderExec();
   if (id === 'sue') renderSue();
@@ -1116,6 +1118,73 @@ function toggleGuar(key, ppId) {{
   renderPayPeriod(ppId);
 }}
 
+function computeGroomerPayout(g, ppId) {{
+  // Final paid/tips for one groomer/period, applying guarantee overrides and
+  // commission_adjustments the same way renderPayPeriod does — shared so the
+  // CSV export never drifts from what's shown on screen.
+  var data = PP_DATA[ppId];
+  var d = data && data[g];
+  if (!d) return {{paid: 0, tips: 0}};
+  if (!d.daily || !d.daily.length) return {{paid: d.paid || 0, tips: d.tips || 0}};
+  var paid = 0, tips = 0;
+  d.daily.forEach(function(day) {{
+    var guar = getGuarRate(g, day.date);
+    var overrideKey = 'guar_override_'+day.date+'_'+g;
+    var overridden = getOverride(overrideKey);
+    var guarActive = guar > 0 && day.guar_applied && !overridden;
+    var commVal = getAdj(g, day.date, 'commission'); if (commVal === null) commVal = day.comm;
+    var tipsVal = getAdj(g, day.date, 'tip');        if (tipsVal === null) tipsVal = day.tips;
+    var p = guarActive ? Math.max(commVal, guar) : commVal;
+    paid += p; tips += tipsVal;
+  }});
+  return {{paid: paid, tips: tips}};
+}}
+
+function downloadPayrollCSV(ppId) {{
+  var data = PP_DATA[ppId];
+  if (!data) return;
+  var rows = [['Employee Name','Commission','Cash Tips','Bonus','Regular Hours']];
+
+  function esc(v) {{
+    v = String(v);
+    return /[",\\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+  }}
+
+  GROOMERS.forEach(function(g) {{
+    var d = data[g]; if (!d) return;
+    var payout = computeGroomerPayout(g, ppId);
+    var pto = getPtoPayout(g, ppId);
+    if (!payout.paid && !payout.tips && !pto) return;
+    rows.push([g, payout.paid.toFixed(2), payout.tips.toFixed(2), pto ? pto.toFixed(2) : '', '']);
+  }});
+
+  var batherHours = data._bather_hours || {{}};
+  var batherTips = data._bather_tips || {{}};
+  Object.keys(batherHours).forEach(function(name) {{
+    rows.push([name, '', (batherTips[name] || 0).toFixed(2), '', (batherHours[name] || 0).toFixed(3)]);
+  }});
+
+  var retailHours = data._retail_hours || {{}};
+  Object.keys(retailHours).forEach(function(name) {{
+    rows.push([name, '', '', '', (retailHours[name] || 0).toFixed(3)]);
+  }});
+
+  if (data._manager_bonus) {{
+    rows.push([{MANAGER_NAME!r}, '', '', data._manager_bonus.toFixed(2), '']);
+  }}
+
+  var csv = rows.map(function(r) {{ return r.map(esc).join(','); }}).join('\\r\\n');
+  var blob = new Blob([csv], {{type: 'text/csv;charset=utf-8;'}});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'gusto_payroll_' + ppId + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}}
+
 function renderPayPeriod(ppId) {{
   var data = PP_DATA[ppId];
   if (!data) return;
@@ -1130,22 +1199,8 @@ function renderPayPeriod(ppId) {{
   GROOMERS.forEach(function(g) {{
     var d = data[g]; if (!d) return;
     totDisc += (d.disc || 0);
-    var adjPaid = 0, adjTotal = 0, adjTips = 0;
-    if (d.daily && d.daily.length) {{
-      d.daily.forEach(function(day) {{
-        var guar = getGuarRate(g, day.date);
-        var overrideKey = 'guar_override_'+day.date+'_'+g;
-        var overridden = getOverride(overrideKey);
-        var guarActive = guar > 0 && day.guar_applied && !overridden;
-        var commVal = getAdj(g, day.date, 'commission'); if (commVal === null) commVal = day.comm;
-        var tipsVal = getAdj(g, day.date, 'tip');        if (tipsVal === null) tipsVal = day.tips;
-        var p = guarActive ? Math.max(commVal, guar) : commVal;
-        adjPaid += p; adjTips += tipsVal; adjTotal += p + tipsVal;
-      }});
-    }} else {{
-      adjPaid = d.paid; adjTips = d.tips; adjTotal = d.total;
-    }}
-    totRev += d.rev; totPaid += adjPaid; totTips += adjTips; totTotal += adjTotal;
+    var payout = computeGroomerPayout(g, ppId);
+    totRev += d.rev; totPaid += payout.paid; totTips += payout.tips; totTotal += payout.paid + payout.tips;
     totGuar += d.guar_days;
   }});
   totRev += (data._bather_rev || 0);
