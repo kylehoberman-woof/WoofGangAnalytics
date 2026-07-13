@@ -79,15 +79,26 @@
         "daily": []
       },
       "Joyce P": {
-        "rev": 0,
+        "rev": 245.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "comm": 122.5,
+        "paid": 122.5,
+        "tips": 49.0,
+        "total": 171.5,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-07-13",
+            "rev": 245.0,
+            "disc": 0,
+            "comm": 122.5,
+            "paid": 122.5,
+            "tips": 49.0,
+            "total": 171.5,
+            "guar_applied": false
+          }
+        ]
       },
       "Kimberly S": {
         "rev": 0,
@@ -101,15 +112,26 @@
         "daily": []
       },
       "Maria C": {
-        "rev": 0,
+        "rev": 215.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
-        "guar_days": 0,
-        "daily": []
+        "comm": 107.5,
+        "paid": 200.0,
+        "tips": 25.0,
+        "total": 225.0,
+        "working_days": 1,
+        "guar_days": 1,
+        "daily": [
+          {
+            "date": "2026-07-13",
+            "rev": 215.0,
+            "disc": 0,
+            "comm": 107.5,
+            "paid": 200.0,
+            "tips": 25.0,
+            "total": 225.0,
+            "guar_applied": true
+          }
+        ]
       },
       "Marie D.": {
         "rev": 0,
@@ -123,34 +145,45 @@
         "daily": []
       },
       "Olivia M": {
-        "rev": 0,
+        "rev": 130.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
+        "comm": 65.0,
+        "paid": 65.0,
         "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "total": 65.0,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-07-13",
+            "rev": 130.0,
+            "disc": 0,
+            "comm": 65.0,
+            "paid": 65.0,
+            "tips": 0,
+            "total": 65.0,
+            "guar_applied": false
+          }
+        ]
       },
       "Paige F": {
-        "rev": 275.0,
+        "rev": 365.0,
         "disc": 0,
-        "comm": 137.5,
+        "comm": 182.5,
         "paid": 200.0,
-        "tips": 55.0,
-        "total": 255.0,
+        "tips": 68.5,
+        "total": 268.5,
         "working_days": 1,
         "guar_days": 1,
         "daily": [
           {
             "date": "2026-07-13",
-            "rev": 275.0,
+            "rev": 365.0,
             "disc": 0,
-            "comm": 137.5,
+            "comm": 182.5,
             "paid": 200.0,
-            "tips": 55.0,
-            "total": 255.0,
+            "tips": 68.5,
+            "total": 268.5,
             "guar_applied": true
           }
         ]
@@ -215,23 +248,33 @@
         }
       ],
       "_manager_bonus": 0.0,
-      "_bather_rev": 0,
+      "_bather_rev": 200.0,
       "_bather_pay": {
-        "Jessica G": 0.0
+        "Jessica G": 54.74
       },
       "_bather_hours": {
-        "Jessica G": 0
+        "Jessica G": 3.22
       },
       "_bather_daily": {
         "Jessica G": [
+          {
+            "date": "2026-07-13",
+            "hours": 3.22
+          },
           {
             "date": "2026-07-13",
             "hours": 0
           }
         ]
       },
-      "_bather_tips": {},
-      "_bather_tips_daily": {},
+      "_bather_tips": {
+        "Jessica G": 40.0
+      },
+      "_bather_tips_daily": {
+        "Jessica G": {
+          "2026-07-13": 40.0
+        }
+      },
       "_retail_pay": {
         "Casey": 0.0
       },
