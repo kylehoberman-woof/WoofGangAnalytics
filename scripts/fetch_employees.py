@@ -148,3 +148,31 @@ def get_store_pay_data(store_key):
             guarantees = dict(config.GUARANTEES)
 
     return retail_name_map, retail_rates, bather_name_map, bather_rate_map, guarantees
+
+
+def get_gusto_payroll_config(store_key):
+    """Return {franpos_name: {"mode": ..., "fixed_amount": ...}} for every
+    employee at the store, regardless of role.
+
+    mode is one of:
+      "full"             — default; entire computed pay goes to Gusto
+      "none"             — excluded from the payroll CSV entirely (paid outside Gusto)
+      "commission_only"  — only commission/regular-hours goes to Gusto; tips
+                            and PTO payout are excluded (handled another way)
+      "fixed_amount"      — only gusto_fixed_amount goes to Gusto; the rest is
+                            paid separately (e.g. by check)
+
+    Employees not present in Supabase (or with no mode set) default to "full"
+    so this never silently drops someone new.
+    """
+    employees = fetch_employees(store=store_key, active_only=False)
+    out = {}
+    for e in employees:
+        key = e.get("full_name") or e.get("name")
+        if not key:
+            continue
+        out[key] = {
+            "mode": e.get("gusto_payroll_mode") or "full",
+            "fixed_amount": float(e["gusto_fixed_amount"]) if e.get("gusto_fixed_amount") is not None else None,
+        }
+    return out

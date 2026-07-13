@@ -20,7 +20,7 @@ from config import (
     STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
 )
 from formatting import fc
-from fetch_employees import get_store_pay_data, get_exclude_set
+from fetch_employees import get_store_pay_data, get_exclude_set, get_gusto_payroll_config
 
 SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
@@ -40,6 +40,9 @@ RETAIL_NAME_MAP, RETAIL_RATES, BATHER_NAME_MAP, BATHER_RATE_MAP, GUARANTEES = ge
 
 # Exclude set built dynamically from Supabase non-groomer employees + system names
 EXCLUDE = get_exclude_set(_store_name)
+
+# Per-employee Gusto payroll treatment (full / none / commission_only / fixed_amount)
+GUSTO_PAYROLL_CONFIG = get_gusto_payroll_config(_store_name)
 # Bather full-names for routing bather revenue to the non-commission bucket
 _BATHER_FULL_NAMES = set(BATHER_NAME_MAP.keys())
 
@@ -528,6 +531,7 @@ groomer_colors_json = _json.dumps(groomer_color)
 # Convert guarantees to JS-friendly format: {name: {rate, start, end}}
 _guar_js = {name: {"rate": g[0], "start": g[1], "end": g[2]} for name, g in GUARANTEES.items()}
 guarantees_json = _json.dumps(_guar_js)
+gusto_payroll_config_json = _json.dumps(GUSTO_PAYROLL_CONFIG)
 
 # ── Sue M: weekly tips + product purchases ────────────────────────────────────
 sue_name = "Sue M"
@@ -927,6 +931,7 @@ var COLORS = {groomer_colors_json};
 var GUARANTEES = {guarantees_json};
 var SUE_WEEKLY = {sue_weekly_json};
 var PP_DATES = {pp_dates_json};
+var GUSTO_PAYROLL_CONFIG = {gusto_payroll_config_json};
 
 function fc(v) {{ return '$' + parseFloat(v).toLocaleString('en-US', {{minimumFractionDigits:2,maximumFractionDigits:2}}); }}
 
@@ -1140,6 +1145,20 @@ function computeGroomerPayout(g, ppId) {{
   return {{paid: paid, tips: tips}};
 }}
 
+function applyGustoMode(name, commission, tips, bonus, hours) {{
+  // Not everyone's full computed pay goes through Gusto — some are paid
+  // entirely another way (mode "none"), some only get their commission/hours
+  // through Gusto with tips handled separately (mode "commission_only"), and
+  // some get a flat capped amount with the remainder paid by check (mode
+  // "fixed_amount"). Defaults to "full" (unchanged) for anyone not configured.
+  var cfg = GUSTO_PAYROLL_CONFIG[name] || {{mode: 'full'}};
+  var mode = cfg.mode || 'full';
+  if (mode === 'none') return null;
+  if (mode === 'fixed_amount') return {{commission: cfg.fixed_amount || 0, tips: 0, bonus: 0, hours: 0}};
+  if (mode === 'commission_only') return {{commission: commission, tips: 0, bonus: 0, hours: hours}};
+  return {{commission: commission, tips: tips, bonus: bonus, hours: hours}};
+}}
+
 function downloadPayrollCSV(ppId) {{
   var data = PP_DATA[ppId];
   if (!data) return;
@@ -1149,28 +1168,39 @@ function downloadPayrollCSV(ppId) {{
     v = String(v);
     return /[",\\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
   }}
+  function addRow(name, commission, tips, bonus, hours) {{
+    var r = applyGustoMode(name, commission, tips, bonus, hours);
+    if (!r) return; // mode "none" — paid outside Gusto entirely
+    if (!r.commission && !r.tips && !r.bonus && !r.hours) return;
+    rows.push([
+      name,
+      r.commission ? r.commission.toFixed(2) : '',
+      r.tips ? r.tips.toFixed(2) : '',
+      r.bonus ? r.bonus.toFixed(2) : '',
+      r.hours ? r.hours.toFixed(3) : '',
+    ]);
+  }}
 
   GROOMERS.forEach(function(g) {{
     var d = data[g]; if (!d) return;
     var payout = computeGroomerPayout(g, ppId);
     var pto = getPtoPayout(g, ppId);
-    if (!payout.paid && !payout.tips && !pto) return;
-    rows.push([g, payout.paid.toFixed(2), payout.tips.toFixed(2), pto ? pto.toFixed(2) : '', '']);
+    addRow(g, payout.paid, payout.tips, pto, 0);
   }});
 
   var batherHours = data._bather_hours || {{}};
   var batherTips = data._bather_tips || {{}};
   Object.keys(batherHours).forEach(function(name) {{
-    rows.push([name, '', (batherTips[name] || 0).toFixed(2), '', (batherHours[name] || 0).toFixed(3)]);
+    addRow(name, 0, batherTips[name] || 0, 0, batherHours[name] || 0);
   }});
 
   var retailHours = data._retail_hours || {{}};
   Object.keys(retailHours).forEach(function(name) {{
-    rows.push([name, '', '', '', (retailHours[name] || 0).toFixed(3)]);
+    addRow(name, 0, 0, 0, retailHours[name] || 0);
   }});
 
   if (data._manager_bonus) {{
-    rows.push([{MANAGER_NAME!r}, '', '', data._manager_bonus.toFixed(2), '']);
+    addRow({MANAGER_NAME!r}, 0, 0, data._manager_bonus, 0);
   }}
 
   var csv = rows.map(function(r) {{ return r.map(esc).join(','); }}).join('\\r\\n');
