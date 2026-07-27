@@ -85,6 +85,110 @@ def fetch_overrides_and_adjustments(store_key):
     return waived, adj
 
 
+PTO_AMOUNT_PER_USE = 100.00   # dollars per approved PTO use
+PTO_MAX_USES = 5              # lifetime cap per employee
+PTO_MIN_TENURE_DAYS = 365     # must have 1 year of employment to be eligible
+
+
+def fetch_paid_pto(store_key, period_start, period_end):
+    """Return {employee_name: dollar_amount} for approved paid-PTO uses whose
+    start_date falls inside the pay period [period_start, period_end].
+
+    Policy: full-time groomers with 1+ year tenure get $100 per use, up to 5
+    lifetime uses ($500 total). Each time_off row with paid_pto=true is one use.
+
+    Eligibility is checked against schedule_employees (is_full_time + hire_date).
+    Lifetime-use counting looks at ALL historical paid_pto records for the employee
+    and only includes uses that fall at or before period_end.
+    """
+    # --- fetch all paid PTO for this store (need full history for lifetime cap) ---
+    r = requests.get(
+        f"{REST_URL}/time_off",
+        params={
+            "select": "employee_name,start_date,type",
+            "store_key": f"eq.{store_key}",
+            "paid_pto": "eq.true",
+            "status": "eq.approved",
+            "order": "start_date.asc",
+        },
+        headers=SB_HEADERS,
+        timeout=15,
+    )
+    if not r.ok:
+        print(f"WARNING: could not fetch time_off PTO ({r.status_code}) — PTO will not be included", file=sys.stderr)
+        return {}
+
+    all_pto = r.json()
+
+    # --- fetch employee eligibility ---
+    re = requests.get(
+        f"{REST_URL}/schedule_employees",
+        params={
+            "select": "name,full_name,is_full_time,hire_date,role",
+            "store": f"in.({store_key},both)",
+            "role": "eq.groomer",
+        },
+        headers=SB_HEADERS,
+        timeout=15,
+    )
+    emp_map: dict[str, dict] = {}  # {name_variant: employee_row}
+    if re.ok:
+        for e in re.json():
+            for key in [e.get("full_name"), e.get("name")]:
+                if key:
+                    emp_map[key] = e
+
+    def _eligible(name, use_date_iso):
+        """Is this employee eligible to receive PTO on use_date?"""
+        e = emp_map.get(name)
+        if not e:
+            print(f"  PTO: {name} not found in schedule_employees — skipping", file=sys.stderr)
+            return False
+        if not e.get("is_full_time"):
+            print(f"  PTO: {name} is not full-time — skipping", file=sys.stderr)
+            return False
+        if not e.get("hire_date"):
+            print(f"  PTO: {name} has no hire_date — skipping", file=sys.stderr)
+            return False
+        tenure = (date.fromisoformat(use_date_iso) - date.fromisoformat(e["hire_date"])).days
+        if tenure < PTO_MIN_TENURE_DAYS:
+            print(f"  PTO: {name} has {tenure} days tenure (need {PTO_MIN_TENURE_DAYS}) — skipping", file=sys.stderr)
+            return False
+        return True
+
+    # Track lifetime uses per employee (across all history up to period_end)
+    lifetime_uses: dict[str, int] = {}
+    for row in all_pto:
+        if row["start_date"] > period_end:
+            continue
+        name = row["employee_name"]
+        lifetime_uses[name] = lifetime_uses.get(name, 0) + 1
+
+    # Now compute what's owed this period
+    pto_dollars: dict[str, float] = {}
+    uses_before_period: dict[str, int] = {}
+    for row in all_pto:
+        name = row["employee_name"]
+        if row["start_date"] < period_start:
+            uses_before_period[name] = uses_before_period.get(name, 0) + 1
+            continue
+        if row["start_date"] > period_end:
+            continue
+        # This use falls in the current period
+        prior_uses = uses_before_period.get(name, 0)
+        if prior_uses >= PTO_MAX_USES:
+            print(f"  PTO: {name} already at lifetime cap ({PTO_MAX_USES} uses) — skipping", file=sys.stderr)
+            continue
+        if not _eligible(name, row["start_date"]):
+            continue
+        pto_dollars[name] = pto_dollars.get(name, 0.0) + PTO_AMOUNT_PER_USE
+        uses_before_period[name] = prior_uses + 1  # count for subsequent rows in same period
+
+    if pto_dollars:
+        print(f"Paid PTO this period: {pto_dollars}")
+    return pto_dollars
+
+
 def fetch_employee_gusto_ids(store_key):
     """{franpos_name: {"employee_uuid": ..., "job_uuid": ...}} from schedule_employees."""
     r = requests.get(
@@ -139,7 +243,7 @@ def compute_groomer_pay(period, waived, adj):
     return result
 
 
-def build_compensations(period, groomer_pay, gusto_ids, store_key):
+def build_compensations(period, groomer_pay, gusto_ids, store_key, pto_hours=None):
     """Build Gusto's employee_compensations payload. Skips anyone without a
     gusto_employee_uuid mapping in schedule_employees (prints a warning so
     they're not silently dropped from payroll)."""
@@ -187,6 +291,23 @@ def build_compensations(period, groomer_pay, gusto_ids, store_key):
             "hourly_compensations": [{"name": "Regular Hours", "hours": f"{hours:.3f}", "job_uuid": ids["job_uuid"]}],
         })
 
+    # Paid PTO — $100/use flat, added as a fixed compensation line ("PTO")
+    for name, dollars in (pto_hours or {}).items():
+        if dollars <= 0:
+            continue
+        ids = _ids_for(name)
+        if not ids:
+            continue
+        pto_comp = {"name": "PTO", "amount": f"{dollars:.2f}", "job_uuid": ids["job_uuid"]}
+        existing = next((c for c in comps if c.get("employee_uuid") == ids["employee_uuid"]), None)
+        if existing is not None:
+            existing.setdefault("fixed_compensations", []).append(pto_comp)
+        else:
+            comps.append({
+                "employee_uuid": ids["employee_uuid"],
+                "fixed_compensations": [pto_comp],
+            })
+
     if skipped:
         print(f"WARNING: no gusto_employee_uuid on file for: {sorted(set(skipped))} — "
               f"their pay for this period was NOT included. Add them to schedule_employees first.",
@@ -199,7 +320,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("store")
     ap.add_argument("--period", help="Specific period id, e.g. pp_3. Defaults to most recent closed period.")
-    ap.add_argument("--dry-run", action="store_true", help="Print the payload instead of calling Gusto")
+    ap.add_argument("--dry-run", action="store_true", help="Print the JSON payload instead of calling Gusto")
+    ap.add_argument("--csv", action="store_true", help="Write a human-readable CSV summary to stdout")
     args = ap.parse_args()
 
     reg = config.STORE_REGISTRY.get(args.store, {})
@@ -219,9 +341,39 @@ def main():
     waived, adj = fetch_overrides_and_adjustments(args.store)
     groomer_pay = compute_groomer_pay(period, waived, adj)
     gusto_ids = fetch_employee_gusto_ids(args.store)
-    comps = build_compensations(period, groomer_pay, gusto_ids, args.store)
+    pto_dollars = fetch_paid_pto(args.store, start, end)
+    comps = build_compensations(period, groomer_pay, gusto_ids, args.store, pto_hours=pto_dollars)
 
     print(f"Built {len(comps)} employee_compensations entries")
+
+    if args.csv:
+        import csv as _csv
+        import io
+        buf = io.StringIO()
+        w = _csv.writer(buf)
+        w.writerow(["Employee", "Commission", "Tips", "PTO", "Bather Hours", "Retail Hours", "Gusto UUID"])
+        # Build lookup for bather/retail hours
+        bather_h = period.get("_bather_hours") or {}
+        retail_h = period.get("_retail_hours") or {}
+        all_names = (
+            set(groomer_pay) | set(bather_h) | set(retail_h) | set(pto_dollars)
+        )
+        ids_rev = {v["employee_uuid"]: k for k, v in gusto_ids.items()}
+        for name in sorted(all_names):
+            gp = groomer_pay.get(name, {})
+            uuid = gusto_ids.get(name, {}).get("employee_uuid", "— missing —")
+            w.writerow([
+                name,
+                f"${gp.get('paid', 0):.2f}" if gp else "",
+                f"${gp.get('tips', 0):.2f}" if gp else "",
+                f"${pto_dollars.get(name, 0):.2f}" if name in pto_dollars else "",
+                f"{bather_h.get(name, 0):.2f} hrs" if name in bather_h else "",
+                f"{retail_h.get(name, 0):.2f} hrs" if name in retail_h else "",
+                uuid,
+            ])
+        print(buf.getvalue())
+        return
+
     if args.dry_run:
         print(json.dumps(comps, indent=2))
         return
