@@ -57,26 +57,48 @@
         "daily": []
       },
       "Julianne D": {
-        "rev": 0,
+        "rev": 395.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
-        "guar_days": 0,
-        "daily": []
+        "comm": 197.5,
+        "paid": 200.0,
+        "tips": 56.9,
+        "total": 256.9,
+        "working_days": 1,
+        "guar_days": 1,
+        "daily": [
+          {
+            "date": "2026-08-01",
+            "rev": 395.0,
+            "disc": 0,
+            "comm": 197.5,
+            "paid": 200.0,
+            "tips": 56.9,
+            "total": 256.9,
+            "guar_applied": true
+          }
+        ]
       },
       "Maria V": {
-        "rev": 0,
+        "rev": 455.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
+        "comm": 227.5,
+        "paid": 227.5,
         "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "total": 227.5,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-08-01",
+            "rev": 455.0,
+            "disc": 0,
+            "comm": 227.5,
+            "paid": 227.5,
+            "tips": 0,
+            "total": 227.5,
+            "guar_applied": false
+          }
+        ]
       },
       "Sereena C": {
         "rev": 0,
@@ -113,10 +135,23 @@
       "_bather_daily": {},
       "_bather_tips": {},
       "_bather_tips_daily": {},
-      "_retail_pay": {},
-      "_retail_hours": {},
-      "_retail_daily": {},
-      "_retail_rates": {}
+      "_retail_pay": {
+        "Kayla": 115.33
+      },
+      "_retail_hours": {
+        "Kayla": 6.07
+      },
+      "_retail_daily": {
+        "Kayla": [
+          {
+            "date": "2026-08-01",
+            "hours": 6.07
+          }
+        ]
+      },
+      "_retail_rates": {
+        "Kayla": 19.0
+      }
     },
     "pp_1": {
       "Alex  I": {
