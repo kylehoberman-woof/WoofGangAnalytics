@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-13T01:53:22.603653-04:00",
+  "generated_at": "2026-08-13T18:18:09.303930-04:00",
   "today": "2026-08-13",
   "yesterday": "2026-08-12",
   "week_start": "2026-08-10",
@@ -139,9 +139,18 @@
           "name": "X-Small Treat Table",
           "stock": 0.0,
           "weeks_of_supply": 0.0,
-          "velocity_monthly": 32.2,
+          "velocity_monthly": 33.2,
           "status": "out",
           "vendor": "Woof Gang Bakery"
+        },
+        {
+          "sku": "810153750116",
+          "name": "WGB 12\" Braided Bully Stick",
+          "stock": -9.0,
+          "weeks_of_supply": -1.6,
+          "velocity_monthly": 24.7,
+          "status": "out",
+          "vendor": "Woof Gang Private Label"
         },
         {
           "sku": "810153750611",
@@ -149,15 +158,6 @@
           "stock": 0.0,
           "weeks_of_supply": 0.0,
           "velocity_monthly": 6.3,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
-        },
-        {
-          "sku": "810153750673",
-          "name": "WGB Turkey Tendons Half Strip - 3oz",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 6.0,
           "status": "out",
           "vendor": "Woof Gang Private Label"
         },
@@ -171,15 +171,6 @@
           "vendor": "Preppy Puppy"
         },
         {
-          "sku": "810153751038",
-          "name": "WGB, All Natural Chicken Filets, 8oz",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 5.3,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
-        },
-        {
           "sku": "852301008069",
           "name": "Stella & Chewy's Broth Topper Beef Grass-Fed 11 ",
           "stock": 0.0,
@@ -189,15 +180,6 @@
           "vendor": "Stella & Chewy's"
         },
         {
-          "sku": "810153750956",
-          "name": "WGB Chicken Feet, 20-pack",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 4.0,
-          "status": "out",
-          "vendor": "Woof Gang Private Label"
-        },
-        {
           "sku": "3000",
           "name": "K9 Granola Donut",
           "stock": 0.0,
@@ -205,24 +187,6 @@
           "velocity_monthly": 4.0,
           "status": "out",
           "vendor": "Other"
-        },
-        {
-          "sku": "705105989716",
-          "name": "Tucker's Raw Frozen Bison Bones Food for Dogs, 5",
-          "stock": -1.0,
-          "weeks_of_supply": -1.1,
-          "velocity_monthly": 4.0,
-          "status": "out",
-          "vendor": "Tucker's"
-        },
-        {
-          "sku": "81907",
-          "name": "Preppy Puppy Pink 4\" Birthday Cake",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 3.3,
-          "status": "out",
-          "vendor": "Preppy Puppy"
         },
         {
           "sku": "810017530137",
@@ -304,6 +268,42 @@
           "velocity_monthly": 3.0,
           "status": "out",
           "vendor": "Woof Gang Bakery"
+        },
+        {
+          "sku": "665635991194",
+          "name": "H&K Party Hat Happy Barkday Large",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 3.0,
+          "status": "out",
+          "vendor": "Huxley & Kent"
+        },
+        {
+          "sku": "81907",
+          "name": "Preppy Puppy Pink 4\" Birthday Cake",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 2.8,
+          "status": "out",
+          "vendor": "Preppy Puppy"
+        },
+        {
+          "sku": "92103",
+          "name": "Corgi Cannoli",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 2.7,
+          "status": "out",
+          "vendor": "Preppy Puppy"
+        },
+        {
+          "sku": "857253003704",
+          "name": "Earth Animal Dog Treat No Hide Chicken Small 2 P",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 2.5,
+          "status": "out",
+          "vendor": "Earth Animal"
         }
       ],
       "mtd_dow_adjusted_expected": 35290.4,
@@ -406,19 +406,11 @@
       },
       "supplies_needed": [
         {
-          "item_name": "Bandanas",
-          "category": "Grooming",
+          "item_name": "Small brown paper bags",
+          "category": "Bag and Packaging",
           "current_quantity": 0.0,
-          "reorder_level": null,
+          "reorder_level": 0.5,
           "unit": "Boxes",
-          "status": "out"
-        },
-        {
-          "item_name": "Bathroom Paper towels",
-          "category": "Cleaning",
-          "current_quantity": 0.0,
-          "reorder_level": 3.0,
-          "unit": "Bundles",
           "status": "out"
         },
         {
@@ -430,62 +422,6 @@
           "status": "out"
         },
         {
-          "item_name": "Windex",
-          "category": "Cleaning",
-          "current_quantity": 0.0,
-          "reorder_level": 0.5,
-          "unit": "Bottles",
-          "status": "out"
-        },
-        {
-          "item_name": "Blueberry Facial",
-          "category": "Grooming",
-          "current_quantity": 1.0,
-          "reorder_level": 1.0,
-          "unit": "Bottles",
-          "status": "order"
-        },
-        {
-          "item_name": "Disinfectant",
-          "category": "Cleaning",
-          "current_quantity": 0.5,
-          "reorder_level": 0.5,
-          "unit": "Bottles",
-          "status": "order"
-        },
-        {
-          "item_name": "Gloves",
-          "category": "Grooming",
-          "current_quantity": 0.5,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "order"
-        },
-        {
-          "item_name": "Hypo allergenic Conditioner (calming lavender)",
-          "category": "Grooming",
-          "current_quantity": 0.25,
-          "reorder_level": 0.5,
-          "unit": "Bottles",
-          "status": "order"
-        },
-        {
-          "item_name": "Masks",
-          "category": "Grooming",
-          "current_quantity": 0.25,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "order"
-        },
-        {
-          "item_name": "Small brown paper bags",
-          "category": "Bag and Packaging",
-          "current_quantity": 0.25,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "order"
-        },
-        {
           "item_name": "Tooth Paste",
           "category": "Grooming",
           "current_quantity": 1.5,
@@ -494,20 +430,60 @@
           "status": "order"
         },
         {
-          "item_name": "Woof Gang Conditioner",
-          "category": "Grooming",
-          "current_quantity": 4.0,
-          "reorder_level": 4.0,
+          "item_name": "Treat bags",
+          "category": "Bag and Packaging",
+          "current_quantity": 0.5,
+          "reorder_level": 0.5,
+          "unit": "Boxes",
+          "status": "order"
+        },
+        {
+          "item_name": "Windex",
+          "category": "Cleaning",
+          "current_quantity": 0.5,
+          "reorder_level": 0.5,
           "unit": "Bottles",
           "status": "order"
         },
         {
-          "item_name": "Woof Gang Shampoo",
+          "item_name": "Blueberry Facial",
           "category": "Grooming",
-          "current_quantity": 3.0,
-          "reorder_level": 4.0,
+          "current_quantity": 1.5,
+          "reorder_level": 1.0,
           "unit": "Bottles",
-          "status": "order"
+          "status": "low"
+        },
+        {
+          "item_name": "Ear Cleaner",
+          "category": "Grooming",
+          "current_quantity": 0.75,
+          "reorder_level": 0.5,
+          "unit": "Bottles",
+          "status": "low"
+        },
+        {
+          "item_name": "Large pink plastic bags",
+          "category": "Bag and Packaging",
+          "current_quantity": 0.75,
+          "reorder_level": 0.5,
+          "unit": "Boxes",
+          "status": "low"
+        },
+        {
+          "item_name": "Small pink plastic bags",
+          "category": "Bag and Packaging",
+          "current_quantity": 0.75,
+          "reorder_level": 0.5,
+          "unit": "Boxes",
+          "status": "low"
+        },
+        {
+          "item_name": "Whitening",
+          "category": "Grooming",
+          "current_quantity": 0.75,
+          "reorder_level": 0.5,
+          "unit": "Bottles",
+          "status": "low"
         }
       ],
       "upcoming_closures": []
@@ -636,18 +612,18 @@
         {
           "sku": "1001",
           "name": "X-Small Treat Table",
-          "stock": -142.0,
+          "stock": -144.0,
           "weeks_of_supply": -17.8,
-          "velocity_monthly": 34.5,
+          "velocity_monthly": 35.0,
           "status": "out",
           "vendor": "Woof Gang Bakery"
         },
         {
           "sku": "30005",
           "name": "Cannoli",
-          "stock": -58.0,
+          "stock": -59.0,
           "weeks_of_supply": -17.3,
-          "velocity_monthly": 14.5,
+          "velocity_monthly": 14.8,
           "status": "out",
           "vendor": "Preppy Puppy"
         },
@@ -695,6 +671,15 @@
           "velocity_monthly": 2.5,
           "status": "out",
           "vendor": "Woof Gang Bakery"
+        },
+        {
+          "sku": "3002",
+          "name": "PP BLUE BDAY CAKE",
+          "stock": 0.0,
+          "weeks_of_supply": 0.0,
+          "velocity_monthly": 2.5,
+          "status": "out",
+          "vendor": "Preppy Puppy"
         },
         {
           "sku": "2003",
@@ -785,15 +770,6 @@
           "velocity_monthly": 2.0,
           "status": "out",
           "vendor": "Bosco & Roxy"
-        },
-        {
-          "sku": "3002",
-          "name": "PP BLUE BDAY CAKE",
-          "stock": 0.0,
-          "weeks_of_supply": 0.0,
-          "velocity_monthly": 2.0,
-          "status": "out",
-          "vendor": "Preppy Puppy"
         },
         {
           "sku": "858961710632",
@@ -911,14 +887,6 @@
       },
       "supplies_needed": [
         {
-          "item_name": "Gloves",
-          "category": "Grooming",
-          "current_quantity": 0.0,
-          "reorder_level": 0.5,
-          "unit": "Boxes",
-          "status": "out"
-        },
-        {
           "item_name": "Small brown paper bags",
           "category": "Bag and Packaging",
           "current_quantity": 0.0,
@@ -927,19 +895,51 @@
           "status": "out"
         },
         {
-          "item_name": "Whitening",
-          "category": "Grooming",
+          "item_name": "Small pink plastic bags",
+          "category": "Bag and Packaging",
           "current_quantity": 0.0,
-          "reorder_level": 0.5,
-          "unit": "Bottles",
+          "reorder_level": null,
+          "unit": "Boxes",
           "status": "out"
         },
         {
-          "item_name": "Shed Control Conditioner",
+          "item_name": "Bandanas",
           "category": "Grooming",
-          "current_quantity": 0.1,
+          "current_quantity": 0.5,
           "reorder_level": 0.5,
+          "unit": "Boxes",
+          "status": "order"
+        },
+        {
+          "item_name": "Dish soap",
+          "category": "Cleaning",
+          "current_quantity": 0.2,
+          "reorder_level": 0.25,
+          "unit": "Bottle",
+          "status": "order"
+        },
+        {
+          "item_name": "Gloves",
+          "category": "Grooming",
+          "current_quantity": 0.5,
+          "reorder_level": 0.5,
+          "unit": "Boxes",
+          "status": "order"
+        },
+        {
+          "item_name": "Laundry Detergent",
+          "category": "Cleaning",
+          "current_quantity": 1.0,
+          "reorder_level": 1.0,
           "unit": "Bottles",
+          "status": "order"
+        },
+        {
+          "item_name": "Treat bags",
+          "category": "Bag and Packaging",
+          "current_quantity": 0.25,
+          "reorder_level": 0.5,
+          "unit": "Boxes",
           "status": "order"
         },
         {
@@ -975,10 +975,10 @@
           "status": "low"
         },
         {
-          "item_name": "Laundry Detergent",
-          "category": "Cleaning",
-          "current_quantity": 1.25,
-          "reorder_level": 1.0,
+          "item_name": "Woof Gang Shampoo",
+          "category": "Grooming",
+          "current_quantity": 4.25,
+          "reorder_level": 4.0,
           "unit": "Bottles",
           "status": "low"
         }
@@ -986,5 +986,5 @@
       "upcoming_closures": []
     }
   },
-  "summary_text": "Kyle,\n\nPort Washington is firing on cylinders\u2014MTD revenue up 9% against DOW-adjusted expectation, appointments up 14%, and year-to-date you're at +45% both in dollars and volume. Yesterday was up 1% in total revenue but grooming climbed 5%, which matters more. The concern: add-on attach collapsed from 55% to 41% and retail cratered 25%. This isn't a capacity problem (you ran 7 groomers at $459/groomer, slightly below the 30-day baseline of $490, but bather hours surged to 7.1h vs. 4.8h typical, suggesting the team was doing the work). The signal is operational\u2014your front-of-house team either didn't upsell or didn't retail-push. Hicksville swung the opposite direction: grooming revenue up 36%, add-ons up to 43% attach, but retail tanked 77%. Yesterday was strong relative to capacity (4 groomers, $348/groomer vs. 30-day baseline $407), but month-to-date Hicksville is down 10% against calendar\u2014a real miss despite yesterday's pop. Both stores show the same retail pattern diverging sharply from grooming. That's your one thing to own today: retail discipline.\n\nYou should be proud of Port Washington's year-to-date trajectory and the fact that both locations are running more groomer-days than last month (58 vs. 52 at PW; 26 vs. 28 at HV\u2014Hicksville flat). The lapse pools at both stores ($296k and $91k combined) represent material upside if you activate even 10%.\n\n**Capacity & coverage:** Today: Port Washington 6 groomers/7.0h bathers, Hicksville 4 groomers/0.0h bathers; next 7 days Port Washington 38 groomer-days, Hicksville 18 groomer-days (front-loaded), and bather hours weighted to PW (43h total)."
+  "summary_text": "Kyle, yesterday was solid execution across the board\u2014Port Washington posted 5% grooming growth on core grooms despite add-on attach dropping from 55% to 41%, and Hicksville delivered 36% grooming growth with a 33% transaction lift. The real story: you're running 14% more groomer-days MTD at Port Washington versus last month while maintaining near-baseline productivity ($478 vs $505/groomer-day), which signals the new capacity is absorbing volume efficiently. YTD, you're up 45% revenue and appointments\u2014that's structural momentum worth tracking.\n\nHowever, there's a pattern worth your attention. Retail collapsed at both stores\u2014Port Washington down 25%, Hicksville down 77%\u2014while grooming and add-ons held or improved. This isn't inventory: you're only 20 SKUs out at each location, none critical. This smells like front-of-house execution or customer traffic timing; the team isn't upselling retail during the groom transaction. Separately, Hicksville's $/groomer-day ($348 vs $407 baseline) is underperforming by 15%, signaling either lower-priced bookings, scheduling inefficiency, or idle time on the 4-groomer schedule. Port Washington's add-on attach decline also warrants a check-in\u2014that's a 14-point drop and doesn't track with volume gains.\n\nMonth-to-date, both stores beat DOW-adjusted expectations (Port +6.5%, Hicksville +8.4%), so the calendar isn't headwind. Lapse pools total $388K combined annual value\u2014meaningful reactivation runway if you want it. Reorder critical items: X-Small Treat Table (negative stock at both locations), Shanti's Medical Journey, and bully sticks.\n\n**Capacity & coverage:** Today 6 groomer-days Port / 4 Hicksville (10 total, 14.0 bather hours combined); tomorrow 7 Port / 4 Hicksville (11 total, 14.0h); next 7 days 38 Port / 18 Hicksville (56 total groomer-days)."
 }
