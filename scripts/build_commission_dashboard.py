@@ -484,12 +484,12 @@ for i, (s, e) in enumerate(pay_periods):
     # Bather tips for this period
     bather_tips = {}
     bather_tips_daily = {}
-    for bname in BATHER_NAME_MAP:
+    for bname, bshort in BATHER_NAME_MAP.items():
         btdays = {d: v for d, v in tips_by_day.get(bname, {}).items()
                   if s.isoformat() <= d <= e.isoformat()}
         if btdays:
-            bather_tips[bname] = round(sum(btdays.values()), 2)
-            bather_tips_daily[bname] = btdays
+            bather_tips[bshort] = round(sum(btdays.values()), 2)
+            bather_tips_daily[bshort] = btdays
     pp_data[f"pp_{i}"]["_bather_tips"] = bather_tips
     pp_data[f"pp_{i}"]["_bather_tips_daily"] = bather_tips_daily
     # Retail staff hours/pay
