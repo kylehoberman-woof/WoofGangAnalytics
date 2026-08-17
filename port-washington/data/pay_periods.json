@@ -210,31 +210,44 @@
       "_bather_daily": {},
       "_bather_tips": {},
       "_bather_tips_daily": {},
-      "_retail_pay": {},
-      "_retail_hours": {},
-      "_retail_daily": {},
-      "_retail_rates": {}
+      "_retail_pay": {
+        "Casey": 0.0
+      },
+      "_retail_hours": {
+        "Casey": 0
+      },
+      "_retail_daily": {
+        "Casey": [
+          {
+            "date": "2026-08-17",
+            "hours": 0
+          }
+        ]
+      },
+      "_retail_rates": {
+        "Casey": 21.0
+      }
     },
     "pp_1": {
       "Alyson D": {
         "rev": 1755.0,
         "disc": 27.0,
         "comm": 877.5,
-        "paid": 877.5,
+        "paid": 905.0,
         "tips": 211.25,
-        "total": 1088.75,
+        "total": 1116.25,
         "working_days": 4,
-        "guar_days": 0,
+        "guar_days": 1,
         "daily": [
           {
             "date": "2026-08-10",
             "rev": 345.0,
             "disc": 0,
             "comm": 172.5,
-            "paid": 172.5,
+            "paid": 200.0,
             "tips": 62.25,
-            "total": 234.75,
-            "guar_applied": false
+            "total": 262.25,
+            "guar_applied": true
           },
           {
             "date": "2026-08-11",
