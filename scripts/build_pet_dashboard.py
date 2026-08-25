@@ -30,8 +30,14 @@ pet_visits_file = data_dir / "pet_visits.json"
 all_data_file = data_dir / "all_data.json"
 
 if not pet_visits_file.exists():
-    print(f"ERROR: {pet_visits_file} not found — run fetch_pet_visits.py first")
-    sys.exit(1)
+    print(f"WARNING: {pet_visits_file} not found — skipping pet dashboard build")
+    out_html = data_dir.parent / f"WoofGang_{store_fn}_PetDashboard.html"
+    out_html.write_text(f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pet Dashboard — {store_label}</title></head>
+<body style="font-family:sans-serif;padding:40px;color:#444">
+<h2>🐾 Pet Dashboard — {store_label}</h2>
+<p style="color:#888">Pet visit data is being fetched for the first time. This dashboard will be available after the next nightly update.</p>
+</body></html>""", encoding="utf-8")
+    sys.exit(0)
 
 with open(pet_visits_file) as f:
     pet_records = json.load(f)
