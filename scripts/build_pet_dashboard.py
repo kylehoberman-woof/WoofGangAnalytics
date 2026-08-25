@@ -172,6 +172,43 @@ for rec in pet_records:
 anomalies.sort(key=lambda x: (x["severity"] == "high", x["date"]), reverse=True)
 print(f"Found {len(anomalies)} anomalies ({sum(1 for a in anomalies if a['severity']=='high')} high)")
 
+# ── Groomer summary (last 30 days) ───────────────────────────────────────────
+from collections import Counter
+cutoff_30 = (today - timedelta(days=30)).isoformat()
+groomer_stats = defaultdict(lambda: {"dogs": 0, "sizes": Counter(), "services": Counter(), "revenue": 0.0, "revenue_exact": 0})
+
+for v in all_visits_flat:
+    if v["date"] < cutoff_30:
+        continue
+    g = v["stylist"] or "Unknown"
+    groomer_stats[g]["dogs"] += 1
+    if v.get("size"):
+        groomer_stats[g]["sizes"][v["size"]] += 1
+    if v.get("service"):
+        groomer_stats[g]["services"][v["service"]] += 1
+    if v.get("price") and v.get("price_match") in ("exact",):
+        groomer_stats[g]["revenue"] += v["price"]
+        groomer_stats[g]["revenue_exact"] += 1
+
+SIZE_ORDER = ["XS", "SM", "MD", "LG", "XL"]
+
+groomer_summary_rows = []
+for g, stats in sorted(groomer_stats.items(), key=lambda x: -x[1]["dogs"]):
+    size_pills = " ".join(
+        f'<span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">{sz}:{cnt}</span>'
+        for sz in SIZE_ORDER for cnt in [stats["sizes"].get(sz, 0)] if cnt > 0
+    )
+    top_svc = stats["services"].most_common(1)[0][0] if stats["services"] else "—"
+    rev_str = f'${stats["revenue"]:.0f} <span style="color:#9ca3af;font-size:11px">({stats["revenue_exact"]} matched)</span>' if stats["revenue"] else "—"
+    groomer_summary_rows.append(f"""
+      <tr>
+        <td><strong>{esc(g)}</strong></td>
+        <td><strong>{stats['dogs']}</strong></td>
+        <td>{size_pills}</td>
+        <td><small>{esc(top_svc)}</small></td>
+        <td>{rev_str}</td>
+      </tr>""")
+
 # ── Recent 30 days for daily view ─────────────────────────────────────────────
 today = date.today()
 recent_dates = sorted(
@@ -309,6 +346,15 @@ html = f"""<!DOCTYPE html>
     <div class="stat"><div class="val">{sum(1 for r in pet_records if r.get('last_visit','') >= (today - timedelta(days=30)).isoformat())}</div><div class="lbl">Active last 30d</div></div>
     <div class="stat"><div class="val">{len(all_visits_flat)}</div><div class="lbl">Total visits on record</div></div>
     <div class="stat"><div class="val">{len(anomalies)}</div><div class="lbl">Anomalies detected</div></div>
+  </div>
+  <div class="card">
+    <h2>Groomer Summary — Last 30 Days</h2>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Groomer</th><th>Dogs</th><th>Size Breakdown</th><th>Top Service</th><th>Revenue (matched)</th></tr></thead>
+      <tbody>{''.join(groomer_summary_rows) if groomer_summary_rows else '<tr><td colspan=5 style="color:#999;text-align:center;padding:24px">No data</td></tr>'}</tbody>
+    </table>
+    </div>
   </div>
   <div class="card">
     <h2>Appointments by Day (last 30 days)</h2>
