@@ -1,0 +1,879 @@
+{
+  "walkin_booking_appointments": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&date=2026-08-25",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&date=2026-08-25'"
+  },
+  "walkin_booking_appointments_nodate": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698'.\",\"MessageDetai"
+  },
+  "walkin_queue": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/queue?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
+    "type": "dict",
+    "keys": [
+      "count",
+      "data"
+    ],
+    "sample": {
+      "data": [],
+      "count": 0
+    }
+  },
+  "walkin_settings": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/203698/settings?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "type": "dict",
+    "keys": [
+      "CompanyId",
+      "CompanyName",
+      "EnableSecondaryContacts",
+      "EnableService",
+      "EnableServiceProvider",
+      "EnableTermsOfService",
+      "Genders",
+      "TermsOfService",
+      "ThankYouPageContent",
+      "ThankYouPageTitle"
+    ],
+    "sample": {
+      "CompanyId": 203698,
+      "CompanyName": 0,
+      "EnableServiceProvider": false,
+      "EnableService": false,
+      "EnableTermsOfService": false,
+      "EnableSecondaryContacts": false,
+      "TermsOfService": null,
+      "ThankYouPageTitle": null,
+      "ThankYouPageContent": null,
+      "Genders": null
+    }
+  },
+  "walkin_simple_services": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/203698/simpleServices?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "type": "dict",
+    "keys": [
+      "data"
+    ],
+    "nested_data_count": 7,
+    "nested_data_keys": [
+      "Duration",
+      "EmployeeId",
+      "Id",
+      "Name",
+      "Price",
+      "ServiceId"
+    ],
+    "nested_data_sample": [
+      {
+        "Id": 27238023,
+        "Name": "ONLINE ADD-ON (#60) - Hypoallergenic Shampoo",
+        "Price": 0.0,
+        "EmployeeId": 0,
+        "Duration": 0,
+        "ServiceId": 27238023
+      },
+      {
+        "Id": 27242127,
+        "Name": "ONLINE ADD-ON (#62) - Teeth Brushing",
+        "Price": 0.0,
+        "EmployeeId": 0,
+        "Duration": 0,
+        "ServiceId": 27242127
+      }
+    ],
+    "sample": {
+      "data": [
+        {
+          "Id": 27238023,
+          "Name": "ONLINE ADD-ON (#60) - Hypoallergenic Shampoo",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 27238023
+        },
+        {
+          "Id": 27242127,
+          "Name": "ONLINE ADD-ON (#62) - Teeth Brushing",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 27242127
+        },
+        {
+          "Id": 27242233,
+          "Name": "ONLINE ADD-ON (#70) - SPA Hairy Beast (Deshedding)",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 30,
+          "ServiceId": 27242233
+        },
+        {
+          "Id": 27242592,
+          "Name": "ONLINE ADD-ON (#71) - SPA Blueberry Facial",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 27242592
+        },
+        {
+          "Id": 25026125,
+          "Name": "ONLINE SERVICE (#1) - DOG - Full Groom",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 90,
+          "ServiceId": 25026125
+        },
+        {
+          "Id": 25026126,
+          "Name": "ONLINE SERVICE (#2) - DOG - Mini Groom",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 60,
+          "ServiceId": 25026126
+        },
+        {
+          "Id": 25026127,
+          "Name": "ONLINE SERVICE (#3) - DOG - Luxury Bath",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 30,
+          "ServiceId": 25026127
+        }
+      ]
+    }
+  },
+  "walkin_services": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/203698/services?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "type": "dict",
+    "keys": [
+      "data"
+    ],
+    "sample": {
+      "data": []
+    }
+  },
+  "company_formfields": {
+    "status": 500,
+    "url": "https://publicapi.franpos.com/api/company/formfields?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
+    "body": "{\"Message\":\"An error has occurred.\",\"ExceptionMessage\":\"The property 'ID' is part of the object's key information and cannot be modified. \",\"ExceptionType\":\"System.InvalidOperationException\",\"StackTrace\":\"   at System.Data.Entity.Core.Objects.EntityEntry.DetectChangesInProperty(Int32 ordinal, Boolea"
+  },
+  "booking_getstatus": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698'.\",\"MessageDetail\":\"No act"
+  },
+  "customer_history_Jack": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/418764637/json?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 18,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-08-01T10:30:00",
+        "Type": 4,
+        "SalesPerson": "Casey Makowski",
+        "Stylist": "Jackie G. ",
+        "Store": "Woof Gang Port Washington, NY (#264)",
+        "Items": "Clsc Bath / General / LG"
+      },
+      {
+        "Date": "2026-07-16T16:00:00",
+        "Type": 4,
+        "SalesPerson": "Casey Makowski",
+        "Stylist": "Jessica G",
+        "Store": "Woof Gang Port Washington, NY (#264)",
+        "Items": "Clsc Bath / General / LG"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-08-01T10:30:00",
+          "Type": 4,
+          "SalesPerson": "Casey Makowski",
+          "Stylist": "Jackie G. ",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Clsc Bath / General / LG"
+        },
+        {
+          "Date": "2026-07-16T16:00:00",
+          "Type": 4,
+          "SalesPerson": "Casey Makowski",
+          "Stylist": "Jessica G",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Clsc Bath / General / LG"
+        },
+        {
+          "Date": "2026-05-15T15:00:00",
+          "Type": 4,
+          "SalesPerson": "Casey Makowski",
+          "Stylist": "Jessica G",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Clsc Bath / General / LG"
+        },
+        {
+          "Date": "2026-04-10T16:15:00",
+          "Type": 4,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": "Olivia M",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Clsc Bath / General / LG"
+        },
+        {
+          "Date": "2026-01-30T12:30:00",
+          "Type": 4,
+          "SalesPerson": "Christine Brower",
+          "Stylist": "Ingrid R",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Clsc Bath / General / LG"
+        },
+        {
+          "Date": "2025-10-30T14:30:00",
+          "Type": 4,
+          "SalesPerson": "Casey Makowski",
+          "Stylist": "Jessica G",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Clsc Bath / General / LG"
+        },
+        {
+          "Date": "2025-10-04T17:33:33",
+          "Type": 1,
+          "SalesPerson": null,
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Don't give to Angela\nrotate!!!!!"
+        },
+        {
+          "Date": "2025-10-04T16:30:25",
+          "Type": 1,
+          "SalesPerson": null,
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "for nail trims don't lift paw cut while paw on table"
+        },
+        {
+          "Date": "2025-10-04T12:30:00",
+          "Type": 4,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": "Angela R",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / General / LG"
+        },
+        {
+          "Date": "2025-08-21T13:30:00",
+          "Type": 4,
+          "SalesPerson": "Kyle Hoberman",
+          "Stylist": "Angela R",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / General / LG"
+        },
+        {
+          "Date": "2025-07-09T10:00:00",
+          "Type": 4,
+          "SalesPerson": "Kyle Hoberman",
+          "Stylist": "Isabelle O",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / General / MD"
+        },
+        {
+          "Date": "2025-05-29T18:53:26",
+          "Type": 1,
+          "SalesPerson": null,
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "very strong. difficult for nails\nhard to get in cage, need assistance "
+        },
+        {
+          "Date": "2025-05-29T14:00:00",
+          "Type": 4,
+          "SalesPerson": "Giana Golden",
+          "Stylist": "Marie D.",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / General / MD"
+        },
+        {
+          "Date": "2025-04-07T09:00:00",
+          "Type": 4,
+          "SalesPerson": "Giana Golden",
+          "Stylist": "Joant C",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / General / MD"
+        },
+        {
+          "Date": "2025-03-07T15:30:00",
+          "Type": 4,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": "Wgb Port Washington",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Grind"
+        },
+        {
+          "Date": "2025-01-13T13:30:00",
+          "Type": 4,
+          "SalesPerson": "Giana Golden",
+          "Stylist": "Sue M",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / General / MD"
+        },
+        {
+          "Date": "2024-12-29T11:00:00",
+          "Type": 4,
+          "SalesPerson": "Kyle Hoberman",
+          "Stylist": "Isabelle O",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / General / MD"
+        },
+        {
+          "Date": "2024-11-17T11:00:00",
+          "Type": 4,
+          "SalesPerson": "Giana Golden",
+          "Stylist": "Isabelle O",
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / General / MD"
+        }
+      ],
+      "totalVisit": 15,
+      "totalSales": 0.0
+    }
+  },
+  "customer_history_Mixi": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/418951082/json?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 11,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-08-21T16:03:48",
+        "Type": 2,
+        "SalesPerson": "Trinity  Rivera",
+        "Stylist": null,
+        "Store": "Woof Gang Port Washington, NY (#264)",
+        "Items": "WALK-IN SERVICE / Nail Trim - 1.00000"
+      },
+      {
+        "Date": "2026-06-22T15:38:57",
+        "Type": 2,
+        "SalesPerson": "Cindy Szczudlo",
+        "Stylist": null,
+        "Store": "Woof Gang Port Washington, NY (#264)",
+        "Items": "WALK-IN SERVICE / Nail Trim - 1.00000"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-08-21T16:03:48",
+          "Type": 2,
+          "SalesPerson": "Trinity  Rivera",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Trim - 1.00000"
+        },
+        {
+          "Date": "2026-06-22T15:38:57",
+          "Type": 2,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Trim - 1.00000"
+        },
+        {
+          "Date": "2026-05-24T12:36:40",
+          "Type": 2,
+          "SalesPerson": "Casey Makowski",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Trim - 1.00000"
+        },
+        {
+          "Date": "2026-04-22T14:35:47",
+          "Type": 2,
+          "SalesPerson": "Casey Makowski",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Fromm Dog Treat Crunchy O's Slammon Smoked Salmon 6 oz - 1.00000, WALK-IN SERVICE / Nail Trim - 1.00000"
+        },
+        {
+          "Date": "2026-02-21T14:39:16",
+          "Type": 2,
+          "SalesPerson": "Casey Makowski",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Trim - 1.00000"
+        },
+        {
+          "Date": "2025-12-24T13:53:13",
+          "Type": 2,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Cookie XS - 1.00000, Fromm Dog Treat Crunchy O's Smokin Cheeseplosions 6 oz - 1.00000, WALK-IN SERVICE / Nail Trim - 1.00000"
+        },
+        {
+          "Date": "2025-09-06T09:51:59",
+          "Type": 2,
+          "SalesPerson": "Parker Spooner",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Trim - 1.00000"
+        },
+        {
+          "Date": "2025-07-25T15:49:39",
+          "Type": 2,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Grind - 1.00000"
+        },
+        {
+          "Date": "2025-06-01T16:00:49",
+          "Type": 2,
+          "SalesPerson": "Giana Golden",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Grind - 1.00000"
+        },
+        {
+          "Date": "2025-03-01T10:36:50",
+          "Type": 2,
+          "SalesPerson": "Sitara Nagrani",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Grind - 1.00000"
+        },
+        {
+          "Date": "2025-01-12T16:41:19",
+          "Type": 2,
+          "SalesPerson": "Giana Golden",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "WALK-IN SERVICE / Nail Grind - 1.00000"
+        }
+      ],
+      "totalVisit": 11,
+      "totalSales": 233.64
+    }
+  },
+  "customer_history_Poppy": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/419582910/json?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 5,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-07-31T10:58:57",
+        "Type": 2,
+        "SalesPerson": "Cindy Szczudlo",
+        "Stylist": null,
+        "Store": "Woof Gang Port Washington, NY (#264)",
+        "Items": "FG / Poodle-Doodle / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000"
+      },
+      {
+        "Date": "2026-07-03T12:40:43",
+        "Type": 2,
+        "SalesPerson": "Cindy Szczudlo",
+        "Stylist": null,
+        "Store": "Woof Gang Port Washington, NY (#264)",
+        "Items": "MG / Poodle-Doodle / LG - 1.00000, ADD-ON / Hypo Allergenic Shampoo - 1.00000, ADD-ON / Teeth Brushing - 1.00000"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-07-31T10:58:57",
+          "Type": 2,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "FG / Poodle-Doodle / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000"
+        },
+        {
+          "Date": "2026-07-03T12:40:43",
+          "Type": 2,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "MG / Poodle-Doodle / LG - 1.00000, ADD-ON / Hypo Allergenic Shampoo - 1.00000, ADD-ON / Teeth Brushing - 1.00000"
+        },
+        {
+          "Date": "2026-02-22T11:12:49",
+          "Type": 2,
+          "SalesPerson": "Casey Makowski",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / Poodle-Doodle / LG - 1.00000, ADD-ON / Hypo Allergenic Shampoo - 1.00000, ADD-ON / Teeth Brushing - 1.00000"
+        },
+        {
+          "Date": "2025-09-24T10:07:58",
+          "Type": 2,
+          "SalesPerson": "Kyle Hoberman",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "MG / Poodle-Doodle / LG - 1.00000, ADD-ON / Hypo Allergenic Shampoo - 1.00000"
+        },
+        {
+          "Date": "2025-08-14T16:19:41",
+          "Type": 2,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": null,
+          "Store": "Woof Gang Port Washington, NY (#264)",
+          "Items": "Lux Bath / Poodle-Doodle / LG - 1.00000, ADD-ON / Hypo Allergenic Shampoo - 1.00000, ADD-ON / Teeth Brushing - 1.00000"
+        }
+      ],
+      "totalVisit": 5,
+      "totalSales": 803.41
+    }
+  },
+  "datadump_customers_sample": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/datadump/v1/customers/7/0/2026-08-24/203698?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "pages",
+      "version"
+    ],
+    "nested_data_count": 6,
+    "nested_data_keys": [
+      "Address",
+      "CellPhone",
+      "City",
+      "CompanyId",
+      "CreationDate",
+      "CustomFieldValues",
+      "CustomerCode",
+      "CustomerId",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "IsAdmin",
+      "LastName",
+      "Membership",
+      "MembershipBalance",
+      "MembershipId",
+      "ModifiedDate",
+      "ParentCustomerId",
+      "Phone",
+      "StateProvinceId",
+      "ZipPostal"
+    ],
+    "nested_data_sample": [
+      {
+        "Address": null,
+        "CellPhone": "",
+        "City": null,
+        "CompanyId": 203698,
+        "CustomerId": 418512104,
+        "DateOfBirth": null,
+        "Email": "kyle.hoberman@gmail.com",
+        "FirstName": "Kyle",
+        "LastName": "Hoberman",
+        "Membership": null,
+        "MembershipBalance": null,
+        "MembershipId": null,
+        "Phone": "",
+        "StateProvinceId": 1,
+        "ZipPostal": null,
+        "IsAdmin": true,
+        "CreationDate": "2024-06-12T19:47:48.73",
+        "ModifiedDate": "2026-08-25T00:41:04.123",
+        "ParentCustomerId": null,
+        "CustomerCode": null,
+        "CustomFieldValues": []
+      },
+      {
+        "Address": null,
+        "CellPhone": "",
+        "City": null,
+        "CompanyId": 203698,
+        "CustomerId": 419024863,
+        "DateOfBirth": null,
+        "Email": "Cynthiamarycatherine@gmail.com",
+        "FirstName": "Cindy",
+        "LastName": "Szczudlo",
+        "Membership": null,
+        "MembershipBalance": null,
+        "MembershipId": null,
+        "Phone": "",
+        "StateProvinceId": null,
+        "ZipPostal": null,
+        "IsAdmin": true,
+        "CreationDate": "2025-02-26T01:58:17.83",
+        "ModifiedDate": "2026-08-24T19:13:15.51",
+        "ParentCustomerId": null,
+        "CustomerCode": null,
+        "CustomFieldValues": []
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Address": null,
+          "CellPhone": "",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 418512104,
+          "DateOfBirth": null,
+          "Email": "kyle.hoberman@gmail.com",
+          "FirstName": "Kyle",
+          "LastName": "Hoberman",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 1,
+          "ZipPostal": null,
+          "IsAdmin": true,
+          "CreationDate": "2024-06-12T19:47:48.73",
+          "ModifiedDate": "2026-08-25T00:41:04.123",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 419024863,
+          "DateOfBirth": null,
+          "Email": "Cynthiamarycatherine@gmail.com",
+          "FirstName": "Cindy",
+          "LastName": "Szczudlo",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": true,
+          "CreationDate": "2025-02-26T01:58:17.83",
+          "ModifiedDate": "2026-08-24T19:13:15.51",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5163784804",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 420718176,
+          "DateOfBirth": null,
+          "Email": "potatonoodles@gmail.com",
+          "FirstName": "Jennifer ",
+          "LastName": "Gonzalez",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-21T18:28:20.347",
+          "ModifiedDate": "2026-08-24T16:29:43.107",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "9145522411",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 420720340,
+          "DateOfBirth": "2024-01-26T00:00:00",
+          "Email": "Janicemcs@yahoo.com",
+          "FirstName": "Maddy",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-22T17:27:28",
+          "ModifiedDate": "2026-08-24T18:03:03",
+          "ParentCustomerId": 420720339,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "156"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "55"
+            },
+            {
+              "id": 380,
+              "name": ""
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "3"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            },
+            {
+              "id": 6569,
+              "name": "false"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5126487170",
+          "City": "Plandome",
+          "CompanyId": 203698,
+          "CustomerId": 420723545,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Paula",
+          "LastName": "White",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": "11050",
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T15:06:09",
+          "ModifiedDate": "2026-08-24T15:06:36",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5126487170",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 420723546,
+          "DateOfBirth": "2023-08-24T11:07:53",
+          "Email": "",
+          "FirstName": "Wayln",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T15:06:36",
+          "ModifiedDate": "2026-08-24T15:08:39",
+          "ParentCustomerId": 420723545,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6121,
+              "name": "cavapoo"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "250"
+            },
+            {
+              "id": 377,
+              "name": "12.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
+        }
+      ],
+      "pages": 1,
+      "version": 742110838
+    }
+  }
+}
