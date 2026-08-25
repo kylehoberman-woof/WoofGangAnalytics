@@ -1,5 +1,523 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Booking Anomalies — Hicksville</title></head>
-<body style="font-family:sans-serif;padding:40px;color:#444">
-<h2>Booking Anomaly Dashboard — Hicksville</h2>
-<p style="color:#888">Pet visit data is being fetched for the first time. This dashboard will be available after the next nightly update.</p>
-</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang Hicksville — Booking Anomalies</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f4f0;color:#1a1a2e}
+
+/* ── Header ── */
+.header{background:linear-gradient(135deg,#1B6B6B 0%,#6B3520 100%);color:white;padding:40px 0 30px;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(196,39,110,0.15) 0%,transparent 50%)}
+.header h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px}
+.header .subtitle{font-size:1rem;font-weight:400;opacity:0.9;position:relative}
+.header .brand-tag{display:inline-block;background:#C4276E;color:white;padding:4px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:12px;position:relative}
+.header-timestamp{position:absolute;top:12px;right:20px;font-size:0.78rem;opacity:0.85;font-weight:400;z-index:1;text-align:right}
+
+/* ── Topbar ── */
+.topbar{background:#C4276E;padding:14px 32px;color:white;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3);display:flex;justify-content:space-between;align-items:center}
+.home-link{color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.88rem;font-weight:600}
+.home-link:hover{color:white}
+.topbar-center{font-size:0.95rem;font-weight:700;color:white}
+.topbar-right{font-size:0.78rem;color:rgba(255,255,255,0.75)}
+
+/* ── Tabs ── */
+.tabs{background:white;border-bottom:2px solid #eee;position:sticky;top:50px;z-index:99;display:flex;padding:0 24px;flex-wrap:wrap;overflow-x:auto}
+.tab{padding:14px 18px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;white-space:nowrap;transition:color 0.15s}
+.tab:hover{color:#C4276E}
+.tab.active{color:#C4276E;border-bottom-color:#C4276E}
+
+/* ── Page & layout ── */
+.page{max-width:1400px;margin:0 auto;padding:24px 24px 60px}
+
+/* ── KPI cards ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:white;border-radius:12px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.kpi-val{font-size:2rem;font-weight:700;line-height:1}
+.kpi-label{font-size:0.73rem;color:#999;margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.kpi.red{border-top:3px solid #e53935}
+.kpi.yellow{border-top:3px solid #F9A825}
+.kpi.orange{border-top:3px solid #e65100}
+.kpi.gray{border-top:3px solid #aaa}
+.kpi.red .kpi-val{color:#e53935}
+.kpi.yellow .kpi-val{color:#F9A825}
+.kpi.orange .kpi-val{color:#e65100}
+
+/* ── Filters ── */
+.filter-bar{background:white;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.filter-label{font-size:0.73rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-right:4px}
+.day-btns{display:flex;gap:6px}
+.day-btn{padding:6px 12px;border:1.5px solid #ddd;border-radius:20px;background:white;color:#666;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.day-btn:hover,.day-btn.active{border-color:#C4276E;background:#C4276E;color:white}
+.filter-select{padding:7px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.84rem;background:white;cursor:pointer;color:#444}
+.filter-select:focus{outline:none;border-color:#C4276E}
+.result-count{font-size:0.8rem;color:#888;margin-left:auto}
+
+/* ── Card ── */
+.card{background:white;border-radius:14px;padding:22px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.stitle{font-size:1.05rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.stitle::before{content:'';display:inline-block;width:4px;height:18px;background:#C4276E;border-radius:2px}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.83rem}
+th{text-align:left;padding:9px 10px;color:#888;font-weight:600;font-size:0.73rem;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid #eee;white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:#C4276E}
+th.n{text-align:right}
+th .sort-arrow{opacity:0.4;font-size:0.7rem;margin-left:3px}
+th.sorted .sort-arrow{opacity:1;color:#C4276E}
+td{padding:9px 10px;border-bottom:1px solid #f5f0ec;vertical-align:middle}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+tr:hover td{background:#fef9fb}
+thead th{position:sticky;top:0;background:#f8f7f4;z-index:5}
+.empty-row td{text-align:center;color:#aaa;padding:32px;font-style:italic}
+
+/* ── Badges ── */
+.badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:0.75rem;font-weight:600;white-space:nowrap;margin:1px}
+.badge.red{background:#fce4ec;color:#c62828}
+.badge.yellow{background:#fff9e6;color:#b45309}
+.badge.orange{background:#fff3e0;color:#bf360c}
+
+/* ── CID link ── */
+.cid-link{color:#C4276E;text-decoration:none;font-weight:600;font-family:monospace;font-size:0.9rem}
+.cid-link:hover{text-decoration:underline}
+
+/* ── Ack button ── */
+.ack-btn{padding:4px 12px;border:1.5px solid #1B6B6B;border-radius:8px;background:transparent;color:#1B6B6B;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.ack-btn:hover{background:#1B6B6B;color:white}
+.unack-btn{padding:4px 12px;border:1.5px solid #aaa;border-radius:8px;background:transparent;color:#888;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.unack-btn:hover{border-color:#C4276E;color:#C4276E}
+
+/* ── Reviewed section toggle ── */
+.reviewed-toggle{padding:10px 16px;border:none;background:transparent;color:#999;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;width:100%;text-align:left}
+.reviewed-toggle:hover{color:#555}
+.reviewed-inner{display:none}
+.reviewed-inner.open{display:block}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal{background:white;border-radius:16px;max-width:760px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+.modal-header{padding:20px 24px 14px;border-bottom:2px solid #eee;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-size:1.05rem;font-weight:700}
+.modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:#999;line-height:1;padding:0 4px}
+.modal-close:hover{color:#C4276E}
+.modal-body{overflow-y:auto;padding:20px 24px}
+.modal-profile{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px;padding:14px;background:#fdf4f8;border-radius:10px}
+.modal-stat{font-size:0.83rem}
+.modal-stat strong{display:block;color:#1a1a2e;font-size:1rem;font-weight:700}
+.modal-stat span{color:#888;font-size:0.73rem;text-transform:uppercase;font-weight:600}
+.modal table{width:100%;font-size:0.83rem}
+.modal th{text-align:left;padding:8px 10px;border-bottom:2px solid #eee;font-size:0.72rem;color:#888;text-transform:uppercase;letter-spacing:0.04em;font-weight:600}
+.modal td{padding:8px 10px;border-bottom:1px solid #f5f0ec}
+.modal td.n{text-align:right}
+tr.anomaly-row td{background:#fff9c4 !important;font-weight:600}
+tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
+
+/* ── Info banner ── */
+.info-banner{background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:0.84rem;color:#1b5e20;line-height:1.5}
+
+@media(max-width:700px){
+  .header{padding:28px 16px 24px}
+  .header h1{font-size:1.6rem}
+  .page{padding:16px 12px 40px}
+  .filter-bar{gap:10px}
+  .modal-profile{gap:14px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-timestamp">Updated August 25, 2026 at 12:11 PM ET<br><a href="../port-washington/WoofGang_PortWashington_BookingAnomalies.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
+  <h1>Woof Gang Hicksville</h1>
+  <div class="subtitle">Booking Anomaly Detector</div>
+  <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
+<div class="topbar">
+  <a id="portal-back" href="../index.html" class="home-link">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
+  <span class="topbar-center">Booking Anomalies</span>
+  <span class="topbar-right">23 anomalies detected</span>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="setTab('all',this)">All Anomalies (23)</button>
+  <button class="tab" onclick="setTab('breed_change',this)">&#x1F534; Breed Changes (18)</button>
+  <button class="tab" onclick="setTab('size_change',this)">&#x1F7E1; Size Changes (0)</button>
+  <button class="tab" onclick="setTab('service_change',this)">&#x1F7E0; Service Changes (10)</button>
+  <button class="tab" onclick="setTab('price_anomaly',this)">&#x1F4B2; Price Anomalies (0)</button>
+</div>
+
+<div class="page">
+
+<div class="info-banner">
+  <strong>How this works:</strong> Each dog with ≥3 grooming visits is analyzed for pattern deviations. Data comes from per-pet visit history (not owner accounts) — multi-dog households are tracked separately by dog.
+  🔴 <strong>Breed</strong> = General ↔ Poodle-Doodle switch &nbsp;|&nbsp;
+  🟡 <strong>Size</strong> = size category changed (XS/SM/MD/LG/XL) when ≥75% of history was one size &nbsp;|&nbsp;
+  🟠 <strong>Service</strong> = service type switched when ≥75% of history was one type &nbsp;|&nbsp;
+  💲 <strong>Price</strong> = last price deviated &gt;30% from this dog's own average for same service+size.
+  Click any row to see full visit history. Acknowledge resolved items to hide them.
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi red"><div class="kpi-val" id="kpi-breed">18</div><div class="kpi-label">&#x1F534; Breed Changes</div></div>
+  <div class="kpi yellow"><div class="kpi-val" id="kpi-size">0</div><div class="kpi-label">&#x1F7E1; Size Changes</div></div>
+  <div class="kpi orange"><div class="kpi-val" id="kpi-service">10</div><div class="kpi-label">&#x1F7E0; Service Changes</div></div>
+  <div class="kpi gray"><div class="kpi-val" id="kpi-price">0</div><div class="kpi-label">&#x1F4B2; Price Anomalies</div></div>
+  <div class="kpi gray"><div class="kpi-val" id="kpi-total">23</div><div class="kpi-label">Total Anomalies</div></div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">Last:</span>
+  <div class="day-btns">
+    <button class="day-btn" onclick="setDays(30,this)">30d</button>
+    <button class="day-btn active" onclick="setDays(60,this)">60d</button>
+    <button class="day-btn" onclick="setDays(90,this)">90d</button>
+    <button class="day-btn" onclick="setDays(0,this)">All Time</button>
+  </div>
+  <span class="filter-label">Groomer:</span>
+  <select class="filter-select" id="groomer-select" onchange="setGroomer(this.value)">
+    <option value="">All Groomers</option>
+    
+  </select>
+  <span class="result-count" id="result-count"></span>
+</div>
+
+<div class="card">
+  <div class="stitle" id="table-title">All Anomalies</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('cid')">ID <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('customer_name')">Customer <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('pet_name')">Pet <span class="sort-arrow">↕</span></th>
+          <th class="n" onclick="sortBy('visit_count')">Visits <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('modal_size_short')">History (Mode) <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('last_size_short')">Last Visit <span class="sort-arrow">↕</span></th>
+          <th>Change</th>
+          <th onclick="sortBy('last_groomer')">Groomer <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('last_date')" id="th-date" class="sorted">Date <span class="sort-arrow">↓</span></th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="anomaly-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Reviewed / Acknowledged Section -->
+<div class="card" id="reviewed-card" style="display:none">
+  <button class="reviewed-toggle" onclick="toggleReviewed(this)">
+    <span id="reviewed-arrow">▶</span> ✅ Reviewed / Acknowledged (<span id="reviewed-count">0</span>)
+  </button>
+  <div class="reviewed-inner" id="reviewed-inner">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Pet</th>
+            <th class="n">Visits</th>
+            <th>History</th>
+            <th>Last Visit</th>
+            <th>Change</th>
+            <th>Groomer</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="acked-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- .page -->
+
+<!-- Customer History Modal -->
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">Customer #<span id="modal-cid"></span> &mdash; Visit History</div>
+      <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-profile" id="modal-profile"></div>
+      <div class="tbl-wrap">
+        <table class="modal-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Service</th>
+              <th>Size</th>
+              <th>Type</th>
+              <th>Groomer</th>
+              <th class="n">Price</th>
+            </tr>
+          </thead>
+          <tbody id="modal-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var ANOMALIES = [{"cid": "420328495", "dog_key": "420328495", "customer_name": "Bianca Gordon", "pet_name": "Finn, Toby", "visit_count": 5, "modal_size": "XLG - 1.00000, ADD-ON", "modal_size_short": "XLG - 1.00000, ADD-ON", "modal_doodle": false, "modal_service": "Lux Bath", "modal_breed": "General", "size_counts": {"Grind - 1.00000": 1, "XLG - 1.00000, ADD-ON": 3, "XLG - 1.00000, SPA UPGRADE": 1}, "service_counts": {"WALK-IN SERVICE": 1, "Lux Bath": 2, "Clsc Bath": 1, "WGB Cologne - Pawfect Love (120 ml) - 1.00000, Lux Bath": 1}, "last_date": "2026-08-19", "last_size": "Grind - 1.00000", "last_size_short": "Grind - 1.00000", "last_doodle": false, "last_service": "WALK-IN SERVICE", "last_breed": "Nail Trim", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "General", "to": "Nail Trim"}}}, {"cid": "420380164", "dog_key": "420380164", "customer_name": "Audra Fredrick", "pet_name": "Wesley", "visit_count": 5, "modal_size": "SM", "modal_size_short": "SM", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"SM": 3}, "service_counts": {"2 a": 1, "FG": 3, "New customer": 1}, "last_date": "2026-08-15", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "2 a", "last_breed": "o puppycut. leave eyelashes", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "o puppycut. leave eyelashes"}}}, {"cid": "420099991", "dog_key": "420099991", "customer_name": "Liz Vulin", "pet_name": "Winston", "visit_count": 6, "modal_size": "SM - 1.00000, ADD-ON", "modal_size_short": "SM - 1.00000, ADD-ON", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"SM - 1.00000, ADD-ON": 3, "SM - 1.00000": 3}, "service_counts": {"FG": 5, "WBALL - Small (assorted colors) - 1.00000, MG": 1}, "last_date": "2026-08-14", "last_size": "SM - 1.00000, ADD-ON", "last_size_short": "SM - 1.00000, ADD-ON", "last_doodle": false, "last_service": "FG", "last_breed": "General", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "General"}}}, {"cid": "420125003", "dog_key": "420125003", "customer_name": "Diana Greenberg", "pet_name": "Annie, Marley", "visit_count": 4, "modal_size": "LG - 1.00000, ADD-ON", "modal_size_short": "LG - 1.00000, ADD-ON", "modal_doodle": false, "modal_service": "Lux Bath", "modal_breed": "General", "size_counts": {"LG - 1.00000, ADD-ON": 3, "LG - 1.00000, Lux Bath": 1}, "service_counts": {"Large Treat Table - 1.00000, Petey Pig - 1.00000, Medium Treat Table - 2.00000, Lux Bath": 1, "Lux Bath": 3}, "last_date": "2026-08-13", "last_size": "LG - 1.00000, ADD-ON", "last_size_short": "LG - 1.00000, ADD-ON", "last_doodle": false, "last_service": "Large Treat Table - 1.00000, Petey Pig - 1.00000, Medium Treat Table - 2.00000, Lux Bath", "last_breed": "General", "last_groomer": null, "last_price": 0.0, "flags": ["service_change"], "flag_details": {"service_change": {"from": "Lux Bath", "to": "Large Treat Table - 1.00000, Petey Pig - 1.00000, Medium Treat Table - 2.00000, Lux Bath"}}}, {"cid": "420220189", "dog_key": "420220189", "customer_name": "Amy Mansfield", "pet_name": "Rocky", "visit_count": 4, "modal_size": "LG - 1.00000", "modal_size_short": "LG - 1.00000", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"LG - 1.00000": 2, "LG - -1.00000": 1, "LG - 1.00000, ADD-ON": 1}, "service_counts": {"Lux Bath": 1, "FG": 3}, "last_date": "2026-08-13", "last_size": "LG - 1.00000", "last_size_short": "LG - 1.00000", "last_doodle": false, "last_service": "Lux Bath", "last_breed": "General", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change", "service_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "General"}, "service_change": {"from": "FG", "to": "Lux Bath"}}}, {"cid": "420292608", "dog_key": "420292608", "customer_name": "Merryl Gordon", "pet_name": "Frankie", "visit_count": 5, "modal_size": "MD", "modal_size_short": "MD", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"MD": 4}, "service_counts": {"5": 1, "FG": 4}, "last_date": "2026-08-12", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "5", "last_breed": "8” comb on body (light yellow comb) trim ears trim tail", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change", "service_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "8” comb on body (light yellow comb) trim ears trim tail"}, "service_change": {"from": "FG", "to": "5"}}}, {"cid": "419999103", "dog_key": "419999103", "customer_name": "Ellen Seo", "pet_name": "Mowgli", "visit_count": 10, "modal_size": "SM", "modal_size_short": "SM", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"SM": 6}, "service_counts": {"8": 1, "FG": 6, "offered 11am CS": 1, "2 a": 1, "Dropping off early, has work meeting at 2pm HI": 1}, "last_date": "2026-08-05", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "8", "last_breed": "5 cant do earlier HI", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "General", "to": "5 cant do earlier HI"}}}, {"cid": "420146926", "dog_key": "420146926", "customer_name": "Jodi Germain", "pet_name": "Bob", "visit_count": 6, "modal_size": "SM - 1.00000, ADD-ON", "modal_size_short": "SM - 1.00000, ADD-ON", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"SM - 1.00000, ADD-ON": 6}, "service_counts": {"WGB Shampoo - Best in Show (500 ml) - 1.00000, FG": 1, "FG": 5}, "last_date": "2026-08-04", "last_size": "SM - 1.00000, ADD-ON", "last_size_short": "SM - 1.00000, ADD-ON", "last_doodle": true, "last_service": "WGB Shampoo - Best in Show (500 ml) - 1.00000, FG", "last_breed": "Poodle-Doodle", "last_groomer": null, "last_price": 0.0, "flags": ["service_change"], "flag_details": {"service_change": {"from": "FG", "to": "WGB Shampoo - Best in Show (500 ml) - 1.00000, FG"}}}, {"cid": "420097049", "dog_key": "420097049", "customer_name": "Ashley Shayani", "pet_name": "Goldie, Hazel", "visit_count": 6, "modal_size": "SM - 1.00000", "modal_size_short": "SM - 1.00000", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"SM - 1.00000": 3, "MD - 1.00000": 2, "SM - 1.00000, FG": 1}, "service_counts": {"FG": 6}, "last_date": "2026-08-04", "last_size": "SM - 1.00000", "last_size_short": "SM - 1.00000", "last_doodle": true, "last_service": "FG", "last_breed": "Poodle-Doodle", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "General", "to": "Poodle-Doodle"}}}, {"cid": "420109339", "dog_key": "420109339", "customer_name": "Sari Weinstein", "pet_name": "Stella", "visit_count": 13, "modal_size": "XLG", "modal_size_short": "XLG", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"XLG": 7}, "service_counts": {"lightgolden trim Acomb skim butt. hotshop on back left hip. right hip": 1, "FG": 6, "6": 1, "natural trim": 2, "leave tail": 1, "offered 10am vs 9am SCS": 1, "Lux Bath": 1}, "last_date": "2026-07-31", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "lightgolden trim Acomb skim butt. hotshop on back left hip. right hip", "last_breed": "leg seemed weak", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "General", "to": "leg seemed weak"}}}, {"cid": "420444476", "dog_key": "420444476", "customer_name": "Kim Covino", "pet_name": "Snowie", "visit_count": 5, "modal_size": "SM", "modal_size_short": "SM", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"SM": 3}, "service_counts": {"3": 1, "Dont clean ears, bad back knees they slip out.": 1, "FG": 3}, "last_date": "2026-07-29", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "3", "last_breed": "8gc ao, stbf, trim tail and ears", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "8gc ao, stbf, trim tail and ears"}}}, {"cid": "420160304", "dog_key": "420160304", "customer_name": "Jill Koffler", "pet_name": "Lulu", "visit_count": 5, "modal_size": "SM - 1.00000, ADD-ON", "modal_size_short": "SM - 1.00000, ADD-ON", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"SM - 1.00000, ADD-ON": 3, "SM - 1.00000": 2}, "service_counts": {"MG": 1, "FG": 4}, "last_date": "2026-07-23", "last_size": "SM - 1.00000, ADD-ON", "last_size_short": "SM - 1.00000, ADD-ON", "last_doodle": false, "last_service": "MG", "last_breed": "General", "last_groomer": null, "last_price": 0.0, "flags": ["service_change"], "flag_details": {"service_change": {"from": "FG", "to": "MG"}}}, {"cid": "420319934", "dog_key": "420319934", "customer_name": "Michelle Brady", "pet_name": "Milo", "visit_count": 7, "modal_size": "MD - 1.00000", "modal_size_short": "MD - 1.00000", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"16. happy with maria and caroll so ONLY BOOK UNDER MARIA OR CAROL HI": 1, "MD - -1.00000": 2, "MD - 1.00000": 3, "SM - 1.00000": 1}, "service_counts": {"7": 1, "FG": 6}, "last_date": "2026-07-16", "last_size": "16. happy with maria and caroll so ONLY BOOK UNDER MARIA OR CAROL HI", "last_size_short": "16. happy with maria and caroll so ONLY BOOK UNDER MARIA OR CAROL HI", "last_doodle": false, "last_service": "7", "last_breed": "16 wasn't satisfied with haircut, went too short was given full refunnd for 7", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change", "service_change"], "flag_details": {"breed_change": {"from": "General", "to": "16 wasn't satisfied with haircut, went too short was given full refunnd for 7"}, "service_change": {"from": "FG", "to": "7"}}}, {"cid": "420078697", "dog_key": "420078697", "customer_name": "lindsey streitmen", "pet_name": "honey", "visit_count": 5, "modal_size": "Grind", "modal_size_short": "Grind", "modal_doodle": false, "modal_service": "WALK-IN SERVICE", "modal_breed": "Nail Trim", "size_counts": {"Grind": 4}, "service_counts": {"cuties sweetie girl": 1, "WALK-IN SERVICE": 4}, "last_date": "2026-07-10", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "cuties sweetie girl", "last_breed": "", "last_groomer": null, "last_price": 0.0, "flags": ["service_change"], "flag_details": {"service_change": {"from": "WALK-IN SERVICE", "to": "cuties sweetie girl"}}}, {"cid": "420447620", "dog_key": "420447620", "customer_name": "Michael Gussin", "pet_name": "Marshal", "visit_count": 6, "modal_size": "SM", "modal_size_short": "SM", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"h": 1, "SM": 3}, "service_counts": {"I o": 1, "FG": 2, "1st full groom 70 discount CS": 1, "MG": 1, "use $70 discount HI": 1}, "last_date": "2026-07-10", "last_size": "h", "last_size_short": "h", "last_doodle": false, "last_service": "I o", "last_breed": "b o", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "b o"}}}, {"cid": "420196481", "dog_key": "420196481", "customer_name": "Andrew Weiss", "pet_name": "Loki", "visit_count": 6, "modal_size": "SM", "modal_size_short": "SM", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"hd trim ears and tail": 1, "SM": 4}, "service_counts": {"1a": 1, "FG": 4}, "last_date": "2026-07-10", "last_size": "hd trim ears and tail", "last_size_short": "hd trim ears and tail", "last_doodle": false, "last_service": "1a", "last_breed": "o A", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change", "service_change"], "flag_details": {"breed_change": {"from": "General", "to": "o A"}, "service_change": {"from": "FG", "to": "1a"}}}, {"cid": "420080856", "dog_key": "420080856", "customer_name": "Marisa Wein", "pet_name": "Paxton", "visit_count": 8, "modal_size": "MD", "modal_size_short": "MD", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"MD": 4}, "service_counts": {"5a": 1, "FG": 4, "5ao, tbf, trim ears and tails (both dogs)": 1, "FG gen MD not curly coated CS": 1, "Owner said won't be able to pick up until 5:30pm HI": 1}, "last_date": "2026-07-02", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "5a", "last_breed": "o 0hd", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "General", "to": "o 0hd"}}}, {"cid": "420011974", "dog_key": "420011974", "customer_name": "Jordan Coene", "pet_name": "Oatmeal", "visit_count": 6, "modal_size": "Grind - 1.00000, Medium Treat Table - 1.00000, Puppy Cake Birthday Cake Kit Carob - 1.00000", "modal_size_short": "Grind - 1.00000, Medium Treat Table - 1.00000, Puppy Cake Birthday Cake Kit Carob - 1.00000", "modal_doodle": true, "modal_service": "WALK-IN SERVICE", "modal_breed": "Poodle-Doodle", "size_counts": {"Grind - 1.00000, Medium Treat Table - 1.00000, Puppy Cake Birthday Cake Kit Carob - 1.00000": 1, "MD - 1.00000, Large Treat Table - 1.00000": 1, "SM - 1.00000, ADD-ON": 1, "MD - 1.00000, ADD-ON": 1}, "service_counts": {"WALK-IN SERVICE": 1, "FG": 1, "Broken But Delicious - 1.00000, FG": 1, "Medium Treat Table - 1.00000": 1, "Small Treat Table - 1.00000, FG": 1, "WGB Bully Stick Jumbo 6\" - 1.00000, Cookie - Dreidel - 1.00000": 1}, "last_date": "2026-06-30", "last_size": "Grind - 1.00000, Medium Treat Table - 1.00000, Puppy Cake Birthday Cake Kit Carob - 1.00000", "last_size_short": "Grind - 1.00000, Medium Treat Table - 1.00000, Puppy Cake Birthday Cake Kit Carob - 1.00000", "last_doodle": false, "last_service": "WALK-IN SERVICE", "last_breed": "Nail Trim", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "Nail Trim"}}}, {"cid": "420089771", "dog_key": "420089771", "customer_name": "Mary Seleman", "pet_name": "Toffy", "visit_count": 6, "modal_size": "MD", "modal_size_short": "MD", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"h": 1, "MD": 3}, "service_counts": {"5o": 1, "FG": 3, "Cannot come early 4pm already a stretch coming from job in NYC may be 5-10 mins late CS": 1, "7ao (matted), tbf (spot shave jaw and cheeks), trim ears and tail": 1}, "last_date": "2026-06-26", "last_size": "h", "last_size_short": "h", "last_doodle": false, "last_service": "5o", "last_breed": "b 1o", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "b 1o"}}}, {"cid": "420104451", "dog_key": "420104451", "customer_name": "Kay Bracken", "pet_name": "London", "visit_count": 4, "modal_size": "SM", "modal_size_short": "SM", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"h tight face": 1, "SM": 3}, "service_counts": {"5 o": 1, "FG": 3}, "last_date": "2026-06-26", "last_size": "h tight face", "last_size_short": "h tight face", "last_doodle": false, "last_service": "5 o", "last_breed": "b 1 o", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change", "service_change"], "flag_details": {"breed_change": {"from": "Poodle-Doodle", "to": "b 1 o"}, "service_change": {"from": "FG", "to": "5 o"}}}, {"cid": "420086039", "dog_key": "420086039", "customer_name": "Gary Goltzman", "pet_name": "Charlie", "visit_count": 7, "modal_size": "MD", "modal_size_short": "MD", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"MD": 5}, "service_counts": {"2a": 1, "FG": 3, "MG": 2, "1in gc ao, round butt feathers, tight front leg feathers, trim and round tail": 1}, "last_date": "2026-06-26", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "2a", "last_breed": "o trim up front feathers", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "General", "to": "o trim up front feathers"}}}, {"cid": "420286822", "dog_key": "420286822", "customer_name": "Jordana Zachary", "pet_name": "Bella", "visit_count": 4, "modal_size": "SM - 1.00000, ADD-ON", "modal_size_short": "SM - 1.00000, ADD-ON", "modal_doodle": true, "modal_service": "FG", "modal_breed": "Poodle-Doodle", "size_counts": {"SM - 1.00000, ADD-ON": 2, "SM - 1.00000": 1}, "service_counts": {"Stella & Chewy's FD Meal Mixers Chicken 8 oz - 1.00000": 1, "FG": 3}, "last_date": "2026-06-25", "last_size": "", "last_size_short": "", "last_doodle": false, "last_service": "Stella & Chewy's FD Meal Mixers Chicken 8 oz - 1.00000", "last_breed": "", "last_groomer": null, "last_price": 0.0, "flags": ["service_change"], "flag_details": {"service_change": {"from": "FG", "to": "Stella & Chewy's FD Meal Mixers Chicken 8 oz - 1.00000"}}}, {"cid": "420082849", "dog_key": "420082849", "customer_name": "Larissa Souza", "pet_name": "Charlie", "visit_count": 5, "modal_size": "SM", "modal_size_short": "SM", "modal_doodle": false, "modal_service": "FG", "modal_breed": "General", "size_counts": {"h": 1, "SM": 3}, "service_counts": {"7o": 1, "FG": 3, "offered 1pm or 230pm chose 230pm so don't ask to come in earlier CS": 1}, "last_date": "2026-06-16", "last_size": "h", "last_size_short": "h", "last_doodle": false, "last_service": "7o", "last_breed": "b 2 o", "last_groomer": null, "last_price": 0.0, "flags": ["breed_change"], "flag_details": {"breed_change": {"from": "General", "to": "b 2 o"}}}];
+var PROFILES = {"420328495": [{"date": "2026-08-19", "service": "WALK-IN SERVICE", "size": "Grind - 1.00000", "breed_group": "Nail Trim", "items_raw": "WALK-IN SERVICE / Nail Trim / Grind - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-07", "service": "Lux Bath", "size": "XLG - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "Lux Bath / General / XLG - 1.00000, ADD-ON / Teeth Brushing - 1.00000, PET RELEAF - Stress Releaf PB Carob Organic Edibites - Large (6mg/180mg CBD) - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-10", "service": "Clsc Bath", "size": "XLG - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "Clsc Bath / General / XLG - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-02", "service": "WGB Cologne - Pawfect Love (120 ml) - 1.00000, Lux Bath", "size": "XLG - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "WGB Cologne - Pawfect Love (120 ml) - 1.00000, Lux Bath / General / XLG - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-20", "service": "Lux Bath", "size": "XLG - 1.00000, SPA UPGRADE", "breed_group": "General", "items_raw": "Lux Bath / General / XLG - 1.00000, SPA UPGRADE / XL Hairy Beast (Deshedding) - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420380164": [{"date": "2026-08-15", "service": "2 a", "size": "", "breed_group": "o puppycut. leave eyelashes", "items_raw": "2 a/o puppycut. leave eyelashes", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-08-15", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-19", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-08", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-25", "service": "New customer", "size": "", "breed_group": "", "items_raw": "New customer ", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420099991": [{"date": "2026-08-14", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-18", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-28", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-01", "service": "FG", "size": "SM - 1.00000", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-11", "service": "FG", "size": "SM - 1.00000", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-02-06", "service": "WBALL - Small (assorted colors) - 1.00000, MG", "size": "SM - 1.00000", "breed_group": "Poodle-Doodle", "items_raw": "WBALL - Small (assorted colors) - 1.00000, MG / Poodle-Doodle / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420220189": [{"date": "2026-08-13", "service": "Lux Bath", "size": "LG - 1.00000", "breed_group": "General", "items_raw": "Lux Bath / General / LG - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-08-13", "service": "FG", "size": "LG - -1.00000", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / LG - -1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-08-13", "service": "FG", "size": "LG - 1.00000", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / LG - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-25", "service": "FG", "size": "LG - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420125003": [{"date": "2026-08-13", "service": "Large Treat Table - 1.00000, Petey Pig - 1.00000, Medium Treat Table - 2.00000, Lux Bath", "size": "LG - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "Large Treat Table - 1.00000, Petey Pig - 1.00000, Medium Treat Table - 2.00000, Lux Bath / General / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000, Lux Bath / General / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-17", "service": "Lux Bath", "size": "LG - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "Lux Bath / General / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000, Lux Bath / General / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-29", "service": "Lux Bath", "size": "LG - 1.00000, Lux Bath", "breed_group": "General", "items_raw": "Lux Bath / General / LG - 1.00000, Lux Bath / General / LG - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-09", "service": "Lux Bath", "size": "LG - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "Lux Bath / General / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000, Lux Bath / General / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420292608": [{"date": "2026-08-12", "service": "5", "size": "", "breed_group": "8” comb on body (light yellow comb) trim ears trim tail", "items_raw": "5/8” comb on body (light yellow comb) trim ears trim tail", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-08-12", "service": "FG", "size": "MD", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / MD", "groomer": "Vanessa M", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-30", "service": "FG", "size": "MD", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / MD", "groomer": "Julianne D", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-11", "service": "FG", "size": "MD", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / MD", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-03", "service": "FG", "size": "MD", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / MD", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}], "419999103": [{"date": "2026-08-05", "service": "8", "size": "", "breed_group": "5 cant do earlier HI", "items_raw": "8/5 cant do earlier HI", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-08-05", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-29", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-28", "service": "offered 11am CS", "size": "", "breed_group": "", "items_raw": "offered 11am CS", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-06", "service": "2 a", "size": "", "breed_group": "0 puppycut", "items_raw": "2 a/0 puppycut", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-06", "service": "Dropping off early, has work meeting at 2pm HI", "size": "", "breed_group": "", "items_raw": "Dropping off early, has work meeting at 2pm HI", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-06", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-19", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-01-28", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2025-12-17", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}], "420097049": [{"date": "2026-08-04", "service": "FG", "size": "SM - 1.00000", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-10", "service": "FG", "size": "SM - 1.00000", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-09", "service": "FG", "size": "MD - 1.00000", "breed_group": "General", "items_raw": "FG / General / MD - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-17", "service": "FG", "size": "SM - 1.00000", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-02", "service": "FG", "size": "MD - 1.00000", "breed_group": "General", "items_raw": "FG / General / MD - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-01-29", "service": "FG", "size": "SM - 1.00000, FG", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000, FG / General / MD - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420146926": [{"date": "2026-08-04", "service": "WGB Shampoo - Best in Show (500 ml) - 1.00000, FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "WGB Shampoo - Best in Show (500 ml) - 1.00000, FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-08", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-30", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-25", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-21", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-02-14", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420109339": [{"date": "2026-07-31", "service": "lightgolden trim Acomb skim butt. hotshop on back left hip. right hip", "size": "", "breed_group": "leg seemed weak", "items_raw": "lightgolden trim Acomb skim butt. hotshop on back left hip. right hip/leg seemed weak", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-30", "service": "FG", "size": "XLG", "breed_group": "General", "items_raw": "FG / General / XLG", "groomer": "Victoria C.", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-03", "service": "FG", "size": "XLG", "breed_group": "General", "items_raw": "FG / General / XLG", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-02", "service": "6", "size": "", "breed_group": "3 offered 930am vs 9am CS", "items_raw": "6/3 offered 930am vs 9am CS", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-19", "service": "FG", "size": "XLG", "breed_group": "General", "items_raw": "FG / General / XLG", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-22", "service": "natural trim", "size": "", "breed_group": "", "items_raw": "natural trim", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-17", "service": "leave tail", "size": "", "breed_group": "", "items_raw": "leave tail", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-17", "service": "FG", "size": "XLG", "breed_group": "General", "items_raw": "FG / General / XLG", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-09", "service": "FG", "size": "XLG", "breed_group": "General", "items_raw": "FG / General / XLG", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-04", "service": "FG", "size": "XLG", "breed_group": "General", "items_raw": "FG / General / XLG", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-03", "service": "offered 10am vs 9am SCS", "size": "", "breed_group": "", "items_raw": "offered 10am vs 9am SCS", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-02-03", "service": "natural trim", "size": "", "breed_group": "", "items_raw": "natural trim", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-02-03", "service": "Lux Bath", "size": "XLG", "breed_group": "General", "items_raw": "Lux Bath / General / XLG", "groomer": "Carol W", "price": 75.0, "price_match": "exact", "addon": false}], "420444476": [{"date": "2026-07-29", "service": "3", "size": "", "breed_group": "8gc ao, stbf, trim tail and ears", "items_raw": "3/8gc ao, stbf, trim tail and ears", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-29", "service": "Dont clean ears, bad back knees they slip out.", "size": "", "breed_group": "", "items_raw": "Dont clean ears, bad back knees they slip out. ", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-29", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-17", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-27", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Maria V", "price": 0, "price_match": "no_match", "addon": false}], "420160304": [{"date": "2026-07-23", "service": "MG", "size": "SM - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "MG / General / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-12", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-08", "service": "FG", "size": "SM - 1.00000", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-10", "service": "FG", "size": "SM - 1.00000", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-11", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420319934": [{"date": "2026-07-16", "service": "7", "size": "16. happy with maria and caroll so ONLY BOOK UNDER MARIA OR CAROL HI", "breed_group": "16 wasn't satisfied with haircut, went too short was given full refunnd for 7", "items_raw": "7/16 wasn't satisfied with haircut, went too short was given full refunnd for 7/16. happy with maria and caroll so ONLY BOOK UNDER MARIA OR CAROL HI ", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-16", "service": "FG", "size": "MD - -1.00000", "breed_group": "General", "items_raw": "FG / General / MD - -1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-16", "service": "FG", "size": "MD - 1.00000", "breed_group": "General", "items_raw": "FG / General / MD - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-27", "service": "FG", "size": "MD - 1.00000", "breed_group": "General", "items_raw": "FG / General / MD - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-27", "service": "FG", "size": "MD - -1.00000", "breed_group": "General", "items_raw": "FG / General / MD - -1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-27", "service": "FG", "size": "MD - 1.00000", "breed_group": "General", "items_raw": "FG / General / MD - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-11", "service": "FG", "size": "SM - 1.00000", "breed_group": "General", "items_raw": "FG / General / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420078697": [{"date": "2026-07-10", "service": "cuties sweetie girl", "size": "", "breed_group": "", "items_raw": "cuties sweetie girl", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-10", "service": "WALK-IN SERVICE", "size": "Grind", "breed_group": "Nail Trim", "items_raw": "WALK-IN SERVICE / Nail Trim / Grind", "groomer": "Victoria C.", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-07", "service": "WALK-IN SERVICE", "size": "Grind", "breed_group": "Nail Trim", "items_raw": "WALK-IN SERVICE / Nail Trim / Grind", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-13", "service": "WALK-IN SERVICE", "size": "Grind", "breed_group": "Nail Trim", "items_raw": "WALK-IN SERVICE / Nail Trim / Grind", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-01-06", "service": "WALK-IN SERVICE", "size": "Grind", "breed_group": "Nail Trim", "items_raw": "WALK-IN SERVICE / Nail Trim / Grind", "groomer": "Maria V", "price": 0, "price_match": "no_match", "addon": false}], "420196481": [{"date": "2026-07-10", "service": "1a", "size": "hd trim ears and tail", "breed_group": "o A", "items_raw": "1a/o A/hd trim ears and tail", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-10", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Victoria C.", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-20", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Maria V", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-15", "service": "", "size": "", "breed_group": "", "items_raw": "", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-18", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-13", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}], "420447620": [{"date": "2026-07-10", "service": "I o", "size": "h", "breed_group": "b o", "items_raw": "I o/b o/h", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-08", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-03", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Julianne D", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-30", "service": "1st full groom 70 discount CS", "size": "", "breed_group": "", "items_raw": "1st full groom 70 discount CS", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-29", "service": "MG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "MG / Poodle-Doodle / SM", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-28", "service": "use $70 discount HI", "size": "", "breed_group": "", "items_raw": "use $70 discount HI", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420080856": [{"date": "2026-07-02", "service": "5a", "size": "", "breed_group": "o 0hd", "items_raw": "5a/o 0hd", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-07-02", "service": "FG", "size": "MD", "breed_group": "General", "items_raw": "FG / General / MD", "groomer": "Victoria C.", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-20", "service": "FG", "size": "MD", "breed_group": "General", "items_raw": "FG / General / MD", "groomer": "Maria V", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-13", "service": "5ao, tbf, trim ears and tails (both dogs)", "size": "", "breed_group": "", "items_raw": "5ao, tbf, trim ears and tails (both dogs)", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-10", "service": "FG gen MD not curly coated CS", "size": "", "breed_group": "", "items_raw": "FG gen MD not curly coated CS", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-10", "service": "FG", "size": "MD", "breed_group": "General", "items_raw": "FG / General / MD", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-05", "service": "Owner said won't be able to pick up until 5:30pm HI", "size": "", "breed_group": "", "items_raw": "Owner said won't be able to pick up until 5:30pm HI", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-01-13", "service": "FG", "size": "MD", "breed_group": "General", "items_raw": "FG / General / MD", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}], "420011974": [{"date": "2026-06-30", "service": "WALK-IN SERVICE", "size": "Grind - 1.00000, Medium Treat Table - 1.00000, Puppy Cake Birthday Cake Kit Carob - 1.00000", "breed_group": "Nail Trim", "items_raw": "WALK-IN SERVICE / Nail Trim / Grind - 1.00000, Medium Treat Table - 1.00000, Puppy Cake Birthday Cake Kit Carob - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-22", "service": "FG", "size": "MD - 1.00000, Large Treat Table - 1.00000", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / MD - 1.00000, Large Treat Table - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-24", "service": "Broken But Delicious - 1.00000, FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "Broken But Delicious - 1.00000, FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000, SPA UPGRADE / Blueberry Pie Facial - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-02-14", "service": "Medium Treat Table - 1.00000", "size": "", "breed_group": "", "items_raw": "Medium Treat Table - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-02-03", "service": "Small Treat Table - 1.00000, FG", "size": "MD - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "Small Treat Table - 1.00000, FG / Poodle-Doodle / MD - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2025-12-11", "service": "WGB Bully Stick Jumbo 6\" - 1.00000, Cookie - Dreidel - 1.00000", "size": "", "breed_group": "", "items_raw": "WGB Bully Stick Jumbo 6\" - 1.00000, Cookie - Dreidel - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420086039": [{"date": "2026-06-26", "service": "2a", "size": "", "breed_group": "o trim up front feathers", "items_raw": "2a/o trim up front feathers", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-25", "service": "FG", "size": "MD", "breed_group": "General", "items_raw": "FG / General / MD", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-18", "service": "MG", "size": "MD", "breed_group": "General", "items_raw": "MG / General / MD", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-17", "service": "1in gc ao, round butt feathers, tight front leg feathers, trim and round tail", "size": "", "breed_group": "", "items_raw": "1in gc ao, round butt feathers, tight front leg feathers, trim and round tail", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-17", "service": "FG", "size": "MD", "breed_group": "General", "items_raw": "FG / General / MD", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-03-11", "service": "FG", "size": "MD", "breed_group": "General", "items_raw": "FG / General / MD", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-01-16", "service": "MG", "size": "MD", "breed_group": "General", "items_raw": "MG / General / MD", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}], "420104451": [{"date": "2026-06-26", "service": "5 o", "size": "h tight face", "breed_group": "b 1 o", "items_raw": "5 o/b 1 o/h tight face", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-25", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-09", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-01-29", "service": "FG", "size": "SM", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}], "420089771": [{"date": "2026-06-26", "service": "5o", "size": "h", "breed_group": "b 1o", "items_raw": "5o/b 1o/h", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-26", "service": "FG", "size": "MD", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / MD", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-25", "service": "Cannot come early 4pm already a stretch coming from job in NYC may be 5-10 mins late CS", "size": "", "breed_group": "", "items_raw": "Cannot come early 4pm already a stretch coming from job in NYC may be 5-10 mins late CS", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-02-03", "service": "7ao (matted), tbf (spot shave jaw and cheeks), trim ears and tail", "size": "", "breed_group": "", "items_raw": "7ao (matted), tbf (spot shave jaw and cheeks), trim ears and tail", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-02-03", "service": "FG", "size": "MD", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / MD", "groomer": "Julia B", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-01-20", "service": "FG", "size": "MD", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / MD", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}], "420286822": [{"date": "2026-06-25", "service": "Stella & Chewy's FD Meal Mixers Chicken 8 oz - 1.00000", "size": "", "breed_group": "", "items_raw": "Stella & Chewy's FD Meal Mixers Chicken 8 oz - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-25", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-05-20", "service": "FG", "size": "SM - 1.00000, ADD-ON", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-04", "service": "FG", "size": "SM - 1.00000", "breed_group": "Poodle-Doodle", "items_raw": "FG / Poodle-Doodle / SM - 1.00000", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}], "420082849": [{"date": "2026-06-16", "service": "7o", "size": "h", "breed_group": "b 2 o", "items_raw": "7o/b 2 o/h", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-16", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-06-09", "service": "offered 1pm or 230pm chose 230pm so don't ask to come in earlier CS", "size": "", "breed_group": "", "items_raw": "offered 1pm or 230pm chose 230pm so don't ask to come in earlier CS", "groomer": null, "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-04-08", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-01-14", "service": "FG", "size": "SM", "breed_group": "General", "items_raw": "FG / General / SM", "groomer": "Carol W", "price": 0, "price_match": "no_match", "addon": false}]};
+var STORE_KEY = "hicksville";
+
+var _tab = 'all';
+var _days = 60;
+var _groomer = '';
+var _sortField = 'last_date';
+var _sortDir = -1;  // -1 = descending
+
+// ── Size short display ──────────────────────────────────────────────────────
+var SIZE_LABELS = {
+  '0-20 lbs': 'SM', '21-40 lbs': 'MD', '41-75 lbs': 'LG',
+  '76-100 lbs': 'XLG', 'Over 100 lbs': 'XXLG'
+};
+function shortSize(s) { return SIZE_LABELS[s] || s || '?'; }
+
+// ── Flag badge HTML ─────────────────────────────────────────────────────────
+function flagBadge(f, details) {
+  if (f === 'breed_change') {
+    var d = details.breed_change;
+    return '<span class="badge red">&#x1F534; ' + (d ? d.from + '→' + d.to : 'Breed') + '</span>';
+  }
+  if (f === 'size_change') {
+    var d = details.size_change;
+    return '<span class="badge yellow">&#x1F7E1; ' + (d ? d.from + d.direction + d.to : 'Size') + '</span>';
+  }
+  if (f === 'service_change') {
+    var d = details.service_change;
+    var from = d ? (d.from || '').split(' ')[0] : '';
+    var to = d ? (d.to || '').split(' ')[0] : '';
+    return '<span class="badge orange">&#x1F7E0; ' + from + '→' + to + '</span>';
+  }
+  if (f === 'price_anomaly') {
+    var d = details.price_anomaly;
+    return '<span class="badge yellow">&#x1F4B2; $' + (d ? d.actual.toFixed(0) + ' vs avg $' + d.expected.toFixed(0) : 'Price') + '</span>';
+  }
+  return '';
+}
+
+// ── localStorage helpers ────────────────────────────────────────────────────
+function getAcked() {
+  try { return JSON.parse(localStorage.getItem('wg_acked_' + STORE_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function isAcked(cid) { return !!getAcked()[cid]; }
+function ack(cid) {
+  var a = getAcked(); a[cid] = {at: new Date().toISOString()};
+  localStorage.setItem('wg_acked_' + STORE_KEY, JSON.stringify(a));
+  render();
+}
+function unack(cid) {
+  var a = getAcked(); delete a[cid];
+  localStorage.setItem('wg_acked_' + STORE_KEY, JSON.stringify(a));
+  render();
+}
+
+// ── Filter helpers ──────────────────────────────────────────────────────────
+function setTab(tab, el) {
+  _tab = tab;
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  var labels = {all:'All Anomalies',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes'};
+  document.getElementById('table-title').innerHTML = labels[tab] || 'Anomalies';
+  render();
+}
+function setDays(days, el) {
+  _days = days;
+  document.querySelectorAll('.day-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  render();
+}
+function setGroomer(val) { _groomer = val; render(); }
+function sortBy(field) {
+  if (_sortField === field) { _sortDir *= -1; }
+  else { _sortField = field; _sortDir = (field === 'last_date') ? -1 : 1; }
+  // Update header arrows
+  document.querySelectorAll('th').forEach(function(th) {
+    th.classList.remove('sorted');
+    var arr = th.querySelector('.sort-arrow');
+    if (arr) arr.textContent = '↕';
+  });
+  // Find the header with onclick matching field
+  document.querySelectorAll('th[onclick]').forEach(function(th) {
+    if (th.getAttribute('onclick').includes("'" + field + "'")) {
+      th.classList.add('sorted');
+      var arr = th.querySelector('.sort-arrow');
+      if (arr) arr.textContent = _sortDir > 0 ? '↑' : '↓';
+    }
+  });
+  render();
+}
+
+function toggleReviewed(btn) {
+  var inner = document.getElementById('reviewed-inner');
+  var arrow = document.getElementById('reviewed-arrow');
+  inner.classList.toggle('open');
+  arrow.textContent = inner.classList.contains('open') ? '▼' : '▶';
+}
+
+// ── Filter anomalies ────────────────────────────────────────────────────────
+function getFiltered(excludeAcked) {
+  var today = new Date();
+  var cutoffStr = '';
+  if (_days > 0) {
+    var cutoff = new Date(today.getTime() - _days * 86400 * 1000);
+    cutoffStr = cutoff.toISOString().slice(0,10);
+  }
+  return ANOMALIES.filter(function(a) {
+    if (_days > 0 && a.last_date < cutoffStr) return false;
+    if (_tab !== 'all' && a.flags.indexOf(_tab) === -1) return false;
+    if (_groomer && a.last_groomer !== _groomer) return false;
+    if (excludeAcked && isAcked(a.dog_key || a.cid)) return false;
+    return true;
+  });
+}
+
+// ── Render table rows ───────────────────────────────────────────────────────
+function makeRow(a, isAckedRow) {
+  var histDisplay = (a.modal_doodle ? 'Poodle-Doodle' : 'General') +
+    ' / ' + a.modal_size_short +
+    ' <span style="color:#aaa;font-size:0.75rem">(' + (a.size_counts[a.modal_size] || 0) + '/' + a.visit_count + ')</span>';
+  var lastDisplay = (a.last_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + a.last_size_short;
+  var flagsHtml = a.flags.map(function(f) { return flagBadge(f, a.flag_details); }).join(' ');
+  var dk = a.dog_key || a.cid;
+  var actionBtn = isAckedRow
+    ? '<button class="unack-btn" onclick="unack(\'' + dk + '\')">↩ Undo</button>'
+    : '<button class="ack-btn" onclick="ack(\'' + dk + '\')">&#x2713; Ack</button>';
+  var cidShort = a.cid.length > 8 ? '#…' + a.cid.slice(-6) : '#' + a.cid;
+  return '<tr>' +
+    '<td><a class="cid-link" href="#" onclick="openModal(\'' + dk + '\');return false;">' + cidShort + '</a></td>' +
+    '<td>' + (a.customer_name || '') + '</td>' +
+    '<td>' + (a.pet_name || '') + '</td>' +
+    '<td class="n">' + a.visit_count + '</td>' +
+    '<td>' + histDisplay + '</td>' +
+    '<td>' + lastDisplay + '</td>' +
+    '<td>' + flagsHtml + '</td>' +
+    '<td>' + (a.last_groomer || '') + '</td>' +
+    '<td>' + a.last_date + '</td>' +
+    '<td>' + actionBtn + '</td>' +
+    '</tr>';
+}
+
+// ── Main render ─────────────────────────────────────────────────────────────
+function render() {
+  var active = getFiltered(true);  // exclude acked
+  var acked = ANOMALIES.filter(function(a) {
+    if (_days > 0) {
+      var cutoff = new Date(Date.now() - _days * 86400 * 1000).toISOString().slice(0,10);
+      if (a.last_date < cutoff) return false;
+    }
+    if (_tab !== 'all' && a.flags.indexOf(_tab) === -1) return false;
+    if (_groomer && a.last_groomer !== _groomer) return false;
+    return isAcked(a.dog_key || a.cid);
+  });
+
+  // Sort active
+  active.sort(function(a, b) {
+    var av = a[_sortField], bv = b[_sortField];
+    if (av == null) av = ''; if (bv == null) bv = '';
+    if (typeof av === 'string') return _sortDir * av.localeCompare(bv);
+    return _sortDir * (av - bv);
+  });
+
+  var tbody = document.getElementById('anomaly-tbody');
+  if (active.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No anomalies match current filters.</td></tr>';
+  } else {
+    tbody.innerHTML = active.map(function(a) { return makeRow(a, false); }).join('');
+  }
+
+  // Result count
+  document.getElementById('result-count').textContent = active.length + ' anomali' + (active.length === 1 ? 'y' : 'es');
+
+  // Reviewed section
+  var reviewedCard = document.getElementById('reviewed-card');
+  var ackedTbody = document.getElementById('acked-tbody');
+  document.getElementById('reviewed-count').textContent = acked.length;
+  if (acked.length > 0) {
+    reviewedCard.style.display = '';
+    ackedTbody.innerHTML = acked.map(function(a) { return makeRow(a, true); }).join('');
+  } else {
+    reviewedCard.style.display = 'none';
+  }
+
+  // Update KPI counts
+  var countAll = getFiltered(false);
+  document.getElementById('kpi-total').textContent = countAll.length;
+  document.getElementById('kpi-breed').textContent = countAll.filter(function(a) { return a.flags.indexOf('breed_change') !== -1; }).length;
+  document.getElementById('kpi-size').textContent = countAll.filter(function(a) { return a.flags.indexOf('size_change') !== -1; }).length;
+  document.getElementById('kpi-service').textContent = countAll.filter(function(a) { return a.flags.indexOf('service_change') !== -1; }).length;
+  document.getElementById('kpi-price').textContent = countAll.filter(function(a) { return a.flags.indexOf('price_anomaly') !== -1; }).length;
+}
+
+// ── Modal ────────────────────────────────────────────────────────────────────
+function openModal(dogKey) {
+  var anomaly = ANOMALIES.find(function(a) { return (a.dog_key || a.cid) === dogKey; });
+  var history = PROFILES[dogKey] || [];
+  var displayId = anomaly ? anomaly.cid : dogKey;
+
+  document.getElementById('modal-cid').textContent = displayId;
+
+  // Profile summary
+  var profHtml = '';
+  if (anomaly) {
+    if (anomaly.customer_name) profHtml += '<div class="modal-stat"><strong>' + anomaly.customer_name + '</strong><span>Customer</span></div>';
+    if (anomaly.pet_name) profHtml += '<div class="modal-stat"><strong>' + anomaly.pet_name + '</strong><span>Pet Name</span></div>';
+    profHtml += '<div class="modal-stat"><strong>' + anomaly.visit_count + '</strong><span>Visits</span></div>';
+    profHtml += '<div class="modal-stat"><strong>' + (anomaly.modal_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.modal_size_short + '</strong><span>Usual</span></div>';
+    profHtml += '<div class="modal-stat"><strong>' + (anomaly.last_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.last_size_short + '</strong><span>Last Visit</span></div>';
+    var flagsHtml = anomaly.flags.map(function(f) { return flagBadge(f, anomaly.flag_details); }).join(' ');
+    profHtml += '<div class="modal-stat"><strong>' + flagsHtml + '</strong><span>Flags</span></div>';
+  }
+  document.getElementById('modal-profile').innerHTML = profHtml;
+
+  var lastDate = anomaly ? anomaly.last_date : '';
+  var tbody = document.getElementById('modal-tbody');
+  tbody.innerHTML = '';
+
+  history.forEach(function(v) {
+    var isAnomaly = (v.date === lastDate && !v.addon);
+    var tr = document.createElement('tr');
+    if (isAnomaly) tr.classList.add('anomaly-row');
+    if (v.addon) tr.style.cssText = 'opacity:0.5;font-style:italic';
+    tr.innerHTML =
+      '<td>' + v.date + '</td>' +
+      '<td>' + (v.addon ? '+ ' : '') + (v.service || '') + '</td>' +
+      '<td>' + (v.size || '') + '</td>' +
+      '<td>' + (v.breed_group || '') + '</td>' +
+      '<td>' + (v.groomer || '') + '</td>' +
+      '<td class="n">' + (v.price && v.price > 0 ? '$' + v.price.toFixed(2) : '—') + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('modal-overlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+
+</body>
+</html>

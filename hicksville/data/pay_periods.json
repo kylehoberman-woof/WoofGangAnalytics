@@ -24,15 +24,26 @@
         "daily": []
       },
       "Carol W": {
-        "rev": 0,
+        "rev": 170.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
+        "comm": 85.0,
+        "paid": 85.0,
         "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "total": 85.0,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-08-25",
+            "rev": 170.0,
+            "disc": 0,
+            "comm": 85.0,
+            "paid": 85.0,
+            "tips": 0,
+            "total": 85.0,
+            "guar_applied": false
+          }
+        ]
       },
       "Debra N": {
         "rev": 0,
@@ -46,13 +57,13 @@
         "daily": []
       },
       "Julia B": {
-        "rev": 1080.0,
+        "rev": 1145.0,
         "disc": 165.0,
-        "comm": 540.0,
-        "paid": 540.0,
-        "tips": 118.55,
-        "total": 658.55,
-        "working_days": 2,
+        "comm": 572.5,
+        "paid": 572.5,
+        "tips": 128.3,
+        "total": 700.8,
+        "working_days": 3,
         "guar_days": 0,
         "daily": [
           {
@@ -74,18 +85,28 @@
             "tips": 67.8,
             "total": 362.8,
             "guar_applied": false
+          },
+          {
+            "date": "2026-08-25",
+            "rev": 65.0,
+            "disc": 0,
+            "comm": 32.5,
+            "paid": 32.5,
+            "tips": 9.75,
+            "total": 42.25,
+            "guar_applied": false
           }
         ]
       },
       "Julianne D": {
-        "rev": 605.0,
-        "disc": 60.0,
-        "comm": 302.5,
-        "paid": 302.5,
-        "tips": 31.0,
-        "total": 333.5,
-        "working_days": 1,
-        "guar_days": 0,
+        "rev": 820.0,
+        "disc": 75.0,
+        "comm": 410.0,
+        "paid": 502.5,
+        "tips": 74.8,
+        "total": 577.3,
+        "working_days": 2,
+        "guar_days": 1,
         "daily": [
           {
             "date": "2026-08-22",
@@ -96,6 +117,16 @@
             "tips": 31.0,
             "total": 333.5,
             "guar_applied": false
+          },
+          {
+            "date": "2026-08-25",
+            "rev": 215.0,
+            "disc": 15.0,
+            "comm": 107.5,
+            "paid": 200.0,
+            "tips": 43.8,
+            "total": 243.8,
+            "guar_applied": true
           }
         ]
       },
@@ -180,6 +211,10 @@
           {
             "date": "2026-08-22",
             "hours": 9.27
+          },
+          {
+            "date": "2026-08-25",
+            "hours": 0
           }
         ],
         "Kayla": [
