@@ -76,15 +76,20 @@ company_id = store.location_id  # may differ — try both
 
 print(f"Probing FranPOS for pet-level data ({store_name})...")
 
-# 1. Walk-in booking appointments
-probe("walkin_booking_appointments",
+# 1. Walk-in booking appointments — API doc says companyId + dateStr
+# Try companyId = location_id (they may be the same value)
+probe("walkin_booking_appointments_today",
       f"{BASE_URL}/api/walkin/booking/appointments",
-      params={"locationId": location_id, "date": today})
+      params={"companyId": location_id, "dateStr": today})
 
-# Also try without date
-probe("walkin_booking_appointments_nodate",
+probe("walkin_booking_appointments_tomorrow",
       f"{BASE_URL}/api/walkin/booking/appointments",
-      params={"locationId": location_id})
+      params={"companyId": location_id, "dateStr": (date.today() + timedelta(days=1)).isoformat()})
+
+# Also try with locationId in case companyId != locationId
+probe("walkin_booking_appointments_locationid",
+      f"{BASE_URL}/api/walkin/booking/appointments",
+      params={"locationId": location_id, "dateStr": today})
 
 # 2. Walk-in queue
 probe("walkin_queue",
@@ -114,6 +119,15 @@ probe("company_formfields",
 probe("booking_getstatus",
       f"{BASE_URL}/api/booking/getstatus",
       params={"locationId": location_id})
+
+# Employee schedules — who is working on a given date (companyId + dateStr)
+probe("walkin_employee_schedules_today",
+      f"{BASE_URL}/api/walkin/employee/schedules",
+      params={"companyId": location_id, "dateStr": today})
+
+probe("walkin_employee_schedules_tomorrow",
+      f"{BASE_URL}/api/walkin/employee/schedules",
+      params={"companyId": location_id, "dateStr": (date.today() + timedelta(days=1)).isoformat()})
 
 # 8. Customer history for a few known pet CIDs
 # Load customer_names to find some pet CIDs (pets have owner set, no lastname)
