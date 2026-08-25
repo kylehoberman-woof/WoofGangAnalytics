@@ -67,7 +67,7 @@ jobs:
       - name: ${{ matrix.store }} - Booking anomalies
         run: python3 scripts/build_booking_anomaly_dashboard.py ${{ matrix.store }}
 
-              - name: ${{ matrix.store }} - Discover pet endpoints
+      - name: ${{ matrix.store }} - Discover pet endpoints
         run: python3 scripts/discover_pet_endpoints.py ${{ matrix.store }}
 
       - name: ${{ matrix.store }} - Commit store data
