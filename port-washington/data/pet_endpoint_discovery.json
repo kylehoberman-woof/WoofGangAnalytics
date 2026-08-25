@@ -1,13 +1,18 @@
 {
-  "walkin_booking_appointments": {
-    "status": 404,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&date=2026-08-25",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&date=2026-08-25'"
+  "walkin_booking_appointments_today": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-08-25",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
-  "walkin_booking_appointments_nodate": {
+  "walkin_booking_appointments_tomorrow": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-08-26",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
+  },
+  "walkin_booking_appointments_locationid": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698'.\",\"MessageDetai"
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-08-25",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-08-"
   },
   "walkin_queue": {
     "status": 200,
@@ -166,6 +171,16 @@
     "status": 404,
     "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
     "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698'.\",\"MessageDetail\":\"No act"
+  },
+  "walkin_employee_schedules_today": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-08-25",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-08-25'"
+  },
+  "walkin_employee_schedules_tomorrow": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-08-26",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-08-26'"
   },
   "customer_history_Jack": {
     "status": 200,
@@ -356,6 +371,57 @@
       "totalSales": 0.0
     }
   },
+  "customer_history_Jack_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/418764637/csv?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-08-01 10:30:00,Visits,Casey Makowski,Jackie G. ,\"Woof Gang Port Washington, NY (#264)\",Clsc Bath / General / LG\r\n2026-07-16 16:00:00,Visits,Casey Makowski,Jessica G,\"Woof Gang Port Washington, NY (#264)\",Clsc Bath / General / LG\r\n2026-05-15 15:00:00,Visits,Casey Makowski,Jessica G,\"Woof Gang Port Washington, NY (#264)\",Clsc Bath / General / LG\r\n2026-04-10 16:15:00,Visits,Cindy Szczudlo,Olivia M,\"Woof Gang Port Washington, NY (#264)\",Clsc Bath / Gen"
+  },
+  "customer_record_Jack": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/418764637?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 418764637,
+      "FirstName": " Jack",
+      "LastName": "",
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "pelbirt1@gmail.com",
+      "CellPhone": "9177438300",
+      "WorkPhone": "",
+      "DateOfBirth": null,
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": null,
+      "StateProvinceId": null,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 203698
+    }
+  },
   "customer_history_Mixi": {
     "status": 200,
     "url": "https://publicapi.franpos.com/api/customers/history/418951082/json?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
@@ -489,6 +555,57 @@
       "totalSales": 233.64
     }
   },
+  "customer_history_Mixi_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/418951082/csv?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-08-21 16:03:48,Sales,Trinity  Rivera,,\"Woof Gang Port Washington, NY (#264)\",WALK-IN SERVICE / Nail Trim - 1.00000\r\n2026-06-22 15:38:57,Sales,Cindy Szczudlo,,\"Woof Gang Port Washington, NY (#264)\",WALK-IN SERVICE / Nail Trim - 1.00000\r\n2026-05-24 12:36:40,Sales,Casey Makowski,,\"Woof Gang Port Washington, NY (#264)\",WALK-IN SERVICE / Nail Trim - 1.00000\r\n2026-04-22 14:35:47,Sales,Casey Makowski,,\"Woof Gang Port Washington, NY (#264)\",\"Fromm Dog Trea"
+  },
+  "customer_record_Mixi": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/418951082?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 418951082,
+      "FirstName": " Shinya",
+      "LastName": "Nakamura",
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "",
+      "CellPhone": "9177015573",
+      "WorkPhone": "",
+      "DateOfBirth": null,
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": 1,
+      "StateProvinceId": 41,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 203698
+    }
+  },
   "customer_history_Poppy": {
     "status": 200,
     "url": "https://publicapi.franpos.com/api/customers/history/419582910/json?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
@@ -572,6 +689,57 @@
       ],
       "totalVisit": 5,
       "totalSales": 803.41
+    }
+  },
+  "customer_history_Poppy_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/419582910/csv?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-07-31 10:58:57,Sales,Cindy Szczudlo,,\"Woof Gang Port Washington, NY (#264)\",\"FG / Poodle-Doodle / LG - 1.00000, ADD-ON / Teeth Brushing - 1.00000\"\r\n2026-07-03 12:40:43,Sales,Cindy Szczudlo,,\"Woof Gang Port Washington, NY (#264)\",\"MG / Poodle-Doodle / LG - 1.00000, ADD-ON / Hypo Allergenic Shampoo - 1.00000, ADD-ON / Teeth Brushing - 1.00000\"\r\n2026-02-22 11:12:49,Sales,Casey Makowski,,\"Woof Gang Port Washington, NY (#264)\",\"Lux Bath / Poodle-Doodle "
+  },
+  "customer_record_Poppy": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/419582910?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 419582910,
+      "FirstName": "Aaron",
+      "LastName": "Rosen",
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "aaron.h.rosen@gmail.com",
+      "CellPhone": "7178779470",
+      "WorkPhone": "7178779470",
+      "DateOfBirth": null,
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": null,
+      "StateProvinceId": null,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 203698
     }
   },
   "datadump_customers_sample": {
@@ -873,7 +1041,7 @@
         }
       ],
       "pages": 1,
-      "version": 742110838
+      "version": 742127950
     }
   }
 }
