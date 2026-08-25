@@ -70,6 +70,12 @@ jobs:
       - name: ${{ matrix.store }} - Discover pet endpoints
         run: python3 scripts/discover_pet_endpoints.py ${{ matrix.store }}
 
+      - name: ${{ matrix.store }} - Fetch pet visits
+        run: python3 scripts/fetch_pet_visits.py ${{ matrix.store }}
+
+      - name: ${{ matrix.store }} - Pet dashboard
+        run: python3 scripts/build_pet_dashboard.py ${{ matrix.store }}
+
       - name: ${{ matrix.store }} - Commit store data
         run: |
           git config --global user.name "github-actions[bot]"
