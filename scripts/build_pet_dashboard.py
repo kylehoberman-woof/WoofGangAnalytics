@@ -46,6 +46,12 @@ print(f"Loaded {len(pet_records)} pet records")
 
 today = date.today()
 
+def esc(s):
+    return str(s).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"','&quot;')
+
+def badge(text, color):
+    return f'<span style="background:{color};color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">{text}</span>'
+
 # ── Build daily appointments index ───────────────────────────────────────────
 # date → groomer → list of {pet_name, owner_name, service, breed_group, size, items_raw}
 daily_by_groomer = defaultdict(lambda: defaultdict(list))
@@ -281,12 +287,6 @@ lapsed_dogs.sort(key=lambda x: (-("Lapsed" in x["status"]), -x["days_overdue"]))
 
 # ── Build HTML ────────────────────────────────────────────────────────────────
 SEVERITY_COLOR = {"high": "#dc2626", "medium": "#d97706", "low": "#6b7280"}
-
-def badge(text, color):
-    return f'<span style="background:{color};color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">{text}</span>'
-
-def esc(s):
-    return str(s).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"','&quot;')
 
 daily_rows = []
 for d in recent_dates[:30]:
