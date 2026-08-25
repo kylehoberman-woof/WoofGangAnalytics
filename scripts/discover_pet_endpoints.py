@@ -140,9 +140,17 @@ if names_file.exists():
                     if info.get("pet") and info.get("owner") and "," not in info.get("pet","")]
     print(f"  Found {len(pet_accounts)} single-pet accounts to probe")
     for cid, info in pet_accounts[:3]:
-        label = f"customer_history_{info['pet'].replace(' ','_')}"
-        probe(label,
+        name = info['pet'].replace(' ','_')
+        # JSON version (already working)
+        probe(f"customer_history_{name}",
               f"{BASE_URL}/api/customers/history/{cid}/json")
+        # CSV version — may have more fields including OrderId
+        probe(f"customer_history_{name}_csv",
+              f"{BASE_URL}/api/customers/history/{cid}/csv")
+        # Full customer record — may include linked order IDs
+        probe(f"customer_record_{name}",
+              f"{BASE_URL}/api/Customers/{cid}",
+              params={"locationId": location_id})
 
 # 9. Datadump customers — check if they have pet sub-objects
 probe("datadump_customers_sample",
