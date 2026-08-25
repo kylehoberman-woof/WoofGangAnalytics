@@ -126,6 +126,18 @@
       </div>
 
       <div class="card">
+        <div class="card-icon">🐾</div>
+        <div class="card-title">Pet Dashboard</div>
+        <div class="card-desc">Per-dog appointment history, groomer assignments, daily dog counts, and lapsed client tracking. Built from individual pet visit records — not owner transactions.</div>
+        <div class="card-tags">
+          <span class="tag">Dogs</span>
+          <span class="tag">Appointments</span>
+          <span class="tag">Retention</span>
+        </div>
+        <a class="card-btn" id="link-pet" href="port-washington/WoofGang_PortWashington_PetDashboard.html">Open Pet Dashboard</a>
+      </div>
+
+      <div class="card">
         <div class="card-icon">🛍️</div>
         <div class="card-title">Retail Products Dashboard</div>
         <div class="card-desc">Top-selling retail products by revenue and units. Category breakdown, monthly bestsellers, weekly revenue trend, and brand performance — all-time and YTD.</div>
@@ -375,7 +387,8 @@ var STORES = {
     fin: 'WoofGang_PortWashington_Financial_Dashboard.html',
     cross: 'WoofGang_CrossStore_Comparison.html',
     anomaly: 'WoofGang_PortWashington_BookingAnomalies.html',
-    retail: 'WoofGang_PortWashington_Retail_Dashboard.html'
+    retail: 'WoofGang_PortWashington_Retail_Dashboard.html',
+    pet: 'WoofGang_PortWashington_PetDashboard.html'
   },
   'hicksville': {
     title: 'Woof Gang Hicksville',
@@ -386,7 +399,8 @@ var STORES = {
     fin: 'WoofGang_Hicksville_Financial_Dashboard.html',
     cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
     anomaly: 'WoofGang_Hicksville_BookingAnomalies.html',
-    retail: 'WoofGang_Hicksville_Retail_Dashboard.html'
+    retail: 'WoofGang_Hicksville_Retail_Dashboard.html',
+    pet: 'WoofGang_Hicksville_PetDashboard.html'
   }
   // NEW STORE TEMPLATE (uncomment and fill in):
   // 'glen-cove': {
@@ -412,6 +426,7 @@ function switchStore(key) {
   document.getElementById('link-cross').href = s.base + s.cross;
   document.getElementById('link-anomaly').href = s.base + s.anomaly;
   document.getElementById('link-retail').href = s.base + s.retail;
+  document.getElementById('link-pet').href = s.base + s.pet;
   localStorage.setItem('selectedStore', key);
 }
 
