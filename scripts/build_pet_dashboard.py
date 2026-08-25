@@ -44,6 +44,8 @@ with open(pet_visits_file) as f:
 
 print(f"Loaded {len(pet_records)} pet records")
 
+today = date.today()
+
 # ── Build daily appointments index ───────────────────────────────────────────
 # date → groomer → list of {pet_name, owner_name, service, breed_group, size, items_raw}
 daily_by_groomer = defaultdict(lambda: defaultdict(list))
@@ -217,7 +219,6 @@ for g, stats in sorted(groomer_stats.items(), key=lambda x: -x[1]["dogs"]):
       </tr>""")
 
 # ── Recent 30 days for daily view ─────────────────────────────────────────────
-today = date.today()
 recent_dates = sorted(
     [d for d in daily_totals if d >= (today - timedelta(days=30)).isoformat()],
     reverse=True
