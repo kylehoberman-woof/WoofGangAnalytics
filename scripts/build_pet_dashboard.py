@@ -18,12 +18,13 @@ from pathlib import Path
 from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import get_store
+from config import get_store, get_store_display, get_store_fn
 
 store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 store = get_store(store_name)
 data_dir = store.data_dir
-store_label = store.label
+store_label = get_store_display(store_name)
+store_fn = get_store_fn(store_name)
 
 pet_visits_file = data_dir / "pet_visits.json"
 all_data_file = data_dir / "all_data.json"
@@ -408,7 +409,7 @@ function showTab(name) {{
 </body>
 </html>"""
 
-out_html = data_dir.parent / f"WoofGang_{store_label.replace(' ','_')}_PetDashboard.html"
+out_html = data_dir.parent / f"WoofGang_{store_fn}_PetDashboard.html"
 with open(out_html, "w") as f:
     f.write(html)
 
