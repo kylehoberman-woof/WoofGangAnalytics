@@ -119,6 +119,72 @@ def parse_items(items_raw):
         "size": parts[2] if len(parts) > 2 else "",
     }
 
+# ── Build order item price lookup from all_data.json ─────────────────────────
+# Key: (date, stylist_lower, service_key) → list of {order_id, price}
+# When multiple items match the same key, we track them all and mark ambiguous
+from collections import defaultdict
+
+order_lookup = defaultdict(list)  # (date, stylist, svc_key) → [{order_id, price}]
+all_data_file = data_dir / "all_data.json"
+
+GROOM_KEYWORDS = {"full groom", "bath", "lux bath", "groom", "trim", "nail"}
+
+def svc_key_from_name(name):
+    n = name.lower()
+    if "full groom" in n or ("full" in n and "groom" in n):
+        return "full groom"
+    if "lux" in n and "bath" in n:
+        return "lux bath"
+    if "bath" in n:
+        return "bath"
+    if "trim" in n:
+        return "trim"
+    if "nail" in n:
+        return "nail"
+    return n[:20]
+
+def stylist_key(name):
+    parts = name.strip().split()
+    if len(parts) >= 2:
+        return (parts[0] + " " + parts[-1][0]).lower()
+    return name.lower()
+
+if all_data_file.exists():
+    with open(all_data_file) as f:
+        raw = json.load(f)
+    items = raw if isinstance(raw, list) else raw.get("order_items", [])
+    loaded = 0
+    for item in items:
+        iname = (item.get("Name") or "").lower()
+        if not any(k in iname for k in GROOM_KEYWORDS):
+            continue
+        emp = (item.get("EmployeeName") or item.get("SalesPerson") or "").strip()
+        dt = item.get("Date") or item.get("CreatedOn") or ""
+        day = dt[:10] if dt else ""
+        price = float(item.get("Price") or item.get("Total") or 0)
+        order_id = item.get("OrderId") or item.get("Id")
+        if not day or not emp or price <= 0:
+            continue
+        key = (day, stylist_key(emp), svc_key_from_name(iname))
+        order_lookup[key].append({"order_id": order_id, "price": price})
+        loaded += 1
+    print(f"Loaded {loaded} grooming order items for price join ({len(order_lookup)} unique keys)")
+else:
+    print("No all_data.json found — skipping price join")
+
+def find_price(date_str, stylist, service):
+    """Try to find matching order item. Returns {order_id, price, match} or None."""
+    skey = svc_key_from_name(service)
+    tkey = stylist_key(stylist)
+    matches = order_lookup.get((date_str, tkey, skey), [])
+    if not matches:
+        return None
+    if len(matches) == 1:
+        return {**matches[0], "match": "exact"}
+    # Multiple matches — ambiguous (same groomer, same service, same day, multiple dogs)
+    return {"order_id": None, "price": sum(m["price"] for m in matches) / len(matches),
+            "match": "ambiguous", "match_count": len(matches)}
+
 errors = 0
 fetched = 0
 for i, pet in enumerate(to_fetch):
@@ -136,17 +202,24 @@ for i, pet in enumerate(to_fetch):
             for v in visits_raw:
                 parsed = parse_items(v.get("Items", ""))
                 dt = v.get("Date", "")
-                visits.append({
-                    "date": dt[:10] if dt else "",
+                day = dt[:10] if dt else ""
+                stylist = v.get("Stylist", "")
+                price_match = find_price(day, stylist, parsed["service"]) if day and stylist else None
+                visit = {
+                    "date": day,
                     "datetime": dt,
-                    "stylist": v.get("Stylist", ""),
+                    "stylist": stylist,
                     "salesperson": v.get("SalesPerson", ""),
                     "service": parsed["service"],
                     "breed_group": parsed["breed_group"],
                     "size": parsed["size"],
                     "items_raw": v.get("Items", ""),
                     "store": v.get("Store", ""),
-                })
+                    "order_id": price_match["order_id"] if price_match else None,
+                    "price": price_match["price"] if price_match else None,
+                    "price_match": price_match["match"] if price_match else "no_match",
+                }
+                visits.append(visit)
             # Sort by date desc
             visits.sort(key=lambda x: x["date"], reverse=True)
             rec = {
