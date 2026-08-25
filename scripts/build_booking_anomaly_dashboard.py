@@ -1,10 +1,8 @@
 """Booking Anomaly Detector Dashboard — Woof Gang
 
-Flags customers whose recent grooming transactions deviate from their historical
-patterns. Used to identify booking errors (wrong breed type, wrong size, wrong
-service type) that affect commission calculations and customer experience.
-
-Works from completed transaction history — FranPOS appointments API is unavailable.
+Flags dogs whose recent grooming visits deviate from their historical patterns.
+Uses pet_visits.json (per-dog visit history from FranPOS customer history API)
+for exact per-dog accuracy — no clustering, no false positives from multi-dog households.
 
 Usage:
     python3 scripts/build_booking_anomaly_dashboard.py                  # Port Washington
@@ -13,7 +11,6 @@ Usage:
 
 import json
 import sys
-import os
 from pathlib import Path
 from collections import defaultdict, Counter
 from datetime import datetime, date, timedelta
@@ -21,8 +18,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from classifier import classify_item
-from config import get_store, STORE_OPEN_DATES, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores
+from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores
 from formatting import esc
 
 # ── Store setup ───────────────────────────────────────────────────────────────
@@ -42,256 +38,28 @@ DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 NOW_STR = datetime.now(ZoneInfo("America/New_York")).strftime("%B %d, %Y at %I:%M %p ET")
 
-# ── Fetch customer names from FranPOS API ────────────────────────────────────
-
-import httpx
-import time as _time
-
-def _fetch_customer_names():
-    """Fetch all customer accounts from FranPOS and build ID→name mapping.
-    Uses Customers/ByCompany endpoint (returns all customers, ~4800 records).
-    Pets have no last name and share a phone number with the owner account.
-    """
-    token = _store.token
-    all_customers = {}
-    for p in range(0, 120):
-        try:
-            r = httpx.get(
-                f"https://publicapi.franpos.com/api/Customers/ByCompany/{p}",
-                params={"Token": token, "startDate": "2024-01-01", "endDate": "2026-12-31"},
-                timeout=45,
-            )
-            if r.status_code != 200:
-                break
-            data = r.json()
-            items = data.get("data", []) if isinstance(data, dict) else data
-            pages = data.get("pages", 1) if isinstance(data, dict) else 1
-            for c in items:
-                all_customers[c["CustomerId"]] = c
-            if p >= pages or not items:
-                break
-            _time.sleep(0.3)
-        except Exception as e:
-            print(f"    Customer fetch page {p} error: {e}")
-            _time.sleep(2)
-            continue
-
-    # Group by phone to find owner/pet pairs
-    # Pets: no last name. Owners: have last name. Same phone = same household.
-    by_phone = {}
-    for c in all_customers.values():
-        phone = (c.get("CellPhone") or "").strip()
-        if phone:
-            by_phone.setdefault(phone, []).append(c)
-
-    # For each phone group, find the owner (has last name) and pets (no last name)
-    pet_owner_map = {}  # pet_cid → owner_name
-    owner_pets_map = {}  # owner_cid → [pet_name, ...]
-    for phone, accounts in by_phone.items():
-        owners = [a for a in accounts if (a.get("LastName") or "").strip()]
-        pets = [a for a in accounts if not (a.get("LastName") or "").strip()]
-        if owners:
-            owner = owners[0]
-            owner_name = f'{(owner.get("FirstName") or "").strip()} {(owner.get("LastName") or "").strip()}'.strip()
-            pet_names = list(dict.fromkeys(((p.get("FirstName") or "").strip()) for p in pets if (p.get("FirstName") or "").strip()))
-            for o in owners:
-                owner_pets_map[o["CustomerId"]] = pet_names
-            for pet in pets:
-                pet_owner_map[pet["CustomerId"]] = owner_name
-
-    # Build mapping: CustomerId → {pet, owner}
-    mapping = {}
-    for cid, c in all_customers.items():
-        fn = (c.get("FirstName") or "").strip()
-        ln = (c.get("LastName") or "").strip()
-        has_lastname = bool(ln)
-        if has_lastname:
-            # This is an owner account — look up their pet(s) via phone
-            pet_list = owner_pets_map.get(cid, [])
-            mapping[str(cid)] = {"pet": ", ".join(pet_list), "owner": f"{fn} {ln}".strip()}
-        else:
-            # This is a pet account
-            owner_name = pet_owner_map.get(cid, "")
-            mapping[str(cid)] = {"pet": fn, "owner": owner_name}
-    return mapping
-
-_NAMES_CACHE = DATA_DIR / "customer_names.json"
-
-print("Fetching customer names from FranPOS...")
-_customer_names = _fetch_customer_names()
-print(f"  {len(_customer_names)} customer accounts loaded from API")
-
-# Save cache if we got a good result; fall back to cache if API returned few/no results
-if len(_customer_names) > 100:
-    with open(_NAMES_CACHE, "w") as f:
-        json.dump(_customer_names, f, indent=2)
-    print(f"  Saved to {_NAMES_CACHE}")
-elif _NAMES_CACHE.exists():
-    with open(_NAMES_CACHE) as f:
-        cached = json.load(f)
-    # Merge: API results override cache, but keep cached entries not in API
-    merged = {**cached, **_customer_names}
-    _customer_names = merged
-    print(f"  Merged with cache: {len(_customer_names)} total")
-
-def get_customer_name(cid):
-    info = _customer_names.get(str(cid), {})
-    return info.get("owner", ""), info.get("pet", "")
-
 # ── Algorithm constants ───────────────────────────────────────────────────────
 
-MIN_VISITS = 3       # min sized visits to build profile
-STALE_DAYS = 90      # ignore anomalies older than this many days
-SERVICE_THRESHOLD = 0.75  # ≥75% of visits must be modal service to flag change
+MIN_VISITS = 3            # min visits to build a profile
+STALE_DAYS = 90           # ignore anomalies older than this many days
+SERVICE_THRESHOLD = 0.75  # ≥75% of visits must be modal service to flag a change
+SIZE_THRESHOLD = 0.75     # ≥75% of visits must be modal size to flag a change
 
-SIZE_ORDER = {
-    "0-20 lbs": 0,
-    "21-40 lbs": 1,
-    "41-75 lbs": 2,
-    "76-100 lbs": 3,
-    "Over 100 lbs": 4,
-}
+SIZE_ORDER = {"XS": 0, "SM": 1, "MD": 2, "LG": 3, "XL": 4}
 
-SIZE_SHORT = {
-    "0-20 lbs": "SM",
-    "21-40 lbs": "MD",
-    "41-75 lbs": "LG",
-    "76-100 lbs": "XLG",
-    "Over 100 lbs": "XXLG",
-}
+# ── Load pet visit history ────────────────────────────────────────────────────
 
+_pet_visits_file = DATA_DIR / "pet_visits.json"
 
-# ── Load & classify data ──────────────────────────────────────────────────────
+if not _pet_visits_file.exists():
+    print(f"ERROR: {_pet_visits_file} not found — run fetch_pet_visits.py first")
+    sys.exit(1)
 
-print(f"Loading data for {_store_display}...")
-with open(DATA_DIR / "all_data.json") as f:
-    raw_data = json.load(f)
+print(f"Loading pet visit history for {_store_display}...")
+with open(_pet_visits_file) as f:
+    pet_records = json.load(f)
 
-# ── Load appointments for pet-level mapping ──────────────────────────────────
-# Appointments use the PET's CustomerID; order items use the OWNER's CustomerID.
-# By linking via OrderId, we can map each transaction to the specific pet.
-_appt_file = DATA_DIR / "appointments.json"
-_order_to_pet = {}  # OrderId → pet CustomerID
-if _appt_file.exists():
-    with open(_appt_file) as f:
-        _appointments = json.load(f)
-    for appt in _appointments:
-        oid = appt.get("OrderId")
-        pet_cid = appt.get("CustomerID")
-        if oid and pet_cid:
-            _order_to_pet[oid] = str(pet_cid)
-    print(f"  Loaded {len(_appointments)} appointments ({len(_order_to_pet)} with OrderId→pet mapping)")
-else:
-    print("  No appointments.json found — using owner-level grouping")
-
-print(f"  Processing {len(raw_data.get('order_items', []))} order items...")
-
-_pet_mapped = 0
-groom_records = []
-for item in raw_data.get("order_items", []):
-    name = item.get("Name", "") or ""
-    sku = item.get("Sku", "") or ""
-    cls = classify_item(name, sku)
-
-    if cls["groom_category"] != "core":
-        continue
-
-    cid = item.get("CustomerId")
-    if not cid:
-        continue
-
-    created_raw = (item.get("CreatedOn") or "")
-    if not created_raw:
-        continue
-    created = created_raw[:10]  # YYYY-MM-DD
-
-    price = float(item.get("Price") or 0) * float(item.get("Quantity") or 1)
-
-    # Try to resolve to pet CID via appointment mapping
-    order_id = item.get("OrderId")
-    pet_cid = _order_to_pet.get(order_id) if order_id else None
-    grouping_cid = pet_cid if pet_cid else str(cid)
-    if pet_cid:
-        _pet_mapped += 1
-
-    groom_records.append({
-        "customer_id": grouping_cid,
-        "owner_cid": str(cid),
-        "date": created,
-        "dog_size": cls["dog_size"],
-        "is_doodle": cls["is_doodle"],
-        "service_type": cls["service_type"] or "Other Groom",
-        "salesperson": (item.get("SalesPerson") or "Unknown").strip(),
-        "price": price,
-        "name": name,
-    })
-
-print(f"  Found {len(groom_records)} core grooming items ({_pet_mapped} mapped to pet accounts)")
-
-
-# ── Build customer visit history ──────────────────────────────────────────────
-
-customer_visits = defaultdict(list)
-for r in groom_records:
-    customer_visits[r["customer_id"]].append(r)
-
-for cid in customer_visits:
-    customer_visits[cid].sort(key=lambda x: x["date"])
-
-
-# ── Split multi-dog accounts into separate dog clusters ──────────────────────
-# If a customer account has visits across very different sizes (e.g., SM and LG),
-# it's likely multiple dogs. We cluster by size proximity: adjacent sizes (±1 step)
-# are the same dog, distant sizes are separate dogs.
-
-def _cluster_dogs(sized_visits):
-    """Split a customer's visits into per-dog clusters based on size patterns.
-    Returns list of visit lists, one per inferred dog."""
-    if not sized_visits:
-        return []
-
-    # Count visits per size
-    size_counts = Counter(v["dog_size"] for v in sized_visits)
-    # Sort sizes by frequency (most visits first)
-    size_list = [s for s, _ in size_counts.most_common()]
-
-    if len(size_list) <= 1:
-        return [sized_visits]  # single size = single dog
-
-    # Build clusters: sizes within ±1 step of each other belong to the same dog
-    clusters = []  # list of sets of sizes
-    assigned = set()
-    for s in size_list:
-        if s in assigned or s not in SIZE_ORDER:
-            continue
-        cluster = {s}
-        assigned.add(s)
-        # Absorb adjacent sizes that are closer to this cluster than to others
-        for other in size_list:
-            if other in assigned or other not in SIZE_ORDER:
-                continue
-            if abs(SIZE_ORDER[other] - SIZE_ORDER[s]) <= 1:
-                cluster.add(other)
-                assigned.add(other)
-        clusters.append(cluster)
-
-    # Add any unassigned sizes (no SIZE_ORDER) to the largest cluster
-    unassigned = [v for v in sized_visits if v["dog_size"] not in assigned]
-    if unassigned and clusters:
-        # Attach to largest cluster
-        pass  # they'll be dropped (flat-rate items without size)
-
-    if len(clusters) <= 1:
-        return [sized_visits]  # all sizes are adjacent = single dog
-
-    # Split visits by cluster
-    result = []
-    for cluster_sizes in clusters:
-        dog_visits = [v for v in sized_visits if v["dog_size"] in cluster_sizes]
-        if dog_visits:
-            result.append(dog_visits)
-    return result
-
+print(f"  {len(pet_records)} pet accounts loaded")
 
 # ── Detect anomalies ──────────────────────────────────────────────────────────
 
@@ -301,152 +69,134 @@ cutoff_str = (date.today() - timedelta(days=STALE_DAYS)).isoformat()
 anomalies = []
 profiles = {}
 
-for cid, all_visits in customer_visits.items():
-    # Only consider visits where we have a size (flat-rate items have size=None)
-    sized_visits = [v for v in all_visits if v["dog_size"] is not None]
-
-    if len(sized_visits) < MIN_VISITS:
+for rec in pet_records:
+    visits = rec.get("visits", [])
+    if len(visits) < MIN_VISITS:
         continue
 
-    # Split into per-dog clusters for multi-dog accounts
-    dog_clusters = _cluster_dogs(sized_visits)
+    # Skip if most recent visit is stale
+    last_visit = visits[0]  # sorted desc
+    if last_visit.get("date", "") < cutoff_str:
+        continue
 
-    for dog_visits in dog_clusters:
-        if len(dog_visits) < MIN_VISITS:
-            continue
+    pet_name = rec.get("pet_name", "").strip()
+    owner_name = rec.get("owner_name", "").strip()
+    dog_key = str(rec["pet_cid"])
 
-        dog_visits.sort(key=lambda x: x["date"])
+    # Build history arrays
+    sizes = [v["size"] for v in visits if v.get("size")]
+    services = [v["service"] for v in visits if v.get("service")]
+    breed_groups = [v["breed_group"] for v in visits if v.get("breed_group")]
 
-        # Skip if most recent visit is stale
-        last = dog_visits[-1]
-        if last["date"] < cutoff_str:
-            continue
+    if not sizes and not services:
+        continue
 
-        sizes = [v["dog_size"] for v in dog_visits]
-        doodles = [v["is_doodle"] for v in dog_visits]
-        services = [v["service_type"] for v in dog_visits]
+    # Modal values
+    modal_size = Counter(sizes).most_common(1)[0][0] if sizes else ""
+    modal_service = Counter(services).most_common(1)[0][0] if services else ""
+    modal_breed = Counter(breed_groups).most_common(1)[0][0] if breed_groups else ""
 
-        modal_size = Counter(sizes).most_common(1)[0][0]
-        doodle_count = sum(1 for d in doodles if d)
-        modal_doodle = (doodle_count / len(doodles)) > 0.5
+    last_size = last_visit.get("size", "")
+    last_service = last_visit.get("service", "")
+    last_breed = last_visit.get("breed_group", "")
+    last_groomer = last_visit.get("stylist", "")
+    last_price = last_visit.get("price") or 0
 
-        service_counter = Counter(services)
-        modal_service = service_counter.most_common(1)[0][0]
+    size_counts = dict(Counter(sizes))
+    service_counts = dict(Counter(services))
 
-        last_size = last["dog_size"]
-        last_doodle = last["is_doodle"]
-        last_service = last["service_type"]
-        last_groomer = last["salesperson"]
-        last_price = last["price"]
+    flags = []
+    flag_details = {}
 
-        size_counts = dict(Counter(sizes))
-        service_counts = dict(Counter(services))
-
-        # ── Anomaly detection ────────────────────────────────────────────────
-
-        flags = []
-        flag_details = {}
-
-        # 1. Breed change: General ↔ Poodle-Doodle
-        if last_doodle != modal_doodle:
+    # 1. Breed group change: General ↔ Poodle-Doodle
+    if modal_breed and last_breed and last_breed != modal_breed:
+        breed_modal_pct = Counter(breed_groups)[modal_breed] / len(breed_groups)
+        if breed_modal_pct >= SERVICE_THRESHOLD:
             flags.append("breed_change")
-            flag_details["breed_change"] = {
-                "from": "Poodle-Doodle" if modal_doodle else "General",
-                "to": "Poodle-Doodle" if last_doodle else "General",
-            }
+            flag_details["breed_change"] = {"from": modal_breed, "to": last_breed}
 
-        # 2. Size change: must differ by ≥1 step
-        if last_size in SIZE_ORDER and modal_size in SIZE_ORDER:
+    # 2. Size change: must differ by ≥1 step AND modal size must dominate
+    if modal_size and last_size and last_size != modal_size:
+        if modal_size in SIZE_ORDER and last_size in SIZE_ORDER:
             gap = abs(SIZE_ORDER[last_size] - SIZE_ORDER[modal_size])
-            if gap >= 1:
-                flags.append("size_change")
+            size_modal_pct = Counter(sizes)[modal_size] / len(sizes)
+            if gap >= 1 and size_modal_pct >= SIZE_THRESHOLD:
                 direction = "↑" if SIZE_ORDER[last_size] > SIZE_ORDER[modal_size] else "↓"
+                flags.append("size_change")
                 flag_details["size_change"] = {
-                    "from": SIZE_SHORT.get(modal_size, modal_size),
-                    "to": SIZE_SHORT.get(last_size, last_size),
-                    "direction": direction,
-                    "gap": gap,
+                    "from": modal_size, "to": last_size,
+                    "direction": direction, "gap": gap,
                 }
 
-        # 3. Service change: ≥75% of history is modal service, last visit is different
-        if last_service != modal_service:
-            modal_pct = service_counter[modal_service] / len(dog_visits)
-            if modal_pct >= SERVICE_THRESHOLD:
-                flags.append("service_change")
-                flag_details["service_change"] = {
-                    "from": modal_service,
-                    "to": last_service,
+    # 3. Service change: ≥75% of history is modal service, last visit differs
+    if modal_service and last_service and last_service != modal_service:
+        modal_pct = Counter(services)[modal_service] / len(services)
+        if modal_pct >= SERVICE_THRESHOLD:
+            flags.append("service_change")
+            flag_details["service_change"] = {"from": modal_service, "to": last_service}
+
+    # 4. Pricing anomaly: price deviates >30% from dog's own average for same service+size
+    if last_price and last_price > 0:
+        same_svc_prices = [
+            v["price"] for v in visits[1:]  # exclude last visit itself
+            if v.get("price") and v.get("price_match") in ("exact",)
+            and v.get("service") == last_service
+            and v.get("size") == last_size
+        ]
+        if len(same_svc_prices) >= 2:
+            avg_price = sum(same_svc_prices) / len(same_svc_prices)
+            pct_diff = abs(last_price - avg_price) / avg_price if avg_price else 0
+            if pct_diff >= 0.30 and last_visit.get("price_match") == "exact":
+                flags.append("price_anomaly")
+                flag_details["price_anomaly"] = {
+                    "expected": round(avg_price, 2),
+                    "actual": round(last_price, 2),
+                    "pct_diff": round(pct_diff * 100, 1),
+                    "direction": "↑" if last_price > avg_price else "↓",
                 }
 
-        if not flags:
-            continue
+    if not flags:
+        continue
 
-        # Build full history (most recent first)
-        history = []
-        for v in reversed(dog_visits):
-            history.append({
-                "date": v["date"],
-                "service": v["service_type"] or "",
-                "size": SIZE_SHORT.get(v["dog_size"], v["dog_size"] or ""),
-                "size_full": v["dog_size"] or "",
-                "doodle": v["is_doodle"],
-                "groomer": v["salesperson"],
-                "price": round(v["price"], 2),
-                "name": v["name"][:60],
-            })
+    # Build full history for modal (most recent first)
+    history = []
+    for v in visits:
+        history.append({
+            "date": v.get("date", ""),
+            "service": v.get("service", ""),
+            "size": v.get("size", ""),
+            "breed_group": v.get("breed_group", ""),
+            "items_raw": v.get("items_raw", ""),
+            "groomer": v.get("stylist", ""),
+            "price": round(v["price"], 2) if v.get("price") else 0,
+            "price_match": v.get("price_match", ""),
+        })
 
-        # Resolve names — check if this CID is a pet account or owner account
-        owner_name, pet_name_from_lookup = get_customer_name(cid)
-        # Also check owner CID from the first visit (in case CID is pet-level)
-        owner_cid = dog_visits[0].get("owner_cid", cid)
-        if not owner_name and owner_cid != cid:
-            owner_name, _ = get_customer_name(owner_cid)
-
-        # If CID is a pet account, pet_name_from_lookup is the pet's own name
-        # If CID is an owner account, pet_name_from_lookup is comma-separated list of all pets
-        if pet_name_from_lookup and "," not in pet_name_from_lookup:
-            # Single pet name — use directly
-            pet_name = pet_name_from_lookup
-        elif len(dog_clusters) > 1:
-            # Multi-dog owner: try to assign pet names to clusters
-            pet_names_list = [n.strip() for n in pet_name_from_lookup.split(",") if n.strip()] if pet_name_from_lookup else []
-            if len(pet_names_list) >= len(dog_clusters):
-                cluster_idx = dog_clusters.index(dog_visits)
-                display_pet = pet_names_list[cluster_idx] if cluster_idx < len(pet_names_list) else ""
-                dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
-                pet_name = (display_pet + dog_label) if display_pet else dog_label.strip(" ()")
-            else:
-                dog_label = f" ({SIZE_SHORT.get(modal_size, modal_size)})"
-                pet_name = (pet_name_from_lookup + dog_label) if pet_name_from_lookup else dog_label.strip(" ()")
-        else:
-            pet_name = pet_name_from_lookup
-
-        # Use a unique key: pet CID if available, else owner CID + size for multi-dog
-        dog_key = cid if len(dog_clusters) == 1 else f"{cid}_{SIZE_SHORT.get(modal_size, 'X')}"
-
-        anomalies.append({
-            "cid": owner_cid if owner_cid != cid else cid,
-            "dog_key": dog_key,
-            "customer_name": owner_name,
-            "pet_name": pet_name,
-            "visit_count": len(dog_visits),
+    anomalies.append({
+        "cid": dog_key,
+        "dog_key": dog_key,
+        "customer_name": owner_name,
+        "pet_name": pet_name,
+        "visit_count": len(visits),
         "modal_size": modal_size,
-        "modal_size_short": SIZE_SHORT.get(modal_size, modal_size),
-        "modal_doodle": modal_doodle,
+        "modal_size_short": modal_size,
+        "modal_doodle": modal_breed.lower() in ("poodle", "doodle", "poodle-doodle"),
         "modal_service": modal_service,
+        "modal_breed": modal_breed,
         "size_counts": size_counts,
         "service_counts": service_counts,
-        "last_date": last["date"],
+        "last_date": last_visit.get("date", ""),
         "last_size": last_size,
-        "last_size_short": SIZE_SHORT.get(last_size, last_size),
-        "last_doodle": last_doodle,
+        "last_size_short": last_size,
+        "last_doodle": last_breed.lower() in ("poodle", "doodle", "poodle-doodle"),
         "last_service": last_service,
+        "last_breed": last_breed,
         "last_groomer": last_groomer,
-        "last_price": round(last_price, 2),
+        "last_price": round(float(last_price), 2),
         "flags": flags,
         "flag_details": flag_details,
     })
-        profiles[dog_key] = history
+    profiles[dog_key] = history
 
 
 def _flag_severity(flags):
@@ -464,6 +214,7 @@ anomalies.reverse()  # most recent first
 n_breed = sum(1 for a in anomalies if "breed_change" in a["flags"])
 n_size = sum(1 for a in anomalies if "size_change" in a["flags"])
 n_service = sum(1 for a in anomalies if "service_change" in a["flags"])
+n_price = sum(1 for a in anomalies if "price_anomaly" in a["flags"])
 n_total = len(anomalies)
 
 # Collect all groomers for filter dropdown
@@ -634,22 +385,25 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   <button class="tab" onclick="setTab('breed_change',this)">&#x1F534; Breed Changes ({n_breed})</button>
   <button class="tab" onclick="setTab('size_change',this)">&#x1F7E1; Size Changes ({n_size})</button>
   <button class="tab" onclick="setTab('service_change',this)">&#x1F7E0; Service Changes ({n_service})</button>
+  <button class="tab" onclick="setTab('price_anomaly',this)">&#x1F4B2; Price Anomalies ({n_price})</button>
 </div>
 
 <div class="page">
 
 <div class="info-banner">
-  <strong>How this works:</strong> Customers with ≥{MIN_VISITS} grooming visits are analyzed for pattern deviations on their most recent transaction.
+  <strong>How this works:</strong> Each dog with ≥{MIN_VISITS} grooming visits is analyzed for pattern deviations. Data comes from per-pet visit history (not owner accounts) — multi-dog households are tracked separately by dog.
   🔴 <strong>Breed</strong> = General ↔ Poodle-Doodle switch &nbsp;|&nbsp;
-  🟡 <strong>Size</strong> = size category changed (SM/MD/LG/XLG/XXLG) &nbsp;|&nbsp;
-  🟠 <strong>Service</strong> = Full Groom ↔ Bath switch when ≥75% history was one type.
-  Click any customer to see their full history. Acknowledge resolved items to hide them.
+  🟡 <strong>Size</strong> = size category changed (XS/SM/MD/LG/XL) when ≥75% of history was one size &nbsp;|&nbsp;
+  🟠 <strong>Service</strong> = service type switched when ≥75% of history was one type &nbsp;|&nbsp;
+  💲 <strong>Price</strong> = last price deviated &gt;30% from this dog's own average for same service+size.
+  Click any row to see full visit history. Acknowledge resolved items to hide them.
 </div>
 
 <div class="kpi-grid">
   <div class="kpi red"><div class="kpi-val" id="kpi-breed">{n_breed}</div><div class="kpi-label">&#x1F534; Breed Changes</div></div>
   <div class="kpi yellow"><div class="kpi-val" id="kpi-size">{n_size}</div><div class="kpi-label">&#x1F7E1; Size Changes</div></div>
   <div class="kpi orange"><div class="kpi-val" id="kpi-service">{n_service}</div><div class="kpi-label">&#x1F7E0; Service Changes</div></div>
+  <div class="kpi gray"><div class="kpi-val" id="kpi-price">{n_price}</div><div class="kpi-label">&#x1F4B2; Price Anomalies</div></div>
   <div class="kpi gray"><div class="kpi-val" id="kpi-total">{n_total}</div><div class="kpi-label">Total Anomalies</div></div>
 </div>
 
@@ -783,6 +537,10 @@ function flagBadge(f, details) {{
     var from = d ? (d.from || '').split(' ')[0] : '';
     var to = d ? (d.to || '').split(' ')[0] : '';
     return '<span class="badge orange">&#x1F7E0; ' + from + '→' + to + '</span>';
+  }}
+  if (f === 'price_anomaly') {{
+    var d = details.price_anomaly;
+    return '<span class="badge yellow">&#x1F4B2; $' + (d ? d.actual.toFixed(0) + ' vs avg $' + d.expected.toFixed(0) : 'Price') + '</span>';
   }}
   return '';
 }}
@@ -938,6 +696,7 @@ function render() {{
   document.getElementById('kpi-breed').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('breed_change') !== -1; }}).length;
   document.getElementById('kpi-size').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('size_change') !== -1; }}).length;
   document.getElementById('kpi-service').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('service_change') !== -1; }}).length;
+  document.getElementById('kpi-price').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('price_anomaly') !== -1; }}).length;
 }}
 
 // ── Modal ────────────────────────────────────────────────────────────────────
@@ -973,9 +732,9 @@ function openModal(dogKey) {{
       '<td>' + v.date + '</td>' +
       '<td>' + (v.service || '') + '</td>' +
       '<td>' + (v.size || '?') + '</td>' +
-      '<td>' + (v.doodle ? 'Poodle-Doodle' : 'General') + '</td>' +
+      '<td>' + (v.breed_group || '') + '</td>' +
       '<td>' + (v.groomer || '') + '</td>' +
-      '<td class="n">$' + v.price.toFixed(2) + '</td>';
+      '<td class="n">' + (v.price && v.price > 0 ? '$' + v.price.toFixed(2) : '—') + '</td>';
     tbody.appendChild(tr);
   }});
 
@@ -1004,4 +763,4 @@ render();
 out_file = OUTPUT_DIR / f"WoofGang_{_fn_display}_BookingAnomalies.html"
 out_file.write_text(html, encoding="utf-8")
 print(f"  Written to: {out_file}")
-print(f"Done! {n_total} anomalies: {n_breed} breed, {n_size} size, {n_service} service")
+print(f"Done! {n_total} anomalies: {n_breed} breed, {n_size} size, {n_service} service, {n_price} price")
