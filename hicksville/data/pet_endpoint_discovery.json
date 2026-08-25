@@ -1,0 +1,937 @@
+{
+  "walkin_booking_appointments": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993&date=2026-08-25",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993&date=2026-08-25'"
+  },
+  "walkin_booking_appointments_nodate": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993'.\",\"MessageDetai"
+  },
+  "walkin_queue": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/queue?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "type": "dict",
+    "keys": [
+      "count",
+      "data"
+    ],
+    "sample": {
+      "data": [],
+      "count": 0
+    }
+  },
+  "walkin_settings": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/205993/settings?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "CompanyId",
+      "CompanyName",
+      "EnableSecondaryContacts",
+      "EnableService",
+      "EnableServiceProvider",
+      "EnableTermsOfService",
+      "Genders",
+      "TermsOfService",
+      "ThankYouPageContent",
+      "ThankYouPageTitle"
+    ],
+    "sample": {
+      "CompanyId": 205993,
+      "CompanyName": 0,
+      "EnableServiceProvider": false,
+      "EnableService": false,
+      "EnableTermsOfService": false,
+      "EnableSecondaryContacts": false,
+      "TermsOfService": null,
+      "ThankYouPageTitle": null,
+      "ThankYouPageContent": null,
+      "Genders": null
+    }
+  },
+  "walkin_simple_services": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/205993/simpleServices?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data"
+    ],
+    "nested_data_count": 7,
+    "nested_data_keys": [
+      "Duration",
+      "EmployeeId",
+      "Id",
+      "Name",
+      "Price",
+      "ServiceId"
+    ],
+    "nested_data_sample": [
+      {
+        "Id": 27462657,
+        "Name": "ONLINE ADD-ON (#60) - Hypoallergenic Shampoo",
+        "Price": 0.0,
+        "EmployeeId": 0,
+        "Duration": 0,
+        "ServiceId": 27462657
+      },
+      {
+        "Id": 27462658,
+        "Name": "ONLINE ADD-ON (#62) - Teeth Brushing",
+        "Price": 0.0,
+        "EmployeeId": 0,
+        "Duration": 0,
+        "ServiceId": 27462658
+      }
+    ],
+    "sample": {
+      "data": [
+        {
+          "Id": 27462657,
+          "Name": "ONLINE ADD-ON (#60) - Hypoallergenic Shampoo",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 27462657
+        },
+        {
+          "Id": 27462658,
+          "Name": "ONLINE ADD-ON (#62) - Teeth Brushing",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 27462658
+        },
+        {
+          "Id": 28185668,
+          "Name": "ONLINE ADD-ON (#70) - SPA Hairy Beast (Deshedding)",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 30,
+          "ServiceId": 28185668
+        },
+        {
+          "Id": 28185669,
+          "Name": "ONLINE ADD-ON (#71) - SPA Blueberry Facial",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 28185669
+        },
+        {
+          "Id": 27462652,
+          "Name": "ONLINE SERVICE (#1) - DOG - Full Groom",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 90,
+          "ServiceId": 27462652
+        },
+        {
+          "Id": 27462653,
+          "Name": "ONLINE SERVICE (#2) - DOG - Mini Groom",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 60,
+          "ServiceId": 27462653
+        },
+        {
+          "Id": 27462654,
+          "Name": "ONLINE SERVICE (#3) - DOG - Luxury Bath",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 30,
+          "ServiceId": 27462654
+        }
+      ]
+    }
+  },
+  "walkin_services": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/205993/services?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data"
+    ],
+    "sample": {
+      "data": []
+    }
+  },
+  "company_formfields": {
+    "status": 500,
+    "url": "https://publicapi.franpos.com/api/company/formfields?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "body": "{\"Message\":\"An error has occurred.\",\"ExceptionMessage\":\"The property 'ID' is part of the object's key information and cannot be modified. \",\"ExceptionType\":\"System.InvalidOperationException\",\"StackTrace\":\"   at System.Data.Entity.Core.Objects.EntityEntry.DetectChangesInProperty(Int32 ordinal, Boolea"
+  },
+  "booking_getstatus": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getstatus?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993'.\",\"MessageDetail\":\"No act"
+  },
+  "customer_history_Chanel": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420612630/json?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 1,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-07-23T10:00:00",
+        "Type": 4,
+        "SalesPerson": "Kayla Moses",
+        "Stylist": "Julia B",
+        "Store": "Woof Gang Hicksville, NY (#265)",
+        "Items": "FG / General / LG"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-07-23T10:00:00",
+          "Type": 4,
+          "SalesPerson": "Kayla Moses",
+          "Stylist": "Julia B",
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "FG / General / LG"
+        }
+      ],
+      "totalVisit": 1,
+      "totalSales": 0.0
+    }
+  },
+  "customer_history_Cookie": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420161601/json?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 3,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-07-22T14:00:00",
+        "Type": 4,
+        "SalesPerson": "Kayla Moses",
+        "Stylist": "Julia B",
+        "Store": "Woof Gang Hicksville, NY (#265)",
+        "Items": "Lux Bath / General / SM"
+      },
+      {
+        "Date": "2026-04-28T09:30:00",
+        "Type": 4,
+        "SalesPerson": "Kayla Moses",
+        "Stylist": "Carol W",
+        "Store": "Woof Gang Hicksville, NY (#265)",
+        "Items": "Lux Bath / General / SM"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-07-22T14:00:00",
+          "Type": 4,
+          "SalesPerson": "Kayla Moses",
+          "Stylist": "Julia B",
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "Lux Bath / General / SM"
+        },
+        {
+          "Date": "2026-04-28T09:30:00",
+          "Type": 4,
+          "SalesPerson": "Kayla Moses",
+          "Stylist": "Carol W",
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "Lux Bath / General / SM"
+        },
+        {
+          "Date": "2026-02-18T12:00:00",
+          "Type": 4,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": "Maria V",
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "Lux Bath / General / SM"
+        }
+      ],
+      "totalVisit": 3,
+      "totalSales": 0.0
+    }
+  },
+  "customer_history_Ladoo": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420104890/json?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 1,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-01-20T14:26:41",
+        "Type": 2,
+        "SalesPerson": "Sophia Kurkowski",
+        "Stylist": null,
+        "Store": "Woof Gang Hicksville, NY (#265)",
+        "Items": "FG / General / SM - 1.00000"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-01-20T14:26:41",
+          "Type": 2,
+          "SalesPerson": "Sophia Kurkowski",
+          "Stylist": null,
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "FG / General / SM - 1.00000"
+        }
+      ],
+      "totalVisit": 1,
+      "totalSales": 76.04
+    }
+  },
+  "datadump_customers_sample": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/datadump/v1/customers/7/0/2026-08-24/205993?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "pages",
+      "version"
+    ],
+    "nested_data_count": 11,
+    "nested_data_keys": [
+      "Address",
+      "CellPhone",
+      "City",
+      "CompanyId",
+      "CreationDate",
+      "CustomFieldValues",
+      "CustomerCode",
+      "CustomerId",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "IsAdmin",
+      "LastName",
+      "Membership",
+      "MembershipBalance",
+      "MembershipId",
+      "ModifiedDate",
+      "ParentCustomerId",
+      "Phone",
+      "StateProvinceId",
+      "ZipPostal"
+    ],
+    "nested_data_sample": [
+      {
+        "Address": null,
+        "CellPhone": "5163849262",
+        "City": null,
+        "CompanyId": 205993,
+        "CustomerId": 420123844,
+        "DateOfBirth": null,
+        "Email": "",
+        "FirstName": "Spanky",
+        "LastName": "",
+        "Membership": null,
+        "MembershipBalance": null,
+        "MembershipId": null,
+        "Phone": "",
+        "StateProvinceId": null,
+        "ZipPostal": null,
+        "IsAdmin": false,
+        "CreationDate": "2026-01-30T20:13:48",
+        "ModifiedDate": "2026-08-24T14:36:28",
+        "ParentCustomerId": 420123842,
+        "CustomerCode": null,
+        "CustomFieldValues": [
+          {
+            "id": 372,
+            "name": "1"
+          },
+          {
+            "id": 373,
+            "name": "3007"
+          },
+          {
+            "id": 377,
+            "name": "13.0"
+          },
+          {
+            "id": 375,
+            "name": "3"
+          },
+          {
+            "id": 376,
+            "name": null
+          },
+          {
+            "id": 378,
+            "name": "1"
+          },
+          {
+            "id": 379,
+            "name": "2"
+          },
+          {
+            "id": 6569,
+            "name": "false"
+          }
+        ]
+      },
+      {
+        "Address": null,
+        "CellPhone": "5164697007",
+        "City": null,
+        "CompanyId": 205993,
+        "CustomerId": 420217692,
+        "DateOfBirth": null,
+        "Email": "Daljitkaur22@aol.com",
+        "FirstName": "Harry",
+        "LastName": "Singh",
+        "Membership": null,
+        "MembershipBalance": null,
+        "MembershipId": null,
+        "Phone": "",
+        "StateProvinceId": null,
+        "ZipPostal": null,
+        "IsAdmin": false,
+        "CreationDate": "2026-03-11T00:27:34",
+        "ModifiedDate": "2026-08-24T15:13:54.22",
+        "ParentCustomerId": null,
+        "CustomerCode": null,
+        "CustomFieldValues": [
+          {
+            "id": 6136,
+            "name": "5167083344"
+          }
+        ]
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Address": null,
+          "CellPhone": "5163849262",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420123844,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Spanky",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-01-30T20:13:48",
+          "ModifiedDate": "2026-08-24T14:36:28",
+          "ParentCustomerId": 420123842,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "3007"
+            },
+            {
+              "id": 377,
+              "name": "13.0"
+            },
+            {
+              "id": 375,
+              "name": "3"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            },
+            {
+              "id": 6569,
+              "name": "false"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5164697007",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420217692,
+          "DateOfBirth": null,
+          "Email": "Daljitkaur22@aol.com",
+          "FirstName": "Harry",
+          "LastName": "Singh",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-03-11T00:27:34",
+          "ModifiedDate": "2026-08-24T15:13:54.22",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6136,
+              "name": "5167083344"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5169652138",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420373822,
+          "DateOfBirth": "2020-04-23T13:19:24",
+          "Email": "kpesonenrf@gmail.com",
+          "FirstName": "Maya",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-04-23T17:18:58",
+          "ModifiedDate": "2026-08-24T17:25:28",
+          "ParentCustomerId": 420373819,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "East Village AH"
+            },
+            {
+              "id": 6121,
+              "name": "American Bully mix"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 377,
+              "name": "63.0"
+            },
+            {
+              "id": 375,
+              "name": null
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "4"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            },
+            {
+              "id": 6569,
+              "name": "false"
+            },
+            {
+              "id": 380,
+              "name": "2029-04-29 12:51:07"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5165678891",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420470934,
+          "DateOfBirth": "2020-07-03T14:15:51",
+          "Email": "rothborts@gmail.com",
+          "FirstName": "Reggie",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-06-03T18:14:38",
+          "ModifiedDate": "2026-08-24T16:55:26",
+          "ParentCustomerId": 420470932,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "Manetto Hill AH"
+            },
+            {
+              "id": 6121,
+              "name": "French Bulldog"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "144"
+            },
+            {
+              "id": 377,
+              "name": "28.0"
+            },
+            {
+              "id": 375,
+              "name": "1"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            },
+            {
+              "id": 6569,
+              "name": "false"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5162382671",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420723772,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Cheryl",
+          "LastName": "Haberman",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T16:13:52",
+          "ModifiedDate": "2026-08-24T16:14:30",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5162382671",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420723773,
+          "DateOfBirth": "2018-08-24T12:15:21",
+          "Email": "",
+          "FirstName": "Zucc",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T16:14:30",
+          "ModifiedDate": "2026-08-24T16:16:12",
+          "ParentCustomerId": 420723772,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "Roslyn AH"
+            },
+            {
+              "id": 6121,
+              "name": "Cavilier"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 377,
+              "name": "17.0"
+            },
+            {
+              "id": 375,
+              "name": null
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5162410005",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420723886,
+          "DateOfBirth": null,
+          "Email": "Westock@aol.com",
+          "FirstName": "Enid",
+          "LastName": "Stock",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T16:45:16.54",
+          "ModifiedDate": "2026-08-24T16:45:16.587",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420723887,
+          "DateOfBirth": "2018-08-31T00:00:00",
+          "Email": "",
+          "FirstName": "Grotto",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T16:45:17.133",
+          "ModifiedDate": "2026-08-24T16:45:17.383",
+          "ParentCustomerId": 420723886,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "252"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "30"
+            },
+            {
+              "id": 380,
+              "name": "2028-06-16 00:00:00"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "9172709466",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420723913,
+          "DateOfBirth": null,
+          "Email": "Gerry_sammarco@hotmail.com",
+          "FirstName": "Gerry",
+          "LastName": "Sammarco",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T16:52:48.967",
+          "ModifiedDate": "2026-08-24T16:52:48.997",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420723914,
+          "DateOfBirth": "2025-07-05T00:00:00",
+          "Email": "",
+          "FirstName": "Teddy",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T16:52:49.263",
+          "ModifiedDate": "2026-08-24T16:52:49.387",
+          "ParentCustomerId": 420723913,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "3001"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "32"
+            },
+            {
+              "id": 380,
+              "name": ""
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5166555321",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420724464,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Linda",
+          "LastName": "Pincus",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-24T19:29:57",
+          "ModifiedDate": "2026-08-24T19:30:46",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        }
+      ],
+      "pages": 1,
+      "version": 742100468
+    }
+  }
+}
