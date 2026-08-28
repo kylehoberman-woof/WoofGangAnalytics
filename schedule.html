@@ -270,7 +270,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         <option value="bather">Bathers</option>
         <option value="retail">Retail & Managers</option>
       </select>
-      <button class="action-btn" onclick="fillRecurring()">⟳ Fill Recurring</button>
+      <button class="action-btn" onclick="fillRecurring(false)">⟳ Fill Recurring</button>
+      <button class="action-btn" onclick="fillRecurring(true)" title="Replace existing shifts with default schedule times">⟳ Overwrite Existing</button>
       <button class="action-btn" onclick="copyLastWeek()">↩ Copy Last Week</button>
     </div>
   </div>
@@ -999,12 +1000,12 @@ function copyLastWeek(){
   }).catch(function(){endLoad();showToast('Copy failed','error');});
 }
 
-function fillRecurring(){
+function fillRecurring(overwrite){
   if(currentStore==='all'){showToast('Switch to a specific store to fill shifts','error');return;}
   var today=new Date(), monday=getMonday(today);
   var ws=addDays(monday,weekOffset*7);
   var wkLetter=weekLetterFor(ws);  // "A" or "B" for the week being filled
-  var posts=[];
+  var posts=[], deletes=[];
   var skippedBiweekly=0;
 
   storeEmployees().forEach(function(e){
@@ -1015,29 +1016,40 @@ function fillRecurring(){
       var entries=Array.isArray(r)?r:[r];
       var iso=toISO(addDays(ws,i));
       if(isHoliday(iso)) return;
-      // Bi-weekly filter uses first entry's weeks value (applies to whole day)
       var rWeeks=(entries[0].weeks)||'all';
       if(rWeeks!=='all' && rWeeks!==wkLetter){ skippedBiweekly++; return; }
       entries.forEach(function(entry){
         var shiftStoreCheck=entry.store||currentStore;
         if(isClosed(shiftStoreCheck,iso)) return;
         var allExisting=(shifts[iso]||[]).concat(otherShifts[iso]||[]);
-        var dup=allExisting.some(function(x){return sEmpId(x)===e.id&&(x.store||currentStore)===shiftStoreCheck;});
-        if(!dup) posts.push({emp_id:e.id,store:shiftStoreCheck,shift_date:iso,start_time:entry.start,end_time:entry.end,notes:''});
+        var existing=allExisting.filter(function(x){return sEmpId(x)===e.id&&(x.store||currentStore)===shiftStoreCheck;});
+        if(existing.length){
+          if(overwrite){
+            // Replace: delete old shift(s) and add the new one
+            existing.forEach(function(x){deletes.push(x.id);});
+            posts.push({emp_id:e.id,store:shiftStoreCheck,shift_date:iso,start_time:entry.start,end_time:entry.end,notes:''});
+          }
+          // else skip (original behaviour)
+        } else {
+          posts.push({emp_id:e.id,store:shiftStoreCheck,shift_date:iso,start_time:entry.start,end_time:entry.end,notes:''});
+        }
       });
     });
   });
 
-  if(!posts.length){
+  if(!posts.length && !deletes.length){
     var msg=skippedBiweekly>0?'No recurring shifts to fill (Week '+wkLetter+' — '+skippedBiweekly+' bi-weekly skipped)':'No recurring shifts to fill';
     showToast(msg);return;
   }
   startLoad();
-  Promise.all(posts.map(function(p){return sbPost('schedule_shifts',p);})).then(function(){
+  var ops=deletes.map(function(id){return sbDelete('schedule_shifts','id=eq.'+id);})
+    .concat(posts.map(function(p){return sbPost('schedule_shifts',p);}));
+  Promise.all(ops).then(function(){
     endLoad();
     renderWeek();
     var wkNote=skippedBiweekly>0?' (Week '+wkLetter+')':'';
-    showToast(posts.length+' shift'+(posts.length!==1?'s':'')+' filled'+wkNote);
+    var msg=posts.length+' shift'+(posts.length!==1?'s':'')+' filled'+(deletes.length?' ('+deletes.length+' replaced)':'')+wkNote;
+    showToast(msg);
   }).catch(function(){endLoad();showToast('Fill failed','error');});
 }
 
