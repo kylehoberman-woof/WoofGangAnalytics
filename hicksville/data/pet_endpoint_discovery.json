@@ -504,7 +504,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 6,
+    "nested_data_count": 18,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -531,36 +531,41 @@
     "nested_data_sample": [
       {
         "Address": null,
-        "CellPhone": "6178880045",
+        "CellPhone": "5163828627",
         "City": null,
         "CompanyId": 205993,
-        "CustomerId": 420398751,
+        "CustomerId": 420028916,
         "DateOfBirth": null,
-        "Email": "catalinachew@yahoo.com",
-        "FirstName": "Catalina",
-        "LastName": "Chew",
+        "Email": "",
+        "FirstName": "Patricia",
+        "LastName": "Marks",
         "Membership": null,
         "MembershipBalance": null,
         "MembershipId": null,
-        "Phone": "6178880045",
-        "StateProvinceId": null,
+        "Phone": "",
+        "StateProvinceId": 41,
         "ZipPostal": null,
         "IsAdmin": false,
-        "CreationDate": "2026-05-05T15:08:22",
-        "ModifiedDate": "2026-08-30T17:29:23.717",
+        "CreationDate": "2025-12-19T19:39:08",
+        "ModifiedDate": "2026-08-31T19:58:40",
         "ParentCustomerId": null,
         "CustomerCode": null,
-        "CustomFieldValues": []
+        "CustomFieldValues": [
+          {
+            "id": 6136,
+            "name": ""
+          }
+        ]
       },
       {
         "Address": null,
-        "CellPhone": "5165519471",
+        "CellPhone": "5163828627",
         "City": null,
         "CompanyId": 205993,
-        "CustomerId": 420851231,
+        "CustomerId": 420028917,
         "DateOfBirth": null,
-        "Email": "kenknudsen41@yahoo.com",
-        "FirstName": "Hunter ",
+        "Email": "",
+        "FirstName": "Charlie",
         "LastName": "",
         "Membership": null,
         "MembershipBalance": null,
@@ -569,9 +574,9 @@
         "StateProvinceId": null,
         "ZipPostal": null,
         "IsAdmin": false,
-        "CreationDate": "2026-08-27T21:19:58",
-        "ModifiedDate": "2026-08-30T15:35:28",
-        "ParentCustomerId": 420851230,
+        "CreationDate": "2025-12-19T19:39:45",
+        "ModifiedDate": "2026-08-31T19:54:48",
+        "ParentCustomerId": 420028916,
         "CustomerCode": null,
         "CustomFieldValues": [
           {
@@ -580,15 +585,7 @@
           },
           {
             "id": 373,
-            "name": "110"
-          },
-          {
-            "id": 374,
-            "name": "-1"
-          },
-          {
-            "id": 377,
-            "name": "16"
+            "name": "3001"
           },
           {
             "id": 375,
@@ -600,7 +597,7 @@
           },
           {
             "id": 378,
-            "name": "1"
+            "name": "2"
           },
           {
             "id": 379,
@@ -609,6 +606,14 @@
           {
             "id": 6569,
             "name": "false"
+          },
+          {
+            "id": 377,
+            "name": "35.0"
+          },
+          {
+            "id": 380,
+            "name": "2027-03-16 14:05:59"
           }
         ]
       }
@@ -616,6 +621,138 @@
     "sample": {
       "isSuccess": true,
       "data": [
+        {
+          "Address": null,
+          "CellPhone": "5163828627",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420028916,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Patricia",
+          "LastName": "Marks",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2025-12-19T19:39:08",
+          "ModifiedDate": "2026-08-31T19:58:40",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6136,
+              "name": ""
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5163828627",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420028917,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Charlie",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2025-12-19T19:39:45",
+          "ModifiedDate": "2026-08-31T19:54:48",
+          "ParentCustomerId": 420028916,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "3001"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            },
+            {
+              "id": 6569,
+              "name": "false"
+            },
+            {
+              "id": 377,
+              "name": "35.0"
+            },
+            {
+              "id": 380,
+              "name": "2027-03-16 14:05:59"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5162978804",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420245755,
+          "DateOfBirth": null,
+          "Email": "beach9@optonline.net",
+          "FirstName": "Marc",
+          "LastName": "Eisenoff",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "5162978804",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-03-18T16:44:19",
+          "ModifiedDate": "2026-08-31T22:45:02.123",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6115,
+              "name": "5168222341- landline"
+            },
+            {
+              "id": 6136,
+              "name": ""
+            },
+            {
+              "id": 6137,
+              "name": ""
+            },
+            {
+              "id": 6138,
+              "name": ""
+            },
+            {
+              "id": 8038,
+              "name": ""
+            }
+          ]
+        },
         {
           "Address": null,
           "CellPhone": "6178880045",
@@ -635,6 +772,29 @@
           "IsAdmin": false,
           "CreationDate": "2026-05-05T15:08:22",
           "ModifiedDate": "2026-08-30T17:29:23.717",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5163041577",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420513150,
+          "DateOfBirth": null,
+          "Email": "ysehgal51@gmail.com",
+          "FirstName": "Yash",
+          "LastName": "Sehgal",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "5163041577",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-06-24T17:30:29",
+          "ModifiedDate": "2026-08-31T18:57:10.473",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
@@ -696,6 +856,66 @@
             {
               "id": 6569,
               "name": "false"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "6465677470",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420854691,
+          "DateOfBirth": null,
+          "Email": "desireebennetthowell@gmail.com",
+          "FirstName": "Benito",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-29T16:08:22",
+          "ModifiedDate": "2026-08-31T12:56:39",
+          "ParentCustomerId": 420854687,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "249"
+            },
+            {
+              "id": 377,
+              "name": "14.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            },
+            {
+              "id": 6569,
+              "name": "false"
+            },
+            {
+              "id": 380,
+              "name": "2026-12-20 08:56:28"
             }
           ]
         },
@@ -889,10 +1109,336 @@
               "name": "3"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5168571813",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420858171,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Donna",
+          "LastName": "Lima",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-31T15:14:27",
+          "ModifiedDate": "2026-08-31T15:14:44",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5168571813",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420858172,
+          "DateOfBirth": "2018-08-31T11:15:05",
+          "Email": "",
+          "FirstName": "Brooke",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-31T15:14:44",
+          "ModifiedDate": "2026-08-31T15:15:35",
+          "ParentCustomerId": 420858171,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "Levittown AH"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "208"
+            },
+            {
+              "id": 377,
+              "name": "10.0"
+            },
+            {
+              "id": 375,
+              "name": "3"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5167790681",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420858541,
+          "DateOfBirth": null,
+          "Email": "kiratbal25@gmail.com",
+          "FirstName": "Snacks",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-31T17:04:16.047",
+          "ModifiedDate": "2026-08-31T17:04:41.67",
+          "ParentCustomerId": 420512626,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "343"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "10"
+            },
+            {
+              "id": 375,
+              "name": "3"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5163227195",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420858760,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Suzana",
+          "LastName": "Chandler",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-31T18:07:03",
+          "ModifiedDate": "2026-08-31T18:07:26",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5163227195",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420858761,
+          "DateOfBirth": "2023-08-31T14:08:04",
+          "Email": "",
+          "FirstName": "Coco",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-31T18:07:26",
+          "ModifiedDate": "2026-08-31T18:08:22",
+          "ParentCustomerId": 420858760,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "West Hills AH"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "169"
+            },
+            {
+              "id": 377,
+              "name": "14.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5163041577",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420858903,
+          "DateOfBirth": "2022-10-31T00:00:00",
+          "Email": "ysehgal51@gmail.com",
+          "FirstName": "Simba Sehgal",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-31T18:57:10.707",
+          "ModifiedDate": "2026-08-31T18:57:10.88",
+          "ParentCustomerId": 420513150,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "293"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "14"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5163041577",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420858907,
+          "DateOfBirth": "2024-05-21T00:00:00",
+          "Email": "ysehgal51@gmail.com",
+          "FirstName": "Sona Sehgal",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-08-31T18:57:17.067",
+          "ModifiedDate": "2026-08-31T18:57:17.363",
+          "ParentCustomerId": 420513150,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "293"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "14"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 751166601
+      "version": 752426705
     }
   }
 }
