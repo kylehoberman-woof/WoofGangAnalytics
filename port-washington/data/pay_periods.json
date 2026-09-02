@@ -2,13 +2,13 @@
   "periods": {
     "pp_0": {
       "Alyson D": {
-        "rev": 470.0,
+        "rev": 955.0,
         "disc": 0,
-        "comm": 235.0,
-        "paid": 235.0,
-        "tips": 79.2,
-        "total": 314.2,
-        "working_days": 1,
+        "comm": 477.5,
+        "paid": 477.5,
+        "tips": 146.2,
+        "total": 623.7,
+        "working_days": 2,
         "guar_days": 0,
         "daily": [
           {
@@ -19,6 +19,16 @@
             "paid": 235.0,
             "tips": 79.2,
             "total": 314.2,
+            "guar_applied": false
+          },
+          {
+            "date": "2026-09-01",
+            "rev": 485.0,
+            "disc": 0,
+            "comm": 242.5,
+            "paid": 242.5,
+            "tips": 67.0,
+            "total": 309.5,
             "guar_applied": false
           }
         ]
@@ -35,15 +45,26 @@
         "daily": []
       },
       "Danielle L": {
-        "rev": 0,
+        "rev": 550.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "comm": 275.0,
+        "paid": 275.0,
+        "tips": 98.0,
+        "total": 373.0,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-09-01",
+            "rev": 550.0,
+            "disc": 0,
+            "comm": 275.0,
+            "paid": 275.0,
+            "tips": 98.0,
+            "total": 373.0,
+            "guar_applied": false
+          }
+        ]
       },
       "Ingrid R": {
         "rev": 0,
@@ -122,6 +143,50 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 435.0,
+        "disc": 0,
+        "comm": 217.5,
+        "paid": 217.5,
+        "tips": 79.8,
+        "total": 297.3,
+        "working_days": 1,
+        "guar_days": 0,
+        "daily": [
+          {
+            "date": "2026-09-01",
+            "rev": 435.0,
+            "disc": 0,
+            "comm": 217.5,
+            "paid": 217.5,
+            "tips": 79.8,
+            "total": 297.3,
+            "guar_applied": false
+          }
+        ]
+      },
+      "Kathleen H. ": {
+        "rev": 235.0,
+        "disc": 0,
+        "comm": 117.5,
+        "paid": 117.5,
+        "tips": 54.25,
+        "total": 171.75,
+        "working_days": 1,
+        "guar_days": 0,
+        "daily": [
+          {
+            "date": "2026-09-01",
+            "rev": 235.0,
+            "disc": 0,
+            "comm": 117.5,
+            "paid": 117.5,
+            "tips": 54.25,
+            "total": 171.75,
+            "guar_applied": false
+          }
+        ]
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -134,13 +199,13 @@
         "daily": []
       },
       "Maria C": {
-        "rev": 505.0,
+        "rev": 975.0,
         "disc": 0,
-        "comm": 252.5,
-        "paid": 252.5,
-        "tips": 72.0,
-        "total": 324.5,
-        "working_days": 1,
+        "comm": 487.5,
+        "paid": 487.5,
+        "tips": 128.5,
+        "total": 616.0,
+        "working_days": 2,
         "guar_days": 0,
         "daily": [
           {
@@ -151,6 +216,16 @@
             "paid": 252.5,
             "tips": 72.0,
             "total": 324.5,
+            "guar_applied": false
+          },
+          {
+            "date": "2026-09-01",
+            "rev": 470.0,
+            "disc": 0,
+            "comm": 235.0,
+            "paid": 235.0,
+            "tips": 56.5,
+            "total": 291.5,
             "guar_applied": false
           }
         ]
@@ -200,15 +275,26 @@
         ]
       },
       "Paige F": {
-        "rev": 0,
+        "rev": 580.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "comm": 290.0,
+        "paid": 290.0,
+        "tips": 95.0,
+        "total": 385.0,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-09-01",
+            "rev": 580.0,
+            "disc": 0,
+            "comm": 290.0,
+            "paid": 290.0,
+            "tips": 95.0,
+            "total": 385.0,
+            "guar_applied": false
+          }
+        ]
       },
       "Stacey W": {
         "rev": 0,
@@ -298,10 +384,12 @@
         }
       },
       "_retail_pay": {
-        "Hailey": 206.43
+        "Hailey": 206.43,
+        "Trinity": 103.32
       },
       "_retail_hours": {
-        "Hailey": 9.83
+        "Hailey": 9.83,
+        "Trinity": 4.92
       },
       "_retail_daily": {
         "Hailey": [
@@ -309,10 +397,17 @@
             "date": "2026-08-31",
             "hours": 9.83
           }
+        ],
+        "Trinity": [
+          {
+            "date": "2026-09-01",
+            "hours": 4.92
+          }
         ]
       },
       "_retail_rates": {
-        "Hailey": 21.0
+        "Hailey": 21.0,
+        "Trinity": 21.0
       }
     },
     "pp_1": {
@@ -568,6 +663,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -1222,6 +1339,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -1933,6 +2072,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -2630,6 +2791,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -3283,6 +3466,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -3965,6 +4170,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -4548,6 +4775,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -5209,6 +5458,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -5857,6 +6128,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -6614,6 +6907,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -7664,6 +7979,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -8659,6 +8996,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -9672,6 +10031,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -10657,6 +11038,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -11631,6 +12034,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -12658,6 +13083,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -13684,6 +14131,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 640.0,
@@ -14757,6 +15226,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 1355.0,
@@ -15833,6 +16324,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -16868,6 +17381,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -17855,6 +18390,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -18883,6 +19440,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -19798,6 +20377,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -20770,6 +21371,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -21761,6 +22384,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -22736,6 +23381,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -23756,6 +24423,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -24804,6 +25493,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -25789,6 +26500,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -26710,6 +27443,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -27615,6 +28370,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -28465,6 +29242,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -29419,6 +30218,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -30416,6 +31237,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -31354,6 +32197,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -32267,6 +33132,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -33164,6 +34051,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -33996,6 +34905,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -34773,6 +35704,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -35546,6 +36499,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -36272,6 +37247,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -37021,6 +38018,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -37785,6 +38804,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -38500,6 +39541,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -39191,6 +40254,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -39838,6 +40923,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -40518,6 +41625,28 @@
             "guar_applied": false
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -41214,6 +42343,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -41889,6 +43040,28 @@
             "guar_applied": true
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -42585,6 +43758,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -43271,6 +44466,28 @@
             "guar_applied": true
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -43993,6 +45210,28 @@
             "guar_applied": true
           }
         ]
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
       },
       "Kimberly S": {
         "rev": 0,
@@ -44723,6 +45962,28 @@
           }
         ]
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -45448,6 +46709,28 @@
         "guar_days": 0,
         "daily": []
       },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
       "Kimberly S": {
         "rev": 0,
         "disc": 0,
@@ -46033,6 +47316,28 @@
         ]
       },
       "Joyce P": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Kathleen H. ": {
         "rev": 0,
         "disc": 0,
         "comm": 0,
