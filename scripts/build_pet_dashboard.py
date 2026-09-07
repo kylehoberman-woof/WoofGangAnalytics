@@ -240,9 +240,35 @@ top_pets = sorted(
 # ── Lapsed / At-Risk dogs ─────────────────────────────────────────────────────
 # For each pet with ≥3 visits, compute average interval between visits.
 # Flag as At Risk if days_since_last > 1.5x avg interval, Lapsed if > 2x.
+
+# FranPOS's customer-history feed mixes real appointments in with internal
+# groomer notes (clipper settings, scheduling asides, "Ok'd by Cindy", etc.) —
+# there's no clean flag for it, so classify by shape: a real appointment
+# almost always has a groomer assigned or a breed_group/size tag, or its text
+# names a known service. Free-text notes typically have none of those.
+_SERVICE_KEYWORDS = (
+    "full groom", "lux bath", "bath", "trim", "nail", "groom", "spa",
+    "teeth", "gland", "deshed", "de-shed", "online service", "brush",
+    "blowout", "add-on", "mini",
+)
+_SERVICE_CODE_RE = re.compile(r"\bfg\b", re.IGNORECASE)
+
+def _is_real_appointment(v):
+    if v.get("stylist"):
+        return True
+    if v.get("size"):
+        # breed_group is not used as a signal on its own — groomer notes
+        # frequently land in that field too (delimiter-parsing artifact),
+        # but "size" reliably stays a real SM/MD/LG/XL-style code.
+        return True
+    text = ((v.get("service") or "") + " " + (v.get("items_raw") or "")).lower()
+    if _SERVICE_CODE_RE.search(text):
+        return True
+    return any(k in text for k in _SERVICE_KEYWORDS)
+
 today_date = date.today()
 lapsed_dogs = []
-lapse_history = {}  # pet_cid → list of past visits, for the click-through detail modal
+lapse_history = {}  # pet_cid → {"appointments": [...], "notes": [...]}, for the click-through detail modal
 
 today_iso = today_date.isoformat()
 
@@ -305,15 +331,24 @@ for rec in pet_records:
         "ratio": ratio,
     })
 
-    lapse_history[str(rec.get("pet_cid", ""))] = [
-        {
-            "date": v.get("date", ""),
-            "service": v.get("service", "") or v.get("items_raw", ""),
-            "size": v.get("size", ""),
-            "groomer": v.get("stylist", ""),
-        }
-        for v in visits[:25]
-    ]
+    lapse_history[str(rec.get("pet_cid", ""))] = {
+        "appointments": [
+            {
+                "date": v.get("date", ""),
+                "service": v.get("service", "") or v.get("items_raw", ""),
+                "size": v.get("size", ""),
+                "groomer": v.get("stylist", ""),
+            }
+            for v in visits[:25] if _is_real_appointment(v)
+        ],
+        "notes": [
+            {
+                "date": v.get("date", ""),
+                "text": v.get("service", "") or v.get("items_raw", ""),
+            }
+            for v in visits[:25] if not _is_real_appointment(v)
+        ],
+    }
 
 # Sort: lapsed first, then by days overdue descending
 lapsed_dogs.sort(key=lambda x: (-("Lapsed" in x["status"]), -x["days_overdue"]))
@@ -428,6 +463,9 @@ LAPSE_CSS = """
   .lc-saved-indicator { font-size:12px; color:#16a34a; }
   .lc-history-table th, .lc-history-table td { font-size:12px; padding:6px 10px; }
   .lc-history-empty { color:#999; text-align:center; padding:16px; font-size:13px; }
+  .lc-history-note { font-size:12px; color:var(--text); padding:6px 0; border-bottom:1px solid var(--border); }
+  .lc-history-note:last-child { border-bottom:none; }
+  .lc-history-note-date { color:var(--muted); font-weight:600; margin-right:6px; }
 """
 
 LAPSE_JS = """
@@ -513,13 +551,23 @@ function openLapseDetail(cid){
   document.getElementById('lc-m-notes').value = rec.notes || '';
   document.getElementById('lc-m-indicator').textContent = '';
 
-  var hist = PET_HISTORY[cid] || [];
+  var hist = PET_HISTORY[cid] || {appointments: [], notes: []};
+  var appts = hist.appointments || [];
+  var notes = hist.notes || [];
+
   var body = document.getElementById('lc-modal-history');
-  body.innerHTML = hist.length
-    ? hist.map(function(v){
+  body.innerHTML = appts.length
+    ? appts.map(function(v){
         return '<tr><td>' + lcEsc(v.date) + '</td><td>' + lcEsc(v.service) + '</td><td>' + lcEsc(v.size) + '</td><td>' + lcEsc(v.groomer) + '</td></tr>';
       }).join('')
     : '<tr><td colspan=4 class="lc-history-empty">No visit history on file</td></tr>';
+
+  var notesEl = document.getElementById('lc-modal-notes');
+  notesEl.innerHTML = notes.length
+    ? notes.map(function(n){
+        return '<div class="lc-history-note"><span class="lc-history-note-date">' + lcEsc(n.date) + '</span> ' + lcEsc(n.text) + '</div>';
+      }).join('')
+    : '<div class="lc-history-empty">No notes on file</div>';
 
   document.getElementById('lc-modal-overlay').classList.add('active');
 }
@@ -757,6 +805,10 @@ html = f"""<!DOCTYPE html>
         <tbody id="lc-modal-history"></tbody>
       </table>
       </div>
+    </div>
+    <div class="lc-modal-section">
+      <h3>Notes</h3>
+      <div id="lc-modal-notes"></div>
     </div>
   </div>
 </div>
