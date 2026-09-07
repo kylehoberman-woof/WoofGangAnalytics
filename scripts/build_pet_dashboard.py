@@ -532,29 +532,37 @@ function loadLapseCalls(){
 }
 
 // Complaint records only carry a free-text customer name (no reliable pet_cid
-// link), so match against a dog's owner_name by shared name tokens rather
-// than an exact key. Loose on purpose — associates see the actual complaint
-// text and can judge for themselves whether it's the same customer.
+// link), so match against a dog's owner_name by last name rather than an
+// exact key — matching on ANY shared name word (including first names) is
+// too loose: "Nicole Goldberg" and an unrelated "Nicole Ortolano" complaint
+// would collide on "Nicole" alone. Last name is a narrower, more reliable
+// signal. Still shown with the complaint's own customer_name in the UI so
+// an associate can catch the rare same-surname, different-family case.
 var lcComplaints = [];
 
 function lcNameTokens(s){
   return (String(s||'').toLowerCase().match(/[a-z]+/g) || []).filter(function(t){ return t.length >= 3; });
 }
 
+function lcLastToken(s){
+  var toks = lcNameTokens(s);
+  return toks.length ? toks[toks.length - 1] : '';
+}
+
 function loadComplaints(){
   lcGet('/customer_complaints?store=eq.'+encodeURIComponent(LC_STORE)+'&select=customer_name,date,category,description,resolution,status&order=date.desc').then(function(rows){
     lcComplaints = (Array.isArray(rows) ? rows : []).map(function(c){
-      return {rec: c, tokens: lcNameTokens(c.customer_name)};
-    }).filter(function(c){ return c.tokens.length > 0; });
+      return {rec: c, lastToken: lcLastToken(c.customer_name)};
+    }).filter(function(c){ return c.lastToken; });
     flagComplaintRows();
   }).catch(function(){});
 }
 
 function complaintsForOwner(ownerName){
-  var ownerToks = lcNameTokens(ownerName);
-  if(!ownerToks.length) return [];
+  var ownerLast = lcLastToken(ownerName);
+  if(!ownerLast) return [];
   return lcComplaints.filter(function(c){
-    return c.tokens.some(function(t){ return ownerToks.indexOf(t) !== -1; });
+    return c.lastToken === ownerLast;
   }).map(function(c){ return c.rec; });
 }
 
@@ -605,7 +613,7 @@ function openLapseDetail(cid){
   if(complaints.length){
     document.getElementById('lc-modal-complaints').innerHTML = complaints.map(function(c){
       return '<div class="lc-complaint-card">'
-        + '<div class="lc-complaint-meta"><span>' + lcEsc(c.date || '') + ' · ' + lcEsc(c.category || '') + '</span><span>' + lcEsc(c.status || '') + '</span></div>'
+        + '<div class="lc-complaint-meta"><span>' + lcEsc(c.date || '') + ' · ' + lcEsc(c.category || '') + ' · on file for ' + lcEsc(c.customer_name || 'unknown') + '</span><span>' + lcEsc(c.status || '') + '</span></div>'
         + '<div class="lc-complaint-desc">' + lcEsc(c.description || '') + '</div>'
         + (c.resolution ? '<div class="lc-complaint-res">Resolution: ' + lcEsc(c.resolution) + '</div>' : '')
         + '</div>';
