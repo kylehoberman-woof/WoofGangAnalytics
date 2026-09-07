@@ -335,7 +335,7 @@ for rec in pet_records:
 
     status = "Lapsed" if ratio >= 2.0 else "At Risk"
     days_overdue = int(days_since - avg_interval)
-    preferred_groomer = visits[0].get("stylist", "") or ""
+    last_groomer = visits[0].get("stylist", "") or ""
 
     lapsed_dogs.append({
         "pet_cid": str(rec.get("pet_cid", "")),
@@ -348,7 +348,7 @@ for rec in pet_records:
         "avg_interval": round(avg_interval),
         "visit_count": len(visits),
         "status": status,
-        "preferred_groomer": preferred_groomer,
+        "last_groomer": last_groomer,
         "last_service": visits[0].get("service", ""),
         "size": visits[0].get("size", ""),
         "ratio": ratio,
@@ -446,7 +446,7 @@ for d in lapsed_dogs:
         <td style="color:{status_color};font-weight:700">{d['status']}</td>
         <td>{d['last_visit']}<br><small style="color:var(--muted)">{d['days_since']}d ago</small></td>
         <td>{freq_str}<br><small style="color:{status_color}">{d['days_overdue']}d overdue</small></td>
-        <td><small>{esc(d['preferred_groomer'])}</small></td>
+        <td><small>{esc(d['last_groomer'])}</small></td>
         <td>{d['visit_count']}</td>
         <td class="lapse-log-cell">
           <button class="lc-log-btn" onclick="openLapseDetail('{cid}')">Log call</button>
@@ -877,7 +877,7 @@ html = f"""<!DOCTYPE html>
     </div>
     <div style="overflow-x:auto">
     <table>
-      <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Usual Groomer</th><th>Visits</th><th>Call Log</th></tr></thead>
+      <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Last Groomer</th><th>Visits</th><th>Call Log</th></tr></thead>
       <tbody id="lc-tbody">{''.join(winback_rows) if winback_rows else '<tr><td colspan=8 style="color:#999;text-align:center;padding:24px">No lapsed or at-risk dogs</td></tr>'}</tbody>
     </table>
     </div>
