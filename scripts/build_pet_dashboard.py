@@ -296,55 +296,63 @@ for rec in pet_records:
         for name in _pet_name_variants(rec.get("pet_name", "")):
             owners_with_future_pet.add((owner, name))
 
+# Plain duplicate accounts: 1,855 (owner, pet name) pairs in Port
+# Washington alone have MORE THAN ONE FranPOS pet_cid for what's clearly
+# the same dog — same owner, identical name, history just split across
+# accounts however FranPOS happened to create them. Processing each cid
+# independently means the real last-visit date, the real groomer, or a
+# future booking can end up sitting on a sibling account we never look
+# at. Merge every non-comma record sharing (owner_name, pet_name) into
+# one group before computing anything.
+individual_groups = defaultdict(list)  # (owner_name, pet_name) -> [records]
+combined_records = []
+for rec in pet_records:
+    name = (rec.get("pet_name") or "").strip()
+    if "," in name:
+        combined_records.append(rec)
+    else:
+        individual_groups[(rec.get("owner_name", ""), name)].append(rec)
+
+individual_pet_names = set(individual_groups.keys())
+
 # A combined multi-pet account ("Lucy, Mason") almost always duplicates
 # individual accounts that already exist for each name under the same
 # owner — in Port Washington 384 of 385 combined accounts are fully
-# redundant this way. Skip a combined account entirely once every one of
-# its names already has its own individual (owner, name) record; only the
-# names that DON'T have one of their own get split out as their own line
-# item, so a genuinely orphaned combined account still shows each pet.
-individual_pet_names = {
-    (rec.get("owner_name", ""), (rec.get("pet_name", "") or "").strip())
-    for rec in pet_records
-    if "," not in (rec.get("pet_name") or "")
-}
+# redundant this way. Skip it entirely once every one of its names
+# already has its own individual group; otherwise fold its visits into
+# the group(s) for the name(s) that don't, so a genuinely orphaned
+# combined account still contributes (and still shows as its own line
+# item once split per name below).
+for rec in combined_records:
+    owner = rec.get("owner_name", "")
+    names = [n.strip() for n in (rec.get("pet_name") or "").split(",") if n.strip()]
+    for n in names:
+        if (owner, n) not in individual_pet_names:
+            individual_groups[(owner, n)].append(rec)
 
-for rec in pet_records:
-    all_dated_visits = [v for v in rec.get("visits", []) if v.get("date")]
+for (owner_name_, pet_name_), group_records in individual_groups.items():
+    all_dated_visits = []
+    for rec in group_records:
+        all_dated_visits.extend(v for v in rec.get("visits", []) if v.get("date"))
+    all_dated_visits.sort(key=lambda v: v["date"], reverse=True)
+
     # Retail purchases (treats, food, shampoo) and internal notes ride along
     # in the same history feed as real grooming appointments — last-visit
     # and cadence are service-based only, not "last time they bought
     # something here."
     real_visits = [v for v in all_dated_visits if _is_real_appointment(v)]
-    owner_name_ = rec.get("owner_name", "")
-    raw_pet_name = (rec.get("pet_name", "") or "").strip()
-    has_future_sibling = any(
-        (owner_name_, name) in owners_with_future_pet
-        for name in _pet_name_variants(raw_pet_name)
-    )
+    has_future_sibling = (owner_name_, pet_name_) in owners_with_future_pet
 
     # Already has something on the books — no outreach needed regardless of
-    # how overdue their past visit history looks. Checked both on this exact
-    # account and any sibling account for the same owner+pet name.
+    # how overdue their past visit history looks. Checked both against this
+    # merged group's own visits and any redundant combined-account sibling
+    # that wasn't folded in above (still needs to count for exclusion).
     if any(v["date"] > today_iso for v in real_visits) or has_future_sibling:
         continue
 
-    visits = real_visits  # past/completed real-service visits only, from here on
+    visits = [v for v in real_visits if v["date"] <= today_iso]
     if len(visits) < 1:
         continue
-
-    # Combined multi-pet account ("Lucy, Mason") — skip entirely if every
-    # name already has its own individual account (the normal case, and
-    # where the real per-dog data lives); otherwise split out only the
-    # name(s) that don't, so a genuinely orphaned combined account still
-    # surfaces each dog as its own line item.
-    if "," in raw_pet_name:
-        names = [n.strip() for n in raw_pet_name.split(",") if n.strip()]
-        display_names = [n for n in names if (owner_name_, n) not in individual_pet_names]
-        if not display_names:
-            continue
-    else:
-        display_names = [raw_pet_name]
 
     last_visit_str = visits[0]["date"]
     days_since = (today_date - date.fromisoformat(last_visit_str)).days
@@ -408,27 +416,29 @@ for rec in pet_records:
         for v in all_dated_visits[:25] if not _is_real_appointment(v)
     ]
 
-    base_cid = str(rec.get("pet_cid", ""))
-    for i, display_name in enumerate(display_names):
-        cid = base_cid if len(display_names) == 1 else f"{base_cid}-{i}"
-        lapsed_dogs.append({
-            "pet_cid": cid,
-            "pet_name": display_name,
-            "owner_name": owner_name_,
-            "owner_phone": rec.get("owner_phone", ""),
-            "last_visit": last_visit_str,
-            "days_since": days_since,
-            "days_overdue": days_overdue,
-            "avg_interval": round(avg_interval) if avg_interval is not None else None,
-            "visit_count": len(visits),
-            "status": status,
-            "last_groomer": last_groomer,
-            "last_groomer_confirmed": last_groomer_confirmed,
-            "last_service": visits[0].get("service", ""),
-            "size": visits[0].get("size", ""),
-            "ratio": ratio,
-        })
-        lapse_history[cid] = {"appointments": appointments_history, "notes": notes_history}
+    # Stable representative cid for the merged group — smallest contributing
+    # pet_cid, so it's deterministic across rebuilds regardless of dict order.
+    cid = str(min(rec.get("pet_cid", 0) for rec in group_records))
+    owner_phone = next((rec.get("owner_phone", "") for rec in group_records if rec.get("owner_phone")), "")
+
+    lapsed_dogs.append({
+        "pet_cid": cid,
+        "pet_name": pet_name_,
+        "owner_name": owner_name_,
+        "owner_phone": owner_phone,
+        "last_visit": last_visit_str,
+        "days_since": days_since,
+        "days_overdue": days_overdue,
+        "avg_interval": round(avg_interval) if avg_interval is not None else None,
+        "visit_count": len(visits),
+        "status": status,
+        "last_groomer": last_groomer,
+        "last_groomer_confirmed": last_groomer_confirmed,
+        "last_service": visits[0].get("service", ""),
+        "size": visits[0].get("size", ""),
+        "ratio": ratio,
+    })
+    lapse_history[cid] = {"appointments": appointments_history, "notes": notes_history}
 
 # Sort: lapsed first, then by days overdue descending
 lapsed_dogs.sort(key=lambda x: -x["days_since"])
