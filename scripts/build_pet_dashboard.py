@@ -291,13 +291,18 @@ def _pet_name_variants(pet_name):
 
 owners_with_future_pet = set()
 for rec in pet_records:
-    if any(v.get("date", "") > today_iso for v in rec.get("visits", [])):
+    if any(v.get("date", "") > today_iso for v in rec.get("visits", []) if _is_real_appointment(v)):
         owner = rec.get("owner_name", "")
         for name in _pet_name_variants(rec.get("pet_name", "")):
             owners_with_future_pet.add((owner, name))
 
 for rec in pet_records:
     all_dated_visits = [v for v in rec.get("visits", []) if v.get("date")]
+    # Retail purchases (treats, food, shampoo) and internal notes ride along
+    # in the same history feed as real grooming appointments — last-visit
+    # and cadence are service-based only, not "last time they bought
+    # something here."
+    real_visits = [v for v in all_dated_visits if _is_real_appointment(v)]
     owner_name_ = rec.get("owner_name", "")
     has_future_sibling = any(
         (owner_name_, name) in owners_with_future_pet
@@ -307,10 +312,10 @@ for rec in pet_records:
     # Already has something on the books — no outreach needed regardless of
     # how overdue their past visit history looks. Checked both on this exact
     # account and any sibling account for the same owner+pet name.
-    if any(v["date"] > today_iso for v in all_dated_visits) or has_future_sibling:
+    if any(v["date"] > today_iso for v in real_visits) or has_future_sibling:
         continue
 
-    visits = all_dated_visits  # past/completed visits only, from here on
+    visits = real_visits  # past/completed real-service visits only, from here on
     if len(visits) < 3:
         continue
     last_visit_str = visits[0]["date"]
@@ -357,7 +362,7 @@ for rec in pet_records:
                 "size": v.get("size", ""),
                 "groomer": v.get("stylist", ""),
             }
-            for v in visits[:25] if _is_real_appointment(v)
+            for v in all_dated_visits[:25] if _is_real_appointment(v)
         ],
         "notes": [
             {
@@ -368,7 +373,7 @@ for rec in pet_records:
                 # service field's fragment alone.
                 "text": v.get("items_raw", "") or v.get("service", ""),
             }
-            for v in visits[:25] if not _is_real_appointment(v)
+            for v in all_dated_visits[:25] if not _is_real_appointment(v)
         ],
     }
 
