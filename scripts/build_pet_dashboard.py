@@ -30,13 +30,27 @@ pet_visits_file = data_dir / "pet_visits.json"
 all_data_file = data_dir / "all_data.json"
 
 if not pet_visits_file.exists():
-    print(f"ERROR: {pet_visits_file} not found — run fetch_pet_visits.py first")
-    sys.exit(1)
+    print(f"WARNING: {pet_visits_file} not found — skipping pet dashboard build")
+    out_html = data_dir.parent / f"WoofGang_{store_fn}_PetDashboard.html"
+    out_html.write_text(f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Pet Dashboard — {store_label}</title></head>
+<body style="font-family:sans-serif;padding:40px;color:#444">
+<h2>🐾 Pet Dashboard — {store_label}</h2>
+<p style="color:#888">Pet visit data is being fetched for the first time. This dashboard will be available after the next nightly update.</p>
+</body></html>""", encoding="utf-8")
+    sys.exit(0)
 
 with open(pet_visits_file) as f:
     pet_records = json.load(f)
 
 print(f"Loaded {len(pet_records)} pet records")
+
+today = date.today()
+
+def esc(s):
+    return str(s).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"','&quot;')
+
+def badge(text, color):
+    return f'<span style="background:{color};color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">{text}</span>'
 
 # ── Build daily appointments index ───────────────────────────────────────────
 # date → groomer → list of {pet_name, owner_name, service, breed_group, size, items_raw}
@@ -211,7 +225,6 @@ for g, stats in sorted(groomer_stats.items(), key=lambda x: -x[1]["dogs"]):
       </tr>""")
 
 # ── Recent 30 days for daily view ─────────────────────────────────────────────
-today = date.today()
 recent_dates = sorted(
     [d for d in daily_totals if d >= (today - timedelta(days=30)).isoformat()],
     reverse=True
@@ -224,14 +237,57 @@ top_pets = sorted(
     reverse=True
 )[:50]
 
+# ── Lapsed / At-Risk dogs ─────────────────────────────────────────────────────
+# For each pet with ≥3 visits, compute average interval between visits.
+# Flag as At Risk if days_since_last > 1.5x avg interval, Lapsed if > 2x.
+today_date = date.today()
+lapsed_dogs = []
+
+for rec in pet_records:
+    visits = [v for v in rec.get("visits", []) if v.get("date")]
+    if len(visits) < 3:
+        continue
+    last_visit_str = visits[0]["date"]
+    days_since = (today_date - date.fromisoformat(last_visit_str)).days
+
+    # Compute average interval from sorted visit dates
+    visit_dates = sorted([date.fromisoformat(v["date"]) for v in visits], reverse=True)
+    intervals = [(visit_dates[i] - visit_dates[i+1]).days for i in range(len(visit_dates)-1)]
+    avg_interval = sum(intervals) / len(intervals)
+
+    if avg_interval < 7:  # skip if avg interval is unrealistically short
+        continue
+
+    ratio = days_since / avg_interval
+    if ratio < 1.5:
+        continue  # still on schedule
+
+    status = "Lapsed" if ratio >= 2.0 else "At Risk"
+    days_overdue = int(days_since - avg_interval)
+    preferred_groomer = visits[0].get("stylist", "") or ""
+
+    lapsed_dogs.append({
+        "pet_cid": str(rec.get("pet_cid", "")),
+        "pet_name": rec.get("pet_name", ""),
+        "owner_name": rec.get("owner_name", ""),
+        "owner_phone": rec.get("owner_phone", ""),
+        "last_visit": last_visit_str,
+        "days_since": days_since,
+        "days_overdue": days_overdue,
+        "avg_interval": round(avg_interval),
+        "visit_count": len(visits),
+        "status": status,
+        "preferred_groomer": preferred_groomer,
+        "last_service": visits[0].get("service", ""),
+        "size": visits[0].get("size", ""),
+        "ratio": ratio,
+    })
+
+# Sort: lapsed first, then by days overdue descending
+lapsed_dogs.sort(key=lambda x: (-("Lapsed" in x["status"]), -x["days_overdue"]))
+
 # ── Build HTML ────────────────────────────────────────────────────────────────
 SEVERITY_COLOR = {"high": "#dc2626", "medium": "#d97706", "low": "#6b7280"}
-
-def badge(text, color):
-    return f'<span style="background:{color};color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">{text}</span>'
-
-def esc(s):
-    return str(s).replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"','&quot;')
 
 daily_rows = []
 for d in recent_dates[:30]:
@@ -278,6 +334,175 @@ for r in top_pets:
         <td><small>{esc(recent_svc)}</small></td>
         <td><small>{esc(recent_groomer)}</small></td>
       </tr>""")
+
+n_lapsed = sum(1 for d in lapsed_dogs if d["status"] == "Lapsed")
+n_at_risk = sum(1 for d in lapsed_dogs if d["status"] == "At Risk")
+
+winback_rows = []
+for d in lapsed_dogs:
+    status_color = "#dc2626" if d["status"] == "Lapsed" else "#d97706"
+    freq_str = f"Every ~{d['avg_interval']} days ({d['avg_interval']//7}w)" if d['avg_interval'] >= 7 else f"Every ~{d['avg_interval']} days"
+    phone = d["owner_phone"]
+    phone_link = f'<a href="tel:{phone}" style="color:var(--pink);text-decoration:none">{phone}</a>' if phone else "—"
+    cid = esc(d["pet_cid"])
+    winback_rows.append(f"""
+      <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}">
+        <td><strong>{esc(d['pet_name'])}</strong><br><small style="color:var(--muted)">{esc(d['size'])} · {esc(d['last_service'])}</small></td>
+        <td>{esc(d['owner_name'])}<br><small>{phone_link}</small></td>
+        <td style="color:{status_color};font-weight:700">{d['status']}</td>
+        <td>{d['last_visit']}<br><small style="color:var(--muted)">{d['days_since']}d ago</small></td>
+        <td>{freq_str}<br><small style="color:{status_color}">{d['days_overdue']}d overdue</small></td>
+        <td><small>{esc(d['preferred_groomer'])}</small></td>
+        <td>{d['visit_count']}</td>
+        <td class="lapse-status-cell">
+          <label class="lc-check"><input type="checkbox" class="lc-contacted"> Contacted</label>
+          <label class="lc-check"><input type="checkbox" class="lc-talked"> Talked to customer</label>
+          <label class="lc-check"><input type="checkbox" class="lc-voicemail"> Left voicemail</label>
+          <label class="lc-check"><input type="checkbox" class="lc-booked"> Booked</label>
+        </td>
+        <td>
+          <textarea class="lc-notes" placeholder="Notes…" rows="2"></textarea>
+          <button class="lc-save-btn" onclick="saveLapseCall(this)">Save</button>
+          <span class="lc-saved-indicator"></span>
+        </td>
+      </tr>""")
+
+# Plain (non-f-string) CSS/JS chunks for the Lapse Calls tab — kept separate from
+# the surrounding f-string so their literal { } don't need doubling.
+LAPSE_CSS = """
+  .lc-filter-bar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; padding:12px; background:#f9fafb; border-radius:8px; }
+  .lc-filter-bar label { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+  .lc-filter-bar input[type=date] { padding:4px 6px; border:1px solid var(--border); border-radius:6px; font-size:13px; }
+  .lc-preset-btn { background:var(--brown); color:#fff; border:none; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; }
+  .lc-preset-btn:hover { opacity:.85; }
+  .lc-range-count { font-size:12px; color:var(--muted); margin-left:auto; }
+  .lc-check { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text); white-space:nowrap; margin-bottom:3px; }
+  .lapse-status-cell { min-width:150px; }
+  .lc-notes { width:160px; font-size:12px; font-family:inherit; border:1px solid var(--border); border-radius:6px; padding:4px 6px; resize:vertical; }
+  .lc-save-btn { display:block; margin-top:4px; background:var(--pink); color:#fff; border:none; padding:4px 10px; border-radius:6px; font-size:11px; cursor:pointer; }
+  .lc-save-btn:hover { opacity:.85; }
+  .lc-saved-indicator { font-size:11px; color:#16a34a; margin-left:6px; }
+  .lapse-row.lc-hidden { display:none; }
+"""
+
+LAPSE_JS = """
+var LC_STORE = "__STORE__";
+var LC_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var LC_SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var LC_SHD = {'apikey':LC_SK,'Authorization':'Bearer '+LC_SK,'Content-Type':'application/json'};
+
+function lcGet(p){ return fetch(LC_SB+p, {headers:LC_SHD}).then(function(r){ return r.json(); }); }
+function lcUpsert(body){
+  return fetch(LC_SB+'/lapse_calls?on_conflict=store,pet_cid', {
+    method:'POST',
+    headers:Object.assign({}, LC_SHD, {'Prefer':'resolution=merge-duplicates,return=representation'}),
+    body: JSON.stringify(body)
+  }).then(function(r){
+    if(!r.ok) return r.json().catch(function(){ return null; }).then(function(err){
+      throw new Error((err && err.message) || ('HTTP ' + r.status));
+    });
+    return r.json();
+  });
+}
+
+var lcStatusByCid = {};
+
+function loadLapseCalls(){
+  lcGet('/lapse_calls?store=eq.'+encodeURIComponent(LC_STORE)).then(function(rows){
+    lcStatusByCid = {};
+    (Array.isArray(rows)?rows:[]).forEach(function(r){ lcStatusByCid[r.pet_cid] = r; });
+    applyLapseStatuses();
+  }).catch(function(){});
+}
+
+function applyLapseStatuses(){
+  document.querySelectorAll('.lapse-row').forEach(function(tr){
+    var cid = tr.getAttribute('data-cid');
+    var rec = lcStatusByCid[cid];
+    if(!rec) return;
+    tr.querySelector('.lc-contacted').checked = !!rec.contacted;
+    tr.querySelector('.lc-talked').checked = !!rec.talked_to_customer;
+    tr.querySelector('.lc-voicemail').checked = !!rec.left_voicemail;
+    tr.querySelector('.lc-booked').checked = !!rec.booked;
+    tr.querySelector('.lc-notes').value = rec.notes || '';
+    var ind = tr.querySelector('.lc-saved-indicator');
+    if(ind) ind.textContent = '✓ logged';
+  });
+  updateCalledCount();
+}
+
+function saveLapseCall(btn){
+  var tr = btn.closest('tr');
+  var cid = tr.getAttribute('data-cid');
+  var body = {
+    store: LC_STORE,
+    pet_cid: cid,
+    pet_name: tr.getAttribute('data-pet-name'),
+    contacted: tr.querySelector('.lc-contacted').checked,
+    talked_to_customer: tr.querySelector('.lc-talked').checked,
+    left_voicemail: tr.querySelector('.lc-voicemail').checked,
+    booked: tr.querySelector('.lc-booked').checked,
+    notes: tr.querySelector('.lc-notes').value,
+    call_date: new Date().toISOString().slice(0,10)
+  };
+  var ind = tr.querySelector('.lc-saved-indicator');
+  ind.textContent = 'Saving…';
+  lcUpsert(body).then(function(res){
+    var saved = Array.isArray(res) ? res[0] : res;
+    if(saved) lcStatusByCid[cid] = saved;
+    ind.textContent = '✓ saved';
+    updateCalledCount();
+  }).catch(function(err){
+    ind.textContent = 'Error: ' + (err && err.message ? err.message : 'save failed');
+  });
+}
+
+function updateCalledCount(){
+  var visible = Array.prototype.slice.call(document.querySelectorAll('.lapse-row:not(.lc-hidden)'));
+  var logged = visible.filter(function(tr){
+    var cid = tr.getAttribute('data-cid');
+    return lcStatusByCid[cid] && lcStatusByCid[cid].contacted;
+  }).length;
+  var el = document.getElementById('lc-called-count');
+  if(el) el.textContent = logged;
+}
+
+function filterLapseRows(){
+  var from = document.getElementById('lc-from').value;
+  var to = document.getElementById('lc-to').value;
+  var rows = document.querySelectorAll('.lapse-row');
+  var shown = 0;
+  rows.forEach(function(tr){
+    var lv = tr.getAttribute('data-last-visit');
+    var visible = true;
+    if(from && lv && lv < from) visible = false;
+    if(to && lv && lv > to) visible = false;
+    tr.classList.toggle('lc-hidden', !visible);
+    if(visible) shown++;
+  });
+  var rc = document.getElementById('lc-range-count');
+  if(rc) rc.textContent = shown + ' of ' + rows.length + ' shown';
+  updateCalledCount();
+}
+
+function setLapseRange(days){
+  var to = new Date();
+  var from = new Date();
+  from.setDate(from.getDate() - days);
+  document.getElementById('lc-to').value = to.toISOString().slice(0,10);
+  document.getElementById('lc-from').value = from.toISOString().slice(0,10);
+  filterLapseRows();
+}
+
+function clearLapseRange(){
+  document.getElementById('lc-from').value = '';
+  document.getElementById('lc-to').value = '';
+  filterLapseRows();
+}
+
+loadLapseCalls();
+filterLapseRows();
+""".replace("__STORE__", store_name)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -327,6 +552,7 @@ html = f"""<!DOCTYPE html>
   .stat .lbl {{ font-size: 12px; color: var(--muted); margin-top: 4px; }}
   .updated {{ font-size: 11px; color: var(--muted); margin-top: 4px; }}
   @media(max-width:600px) {{ th,td {{ padding: 8px 6px; font-size: 12px; }} }}
+{LAPSE_CSS}
 </style>
 </head>
 <body>
@@ -334,6 +560,7 @@ html = f"""<!DOCTYPE html>
   <h1>🐾 Pet Dashboard — {store_label}</h1>
   <nav>
     <button class="tab-btn active" onclick="showTab('daily')">Daily Appointments</button>
+    <button class="tab-btn" onclick="showTab('lapse')">Lapse Calls ({len(lapsed_dogs)})</button>
     <button class="tab-btn" onclick="showTab('anomalies')">Anomalies ({len(anomalies)})</button>
     <button class="tab-btn" onclick="showTab('pets')">Pet Profiles</button>
   </nav>
@@ -346,7 +573,8 @@ html = f"""<!DOCTYPE html>
     <div class="stat"><div class="val">{len(pet_records)}</div><div class="lbl">Pet accounts</div></div>
     <div class="stat"><div class="val">{sum(1 for r in pet_records if r.get('last_visit','') >= (today - timedelta(days=30)).isoformat())}</div><div class="lbl">Active last 30d</div></div>
     <div class="stat"><div class="val">{len(all_visits_flat)}</div><div class="lbl">Total visits on record</div></div>
-    <div class="stat"><div class="val">{len(anomalies)}</div><div class="lbl">Anomalies detected</div></div>
+    <div class="stat" style="border-color:#dc2626"><div class="val" style="color:#dc2626">{n_lapsed}</div><div class="lbl">Lapsed dogs</div></div>
+    <div class="stat" style="border-color:#d97706"><div class="val" style="color:#d97706">{n_at_risk}</div><div class="lbl">At-risk dogs</div></div>
   </div>
   <div class="card">
     <h2>Groomer Summary — Last 30 Days</h2>
@@ -363,6 +591,36 @@ html = f"""<!DOCTYPE html>
     <table>
       <thead><tr><th>Date</th><th>Dogs</th><th>Groomer Assignments</th></tr></thead>
       <tbody>{''.join(daily_rows) if daily_rows else '<tr><td colspan=3 style="color:#999;text-align:center;padding:24px">No visits in last 30 days</td></tr>'}</tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- LAPSE CALLS -->
+<div class="section" id="tab-lapse">
+  <div class="stat-row">
+    <div class="stat" style="border-color:#dc2626"><div class="val" style="color:#dc2626">{n_lapsed}</div><div class="lbl">Lapsed</div><div class="updated">≥2× their usual interval</div></div>
+    <div class="stat" style="border-color:#d97706"><div class="val" style="color:#d97706">{n_at_risk}</div><div class="lbl">At Risk</div><div class="updated">1.5–2× their usual interval</div></div>
+    <div class="stat"><div class="val">{len(lapsed_dogs)}</div><div class="lbl">Total needing outreach</div></div>
+    <div class="stat" style="border-color:#16a34a"><div class="val" style="color:#16a34a" id="lc-called-count">—</div><div class="lbl">Contacted in range</div></div>
+  </div>
+  <div class="card">
+    <h2>Lapse Calls — Outreach List</h2>
+    <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
+      Dogs overdue based on their own historical visit frequency. Lapsed = gone 2× longer than usual. At Risk = 1.5×. Sorted by most overdue first.
+      Filter to a batch by last-visit date (typically 6 weeks at a time), work the calls, and log the outcome for each dog.
+    </p>
+    <div class="lc-filter-bar">
+      <label>Last visit from <input type="date" id="lc-from" onchange="filterLapseRows()"></label>
+      <label>to <input type="date" id="lc-to" onchange="filterLapseRows()"></label>
+      <button class="lc-preset-btn" onclick="setLapseRange(42)">Last 6 Weeks</button>
+      <button class="lc-preset-btn" onclick="clearLapseRange()">Show All</button>
+      <span class="lc-range-count" id="lc-range-count"></span>
+    </div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Usual Groomer</th><th>Visits</th><th>Call Status</th><th>Notes</th></tr></thead>
+      <tbody id="lc-tbody">{''.join(winback_rows) if winback_rows else '<tr><td colspan=9 style="color:#999;text-align:center;padding:24px">No lapsed or at-risk dogs</td></tr>'}</tbody>
     </table>
     </div>
   </div>
@@ -405,6 +663,7 @@ function showTab(name) {{
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
 }}
+{LAPSE_JS}
 </script>
 </body>
 </html>"""
