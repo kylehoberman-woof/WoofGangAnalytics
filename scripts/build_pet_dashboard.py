@@ -244,8 +244,17 @@ today_date = date.today()
 lapsed_dogs = []
 lapse_history = {}  # pet_cid → list of past visits, for the click-through detail modal
 
+today_iso = today_date.isoformat()
+
 for rec in pet_records:
-    visits = [v for v in rec.get("visits", []) if v.get("date")]
+    all_dated_visits = [v for v in rec.get("visits", []) if v.get("date")]
+
+    # Already has something on the books — no outreach needed regardless of
+    # how overdue their past visit history looks.
+    if any(v["date"] > today_iso for v in all_dated_visits):
+        continue
+
+    visits = all_dated_visits  # past/completed visits only, from here on
     if len(visits) < 3:
         continue
     last_visit_str = visits[0]["date"]
@@ -689,6 +698,7 @@ html = f"""<!DOCTYPE html>
     <h2>Lapse Calls — Outreach List</h2>
     <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
       Dogs overdue based on their own historical visit frequency. Lapsed = gone 2× longer than usual. At Risk = 1.5×. Sorted by most overdue first.
+      Dogs with a future appointment already booked are automatically excluded — this list is only who still needs outreach.
       Filter to a batch by last-visit date (typically 6 weeks at a time), work the calls, and log the outcome for each dog.
     </p>
     <div class="lc-filter-bar">
