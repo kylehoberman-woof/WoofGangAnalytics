@@ -316,25 +316,34 @@ for rec in pet_records:
         continue
 
     visits = real_visits  # past/completed real-service visits only, from here on
-    if len(visits) < 3:
+    if len(visits) < 1:
         continue
     last_visit_str = visits[0]["date"]
     days_since = (today_date - date.fromisoformat(last_visit_str)).days
 
-    # Compute average interval from sorted visit dates
-    visit_dates = sorted([date.fromisoformat(v["date"]) for v in visits], reverse=True)
-    intervals = [(visit_dates[i] - visit_dates[i+1]).days for i in range(len(visit_dates)-1)]
-    avg_interval = sum(intervals) / len(intervals)
+    # Who's on this list is now purely "had a real visit, hasn't been back
+    # since, nothing booked" — an associate picks the last-visit date range
+    # themselves (e.g. last visit between June 1 and August 1) rather than
+    # the tool deciding who's "due" for them personally. The Lapsed/At Risk
+    # ratio against their OWN historical frequency is kept only as extra
+    # context where there's enough history (3+ real visits) to compute a
+    # meaningful personal baseline — it no longer gates who appears.
+    avg_interval = None
+    ratio = None
+    status = None
+    days_overdue = None
+    if len(visits) >= 3:
+        visit_dates = sorted([date.fromisoformat(v["date"]) for v in visits], reverse=True)
+        intervals = [(visit_dates[i] - visit_dates[i+1]).days for i in range(len(visit_dates)-1)]
+        avg_interval = sum(intervals) / len(intervals)
+        if avg_interval >= 7:  # skip if avg interval is unrealistically short
+            ratio = days_since / avg_interval
+            if ratio >= 1.5:
+                status = "Lapsed" if ratio >= 2.0 else "At Risk"
+                days_overdue = int(days_since - avg_interval)
+        else:
+            avg_interval = None
 
-    if avg_interval < 7:  # skip if avg interval is unrealistically short
-        continue
-
-    ratio = days_since / avg_interval
-    if ratio < 1.5:
-        continue  # still on schedule
-
-    status = "Lapsed" if ratio >= 2.0 else "At Risk"
-    days_overdue = int(days_since - avg_interval)
     last_groomer = visits[0].get("stylist", "") or ""
 
     lapsed_dogs.append({
@@ -345,7 +354,7 @@ for rec in pet_records:
         "last_visit": last_visit_str,
         "days_since": days_since,
         "days_overdue": days_overdue,
-        "avg_interval": round(avg_interval),
+        "avg_interval": round(avg_interval) if avg_interval is not None else None,
         "visit_count": len(visits),
         "status": status,
         "last_groomer": last_groomer,
@@ -378,7 +387,7 @@ for rec in pet_records:
     }
 
 # Sort: lapsed first, then by days overdue descending
-lapsed_dogs.sort(key=lambda x: (-("Lapsed" in x["status"]), -x["days_overdue"]))
+lapsed_dogs.sort(key=lambda x: -x["days_since"])
 
 # ── Build HTML ────────────────────────────────────────────────────────────────
 SEVERITY_COLOR = {"high": "#dc2626", "medium": "#d97706", "low": "#6b7280"}
@@ -434,8 +443,23 @@ n_at_risk = sum(1 for d in lapsed_dogs if d["status"] == "At Risk")
 
 winback_rows = []
 for d in lapsed_dogs:
-    status_color = "#dc2626" if d["status"] == "Lapsed" else "#d97706"
-    freq_str = f"Every ~{d['avg_interval']} days ({d['avg_interval']//7}w)" if d['avg_interval'] >= 7 else f"Every ~{d['avg_interval']} days"
+    if d["status"] == "Lapsed":
+        status_color = "#dc2626"
+        status_text = "Lapsed"
+    elif d["status"] == "At Risk":
+        status_color = "#d97706"
+        status_text = "At Risk"
+    else:
+        status_color = "#9ca3af"
+        status_text = "—"
+
+    if d["avg_interval"] is not None:
+        freq_str = f"Every ~{d['avg_interval']} days ({d['avg_interval']//7}w)" if d['avg_interval'] >= 7 else f"Every ~{d['avg_interval']} days"
+        overdue_html = f'<br><small style="color:{status_color}">{d["days_overdue"]}d overdue</small>' if d["days_overdue"] is not None else ""
+    else:
+        freq_str = "—"
+        overdue_html = ""
+
     phone = d["owner_phone"]
     phone_link = f'<a href="tel:{phone}" style="color:var(--pink);text-decoration:none">{phone}</a>' if phone else "—"
     cid = esc(d["pet_cid"])
@@ -443,9 +467,9 @@ for d in lapsed_dogs:
       <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}" data-owner-name="{esc(d['owner_name'])}" data-owner-phone="{esc(d['owner_phone'])}">
         <td><button class="lc-name-btn" onclick="openLapseDetail('{cid}')">{esc(d['pet_name'])}</button><br><small style="color:var(--muted)">{esc(d['size'])} · {esc(d['last_service'])}</small></td>
         <td>{esc(d['owner_name'])}<br><small>{phone_link}</small></td>
-        <td style="color:{status_color};font-weight:700">{d['status']}</td>
+        <td style="color:{status_color};font-weight:700">{status_text}</td>
         <td>{d['last_visit']}<br><small style="color:var(--muted)">{d['days_since']}d ago</small></td>
-        <td>{freq_str}<br><small style="color:{status_color}">{d['days_overdue']}d overdue</small></td>
+        <td>{freq_str}{overdue_html}</td>
         <td><small>{esc(d['last_groomer'])}</small></td>
         <td>{d['visit_count']}</td>
         <td class="lapse-log-cell">
@@ -739,12 +763,13 @@ function filterLapseRows(){
   updateCalledCount();
 }
 
-function setLapseRange(days){
-  var to = new Date();
+function setLapseRange(fromDaysAgo, toDaysAgo){
   var from = new Date();
-  from.setDate(from.getDate() - days);
-  document.getElementById('lc-to').value = to.toISOString().slice(0,10);
+  from.setDate(from.getDate() - fromDaysAgo);
+  var to = new Date();
+  to.setDate(to.getDate() - toDaysAgo);
   document.getElementById('lc-from').value = from.toISOString().slice(0,10);
+  document.getElementById('lc-to').value = to.toISOString().slice(0,10);
   filterLapseRows();
 }
 
@@ -856,29 +881,30 @@ html = f"""<!DOCTYPE html>
 <!-- LAPSE CALLS -->
 <div class="section" id="tab-lapse">
   <div class="stat-row">
+    <div class="stat"><div class="val">{len(lapsed_dogs)}</div><div class="lbl">Total candidates</div><div class="updated">had a visit, none since, nothing booked</div></div>
     <div class="stat" style="border-color:#dc2626"><div class="val" style="color:#dc2626">{n_lapsed}</div><div class="lbl">Lapsed</div><div class="updated">≥2× their usual interval</div></div>
     <div class="stat" style="border-color:#d97706"><div class="val" style="color:#d97706">{n_at_risk}</div><div class="lbl">At Risk</div><div class="updated">1.5–2× their usual interval</div></div>
-    <div class="stat"><div class="val">{len(lapsed_dogs)}</div><div class="lbl">Total needing outreach</div></div>
     <div class="stat" style="border-color:#16a34a"><div class="val" style="color:#16a34a" id="lc-called-count">—</div><div class="lbl">Contacted in range</div></div>
   </div>
   <div class="card">
     <h2>Lapse Calls — Outreach List</h2>
     <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
-      Dogs overdue based on their own historical visit frequency. Lapsed = gone 2× longer than usual. At Risk = 1.5×. Sorted by most overdue first.
-      Dogs with a future appointment already booked are automatically excluded — this list is only who still needs outreach.
-      Filter to a batch by last-visit date (typically 6 weeks at a time), work the calls, and log the outcome for each dog.
+      Every customer whose last completed visit falls in the date range below, with nothing since and no future appointment already on the books.
+      Pick a last-visit window to build your calling batch — e.g. last visit between June 1 and August 1 catches everyone who hasn't been back since.
+      Lapsed/At Risk badges show how overdue a dog is against their own typical visit frequency where we have enough history (3+ real visits) —
+      that's extra context, it doesn't decide who's on this list. Sorted by longest since last visit first.
     </p>
     <div class="lc-filter-bar">
       <label>Last visit from <input type="date" id="lc-from" onchange="filterLapseRows()"></label>
       <label>to <input type="date" id="lc-to" onchange="filterLapseRows()"></label>
-      <button class="lc-preset-btn" onclick="setLapseRange(42)">Last 6 Weeks</button>
+      <button class="lc-preset-btn" onclick="setLapseRange(84, 42)">6–12 Weeks Ago</button>
       <button class="lc-preset-btn" onclick="clearLapseRange()">Show All</button>
       <span class="lc-range-count" id="lc-range-count"></span>
     </div>
     <div style="overflow-x:auto">
     <table>
       <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Last Groomer</th><th>Visits</th><th>Call Log</th></tr></thead>
-      <tbody id="lc-tbody">{''.join(winback_rows) if winback_rows else '<tr><td colspan=8 style="color:#999;text-align:center;padding:24px">No lapsed or at-risk dogs</td></tr>'}</tbody>
+      <tbody id="lc-tbody">{''.join(winback_rows) if winback_rows else '<tr><td colspan=8 style="color:#999;text-align:center;padding:24px">No customers match this filter</td></tr>'}</tbody>
     </table>
     </div>
     <p style="color:#9ca3af;font-size:12px;margin-top:10px">Click a dog's name to see its full appointment history and log a call.</p>
