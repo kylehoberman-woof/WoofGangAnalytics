@@ -128,13 +128,25 @@
       <div class="card">
         <div class="card-icon">🐾</div>
         <div class="card-title">Pet Dashboard</div>
-        <div class="card-desc">Per-dog appointment history, groomer assignments, daily dog counts, and lapsed client tracking. Built from individual pet visit records — not owner transactions.</div>
+        <div class="card-desc">Per-dog appointment history, groomer assignments, and daily dog counts. Built from individual pet visit records — not owner transactions.</div>
         <div class="card-tags">
           <span class="tag">Dogs</span>
           <span class="tag">Appointments</span>
-          <span class="tag">Retention</span>
+          <span class="tag">Anomalies</span>
         </div>
         <a class="card-btn" id="link-pet" href="port-washington/WoofGang_PortWashington_PetDashboard.html">Open Pet Dashboard</a>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">📞</div>
+        <div class="card-title">Lapse Calls</div>
+        <div class="card-desc">Sales associate outreach tool — customers overdue for a visit with nothing booked. Pick a last-visit date range to build a calling batch, log each call's outcome, and track who needs a follow-up.</div>
+        <div class="card-tags">
+          <span class="tag">Outreach</span>
+          <span class="tag">Retention</span>
+          <span class="tag">Call Log</span>
+        </div>
+        <a class="card-btn" id="link-lapse" href="port-washington/WoofGang_PortWashington_LapseCalls.html">Open Lapse Calls</a>
       </div>
 
       <div class="card">
@@ -388,7 +400,8 @@ var STORES = {
     cross: 'WoofGang_CrossStore_Comparison.html',
     anomaly: 'WoofGang_PortWashington_BookingAnomalies.html',
     retail: 'WoofGang_PortWashington_Retail_Dashboard.html',
-    pet: 'WoofGang_PortWashington_PetDashboard.html'
+    pet: 'WoofGang_PortWashington_PetDashboard.html',
+    lapse: 'WoofGang_PortWashington_LapseCalls.html'
   },
   'hicksville': {
     title: 'Woof Gang Hicksville',
@@ -400,7 +413,8 @@ var STORES = {
     cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
     anomaly: 'WoofGang_Hicksville_BookingAnomalies.html',
     retail: 'WoofGang_Hicksville_Retail_Dashboard.html',
-    pet: 'WoofGang_Hicksville_PetDashboard.html'
+    pet: 'WoofGang_Hicksville_PetDashboard.html',
+    lapse: 'WoofGang_Hicksville_LapseCalls.html'
   }
   // NEW STORE TEMPLATE (uncomment and fill in):
   // 'glen-cove': {
@@ -427,6 +441,7 @@ function switchStore(key) {
   document.getElementById('link-anomaly').href = s.base + s.anomaly;
   document.getElementById('link-retail').href = s.base + s.retail;
   document.getElementById('link-pet').href = s.base + s.pet;
+  document.getElementById('link-lapse').href = s.base + s.lapse;
   localStorage.setItem('selectedStore', key);
 }
 

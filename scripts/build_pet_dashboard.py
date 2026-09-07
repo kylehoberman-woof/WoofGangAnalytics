@@ -12,29 +12,24 @@ Usage:
     python3 scripts/build_pet_dashboard.py hicksville
 """
 
-import json, sys, re
+import json, sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).parent))
 from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY
+from lapse_calls_lib import (
+    get_store_tag, filter_pet_records_to_store, load_customer_visit_staff,
+    compute_lapse_candidates,
+)
 
 store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 store = get_store(store_name)
 data_dir = store.data_dir
 store_label = get_store_display(store_name)
 store_fn = get_store_fn(store_name)
-# FranPOS's customer-history API returns a customer's visits network-wide,
-# not scoped to this location — a family who got groomed at another Woof
-# Gang location (different city, different franchise) shows up in the same
-# feed. Visits are tagged with a "store" field like "Woof Gang West Islip,
-# NY (#450)"; only the (#<store_number>) for THIS location counts.
-_store_number = STORE_REGISTRY.get(store_name, {}).get("store_number")
-_store_tag = f"(#{_store_number})" if _store_number else None
-
-def _is_this_store(v):
-    return _store_tag is None or _store_tag in (v.get("store") or "")
+_store_tag = get_store_tag(store_name, STORE_REGISTRY)
 
 pet_visits_file = data_dir / "pet_visits.json"
 all_data_file = data_dir / "all_data.json"
@@ -54,14 +49,10 @@ with open(pet_visits_file) as f:
 
 # Strip cross-location visits right at the source, so every downstream
 # computation in this file (daily appointments, anomalies, groomer
-# summary, lapse calls) only ever sees this store's own history. Also
-# recompute the summary fields fetch_pet_visits.py stamped on each record
-# (network-wide) so they stay consistent with the now-filtered visits.
-for _rec in pet_records:
-    _rec["visits"] = [v for v in _rec.get("visits", []) if _is_this_store(v)]
-    _rec["total_visits"] = len(_rec["visits"])
-    _dated = [v["date"] for v in _rec["visits"] if v.get("date")]
-    _rec["last_visit"] = max(_dated) if _dated else ""
+# summary) only ever sees this store's own history. FranPOS's
+# customer-history API returns visits network-wide, not scoped to this
+# location — see lapse_calls_lib for the full story.
+filter_pet_records_to_store(pet_records, _store_tag)
 
 print(f"Loaded {len(pet_records)} pet records")
 
@@ -105,15 +96,10 @@ for rec in pet_records:
 order_price_map = {}  # (date, stylist_short, service_key) → price
 groomer_service_prices = defaultdict(list)  # (stylist, service, size) → [prices]
 
-# Index: (CustomerId, date) → staff on a grooming order item, keyed by the
-# pet's own FranPOS id. Used as the Last Groomer fallback when a visit has
-# no stylist recorded — cross-checked against confirmed-stylist visits
-# elsewhere in this store, this order-level field agrees 94% of the time.
-# pet_visits.json's OWN embedded "salesperson" field, by contrast, disagrees
-# with confirmed stylists 62% of the time — it reflects whoever logged the
-# customer-history note, not who worked the appointment — so it's only used
-# as a last resort below when no order item is found at all.
-customer_visit_staff = defaultdict(list)  # (CustomerId, date) → [staff names]
+# (CustomerId, date) → staff on a grooming order item — see lapse_calls_lib
+# for why this is the Last Groomer fallback instead of the embedded
+# "salesperson" field.
+customer_visit_staff = load_customer_visit_staff(all_data_file)
 
 if all_data_file.exists():
     with open(all_data_file) as f:
@@ -121,14 +107,6 @@ if all_data_file.exists():
     order_items = all_data if isinstance(all_data, list) else all_data.get("order_items", [])
 
     GROOM_KEYWORDS = {"full groom", "bath", "lux bath", "groom", "trim", "nail"}
-
-    for item in order_items:
-        _staff = (item.get("EmployeeName") or item.get("SalesPerson") or "").strip()
-        _cust_id = item.get("CustomerId")
-        _dt = item.get("Date") or item.get("CreatedOn") or ""
-        _day = _dt[:10] if _dt else ""
-        if _staff and _cust_id and _day and any(k in (item.get("Name") or "").lower() for k in GROOM_KEYWORDS):
-            customer_visit_staff[(_cust_id, _day)].append(_staff)
 
     for item in order_items:
         name = (item.get("Name") or "").lower()
@@ -277,226 +255,10 @@ top_pets = sorted(
 )[:50]
 
 # ── Lapsed / At-Risk dogs ─────────────────────────────────────────────────────
-# For each pet with ≥3 visits, compute average interval between visits.
-# Flag as At Risk if days_since_last > 1.5x avg interval, Lapsed if > 2x.
-
-# FranPOS's customer-history feed mixes real appointments in with internal
-# groomer notes (clipper settings, scheduling asides, "Ok'd by Cindy", etc.) —
-# there's no clean flag for it, so classify by shape: a real appointment
-# almost always has a groomer assigned or a breed_group/size tag, or its text
-# names a known service. Free-text notes typically have none of those.
-# Word-boundary matched (not raw substring) — otherwise "groom" matches
-# inside "groomed", which shows up constantly in note prose like "Maria
-# groomed the dog and noticed...".
-_SERVICE_KEYWORD_RE = re.compile(
-    r"\b(fg|mg|full groom|mini groom|lux bath|bath|trim|nail|groom|spa|"
-    r"teeth|gland|deshed|de-shed|online service|brush|blowout|add-on|mini)\b",
-    re.IGNORECASE,
-)
-# A free-text note that happens to contain "/" gets split across service /
-# breed_group / size by the same delimiter parsing that handles real
-# "service / breed_group / size" records, so a merely non-empty size field
-# isn't safe on its own — require it to actually look like a size code.
-_SIZE_CODE_RE = re.compile(r"^(xs|sm|md|lg|xlg|xl|general|teeth brushing)\b", re.IGNORECASE)
-
-def _is_real_appointment(v):
-    if v.get("stylist"):
-        return True
-    size = (v.get("size") or "").strip()
-    if size and _SIZE_CODE_RE.match(size):
-        return True
-    # Only the "service" field itself, not items_raw — for a note-corrupted
-    # record items_raw is just the whole note restated across three fields,
-    # and checking it here would match keywords buried in that prose too.
-    return bool(_SERVICE_KEYWORD_RE.search(v.get("service") or ""))
-
-today_date = date.today()
-lapsed_dogs = []
-lapse_history = {}  # pet_cid → {"appointments": [...], "notes": [...]}, for the click-through detail modal
-
-today_iso = today_date.isoformat()
-
-# Some owners have the same pet registered under more than one FranPOS pet_cid
-# (duplicate/re-created accounts) — e.g. the same dog's older history sits on
-# one account while its active recurring bookings moved to another. This
-# also shows up as a combined multi-pet account (pet_name "Biscuit, Claire")
-# alongside separate single-pet accounts for "Biscuit" and "Claire" — same
-# real dogs, three different pet_cids. A future appointment on any sibling
-# account counts for the whole (owner_name, individual pet name) group.
-def _pet_name_variants(pet_name):
-    parts = {p.strip() for p in (pet_name or "").split(",") if p.strip()}
-    parts.add((pet_name or "").strip())
-    return parts
-
-owners_with_future_pet = set()
-for rec in pet_records:
-    if any(v.get("date", "") > today_iso for v in rec.get("visits", []) if _is_real_appointment(v)):
-        owner = rec.get("owner_name", "")
-        for name in _pet_name_variants(rec.get("pet_name", "")):
-            owners_with_future_pet.add((owner, name))
-
-# Plain duplicate accounts: 1,855 (owner, pet name) pairs in Port
-# Washington alone have MORE THAN ONE FranPOS pet_cid for what's clearly
-# the same dog — same owner, identical name, history just split across
-# accounts however FranPOS happened to create them. Processing each cid
-# independently means the real last-visit date, the real groomer, or a
-# future booking can end up sitting on a sibling account we never look
-# at. Merge every non-comma record sharing (owner_name, pet_name) into
-# one group before computing anything.
-individual_groups = defaultdict(list)  # (owner_name, pet_name) -> [records]
-combined_records = []
-for rec in pet_records:
-    name = (rec.get("pet_name") or "").strip()
-    if "," in name:
-        combined_records.append(rec)
-    else:
-        individual_groups[(rec.get("owner_name", ""), name)].append(rec)
-
-individual_pet_names = set(individual_groups.keys())
-
-# A combined multi-pet account ("Lucy, Mason") almost always duplicates
-# individual accounts that already exist for each name under the same
-# owner — in Port Washington 384 of 385 combined accounts are fully
-# redundant this way. Skip it entirely once every one of its names
-# already has its own individual group; otherwise fold its visits into
-# the group(s) for the name(s) that don't, so a genuinely orphaned
-# combined account still contributes (and still shows as its own line
-# item once split per name below).
-for rec in combined_records:
-    owner = rec.get("owner_name", "")
-    names = [n.strip() for n in (rec.get("pet_name") or "").split(",") if n.strip()]
-    for n in names:
-        if (owner, n) not in individual_pet_names:
-            individual_groups[(owner, n)].append(rec)
-
-for (owner_name_, pet_name_), group_records in individual_groups.items():
-    all_dated_visits = []
-    for rec in group_records:
-        origin_cid = rec.get("pet_cid")
-        all_dated_visits.extend(
-            {**v, "_origin_cid": origin_cid} for v in rec.get("visits", []) if v.get("date")
-        )
-    all_dated_visits.sort(key=lambda v: v["date"], reverse=True)
-
-    # Retail purchases (treats, food, shampoo) and internal notes ride along
-    # in the same history feed as real grooming appointments — last-visit
-    # and cadence are service-based only, not "last time they bought
-    # something here."
-    real_visits = [v for v in all_dated_visits if _is_real_appointment(v)]
-    has_future_sibling = (owner_name_, pet_name_) in owners_with_future_pet
-
-    # Already has something on the books — no outreach needed regardless of
-    # how overdue their past visit history looks. Checked both against this
-    # merged group's own visits and any redundant combined-account sibling
-    # that wasn't folded in above (still needs to count for exclusion).
-    if any(v["date"] > today_iso for v in real_visits) or has_future_sibling:
-        continue
-
-    visits = [v for v in real_visits if v["date"] <= today_iso]
-    if len(visits) < 1:
-        continue
-
-    last_visit_str = visits[0]["date"]
-    days_since = (today_date - date.fromisoformat(last_visit_str)).days
-
-    # Who's on this list is now purely "had a real visit, hasn't been back
-    # since, nothing booked" — an associate picks the last-visit date range
-    # themselves (e.g. last visit between June 1 and August 1) rather than
-    # the tool deciding who's "due" for them personally. The Lapsed/At Risk
-    # ratio against their OWN historical frequency is kept only as extra
-    # context where there's enough history (3+ real visits) to compute a
-    # meaningful personal baseline — it no longer gates who appears.
-    avg_interval = None
-    ratio = None
-    status = None
-    days_overdue = None
-    if len(visits) >= 3:
-        visit_dates = sorted([date.fromisoformat(v["date"]) for v in visits], reverse=True)
-        intervals = [(visit_dates[i] - visit_dates[i+1]).days for i in range(len(visit_dates)-1)]
-        avg_interval = sum(intervals) / len(intervals)
-        if avg_interval >= 7:  # skip if avg interval is unrealistically short
-            ratio = days_since / avg_interval
-            if ratio >= 1.5:
-                status = "Lapsed" if ratio >= 2.0 else "At Risk"
-                days_overdue = int(days_since - avg_interval)
-        else:
-            avg_interval = None
-
-    # Every dog should show a last groomer where the data allows it:
-    # 1. Prefer the stylist on the most recent real visit, falling back
-    #    through earlier real visits for one.
-    # 2. If none of them ever recorded a stylist, cross-reference the order
-    #    item for that same visit (matched by the visit's own pet_cid +
-    #    date) — its staff field agrees with a confirmed stylist 94% of
-    #    the time elsewhere in this store, so it's treated as confirmed.
-    # 3. Only as a last resort — no stylist anywhere AND no matching order
-    #    item — fall back to pet_visits.json's own embedded "salesperson"
-    #    on the most recent visit, flagged with * since that field
-    #    disagrees with confirmed stylists 62% of the time (it reflects
-    #    whoever logged the customer-history note, not who worked it).
-    last_groomer = ""
-    last_groomer_confirmed = True
-    for v in visits:
-        if v.get("stylist"):
-            last_groomer = v["stylist"]
-            break
-    if not last_groomer:
-        for v in visits:
-            staff = customer_visit_staff.get((v.get("_origin_cid"), v["date"]))
-            if staff:
-                last_groomer = staff[0]
-                break
-    if not last_groomer and visits[0].get("salesperson"):
-        last_groomer = visits[0]["salesperson"]
-        last_groomer_confirmed = False
-
-    appointments_history = [
-        {
-            "date": v.get("date", ""),
-            "service": v.get("service", "") or v.get("items_raw", ""),
-            "size": v.get("size", ""),
-            "groomer": v.get("stylist", ""),
-        }
-        for v in all_dated_visits[:25] if _is_real_appointment(v)
-    ]
-    notes_history = [
-        {
-            "date": v.get("date", ""),
-            # items_raw first here — for a note that got fragmented
-            # across service/breed_group/size, items_raw is the joined
-            # reconstruction and reads more completely than the
-            # service field's fragment alone.
-            "text": v.get("items_raw", "") or v.get("service", ""),
-        }
-        for v in all_dated_visits[:25] if not _is_real_appointment(v)
-    ]
-
-    # Stable representative cid for the merged group — smallest contributing
-    # pet_cid, so it's deterministic across rebuilds regardless of dict order.
-    cid = str(min(rec.get("pet_cid", 0) for rec in group_records))
-    owner_phone = next((rec.get("owner_phone", "") for rec in group_records if rec.get("owner_phone")), "")
-
-    lapsed_dogs.append({
-        "pet_cid": cid,
-        "pet_name": pet_name_,
-        "owner_name": owner_name_,
-        "owner_phone": owner_phone,
-        "last_visit": last_visit_str,
-        "days_since": days_since,
-        "days_overdue": days_overdue,
-        "avg_interval": round(avg_interval) if avg_interval is not None else None,
-        "visit_count": len(visits),
-        "status": status,
-        "last_groomer": last_groomer,
-        "last_groomer_confirmed": last_groomer_confirmed,
-        "last_service": visits[0].get("service", ""),
-        "size": visits[0].get("size", ""),
-        "ratio": ratio,
-    })
-    lapse_history[cid] = {"appointments": appointments_history, "notes": notes_history}
-
-# Sort: lapsed first, then by days overdue descending
-lapsed_dogs.sort(key=lambda x: -x["days_since"])
+# Full computation now lives in lapse_calls_lib.py, shared with the
+# standalone Lapse Calls widget — see that module for the merge/filter
+# logic. Only used here for the Daily tab's quick-glance counts.
+lapsed_dogs, lapse_history = compute_lapse_candidates(pet_records, customer_visit_staff)
 
 # ── Build HTML ────────────────────────────────────────────────────────────────
 SEVERITY_COLOR = {"high": "#dc2626", "medium": "#d97706", "low": "#6b7280"}
@@ -550,357 +312,6 @@ for r in top_pets:
 n_lapsed = sum(1 for d in lapsed_dogs if d["status"] == "Lapsed")
 n_at_risk = sum(1 for d in lapsed_dogs if d["status"] == "At Risk")
 
-winback_rows = []
-for d in lapsed_dogs:
-    if d["status"] == "Lapsed":
-        status_color = "#dc2626"
-        status_text = "Lapsed"
-    elif d["status"] == "At Risk":
-        status_color = "#d97706"
-        status_text = "At Risk"
-    else:
-        status_color = "#9ca3af"
-        status_text = "—"
-
-    if d["avg_interval"] is not None:
-        freq_str = f"Every ~{d['avg_interval']} days ({d['avg_interval']//7}w)" if d['avg_interval'] >= 7 else f"Every ~{d['avg_interval']} days"
-        overdue_html = f'<br><small style="color:{status_color}">{d["days_overdue"]}d overdue</small>' if d["days_overdue"] is not None else ""
-    else:
-        freq_str = "—"
-        overdue_html = ""
-
-    phone = d["owner_phone"]
-    phone_link = f'<a href="tel:{phone}" style="color:var(--pink);text-decoration:none">{phone}</a>' if phone else "—"
-    cid = esc(d["pet_cid"])
-    if d["last_groomer"]:
-        groomer_html = (
-            f'<small>{esc(d["last_groomer"])}</small>' if d["last_groomer_confirmed"]
-            else f'<small style="font-style:italic;color:var(--muted)" title="Stylist not recorded — showing front desk/checkout staff from that visit">{esc(d["last_groomer"])}*</small>'
-        )
-    else:
-        groomer_html = '<small style="color:var(--muted)">—</small>'
-    winback_rows.append(f"""
-      <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}" data-owner-name="{esc(d['owner_name'])}" data-owner-phone="{esc(d['owner_phone'])}">
-        <td><button class="lc-name-btn" onclick="openLapseDetail('{cid}')">{esc(d['pet_name'])}</button><br><small style="color:var(--muted)">{esc(d['size'])} · {esc(d['last_service'])}</small></td>
-        <td>{esc(d['owner_name'])}<br><small>{phone_link}</small></td>
-        <td style="color:{status_color};font-weight:700">{status_text}</td>
-        <td>{d['last_visit']}<br><small style="color:var(--muted)">{d['days_since']}d ago</small></td>
-        <td>{freq_str}{overdue_html}</td>
-        <td>{groomer_html}</td>
-        <td>{d['visit_count']}</td>
-        <td class="lapse-log-cell">
-          <button class="lc-log-btn" onclick="openLapseDetail('{cid}')">Log call</button>
-          <div class="lc-log-status">Not yet contacted</div>
-          <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
-        </td>
-      </tr>""")
-
-# Plain (non-f-string) CSS/JS chunks for the Lapse Calls tab — kept separate from
-# the surrounding f-string so their literal { } don't need doubling.
-LAPSE_CSS = """
-  .lc-filter-bar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; padding:12px; background:#f9fafb; border-radius:8px; }
-  .lc-filter-bar label { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
-  .lc-filter-bar input[type=date] { padding:4px 6px; border:1px solid var(--border); border-radius:6px; font-size:13px; }
-  .lc-preset-btn { background:var(--brown); color:#fff; border:none; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; }
-  .lc-preset-btn:hover { opacity:.85; }
-  .lc-range-count { font-size:12px; color:var(--muted); margin-left:auto; }
-  .lc-check { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text); white-space:nowrap; margin-bottom:3px; }
-  .lc-name-btn { background:none; border:none; padding:0; margin:0; font:inherit; font-weight:700; color:var(--pink); cursor:pointer; text-decoration:underline; text-align:left; }
-  .lc-name-btn:hover { opacity:.75; }
-  .lapse-log-cell { min-width:150px; }
-  .lc-log-btn { background:var(--brown); color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:11px; cursor:pointer; }
-  .lc-log-btn:hover { opacity:.85; }
-  .lc-log-status { font-size:11px; color:var(--muted); margin-top:5px; max-width:180px; }
-  .lc-complaint-flag { font-size:11px; color:#dc2626; font-weight:700; margin-top:4px; }
-  .lapse-row.lc-hidden { display:none; }
-
-  .lc-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:flex-start; justify-content:center; padding:5vh 16px; overflow-y:auto; }
-  .lc-modal-overlay.active { display:flex; }
-  .lc-modal { background:#fff; border-radius:12px; max-width:640px; width:100%; padding:24px; position:relative; }
-  .lc-modal-close { position:absolute; top:14px; right:16px; background:none; border:none; font-size:22px; line-height:1; cursor:pointer; color:var(--muted); }
-  .lc-modal-close:hover { color:var(--text); }
-  .lc-modal h2 { font-size:20px; color:var(--brown); margin-bottom:2px; }
-  .lc-modal-owner { font-size:13px; color:var(--text); margin-bottom:4px; }
-  .lc-modal-phone { color:var(--pink); font-weight:600; text-decoration:none; }
-  .lc-modal-phone:hover { text-decoration:underline; }
-  .lc-modal-sub { font-size:12px; color:var(--muted); margin-bottom:18px; }
-  .lc-modal-section { margin-top:18px; }
-  .lc-modal-section h3 { font-size:13px; color:var(--brown); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
-  .lc-check-grid { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:10px; }
-  .lc-check-grid label { font-size:13px; display:flex; align-items:center; gap:6px; }
-  .lc-modal textarea { width:100%; font-size:13px; font-family:inherit; border:1px solid var(--border); border-radius:8px; padding:8px 10px; resize:vertical; }
-  .lc-modal-actions { display:flex; align-items:center; gap:10px; margin-top:10px; }
-  .lc-save-btn { background:var(--pink); color:#fff; border:none; padding:7px 16px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; }
-  .lc-save-btn:hover { opacity:.85; }
-  .lc-saved-indicator { font-size:12px; color:#16a34a; }
-  .lc-history-table th, .lc-history-table td { font-size:12px; padding:6px 10px; }
-  .lc-history-empty { color:#999; text-align:center; padding:16px; font-size:13px; }
-  .lc-history-note { font-size:12px; color:var(--text); padding:6px 0; border-bottom:1px solid var(--border); }
-  .lc-history-note:last-child { border-bottom:none; }
-  .lc-history-note-date { color:var(--muted); font-weight:600; margin-right:6px; }
-
-  .lc-modal-section.lc-complaints-section { background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:14px 16px; margin-top:0; }
-  .lc-complaints-section h3 { color:#b91c1c; }
-  .lc-complaint-card { background:#fff; border:1px solid #fecaca; border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:12px; }
-  .lc-complaint-card:last-child { margin-bottom:0; }
-  .lc-complaint-meta { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
-  .lc-complaint-desc { color:var(--text); margin-bottom:4px; }
-  .lc-complaint-res { color:var(--muted); font-style:italic; }
-"""
-
-LAPSE_JS = """
-var LC_STORE = "__STORE__";
-var PET_HISTORY = __PET_HISTORY__;
-var LC_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
-var LC_SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
-var LC_SHD = {'apikey':LC_SK,'Authorization':'Bearer '+LC_SK,'Content-Type':'application/json'};
-
-function lcEsc(s){
-  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function lcGet(p){ return fetch(LC_SB+p, {headers:LC_SHD}).then(function(r){ return r.json(); }); }
-function lcUpsert(body){
-  return fetch(LC_SB+'/lapse_calls?on_conflict=store,pet_cid', {
-    method:'POST',
-    headers:Object.assign({}, LC_SHD, {'Prefer':'resolution=merge-duplicates,return=representation'}),
-    body: JSON.stringify(body)
-  }).then(function(r){
-    if(!r.ok) return r.json().catch(function(){ return null; }).then(function(err){
-      throw new Error((err && err.message) || ('HTTP ' + r.status));
-    });
-    return r.json();
-  });
-}
-
-var lcStatusByCid = {};
-var lcCurrentCid = null;
-
-function findLapseRow(cid){
-  var rows = document.querySelectorAll('.lapse-row');
-  for(var i=0;i<rows.length;i++){
-    if(rows[i].getAttribute('data-cid') === cid) return rows[i];
-  }
-  return null;
-}
-
-function loadLapseCalls(){
-  lcGet('/lapse_calls?store=eq.'+encodeURIComponent(LC_STORE)).then(function(rows){
-    lcStatusByCid = {};
-    (Array.isArray(rows)?rows:[]).forEach(function(r){ lcStatusByCid[r.pet_cid] = r; });
-    applyLapseStatuses();
-  }).catch(function(){});
-}
-
-// Complaint records only carry a free-text customer name (no reliable pet_cid
-// link), so match against a dog's owner_name by last name rather than an
-// exact key — matching on ANY shared name word (including first names) is
-// too loose: "Nicole Goldberg" and an unrelated "Nicole Ortolano" complaint
-// would collide on "Nicole" alone. Last name is a narrower, more reliable
-// signal. Still shown with the complaint's own customer_name in the UI so
-// an associate can catch the rare same-surname, different-family case.
-var lcComplaints = [];
-
-function lcNameTokens(s){
-  return (String(s||'').toLowerCase().match(/[a-z]+/g) || []).filter(function(t){ return t.length >= 3; });
-}
-
-function lcLastToken(s){
-  var toks = lcNameTokens(s);
-  return toks.length ? toks[toks.length - 1] : '';
-}
-
-function loadComplaints(){
-  lcGet('/customer_complaints?store=eq.'+encodeURIComponent(LC_STORE)+'&select=customer_name,date,category,description,resolution,status&order=date.desc').then(function(rows){
-    lcComplaints = (Array.isArray(rows) ? rows : []).map(function(c){
-      return {rec: c, lastToken: lcLastToken(c.customer_name)};
-    }).filter(function(c){ return c.lastToken; });
-    flagComplaintRows();
-  }).catch(function(){});
-}
-
-function complaintsForOwner(ownerName){
-  var ownerLast = lcLastToken(ownerName);
-  if(!ownerLast) return [];
-  return lcComplaints.filter(function(c){
-    return c.lastToken === ownerLast;
-  }).map(function(c){ return c.rec; });
-}
-
-function flagComplaintRows(){
-  document.querySelectorAll('.lapse-row').forEach(function(tr){
-    var owner = tr.getAttribute('data-owner-name');
-    var hasComplaint = complaintsForOwner(owner).length > 0;
-    var flag = tr.querySelector('.lc-complaint-flag');
-    if(flag) flag.style.display = hasComplaint ? 'block' : 'none';
-  });
-}
-
-function lcStatusSummary(rec){
-  if(!rec || !rec.contacted) return 'Not yet contacted';
-  var bits = [];
-  if(rec.talked_to_customer) bits.push('talked to customer');
-  if(rec.left_voicemail) bits.push('left voicemail');
-  if(rec.booked) bits.push('booked ✓');
-  return bits.length ? ('✓ Contacted — ' + bits.join(', ')) : '✓ Contacted';
-}
-
-function updateLogStatus(cid){
-  var tr = findLapseRow(cid);
-  if(!tr) return;
-  var el = tr.querySelector('.lc-log-status');
-  if(el) el.textContent = lcStatusSummary(lcStatusByCid[cid]);
-}
-
-function applyLapseStatuses(){
-  document.querySelectorAll('.lapse-row').forEach(function(tr){
-    updateLogStatus(tr.getAttribute('data-cid'));
-  });
-  updateCalledCount();
-}
-
-function openLapseDetail(cid){
-  lcCurrentCid = cid;
-  var tr = findLapseRow(cid);
-  var name = tr ? tr.getAttribute('data-pet-name') : '';
-  var ownerName = tr ? tr.getAttribute('data-owner-name') : '';
-  var ownerPhone = tr ? tr.getAttribute('data-owner-phone') : '';
-  var rec = lcStatusByCid[cid] || {};
-
-  var phoneHtml = ownerPhone
-    ? '<a href="tel:' + lcEsc(ownerPhone) + '" class="lc-modal-phone">' + lcEsc(ownerPhone) + '</a>'
-    : '';
-  document.getElementById('lc-modal-header').innerHTML =
-    '<h2>' + lcEsc(name) + '</h2>'
-    + '<div class="lc-modal-owner">' + lcEsc(ownerName || 'Unknown owner') + (phoneHtml ? ' · ' + phoneHtml : '') + '</div>'
-    + '<div class="lc-modal-sub">' + lcStatusSummary(rec) + '</div>';
-
-  var complaints = complaintsForOwner(ownerName);
-  var complaintsSection = document.getElementById('lc-modal-complaints-section');
-  if(complaints.length){
-    document.getElementById('lc-modal-complaints').innerHTML = complaints.map(function(c){
-      return '<div class="lc-complaint-card">'
-        + '<div class="lc-complaint-meta"><span>' + lcEsc(c.date || '') + ' · ' + lcEsc(c.category || '') + ' · on file for ' + lcEsc(c.customer_name || 'unknown') + '</span><span>' + lcEsc(c.status || '') + '</span></div>'
-        + '<div class="lc-complaint-desc">' + lcEsc(c.description || '') + '</div>'
-        + (c.resolution ? '<div class="lc-complaint-res">Resolution: ' + lcEsc(c.resolution) + '</div>' : '')
-        + '</div>';
-    }).join('');
-    complaintsSection.style.display = 'block';
-  } else {
-    complaintsSection.style.display = 'none';
-  }
-
-  document.getElementById('lc-m-contacted').checked = !!rec.contacted;
-  document.getElementById('lc-m-talked').checked = !!rec.talked_to_customer;
-  document.getElementById('lc-m-voicemail').checked = !!rec.left_voicemail;
-  document.getElementById('lc-m-booked').checked = !!rec.booked;
-  document.getElementById('lc-m-notes').value = rec.notes || '';
-  document.getElementById('lc-m-indicator').textContent = '';
-
-  var hist = PET_HISTORY[cid] || {appointments: [], notes: []};
-  var appts = hist.appointments || [];
-  var notes = hist.notes || [];
-
-  var body = document.getElementById('lc-modal-history');
-  body.innerHTML = appts.length
-    ? appts.map(function(v){
-        return '<tr><td>' + lcEsc(v.date) + '</td><td>' + lcEsc(v.service) + '</td><td>' + lcEsc(v.size) + '</td><td>' + lcEsc(v.groomer) + '</td></tr>';
-      }).join('')
-    : '<tr><td colspan=4 class="lc-history-empty">No visit history on file</td></tr>';
-
-  var notesEl = document.getElementById('lc-modal-notes');
-  notesEl.innerHTML = notes.length
-    ? notes.map(function(n){
-        return '<div class="lc-history-note"><span class="lc-history-note-date">' + lcEsc(n.date) + '</span> ' + lcEsc(n.text) + '</div>';
-      }).join('')
-    : '<div class="lc-history-empty">No notes on file</div>';
-
-  document.getElementById('lc-modal-overlay').classList.add('active');
-}
-
-function closeLapseDetail(){
-  document.getElementById('lc-modal-overlay').classList.remove('active');
-  lcCurrentCid = null;
-}
-
-function saveLapseDetail(){
-  if(!lcCurrentCid) return;
-  var cid = lcCurrentCid;
-  var tr = findLapseRow(cid);
-  var body = {
-    store: LC_STORE,
-    pet_cid: cid,
-    pet_name: tr ? tr.getAttribute('data-pet-name') : '',
-    contacted: document.getElementById('lc-m-contacted').checked,
-    talked_to_customer: document.getElementById('lc-m-talked').checked,
-    left_voicemail: document.getElementById('lc-m-voicemail').checked,
-    booked: document.getElementById('lc-m-booked').checked,
-    notes: document.getElementById('lc-m-notes').value,
-    call_date: new Date().toISOString().slice(0,10)
-  };
-  var ind = document.getElementById('lc-m-indicator');
-  ind.textContent = 'Saving…';
-  lcUpsert(body).then(function(res){
-    var saved = Array.isArray(res) ? res[0] : res;
-    if(saved) lcStatusByCid[cid] = saved;
-    ind.textContent = '✓ saved';
-    updateLogStatus(cid);
-    updateCalledCount();
-  }).catch(function(err){
-    ind.textContent = 'Error: ' + (err && err.message ? err.message : 'save failed');
-  });
-}
-
-function updateCalledCount(){
-  var visible = Array.prototype.slice.call(document.querySelectorAll('.lapse-row:not(.lc-hidden)'));
-  var logged = visible.filter(function(tr){
-    var cid = tr.getAttribute('data-cid');
-    return lcStatusByCid[cid] && lcStatusByCid[cid].contacted;
-  }).length;
-  var el = document.getElementById('lc-called-count');
-  if(el) el.textContent = logged;
-}
-
-function filterLapseRows(){
-  var from = document.getElementById('lc-from').value;
-  var to = document.getElementById('lc-to').value;
-  var rows = document.querySelectorAll('.lapse-row');
-  var shown = 0;
-  rows.forEach(function(tr){
-    var lv = tr.getAttribute('data-last-visit');
-    var visible = true;
-    if(from && lv && lv < from) visible = false;
-    if(to && lv && lv > to) visible = false;
-    tr.classList.toggle('lc-hidden', !visible);
-    if(visible) shown++;
-  });
-  var rc = document.getElementById('lc-range-count');
-  if(rc) rc.textContent = shown + ' of ' + rows.length + ' shown';
-  updateCalledCount();
-}
-
-function setLapseRange(fromDaysAgo, toDaysAgo){
-  var from = new Date();
-  from.setDate(from.getDate() - fromDaysAgo);
-  var to = new Date();
-  to.setDate(to.getDate() - toDaysAgo);
-  document.getElementById('lc-from').value = from.toISOString().slice(0,10);
-  document.getElementById('lc-to').value = to.toISOString().slice(0,10);
-  filterLapseRows();
-}
-
-function clearLapseRange(){
-  document.getElementById('lc-from').value = '';
-  document.getElementById('lc-to').value = '';
-  filterLapseRows();
-}
-
-loadLapseCalls();
-loadComplaints();
-filterLapseRows();
-""".replace("__STORE__", store_name).replace(
-    "__PET_HISTORY__", json.dumps(lapse_history).replace("</", "<\\/")
-)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -950,7 +361,6 @@ html = f"""<!DOCTYPE html>
   .stat .lbl {{ font-size: 12px; color: var(--muted); margin-top: 4px; }}
   .updated {{ font-size: 11px; color: var(--muted); margin-top: 4px; }}
   @media(max-width:600px) {{ th,td {{ padding: 8px 6px; font-size: 12px; }} }}
-{LAPSE_CSS}
 </style>
 </head>
 <body>
@@ -958,7 +368,7 @@ html = f"""<!DOCTYPE html>
   <h1>🐾 Pet Dashboard — {store_label}</h1>
   <nav>
     <button class="tab-btn active" onclick="showTab('daily')">Daily Appointments</button>
-    <button class="tab-btn" onclick="showTab('lapse')">Lapse Calls ({len(lapsed_dogs)})</button>
+    <a class="tab-btn" href="WoofGang_{store_fn}_LapseCalls.html" style="text-decoration:none;display:inline-block">📞 Lapse Calls ({len(lapsed_dogs)})</a>
     <button class="tab-btn" onclick="showTab('anomalies')">Anomalies ({len(anomalies)})</button>
     <button class="tab-btn" onclick="showTab('pets')">Pet Profiles</button>
   </nav>
@@ -990,79 +400,6 @@ html = f"""<!DOCTYPE html>
       <thead><tr><th>Date</th><th>Dogs</th><th>Groomer Assignments</th></tr></thead>
       <tbody>{''.join(daily_rows) if daily_rows else '<tr><td colspan=3 style="color:#999;text-align:center;padding:24px">No visits in last 30 days</td></tr>'}</tbody>
     </table>
-    </div>
-  </div>
-</div>
-
-<!-- LAPSE CALLS -->
-<div class="section" id="tab-lapse">
-  <div class="stat-row">
-    <div class="stat"><div class="val">{len(lapsed_dogs)}</div><div class="lbl">Total candidates</div><div class="updated">had a visit, none since, nothing booked</div></div>
-    <div class="stat" style="border-color:#dc2626"><div class="val" style="color:#dc2626">{n_lapsed}</div><div class="lbl">Lapsed</div><div class="updated">≥2× their usual interval</div></div>
-    <div class="stat" style="border-color:#d97706"><div class="val" style="color:#d97706">{n_at_risk}</div><div class="lbl">At Risk</div><div class="updated">1.5–2× their usual interval</div></div>
-    <div class="stat" style="border-color:#16a34a"><div class="val" style="color:#16a34a" id="lc-called-count">—</div><div class="lbl">Contacted in range</div></div>
-  </div>
-  <div class="card">
-    <h2>Lapse Calls — Outreach List</h2>
-    <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
-      Every customer whose last completed visit falls in the date range below, with nothing since and no future appointment already on the books.
-      Pick a last-visit window to build your calling batch — e.g. last visit between June 1 and August 1 catches everyone who hasn't been back since.
-      Lapsed/At Risk badges show how overdue a dog is against their own typical visit frequency where we have enough history (3+ real visits) —
-      that's extra context, it doesn't decide who's on this list. Sorted by longest since last visit first.
-      A groomer marked with * means no stylist was recorded on any of their visits — showing the front desk/checkout staff instead.
-    </p>
-    <div class="lc-filter-bar">
-      <label>Last visit from <input type="date" id="lc-from" onchange="filterLapseRows()"></label>
-      <label>to <input type="date" id="lc-to" onchange="filterLapseRows()"></label>
-      <button class="lc-preset-btn" onclick="setLapseRange(84, 42)">6–12 Weeks Ago</button>
-      <button class="lc-preset-btn" onclick="clearLapseRange()">Show All</button>
-      <span class="lc-range-count" id="lc-range-count"></span>
-    </div>
-    <div style="overflow-x:auto">
-    <table>
-      <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Last Groomer</th><th>Visits</th><th>Call Log</th></tr></thead>
-      <tbody id="lc-tbody">{''.join(winback_rows) if winback_rows else '<tr><td colspan=8 style="color:#999;text-align:center;padding:24px">No customers match this filter</td></tr>'}</tbody>
-    </table>
-    </div>
-    <p style="color:#9ca3af;font-size:12px;margin-top:10px">Click a dog's name to see its full appointment history and log a call.</p>
-  </div>
-</div>
-
-<!-- LAPSE CALL DETAIL MODAL -->
-<div class="lc-modal-overlay" id="lc-modal-overlay" onclick="if(event.target===this) closeLapseDetail()">
-  <div class="lc-modal">
-    <button class="lc-modal-close" onclick="closeLapseDetail()">&times;</button>
-    <div id="lc-modal-header"></div>
-    <div class="lc-modal-section lc-complaints-section" id="lc-modal-complaints-section" style="display:none">
-      <h3>⚠ Prior Complaints</h3>
-      <div id="lc-modal-complaints"></div>
-    </div>
-    <div class="lc-modal-section">
-      <h3>Call Log</h3>
-      <div class="lc-check-grid">
-        <label><input type="checkbox" id="lc-m-contacted"> Contacted</label>
-        <label><input type="checkbox" id="lc-m-talked"> Talked to customer</label>
-        <label><input type="checkbox" id="lc-m-voicemail"> Left voicemail</label>
-        <label><input type="checkbox" id="lc-m-booked"> Booked</label>
-      </div>
-      <textarea id="lc-m-notes" placeholder="Notes…" rows="4"></textarea>
-      <div class="lc-modal-actions">
-        <button class="lc-save-btn" onclick="saveLapseDetail()">Save</button>
-        <span class="lc-saved-indicator" id="lc-m-indicator"></span>
-      </div>
-    </div>
-    <div class="lc-modal-section">
-      <h3>Appointment History</h3>
-      <div style="overflow-x:auto">
-      <table class="lc-history-table">
-        <thead><tr><th>Date</th><th>Service</th><th>Size</th><th>Groomer</th></tr></thead>
-        <tbody id="lc-modal-history"></tbody>
-      </table>
-      </div>
-    </div>
-    <div class="lc-modal-section">
-      <h3>Notes</h3>
-      <div id="lc-modal-notes"></div>
     </div>
   </div>
 </div>
@@ -1104,7 +441,6 @@ function showTab(name) {{
   document.getElementById('tab-' + name).classList.add('active');
   event.target.classList.add('active');
 }}
-{LAPSE_JS}
 </script>
 </body>
 </html>"""
