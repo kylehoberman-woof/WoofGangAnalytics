@@ -296,6 +296,19 @@ for rec in pet_records:
         for name in _pet_name_variants(rec.get("pet_name", "")):
             owners_with_future_pet.add((owner, name))
 
+# A combined multi-pet account ("Lucy, Mason") almost always duplicates
+# individual accounts that already exist for each name under the same
+# owner — in Port Washington 384 of 385 combined accounts are fully
+# redundant this way. Skip a combined account entirely once every one of
+# its names already has its own individual (owner, name) record; only the
+# names that DON'T have one of their own get split out as their own line
+# item, so a genuinely orphaned combined account still shows each pet.
+individual_pet_names = {
+    (rec.get("owner_name", ""), (rec.get("pet_name", "") or "").strip())
+    for rec in pet_records
+    if "," not in (rec.get("pet_name") or "")
+}
+
 for rec in pet_records:
     all_dated_visits = [v for v in rec.get("visits", []) if v.get("date")]
     # Retail purchases (treats, food, shampoo) and internal notes ride along
@@ -304,9 +317,10 @@ for rec in pet_records:
     # something here."
     real_visits = [v for v in all_dated_visits if _is_real_appointment(v)]
     owner_name_ = rec.get("owner_name", "")
+    raw_pet_name = (rec.get("pet_name", "") or "").strip()
     has_future_sibling = any(
         (owner_name_, name) in owners_with_future_pet
-        for name in _pet_name_variants(rec.get("pet_name", ""))
+        for name in _pet_name_variants(raw_pet_name)
     )
 
     # Already has something on the books — no outreach needed regardless of
@@ -318,6 +332,20 @@ for rec in pet_records:
     visits = real_visits  # past/completed real-service visits only, from here on
     if len(visits) < 1:
         continue
+
+    # Combined multi-pet account ("Lucy, Mason") — skip entirely if every
+    # name already has its own individual account (the normal case, and
+    # where the real per-dog data lives); otherwise split out only the
+    # name(s) that don't, so a genuinely orphaned combined account still
+    # surfaces each dog as its own line item.
+    if "," in raw_pet_name:
+        names = [n.strip() for n in raw_pet_name.split(",") if n.strip()]
+        display_names = [n for n in names if (owner_name_, n) not in individual_pet_names]
+        if not display_names:
+            continue
+    else:
+        display_names = [raw_pet_name]
+
     last_visit_str = visits[0]["date"]
     days_since = (today_date - date.fromisoformat(last_visit_str)).days
 
@@ -344,47 +372,63 @@ for rec in pet_records:
         else:
             avg_interval = None
 
-    last_groomer = visits[0].get("stylist", "") or ""
+    # Every dog should show a last groomer where the data allows it: prefer
+    # the stylist on the most recent real visit, fall back through earlier
+    # real visits for one, and only if none of them ever recorded a stylist
+    # fall back to the checkout salesperson on the most recent visit —
+    # flagged distinctly (not necessarily who actually groomed the dog).
+    last_groomer = ""
+    last_groomer_confirmed = True
+    for v in visits:
+        if v.get("stylist"):
+            last_groomer = v["stylist"]
+            break
+    if not last_groomer and visits[0].get("salesperson"):
+        last_groomer = visits[0]["salesperson"]
+        last_groomer_confirmed = False
 
-    lapsed_dogs.append({
-        "pet_cid": str(rec.get("pet_cid", "")),
-        "pet_name": rec.get("pet_name", ""),
-        "owner_name": rec.get("owner_name", ""),
-        "owner_phone": rec.get("owner_phone", ""),
-        "last_visit": last_visit_str,
-        "days_since": days_since,
-        "days_overdue": days_overdue,
-        "avg_interval": round(avg_interval) if avg_interval is not None else None,
-        "visit_count": len(visits),
-        "status": status,
-        "last_groomer": last_groomer,
-        "last_service": visits[0].get("service", ""),
-        "size": visits[0].get("size", ""),
-        "ratio": ratio,
-    })
+    appointments_history = [
+        {
+            "date": v.get("date", ""),
+            "service": v.get("service", "") or v.get("items_raw", ""),
+            "size": v.get("size", ""),
+            "groomer": v.get("stylist", ""),
+        }
+        for v in all_dated_visits[:25] if _is_real_appointment(v)
+    ]
+    notes_history = [
+        {
+            "date": v.get("date", ""),
+            # items_raw first here — for a note that got fragmented
+            # across service/breed_group/size, items_raw is the joined
+            # reconstruction and reads more completely than the
+            # service field's fragment alone.
+            "text": v.get("items_raw", "") or v.get("service", ""),
+        }
+        for v in all_dated_visits[:25] if not _is_real_appointment(v)
+    ]
 
-    lapse_history[str(rec.get("pet_cid", ""))] = {
-        "appointments": [
-            {
-                "date": v.get("date", ""),
-                "service": v.get("service", "") or v.get("items_raw", ""),
-                "size": v.get("size", ""),
-                "groomer": v.get("stylist", ""),
-            }
-            for v in all_dated_visits[:25] if _is_real_appointment(v)
-        ],
-        "notes": [
-            {
-                "date": v.get("date", ""),
-                # items_raw first here — for a note that got fragmented
-                # across service/breed_group/size, items_raw is the joined
-                # reconstruction and reads more completely than the
-                # service field's fragment alone.
-                "text": v.get("items_raw", "") or v.get("service", ""),
-            }
-            for v in all_dated_visits[:25] if not _is_real_appointment(v)
-        ],
-    }
+    base_cid = str(rec.get("pet_cid", ""))
+    for i, display_name in enumerate(display_names):
+        cid = base_cid if len(display_names) == 1 else f"{base_cid}-{i}"
+        lapsed_dogs.append({
+            "pet_cid": cid,
+            "pet_name": display_name,
+            "owner_name": owner_name_,
+            "owner_phone": rec.get("owner_phone", ""),
+            "last_visit": last_visit_str,
+            "days_since": days_since,
+            "days_overdue": days_overdue,
+            "avg_interval": round(avg_interval) if avg_interval is not None else None,
+            "visit_count": len(visits),
+            "status": status,
+            "last_groomer": last_groomer,
+            "last_groomer_confirmed": last_groomer_confirmed,
+            "last_service": visits[0].get("service", ""),
+            "size": visits[0].get("size", ""),
+            "ratio": ratio,
+        })
+        lapse_history[cid] = {"appointments": appointments_history, "notes": notes_history}
 
 # Sort: lapsed first, then by days overdue descending
 lapsed_dogs.sort(key=lambda x: -x["days_since"])
@@ -463,6 +507,13 @@ for d in lapsed_dogs:
     phone = d["owner_phone"]
     phone_link = f'<a href="tel:{phone}" style="color:var(--pink);text-decoration:none">{phone}</a>' if phone else "—"
     cid = esc(d["pet_cid"])
+    if d["last_groomer"]:
+        groomer_html = (
+            f'<small>{esc(d["last_groomer"])}</small>' if d["last_groomer_confirmed"]
+            else f'<small style="font-style:italic;color:var(--muted)" title="Stylist not recorded — showing front desk/checkout staff from that visit">{esc(d["last_groomer"])}*</small>'
+        )
+    else:
+        groomer_html = '<small style="color:var(--muted)">—</small>'
     winback_rows.append(f"""
       <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}" data-owner-name="{esc(d['owner_name'])}" data-owner-phone="{esc(d['owner_phone'])}">
         <td><button class="lc-name-btn" onclick="openLapseDetail('{cid}')">{esc(d['pet_name'])}</button><br><small style="color:var(--muted)">{esc(d['size'])} · {esc(d['last_service'])}</small></td>
@@ -470,7 +521,7 @@ for d in lapsed_dogs:
         <td style="color:{status_color};font-weight:700">{status_text}</td>
         <td>{d['last_visit']}<br><small style="color:var(--muted)">{d['days_since']}d ago</small></td>
         <td>{freq_str}{overdue_html}</td>
-        <td><small>{esc(d['last_groomer'])}</small></td>
+        <td>{groomer_html}</td>
         <td>{d['visit_count']}</td>
         <td class="lapse-log-cell">
           <button class="lc-log-btn" onclick="openLapseDetail('{cid}')">Log call</button>
@@ -893,6 +944,7 @@ html = f"""<!DOCTYPE html>
       Pick a last-visit window to build your calling batch — e.g. last visit between June 1 and August 1 catches everyone who hasn't been back since.
       Lapsed/At Risk badges show how overdue a dog is against their own typical visit frequency where we have enough history (3+ real visits) —
       that's extra context, it doesn't decide who's on this list. Sorted by longest since last visit first.
+      A groomer marked with * means no stylist was recorded on any of their visits — showing the front desk/checkout staff instead.
     </p>
     <div class="lc-filter-bar">
       <label>Last visit from <input type="date" id="lc-from" onchange="filterLapseRows()"></label>
