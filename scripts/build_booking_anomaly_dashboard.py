@@ -47,13 +47,28 @@ SIZE_THRESHOLD = 0.75     # ≥75% of visits must be modal size to flag a change
 
 SIZE_ORDER = {"XS": 0, "SM": 1, "MD": 2, "LG": 3, "XL": 4}
 
+_ADDON_PREFIXES = ("add-on", "online add-on", "online service")
+
+def _is_addon(visit):
+    """True if this visit record is an add-on or online service, not a primary groom."""
+    svc = (visit.get("service") or "").lower()
+    raw = (visit.get("items_raw") or "").lower()
+    return any(svc.startswith(p) or raw.startswith(p) for p in _ADDON_PREFIXES)
+
 # ── Load pet visit history ────────────────────────────────────────────────────
 
 _pet_visits_file = DATA_DIR / "pet_visits.json"
 
 if not _pet_visits_file.exists():
-    print(f"ERROR: {_pet_visits_file} not found — run fetch_pet_visits.py first")
-    sys.exit(1)
+    print(f"WARNING: {_pet_visits_file} not found — skipping anomaly build (run fetch_pet_visits.py first)")
+    # Write a placeholder so the workflow doesn't fail
+    out_file = OUTPUT_DIR / f"WoofGang_{_fn_display}_BookingAnomalies.html"
+    out_file.write_text(f"""<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Booking Anomalies — {_store_display}</title></head>
+<body style="font-family:sans-serif;padding:40px;color:#444">
+<h2>Booking Anomaly Dashboard — {_store_display}</h2>
+<p style="color:#888">Pet visit data is being fetched for the first time. This dashboard will be available after the next nightly update.</p>
+</body></html>""", encoding="utf-8")
+    sys.exit(0)
 
 print(f"Loading pet visit history for {_store_display}...")
 with open(_pet_visits_file) as f:
@@ -70,12 +85,14 @@ anomalies = []
 profiles = {}
 
 for rec in pet_records:
-    visits = rec.get("visits", [])
+    all_visits = rec.get("visits", [])
+    # Filter to primary grooming visits only — exclude add-ons and online services
+    visits = [v for v in all_visits if not _is_addon(v)]
     if len(visits) < MIN_VISITS:
         continue
 
-    # Skip if most recent visit is stale
-    last_visit = visits[0]  # sorted desc
+    # Skip if most recent primary visit is stale
+    last_visit = visits[0]  # sorted desc (first non-addon)
     if last_visit.get("date", "") < cutoff_str:
         continue
 
@@ -83,7 +100,7 @@ for rec in pet_records:
     owner_name = rec.get("owner_name", "").strip()
     dog_key = str(rec["pet_cid"])
 
-    # Build history arrays
+    # Build history arrays from primary visits only
     sizes = [v["size"] for v in visits if v.get("size")]
     services = [v["service"] for v in visits if v.get("service")]
     breed_groups = [v["breed_group"] for v in visits if v.get("breed_group")]
@@ -159,8 +176,9 @@ for rec in pet_records:
         continue
 
     # Build full history for modal (most recent first)
+    # Show all visits in modal (including add-ons) but flag them
     history = []
-    for v in visits:
+    for v in all_visits:
         history.append({
             "date": v.get("date", ""),
             "service": v.get("service", ""),
@@ -170,6 +188,7 @@ for rec in pet_records:
             "groomer": v.get("stylist", ""),
             "price": round(v["price"], 2) if v.get("price") else 0,
             "price_match": v.get("price_match", ""),
+            "addon": _is_addon(v),
         })
 
     anomalies.append({
@@ -725,13 +744,14 @@ function openModal(dogKey) {{
   tbody.innerHTML = '';
 
   history.forEach(function(v) {{
-    var isAnomaly = (v.date === lastDate);
+    var isAnomaly = (v.date === lastDate && !v.addon);
     var tr = document.createElement('tr');
     if (isAnomaly) tr.classList.add('anomaly-row');
+    if (v.addon) tr.style.cssText = 'opacity:0.5;font-style:italic';
     tr.innerHTML =
       '<td>' + v.date + '</td>' +
-      '<td>' + (v.service || '') + '</td>' +
-      '<td>' + (v.size || '?') + '</td>' +
+      '<td>' + (v.addon ? '+ ' : '') + (v.service || '') + '</td>' +
+      '<td>' + (v.size || '') + '</td>' +
       '<td>' + (v.breed_group || '') + '</td>' +
       '<td>' + (v.groomer || '') + '</td>' +
       '<td class="n">' + (v.price && v.price > 0 ? '$' + v.price.toFixed(2) : '—') + '</td>';

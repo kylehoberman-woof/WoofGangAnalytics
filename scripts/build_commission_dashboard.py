@@ -532,6 +532,7 @@ groomer_colors_json = _json.dumps(groomer_color)
 _guar_js = {name: {"rate": g[0], "start": g[1], "end": g[2]} for name, g in GUARANTEES.items()}
 guarantees_json = _json.dumps(_guar_js)
 gusto_payroll_config_json = _json.dumps(GUSTO_PAYROLL_CONFIG)
+bather_rate_map_json = _json.dumps({k: float(v) for k, v in BATHER_RATE_MAP.items()})
 
 # ── Sue M: weekly tips + product purchases ────────────────────────────────────
 sue_name = "Sue M"
@@ -844,7 +845,7 @@ tr:hover td{{background:#fafaf8!important}}
     </div>
   </div>
   <div class="card" id="bather-pp-card" style="display:none">
-    <div class="stitle">Bathers (Hourly @ $17/hr)</div>
+    <div class="stitle">Bathers (Hourly)</div>
     <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap" id="bather-pp-kpis"></div>
     <div class="detail-section" id="bather-pp-detail" style="display:none;margin-top:12px"></div>
     <button class="toggle-btn" data-label="details by person" onclick="toggleDetail('bather-pp-detail',this)">▼ Show details by person</button>
@@ -929,6 +930,7 @@ var GROOMERS = {groomers_json};
 var MONTHLY_DATA = {monthly_json};
 var COLORS = {groomer_colors_json};
 var GUARANTEES = {guarantees_json};
+var BATHER_RATE_MAP = {bather_rate_map_json};
 var SUE_WEEKLY = {sue_weekly_json};
 var PP_DATES = {pp_dates_json};
 var GUSTO_PAYROLL_CONFIG = {gusto_payroll_config_json};
@@ -1403,9 +1405,12 @@ function renderPayPeriod(ppId) {{
       var days = batherDailyData[name] || [];
       if (days.length > 0) {{{{
         batherDetailHtml += '<table style=\"width:100%;border-collapse:collapse;font-size:0.83rem\"><thead><tr><th style=\"text-align:left;padding:6px 10px;color:#888\">Date</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Hours</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Pay</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Tips</th><th style=\"text-align:right;padding:6px 10px;color:#888\">Total</th></tr></thead><tbody>';
+        var seenDates = {{}};
+        var bRate = BATHER_RATE_MAP[name] || 17;
         days.forEach(function(r) {{{{
-          var tipForDay = (batherTipsDaily[name] || {{}})[r.date] || 0;
-          var dayPay = r.hours * 17;
+          var tipForDay = seenDates[r.date] ? 0 : ((batherTipsDaily[name] || {{}})[r.date] || 0);
+          seenDates[r.date] = true;
+          var dayPay = r.hours * bRate;
           batherDetailHtml += '<tr><td>'+r.date+'</td><td style=\"text-align:right\">'+r.hours.toFixed(2)+'h</td><td style=\"text-align:right;color:#00796B\">'+fc(dayPay)+'</td><td style=\"text-align:right;color:#f57c00\">'+fc(tipForDay)+'</td><td style=\"text-align:right;font-weight:700\">'+fc(dayPay+tipForDay)+'</td></tr>';
         }}}});
         batherDetailHtml += '</tbody></table>';

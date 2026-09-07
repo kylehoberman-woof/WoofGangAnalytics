@@ -1,0 +1,3535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pet Dashboard — Hicksville</title>
+<style>
+  :root {
+    --brown: #2C1A0E;
+    --pink: #E8006A;
+    --bg: #fdf8f5;
+    --card: #fff;
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+         background: var(--bg); color: var(--text); font-size: 14px; }
+  header { background: var(--brown); color: #fff; padding: 16px 24px;
+            display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 100; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  nav { display: flex; gap: 8px; margin-left: auto; }
+  nav a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px;
+           padding: 6px 12px; border-radius: 6px; }
+  nav a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .tab-btn { background: rgba(255,255,255,0.15); color: #fff; border: none;
+              padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .tab-btn.active { background: var(--pink); }
+  main { max-width: 1400px; margin: 0 auto; padding: 24px 16px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+           padding: 20px; margin-bottom: 20px; }
+  .card h2 { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: var(--brown); }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--brown); color: #fff; padding: 10px 12px; text-align: left; font-size: 12px; font-weight: 600; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fef9f5; }
+  .groomer-cell { background: #f9fafb; border-radius: 6px; padding: 6px 8px; margin-bottom: 4px; font-size: 12px; }
+  .stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+           padding: 16px 20px; flex: 1; min-width: 140px; }
+  .stat .val { font-size: 28px; font-weight: 700; color: var(--brown); }
+  .stat .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .updated { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  @media(max-width:600px) { th,td { padding: 8px 6px; font-size: 12px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🐾 Pet Dashboard — Hicksville</h1>
+  <nav>
+    <button class="tab-btn active" onclick="showTab('daily')">Daily Appointments</button>
+    <button class="tab-btn" onclick="showTab('winback')">Win-Back (239)</button>
+    <button class="tab-btn" onclick="showTab('anomalies')">Anomalies (963)</button>
+    <button class="tab-btn" onclick="showTab('pets')">Pet Profiles</button>
+  </nav>
+</header>
+<main>
+
+<!-- DAILY -->
+<div class="section active" id="tab-daily">
+  <div class="stat-row">
+    <div class="stat"><div class="val">2065</div><div class="lbl">Pet accounts</div></div>
+    <div class="stat"><div class="val">659</div><div class="lbl">Active last 30d</div></div>
+    <div class="stat"><div class="val">6123</div><div class="lbl">Total visits on record</div></div>
+    <div class="stat" style="border-color:#dc2626"><div class="val" style="color:#dc2626">179</div><div class="lbl">Lapsed dogs</div></div>
+    <div class="stat" style="border-color:#d97706"><div class="val" style="color:#d97706">60</div><div class="lbl">At-risk dogs</div></div>
+  </div>
+  <div class="card">
+    <h2>Groomer Summary — Last 30 Days</h2>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Groomer</th><th>Dogs</th><th>Size Breakdown</th><th>Top Service</th><th>Revenue (matched)</th></tr></thead>
+      <tbody>
+      <tr>
+        <td><strong>Unknown</strong></td>
+        <td><strong>512</strong></td>
+        <td></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Julia B</strong></td>
+        <td><strong>136</strong></td>
+        <td><span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">SM:55</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">MD:35</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">LG:23</span></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Carol W</strong></td>
+        <td><strong>107</strong></td>
+        <td><span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">SM:50</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">MD:34</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">LG:18</span></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Julianne D</strong></td>
+        <td><strong>85</strong></td>
+        <td><span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">SM:46</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">MD:20</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">LG:11</span></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Vanessa M</strong></td>
+        <td><strong>73</strong></td>
+        <td><span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">SM:37</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">MD:16</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">LG:12</span></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Victoria C.</strong></td>
+        <td><strong>39</strong></td>
+        <td><span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">SM:24</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">MD:9</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">LG:3</span></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Maria V</strong></td>
+        <td><strong>17</strong></td>
+        <td><span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">SM:14</span> <span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">MD:2</span></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Wgb Hicksville</strong></td>
+        <td><strong>2</strong></td>
+        <td><span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">SM:2</span></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Lexie C</strong></td>
+        <td><strong>2</strong></td>
+        <td></td>
+        <td><small>Special Coat Full Service Groom SM</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Annmarie Rooney</strong></td>
+        <td><strong>1</strong></td>
+        <td></td>
+        <td><small>ONLINE SERVICE (#1) - DOG - Full Groom</small></td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td><strong>Connor Waldrop</strong></td>
+        <td><strong>1</strong></td>
+        <td><span style="background:#f3f4f6;padding:1px 6px;border-radius:8px;font-size:11px">LG:1</span></td>
+        <td><small>FG</small></td>
+        <td>—</td>
+      </tr></tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Appointments by Day (last 30 days)</h2>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Date</th><th>Dogs</th><th>Groomer Assignments</th></tr></thead>
+      <tbody>
+      <tr>
+        <td><strong>2027-02-02</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Charlie (MD)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2027-01-05</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Charlie (MD)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-12-08</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Charlie (MD)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-11-10</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Charlie (MD)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-24</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Pawley (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-17</strong></td>
+        <td><strong>4</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>AJ (MD)</small></div><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Benny (SM), Billie Jean (SM), Cooper (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-16</strong></td>
+        <td><strong>2</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Zoe (SM)</small></div><div class='groomer-cell'><strong>Victoria C.</strong><br><small>Friar (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-15</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>Ryder (LG)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-13</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Charlie (MD)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-10</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>Blue (LG)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-09</strong></td>
+        <td><strong>4</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Emme (SM), Fiona (SM), Piper (SM)</small></div><div class='groomer-cell'><strong>Victoria C.</strong><br><small>Lulu (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-05</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>Badger (XXLG)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-03</strong></td>
+        <td><strong>2</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>Chase (MD)</small></div><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Hershey (MD)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-02</strong></td>
+        <td><strong>1</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Milo (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-10-01</strong></td>
+        <td><strong>2</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Rocky (SM)</small></div><div class='groomer-cell'><strong>Julia B</strong><br><small>Chloe (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-29</strong></td>
+        <td><strong>3</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Tucker (MD)</small></div><div class='groomer-cell'><strong>Maria V</strong><br><small>Davey (SM), Lucky (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-28</strong></td>
+        <td><strong>3</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>Luigi (SM), Luna (LG), Spanky (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-26</strong></td>
+        <td><strong>8</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>Charlie Brown (LG)</small></div><div class='groomer-cell'><strong>Maria V</strong><br><small>Buddy (SM), Dove (SM), Chanel (SM), Coco (SM), Reign (SM), Maizey (SM)</small></div><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Bella (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-25</strong></td>
+        <td><strong>6</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Alexa (MD), Kona (MD), Peyton (SM)</small></div><div class='groomer-cell'><strong>Julia B</strong><br><small>Alphaa (MD)</small></div><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Zion (MD)</small></div><div class='groomer-cell'><strong>Victoria C.</strong><br><small>Kodi (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-23</strong></td>
+        <td><strong>2</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Angel (MD)</small></div><div class='groomer-cell'><strong>Julia B</strong><br><small>Chip (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-21</strong></td>
+        <td><strong>2</strong></td>
+        <td><div class='groomer-cell'><strong>Maria V</strong><br><small>Fuji (SM), Lucky (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-19</strong></td>
+        <td><strong>5</strong></td>
+        <td><div class='groomer-cell'><strong>Maria V</strong><br><small>Luna (SM), Sunny (SM), Windsor (SM)</small></div><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Lulu Bella (SM), Sofie (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-18</strong></td>
+        <td><strong>4</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Cody (SM), Charlie (SM)</small></div><div class='groomer-cell'><strong>Julianne D</strong><br><small>Bentley (SM)</small></div><div class='groomer-cell'><strong>Victoria C.</strong><br><small>Johnnie B (LG)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-16</strong></td>
+        <td><strong>3</strong></td>
+        <td><div class='groomer-cell'><strong>Maria V</strong><br><small>Bailey (MD), Bob (SM), Rosie (MD)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-15</strong></td>
+        <td><strong>6</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>Bob (?), Bailey (MD), Kelsi (SM)</small></div><div class='groomer-cell'><strong>Julianne D</strong><br><small>Sophie (LG), Stella (SM), Thurman (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-14</strong></td>
+        <td><strong>3</strong></td>
+        <td><div class='groomer-cell'><strong>Julia B</strong><br><small>Miley (SM), Willow (MD)</small></div><div class='groomer-cell'><strong>Maria V</strong><br><small>Toby (XLG)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-12</strong></td>
+        <td><strong>5</strong></td>
+        <td><div class='groomer-cell'><strong>Annmarie Rooney</strong><br><small>Damian (?)</small></div><div class='groomer-cell'><strong>Julia B</strong><br><small>Damian (LG)</small></div><div class='groomer-cell'><strong>Julianne D</strong><br><small>Bella (SM), Oliver (SM)</small></div><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Dexter (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-11</strong></td>
+        <td><strong>8</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Brady (LG), Nate (MD), Sadie (MD), Fitton (LG), Iggy (LG)</small></div><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Bixie (SM)</small></div><div class='groomer-cell'><strong>Victoria C.</strong><br><small>Cosmo (SM), Benji (SM)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-10</strong></td>
+        <td><strong>8</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Charlie (MD), Cooper (SM), London (SM), Coco (SM)</small></div><div class='groomer-cell'><strong>Julia B</strong><br><small>Charlie (MD)</small></div><div class='groomer-cell'><strong>Julianne D</strong><br><small>Bleu (MD), Snacks (SM)</small></div><div class='groomer-cell'><strong>Victoria C.</strong><br><small>Daisey (LG)</small></div></td>
+      </tr>
+      <tr>
+        <td><strong>2026-09-09</strong></td>
+        <td><strong>11</strong></td>
+        <td><div class='groomer-cell'><strong>Carol W</strong><br><small>Dash (SM), Rosie (MD), Spark (MD), Cody (SM), Tucker (XLG), Jack (SM)</small></div><div class='groomer-cell'><strong>Lexie C</strong><br><small>Cooper (?), Zoey (?)</small></div><div class='groomer-cell'><strong>Vanessa M</strong><br><small>Nala (LG), Bailey (SM), Benji (LG)</small></div></td>
+      </tr></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- WIN-BACK -->
+<div class="section" id="tab-winback">
+  <div class="stat-row">
+    <div class="stat" style="border-color:#dc2626"><div class="val" style="color:#dc2626">179</div><div class="lbl">Lapsed</div><div class="updated">≥2× their usual interval</div></div>
+    <div class="stat" style="border-color:#d97706"><div class="val" style="color:#d97706">60</div><div class="lbl">At Risk</div><div class="updated">1.5–2× their usual interval</div></div>
+    <div class="stat"><div class="val">239</div><div class="lbl">Total needing outreach</div></div>
+  </div>
+  <div class="card">
+    <h2>Win-Back Outreach List</h2>
+    <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
+      Dogs overdue based on their own historical visit frequency. Lapsed = gone 2× longer than usual. At Risk = 1.5×. Sorted by most overdue first.
+    </p>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Usual Groomer</th><th>Visits</th></tr></thead>
+      <tbody>
+      <tr>
+        <td><strong>Diamond girl</strong><br><small style="color:var(--muted)">SM · MG</small></td>
+        <td>Gabrielle Guillaume<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-01-22<br><small style="color:var(--muted)">228d ago</small></td>
+        <td>Every ~8 days (1w)<br><small style="color:#dc2626">220d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Sadie</strong><br><small style="color:var(--muted)">SM · MG</small></td>
+        <td>Max Mogil<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-02-09<br><small style="color:var(--muted)">210d ago</small></td>
+        <td>Every ~27 days (3w)<br><small style="color:#dc2626">183d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Raji</strong><br><small style="color:var(--muted)"> · Gift Card - 1.00000</small></td>
+        <td>Cynthia Szczudlo<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-02-27<br><small style="color:var(--muted)">192d ago</small></td>
+        <td>Every ~11 days (1w)<br><small style="color:#dc2626">181d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Nohva</strong><br><small style="color:var(--muted)"> · first groom: A o</small></td>
+        <td>Khendra Campbell<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-02-11<br><small style="color:var(--muted)">208d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#dc2626">178d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Leah</strong><br><small style="color:var(--muted)"> · 1 a</small></td>
+        <td>Shenae Carpenter<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-02-27<br><small style="color:var(--muted)">192d ago</small></td>
+        <td>Every ~18 days (2w)<br><small style="color:#dc2626">174d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Brody</strong><br><small style="color:var(--muted)">Vet. Will need to be on meds for next appt. or cannot book CS · 3</small></td>
+        <td>michelle lenski<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-05<br><small style="color:var(--muted)">186d ago</small></td>
+        <td>Every ~19 days (2w)<br><small style="color:#dc2626">166d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Nacho</strong><br><small style="color:var(--muted)"> · 3</small></td>
+        <td>Leidy Montano<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-21<br><small style="color:var(--muted)">170d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#dc2626">158d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Milo</strong><br><small style="color:var(--muted)">c of warm weather. · 5</small></td>
+        <td>Steven Rivera<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-13<br><small style="color:var(--muted)">178d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">156d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>bella</strong><br><small style="color:var(--muted)">MD · Lux Bath</small></td>
+        <td>christopher monuna<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-04<br><small style="color:var(--muted)">187d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#dc2626">156d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Molly</strong><br><small style="color:var(--muted)"> · 3</small></td>
+        <td>Stefanie Weisbach<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-07<br><small style="color:var(--muted)">184d ago</small></td>
+        <td>Every ~29 days (4w)<br><small style="color:#dc2626">155d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Bella</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Roden Oginar<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-27<br><small style="color:var(--muted)">164d ago</small></td>
+        <td>Every ~10 days (1w)<br><small style="color:#dc2626">153d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>francesca</strong><br><small style="color:var(--muted)"> · Skittish but very well behaved. sweet girls the both of them.</small></td>
+        <td>Liz Galasso<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-13<br><small style="color:var(--muted)">178d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">152d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Maverick</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>Heather Hammerman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-13<br><small style="color:var(--muted)">178d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#dc2626">150d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Teddy</strong><br><small style="color:var(--muted)"> · 5</small></td>
+        <td>HABIBI seraj<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-19<br><small style="color:var(--muted)">172d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">149d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Blinkie</strong><br><small style="color:var(--muted)">h · 4o</small></td>
+        <td>Leon Schickman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-18<br><small style="color:var(--muted)">173d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">147d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Houdini</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Leon Schickman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-18<br><small style="color:var(--muted)">173d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">147d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Sparky</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Leon Schickman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-18<br><small style="color:var(--muted)">173d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">147d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Gogo</strong><br><small style="color:var(--muted)"> · #1 all over A head trim tail... Debby</small></td>
+        <td>Crystal Lim<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-31<br><small style="color:var(--muted)">160d ago</small></td>
+        <td>Every ~14 days (2w)<br><small style="color:#dc2626">146d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Cosmo</strong><br><small style="color:var(--muted)"> · 3</small></td>
+        <td>Brittney Warner<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-07<br><small style="color:var(--muted)">153d ago</small></td>
+        <td>Every ~9 days (1w)<br><small style="color:#dc2626">144d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Nimmo</strong><br><small style="color:var(--muted)"> · Wants a call after 4</small></td>
+        <td>Leon Schickman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-26<br><small style="color:var(--muted)">165d ago</small></td>
+        <td>Every ~21 days (3w)<br><small style="color:#dc2626">143d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Bodhi</strong><br><small style="color:var(--muted)">SM · MG</small></td>
+        <td>Laura Kelly<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-27<br><small style="color:var(--muted)">164d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">141d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Stella</strong><br><small style="color:var(--muted)">SM · Lux Bath</small></td>
+        <td>Kevin Raab<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-10<br><small style="color:var(--muted)">150d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#dc2626">138d overdue</small></td>
+        <td><small>Debra N</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>scout</strong><br><small style="color:var(--muted)"> · 5</small></td>
+        <td>barbara moran<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-23<br><small style="color:var(--muted)">168d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#dc2626">137d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Tilly</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Jane Gewant<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-16<br><small style="color:var(--muted)">144d ago</small></td>
+        <td>Every ~8 days (1w)<br><small style="color:#dc2626">136d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Ozai</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>Riya Sharma<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-07<br><small style="color:var(--muted)">153d ago</small></td>
+        <td>Every ~17 days (2w)<br><small style="color:#dc2626">136d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Journey</strong><br><small style="color:var(--muted)">SM · MG</small></td>
+        <td>Imani Insuasti<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-17<br><small style="color:var(--muted)">143d ago</small></td>
+        <td>Every ~9 days (1w)<br><small style="color:#dc2626">134d overdue</small></td>
+        <td><small>Debra N</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Vidi</strong><br><small style="color:var(--muted)"> · 1</small></td>
+        <td>Ximina Flemming<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-14<br><small style="color:var(--muted)">146d ago</small></td>
+        <td>Every ~11 days (1w)<br><small style="color:#dc2626">134d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Twinkie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Leon Schickman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-18<br><small style="color:var(--muted)">173d ago</small></td>
+        <td>Every ~38 days (5w)<br><small style="color:#dc2626">134d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Charli Mae</strong><br><small style="color:var(--muted)"> · does want shaved, wants feathering even to the leg, doesn't like head being dried, wants hair behind ears trimmed HI</small></td>
+        <td>Jerilyn Kaval<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-10<br><small style="color:var(--muted)">150d ago</small></td>
+        <td>Every ~18 days (2w)<br><small style="color:#dc2626">132d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Enzo</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Pesina Eaeta<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-13<br><small style="color:var(--muted)">147d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">131d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Cupcake, Parker</strong><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · FG</small></td>
+        <td>Lisa Pfeifer<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-22<br><small style="color:var(--muted)">138d ago</small></td>
+        <td>Every ~8 days (1w)<br><small style="color:#dc2626">130d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Journey</strong><br><small style="color:var(--muted)"> · Cookie - Mini Birthday Cupcake - 1.00000, I Ruv Ice Cream Swirl - 1.00000, X-Small Treat Table - 1.00000, WGB Collagen Chew - Beef Small Roll 5&quot; - 2.00000</small></td>
+        <td>Imani Insuasti<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-17<br><small style="color:var(--muted)">143d ago</small></td>
+        <td>Every ~14 days (2w)<br><small style="color:#dc2626">129d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Mini, Penny</strong><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
+        <td>Sharon Higgins<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-08<br><small style="color:var(--muted)">152d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#dc2626">129d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Penny</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Sharon Higgins<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-08<br><small style="color:var(--muted)">152d ago</small></td>
+        <td>Every ~24 days (3w)<br><small style="color:#dc2626">128d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Benji</strong><br><small style="color:var(--muted)">MD · Lux Bath</small></td>
+        <td>Jackie Wynne<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-03-20<br><small style="color:var(--muted)">171d ago</small></td>
+        <td>Every ~44 days (6w)<br><small style="color:#dc2626">127d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Remy</strong><br><small style="color:var(--muted)">MD · Clsc Bath</small></td>
+        <td>Joseph Giordano<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-13<br><small style="color:var(--muted)">147d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">124d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Winnie</strong><br><small style="color:var(--muted)">LG · Lux Bath</small></td>
+        <td>Dana Walsh<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-01<br><small style="color:var(--muted)">129d ago</small></td>
+        <td>Every ~10 days (1w)<br><small style="color:#dc2626">119d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Roscoe</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Michelle Seid<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-22<br><small style="color:var(--muted)">138d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">115d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Laila</strong><br><small style="color:var(--muted)"> · A o</small></td>
+        <td>Lloyd madden<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-22<br><small style="color:var(--muted)">138d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#dc2626">114d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Mocha</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Kimberly Lee<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-23<br><small style="color:var(--muted)">137d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#dc2626">109d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Phoebe</strong><br><small style="color:var(--muted)"> · 0 a</small></td>
+        <td>Jamie Devaoo<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-22<br><small style="color:var(--muted)">138d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#dc2626">109d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Gus</strong><br><small style="color:var(--muted)">Trazadone. Maria did 2x but cannot do again only bath-too bitey and cannot finish face · 5</small></td>
+        <td>Ellen Picardi<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-02<br><small style="color:var(--muted)">128d ago</small></td>
+        <td>Every ~20 days (2w)<br><small style="color:#dc2626">107d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Cola</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>Kim Hyunsook<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-21<br><small style="color:var(--muted)">139d ago</small></td>
+        <td>Every ~32 days (4w)<br><small style="color:#dc2626">107d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Shoomie</strong><br><small style="color:var(--muted)"> · don't book on Julia again. If asks for her just say booked and offer other groomer CS</small></td>
+        <td>Daphne Ruzhiel<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-14<br><small style="color:var(--muted)">116d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#dc2626">104d overdue</small></td>
+        <td><small></small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Macie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Jennifer Pellegrini<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-12<br><small style="color:var(--muted)">118d ago</small></td>
+        <td>Every ~14 days (2w)<br><small style="color:#dc2626">104d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Mack</strong><br><small style="color:var(--muted)"> · Matted skirt. 7sch cut, 5 skirt, sch head, trim tail</small></td>
+        <td>Dana Gelber<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-11<br><small style="color:var(--muted)">119d ago</small></td>
+        <td>Every ~14 days (2w)<br><small style="color:#dc2626">104d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Benny</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Marjorie Tirsun<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-08<br><small style="color:var(--muted)">122d ago</small></td>
+        <td>Every ~17 days (2w)<br><small style="color:#dc2626">104d overdue</small></td>
+        <td><small>Debra N</small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Bruno</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>German Paris<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-14<br><small style="color:var(--muted)">116d ago</small></td>
+        <td>Every ~13 days (1w)<br><small style="color:#dc2626">102d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Sadie Mac</strong><br><small style="color:var(--muted)">SM · MG</small></td>
+        <td>Max Mogil<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-11<br><small style="color:var(--muted)">119d ago</small></td>
+        <td>Every ~18 days (2w)<br><small style="color:#dc2626">100d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Teddy</strong><br><small style="color:var(--muted)"> · 5 ao (matted), tbf, trim tail and ears</small></td>
+        <td>Madeline Pantaleon<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-18<br><small style="color:var(--muted)">112d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">96d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Nicki</strong><br><small style="color:var(--muted)"> · accidentally charged fg and julia did a mg</small></td>
+        <td>Heather Lonic<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-04<br><small style="color:var(--muted)">126d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#dc2626">96d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Honey</strong><br><small style="color:var(--muted)"> · 2a</small></td>
+        <td>Candace Marck<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-20<br><small style="color:var(--muted)">110d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#dc2626">95d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Ozai</strong><br><small style="color:var(--muted)">LG - 1.00000 · FG</small></td>
+        <td>Riya Sharma<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-07<br><small style="color:var(--muted)">153d ago</small></td>
+        <td>Every ~58 days (8w)<br><small style="color:#dc2626">94d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Gordie</strong><br><small style="color:var(--muted)"> · use this profile for booking appointments has 2 profiles HI</small></td>
+        <td>Lisa Halpin<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-22<br><small style="color:var(--muted)">108d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#dc2626">92d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Sammy</strong><br><small style="color:var(--muted)"> · 5ao, tbf, trim tail and ears</small></td>
+        <td>Brian Munter<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-18<br><small style="color:var(--muted)">112d ago</small></td>
+        <td>Every ~20 days (2w)<br><small style="color:#dc2626">91d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Sloane</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Isaac Gealer<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-07<br><small style="color:var(--muted)">123d ago</small></td>
+        <td>Every ~31 days (4w)<br><small style="color:#dc2626">91d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Melli</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Catelin Budano<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-19<br><small style="color:var(--muted)">111d ago</small></td>
+        <td>Every ~20 days (2w)<br><small style="color:#dc2626">90d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Harley</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Jennifer Pellegrini<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-12<br><small style="color:var(--muted)">118d ago</small></td>
+        <td>Every ~27 days (3w)<br><small style="color:#dc2626">90d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Charli Mae</strong><br><small style="color:var(--muted)"> · Medium Treat Table - 1.00000, Preppy Puppy Pink</small></td>
+        <td>Jerilyn Kaval<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-03<br><small style="color:var(--muted)">127d ago</small></td>
+        <td>Every ~38 days (5w)<br><small style="color:#dc2626">89d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Molly</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Rose Karahalis<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-14<br><small style="color:var(--muted)">116d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#dc2626">88d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Venchi</strong><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
+        <td>Ash Puri<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-08<br><small style="color:var(--muted)">122d ago</small></td>
+        <td>Every ~34 days (4w)<br><small style="color:#dc2626">88d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Auggie</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Cal Leonard<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-30<br><small style="color:var(--muted)">100d ago</small></td>
+        <td>Every ~13 days (1w)<br><small style="color:#dc2626">87d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Piper</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Leona Geneen<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-28<br><small style="color:var(--muted)">102d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#dc2626">87d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Ollie</strong><br><small style="color:var(--muted)"> · 5ao, tbf, trim tail and ears</small></td>
+        <td>Brian Munter<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-18<br><small style="color:var(--muted)">112d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">86d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Molly</strong><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
+        <td>Rose Karahalis<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-14<br><small style="color:var(--muted)">116d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#dc2626">86d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Rupert</strong><br><small style="color:var(--muted)"> · mini groom</small></td>
+        <td>Beth Matlin<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-28<br><small style="color:var(--muted)">102d ago</small></td>
+        <td>Every ~17 days (2w)<br><small style="color:#dc2626">85d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Tate</strong><br><small style="color:var(--muted)"> · Woof Gang Bully Sticks 6 Pack - 1.00000</small></td>
+        <td>Stacey Granat<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-14<br><small style="color:var(--muted)">116d ago</small></td>
+        <td>Every ~32 days (4w)<br><small style="color:#dc2626">84d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>storm</strong><br><small style="color:var(--muted)">Grind · WALK-IN SERVICE</small></td>
+        <td>linda carter<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-04-20<br><small style="color:var(--muted)">140d ago</small></td>
+        <td>Every ~56 days (8w)<br><small style="color:#dc2626">84d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Ruby</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Linda Mollica<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-05<br><small style="color:var(--muted)">94d ago</small></td>
+        <td>Every ~11 days (1w)<br><small style="color:#dc2626">83d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Gus, Ollie</strong><br><small style="color:var(--muted)">Grind - 1.00000, FG · WALK-IN SERVICE</small></td>
+        <td>Ellen Picardi<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-02<br><small style="color:var(--muted)">128d ago</small></td>
+        <td>Every ~46 days (6w)<br><small style="color:#dc2626">82d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Ollie</strong><br><small style="color:var(--muted)">26 ear cut when Ollie tried to bite Carol. Client informed. Owner spoken to-they took Ollie to Vet to get ear glued. Said understood as Ollie can be difficult. CS · 5</small></td>
+        <td>Amanda Bacharier<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-02<br><small style="color:var(--muted)">97d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">81d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Bruno</strong><br><small style="color:var(--muted)">LG - 1.00000, ADD-ON · FG</small></td>
+        <td>German Paris<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-14<br><small style="color:var(--muted)">116d ago</small></td>
+        <td>Every ~36 days (5w)<br><small style="color:#dc2626">80d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Milo</strong><br><small style="color:var(--muted)">26 1st time cust heard shutup said to dog in babk and also Debby mentioned smell of other dog on her. Bad 1st experience. spoke w · 4</small></td>
+        <td>Melissa Rojan<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-02<br><small style="color:var(--muted)">97d ago</small></td>
+        <td>Every ~17 days (2w)<br><small style="color:#dc2626">79d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Ollie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Melani Heller<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-28<br><small style="color:var(--muted)">102d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">79d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Ellie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Susan Fishelberg<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-30<br><small style="color:var(--muted)">100d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">78d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Leo</strong><br><small style="color:var(--muted)">SM · MG</small></td>
+        <td>Christian Lopez<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-30<br><small style="color:var(--muted)">100d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">78d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Ollie, Sammy</strong><br><small style="color:var(--muted)">SM - 1.00000, FG · FG</small></td>
+        <td>Brian Munter<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-18<br><small style="color:var(--muted)">112d ago</small></td>
+        <td>Every ~34 days (4w)<br><small style="color:#dc2626">78d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Harley, Macie</strong><br><small style="color:var(--muted)">SM - 1.00000, FG · FG</small></td>
+        <td>Jennifer Pellegrini<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-12<br><small style="color:var(--muted)">118d ago</small></td>
+        <td>Every ~40 days (5w)<br><small style="color:#dc2626">78d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Ollie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Jim Werner<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-20<br><small style="color:var(--muted)">110d ago</small></td>
+        <td>Every ~32 days (4w)<br><small style="color:#dc2626">77d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Mack</strong><br><small style="color:var(--muted)">MD - 1.00000, ADD-ON · FG</small></td>
+        <td>Dana Gelber<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-11<br><small style="color:var(--muted)">119d ago</small></td>
+        <td>Every ~43 days (6w)<br><small style="color:#dc2626">76d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Gadget</strong><br><small style="color:var(--muted)">26 small wound on belly during shavedown (looked like pimple  popped) owner not told at time daught told at pickkup.  owner found bleedingat home and took to Vet we covered $354 Vet bill · 4</small></td>
+        <td>Maria Resende<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-02<br><small style="color:var(--muted)">97d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#dc2626">74d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Diesel</strong><br><small style="color:var(--muted)"> · ONLINE SERVICE (#1) - DOG - Full Groom</small></td>
+        <td>Jacklyn Frank<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-29<br><small style="color:var(--muted)">101d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">74d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Coco, Vegas</strong><br><small style="color:var(--muted)"> · WGB Chips - Beef Chips (4 oz) - 2.00000</small></td>
+        <td>Kathleen Milana<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-26<br><small style="color:var(--muted)">104d ago</small></td>
+        <td>Every ~31 days (4w)<br><small style="color:#dc2626">72d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Cupcake</strong><br><small style="color:var(--muted)"> · Don't use this profile book under Lisa Pfeifer profile</small></td>
+        <td>Lisa Pfeifer<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-19<br><small style="color:var(--muted)">111d ago</small></td>
+        <td>Every ~39 days (5w)<br><small style="color:#dc2626">72d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Mozzie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Carolyn Miao<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-13<br><small style="color:var(--muted)">86d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#dc2626">71d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Zeus</strong><br><small style="color:var(--muted)">XLG · MG</small></td>
+        <td>Dana Aronow<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-07<br><small style="color:var(--muted)">92d ago</small></td>
+        <td>Every ~20 days (2w)<br><small style="color:#dc2626">71d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Sadie, Sadie Mac</strong><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · MG</small></td>
+        <td>Max Mogil<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-11<br><small style="color:var(--muted)">119d ago</small></td>
+        <td>Every ~48 days (6w)<br><small style="color:#dc2626">70d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Bree</strong><br><small style="color:var(--muted)">8 ao, tbf, trim tail and ears · 1</small></td>
+        <td>Maryanne Sullivan<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-13<br><small style="color:var(--muted)">86d ago</small></td>
+        <td>Every ~21 days (3w)<br><small style="color:#dc2626">65d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Ellie</strong><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
+        <td>Susan Fishelberg<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-30<br><small style="color:var(--muted)">100d ago</small></td>
+        <td>Every ~35 days (5w)<br><small style="color:#dc2626">65d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Ginger</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Christine Iannucci<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-05<br><small style="color:var(--muted)">94d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#dc2626">64d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Maisie</strong><br><small style="color:var(--muted)">Grind - 1.00000 · Bakery Bulk Treats - 7.00000, WALK-IN SERVICE</small></td>
+        <td>Patrice Wein<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-05<br><small style="color:var(--muted)">94d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#dc2626">64d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Bella</strong><br><small style="color:var(--muted)"> · 3</small></td>
+        <td>Jordana Zachary<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-26<br><small style="color:var(--muted)">73d ago</small></td>
+        <td>Every ~9 days (1w)<br><small style="color:#dc2626">63d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Hershey</strong><br><small style="color:var(--muted)">MD - 1.00000 · FG</small></td>
+        <td>Karyn Raxenberg<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-13<br><small style="color:var(--muted)">86d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#dc2626">63d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Finn</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Jennifer Gutterson<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-05<br><small style="color:var(--muted)">94d ago</small></td>
+        <td>Every ~31 days (4w)<br><small style="color:#dc2626">63d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Diesel</strong><br><small style="color:var(--muted)"> · WGB Bully Stick Braided 12&quot; - 1.00000</small></td>
+        <td>Jacklyn Frank<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-28<br><small style="color:var(--muted)">102d ago</small></td>
+        <td>Every ~39 days (5w)<br><small style="color:#dc2626">63d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Sloane</strong><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · FG</small></td>
+        <td>Isaac Gealer<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-07<br><small style="color:var(--muted)">123d ago</small></td>
+        <td>Every ~60 days (8w)<br><small style="color:#dc2626">63d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Ollie</strong><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · FG</small></td>
+        <td>Jim Werner<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-20<br><small style="color:var(--muted)">110d ago</small></td>
+        <td>Every ~48 days (6w)<br><small style="color:#dc2626">61d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Venchi</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Ash Puri<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-23<br><small style="color:var(--muted)">76d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#dc2626">60d overdue</small></td>
+        <td><small>Wgb Hicksville</small></td>
+        <td>13</td>
+      </tr>
+      <tr>
+        <td><strong>Shiba</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Hector Arrivillaga<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-19<br><small style="color:var(--muted)">111d ago</small></td>
+        <td>Every ~52 days (7w)<br><small style="color:#dc2626">59d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Ollie</strong><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
+        <td>Melani Heller<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-05-28<br><small style="color:var(--muted)">102d ago</small></td>
+        <td>Every ~44 days (6w)<br><small style="color:#dc2626">58d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Hunter</strong><br><small style="color:var(--muted)">XLG · FG</small></td>
+        <td>Min Tian<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-26<br><small style="color:var(--muted)">73d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">57d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Kobe</strong><br><small style="color:var(--muted)"> · 0 a</small></td>
+        <td>Sharonie Kesselman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-16<br><small style="color:var(--muted)">83d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">57d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Molly</strong><br><small style="color:var(--muted)">SM · Lux Bath</small></td>
+        <td>Stacey Haber<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-08<br><small style="color:var(--muted)">91d ago</small></td>
+        <td>Every ~33 days (4w)<br><small style="color:#dc2626">57d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Johnie B</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>Robin Chamow<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-06<br><small style="color:var(--muted)">93d ago</small></td>
+        <td>Every ~36 days (5w)<br><small style="color:#dc2626">57d overdue</small></td>
+        <td><small>Wgb Hicksville</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Coco</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Monita bijoriya<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-04<br><small style="color:var(--muted)">95d ago</small></td>
+        <td>Every ~38 days (5w)<br><small style="color:#dc2626">57d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Polar</strong><br><small style="color:var(--muted)"> · 5ao, tbf, trim ears and tail</small></td>
+        <td>Sunali Nagi<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-26<br><small style="color:var(--muted)">73d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">56d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Opie</strong><br><small style="color:var(--muted)">h · 5 o</small></td>
+        <td>Allison Strohson<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-20<br><small style="color:var(--muted)">79d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#dc2626">56d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Snickers</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Noel Hammaren<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-03<br><small style="color:var(--muted)">66d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#dc2626">54d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Theo</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Ava Zias<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-26<br><small style="color:var(--muted)">73d ago</small></td>
+        <td>Every ~18 days (2w)<br><small style="color:#dc2626">54d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Benny</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>Jahmeelah Shabazz<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-23<br><small style="color:var(--muted)">76d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">53d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Millie</strong><br><small style="color:var(--muted)"> · 2a</small></td>
+        <td>Karina Widdicombe<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-05<br><small style="color:var(--muted)">94d ago</small></td>
+        <td>Every ~42 days (6w)<br><small style="color:#dc2626">52d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Odie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Yiendhy Farrelly<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-22<br><small style="color:var(--muted)">77d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">51d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Clover, Daisy</strong><br><small style="color:var(--muted)">XXLG - 1.00000, ADD-ON · Large Treat Table - 2.00000, FG</small></td>
+        <td>Brianna Tietjen<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-06<br><small style="color:var(--muted)">93d ago</small></td>
+        <td>Every ~42 days (6w)<br><small style="color:#dc2626">51d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Marshal</strong><br><small style="color:var(--muted)">h · I o</small></td>
+        <td>Michael Gussin<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~9 days (1w)<br><small style="color:#dc2626">50d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Ollie</strong><br><small style="color:var(--muted)"> · 7ao 1gc head short tbf trim ears lion tail (matted)</small></td>
+        <td>Lena Nadelman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-27<br><small style="color:var(--muted)">72d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">49d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Snacks</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Kamal Bal<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-26<br><small style="color:var(--muted)">73d ago</small></td>
+        <td>Every ~24 days (3w)<br><small style="color:#dc2626">49d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Bailey, Jax, Niko</strong><br><small style="color:var(--muted)">LG - 1.00000, FG · MG</small></td>
+        <td>Maxine Epstien<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-23<br><small style="color:var(--muted)">76d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#dc2626">48d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Skylar</strong><br><small style="color:var(--muted)">and assured we will note to not cut paws too short next time HI · 7</small></td>
+        <td>Doreen Kramer<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-03<br><small style="color:var(--muted)">66d ago</small></td>
+        <td>Every ~19 days (2w)<br><small style="color:#dc2626">47d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Pepper</strong><br><small style="color:var(--muted)"> · 1a</small></td>
+        <td>Divpreet Kaur<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-11<br><small style="color:var(--muted)">58d ago</small></td>
+        <td>Every ~11 days (1w)<br><small style="color:#dc2626">46d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Tasha</strong><br><small style="color:var(--muted)">h short face · 6 o</small></td>
+        <td>Ken Partlow<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~13 days (1w)<br><small style="color:#dc2626">46d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Charlie</strong><br><small style="color:var(--muted)"> · 2a</small></td>
+        <td>Gary Goltzman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-26<br><small style="color:var(--muted)">73d ago</small></td>
+        <td>Every ~27 days (3w)<br><small style="color:#dc2626">46d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Pancake</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Shari Staiano<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-19<br><small style="color:var(--muted)">80d ago</small></td>
+        <td>Every ~34 days (4w)<br><small style="color:#dc2626">46d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Bijou</strong><br><small style="color:var(--muted)"> · 1 guard A head tbf trim ears</small></td>
+        <td>Susanne Smith<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-16<br><small style="color:var(--muted)">53d ago</small></td>
+        <td>Every ~7 days (1w)<br><small style="color:#dc2626">45d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Teddy</strong><br><small style="color:var(--muted)">h · 5 o</small></td>
+        <td>Stefanie Mosenson<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-11<br><small style="color:var(--muted)">58d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#dc2626">45d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Teddy</strong><br><small style="color:var(--muted)">h tight face · 6 o</small></td>
+        <td>Ken Partlow<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~14 days (2w)<br><small style="color:#dc2626">45d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Violet</strong><br><small style="color:var(--muted)">LG - 1.00000, ADD-ON · WGB Collagen Chew - Beef Large Roll 10&quot; - 1.00000, Lux Bath</small></td>
+        <td>Miranda Ortiz<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-02<br><small style="color:var(--muted)">67d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#dc2626">43d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Duck</strong><br><small style="color:var(--muted)">MD - 1.00000, SPA UPGRADE · MG</small></td>
+        <td>Anna Woytysiak<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-15<br><small style="color:var(--muted)">54d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#dc2626">42d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Calvin</strong><br><small style="color:var(--muted)">LG · Lux Bath</small></td>
+        <td>Rachel Luxemburg<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-26<br><small style="color:var(--muted)">73d ago</small></td>
+        <td>Every ~31 days (4w)<br><small style="color:#dc2626">42d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Shea</strong><br><small style="color:var(--muted)"> · spot shave matting, 5</small></td>
+        <td>Adrian Mellina<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-15<br><small style="color:var(--muted)">54d ago</small></td>
+        <td>Every ~13 days (1w)<br><small style="color:#dc2626">41d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Tasha, Teddy</strong><br><small style="color:var(--muted)">MD - 1.00000 · FG</small></td>
+        <td>Ken Partlow<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~17 days (2w)<br><small style="color:#dc2626">41d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Joey</strong><br><small style="color:var(--muted)"> · 5</small></td>
+        <td>Sam Leiman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-29<br><small style="color:var(--muted)">70d ago</small></td>
+        <td>Every ~29 days (4w)<br><small style="color:#dc2626">41d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Toffy</strong><br><small style="color:var(--muted)">h · 5o</small></td>
+        <td>Mary Seleman<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-26<br><small style="color:var(--muted)">73d ago</small></td>
+        <td>Every ~31 days (4w)<br><small style="color:#dc2626">41d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Polar</strong><br><small style="color:var(--muted)">MD - 1.00000, SPA UPGRADE · FG</small></td>
+        <td>Sunali Nagi<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-25<br><small style="color:var(--muted)">74d ago</small></td>
+        <td>Every ~32 days (4w)<br><small style="color:#dc2626">41d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Duck</strong><br><small style="color:var(--muted)"> · minigroom tbf ants to grow dog long</small></td>
+        <td>Anna Woytysiak<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-16<br><small style="color:var(--muted)">53d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#dc2626">40d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Dixie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Jannie Counsell<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-11<br><small style="color:var(--muted)">58d ago</small></td>
+        <td>Every ~18 days (2w)<br><small style="color:#dc2626">40d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Bader</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Lindsay Davis<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-07<br><small style="color:var(--muted)">62d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">40d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Zero</strong><br><small style="color:var(--muted)">XLG · Lux Bath</small></td>
+        <td>Tiffany Rudolph<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-18<br><small style="color:var(--muted)">51d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#dc2626">39d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Ava</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Kay Kwak<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-02<br><small style="color:var(--muted)">67d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#dc2626">39d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Milo</strong><br><small style="color:var(--muted)">16. happy with maria and caroll so ONLY BOOK UNDER MARIA OR CAROL HI · 7</small></td>
+        <td>Michelle Brady<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-16<br><small style="color:var(--muted)">53d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">37d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>London</strong><br><small style="color:var(--muted)"> · HonestChew- Infinity S - 1.00000</small></td>
+        <td>Kay Bracken<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-06-25<br><small style="color:var(--muted)">74d ago</small></td>
+        <td>Every ~37 days (5w)<br><small style="color:#dc2626">37d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Moses</strong><br><small style="color:var(--muted)">h · 2o</small></td>
+        <td>Rachel Gubin<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#dc2626">36d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Loki</strong><br><small style="color:var(--muted)">hd trim ears and tail · 1a</small></td>
+        <td>Andrew Weiss<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~24 days (3w)<br><small style="color:#dc2626">35d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Benji</strong><br><small style="color:var(--muted)"> · 2a</small></td>
+        <td>Paul Krasko<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~25 days (3w)<br><small style="color:#dc2626">34d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Tony</strong><br><small style="color:var(--muted)"> · 7</small></td>
+        <td>Luis Rodriguez<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-01<br><small style="color:var(--muted)">68d ago</small></td>
+        <td>Every ~33 days (4w)<br><small style="color:#dc2626">34d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Murphy</strong><br><small style="color:var(--muted)">LG · Clsc Bath</small></td>
+        <td>Sydney Phelan<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-20<br><small style="color:var(--muted)">49d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">33d overdue</small></td>
+        <td><small>Wgb Hicksville</small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Chanel, Coco, Luna, Reign, Sunny, Windsor</strong><br><small style="color:var(--muted)">SM - 1.00000, FG · FG</small></td>
+        <td>Jaime Perlafurst<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-18<br><small style="color:var(--muted)">51d ago</small></td>
+        <td>Every ~18 days (2w)<br><small style="color:#dc2626">33d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Teddy</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Linda Goldfarb<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-09<br><small style="color:var(--muted)">60d ago</small></td>
+        <td>Every ~27 days (3w)<br><small style="color:#dc2626">33d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Jack</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Aneliya Hristoba<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-07<br><small style="color:var(--muted)">62d ago</small></td>
+        <td>Every ~29 days (4w)<br><small style="color:#dc2626">33d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Coco</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Pinaz Khan<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-11<br><small style="color:var(--muted)">58d ago</small></td>
+        <td>Every ~26 days (3w)<br><small style="color:#dc2626">32d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Bowser</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Gen Filverio<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-17<br><small style="color:var(--muted)">52d ago</small></td>
+        <td>Every ~21 days (3w)<br><small style="color:#dc2626">31d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Lucca</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Raul Rojas<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#dc2626">31d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Charlie</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Annie Yang Cording<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-08<br><small style="color:var(--muted)">61d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#dc2626">31d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Miles</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Cliff Bieder<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-20<br><small style="color:var(--muted)">49d ago</small></td>
+        <td>Every ~19 days (2w)<br><small style="color:#dc2626">30d overdue</small></td>
+        <td><small>Wgb Hicksville</small></td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td><strong>Boccelli</strong><br><small style="color:var(--muted)"> · Matted today, will see what I can do</small></td>
+        <td>Christina Mammano<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-15<br><small style="color:var(--muted)">54d ago</small></td>
+        <td>Every ~24 days (3w)<br><small style="color:#dc2626">30d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Apollo, Honey, Pancake, Zsa zsa</strong><br><small style="color:var(--muted)">SM - 1.00000 · No Hide Beef - Stix - 1.00000, FG</small></td>
+        <td>Shari Staiano<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-15<br><small style="color:var(--muted)">54d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#dc2626">30d overdue</small></td>
+        <td><small></small></td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td><strong>Pepper</strong><br><small style="color:var(--muted)">MD - 1.00000, ADD-ON · Taco Tuesday Treat - 1.00000, Hamburger - XL - 1.00000, Cannoli - 1.00000, FG</small></td>
+        <td>Divpreet Kaur<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-11<br><small style="color:var(--muted)">58d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#dc2626">30d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Luna</strong><br><small style="color:var(--muted)">MD · Lux Bath</small></td>
+        <td>Kallie Koroneos<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-25<br><small style="color:var(--muted)">44d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#dc2626">29d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>12</td>
+      </tr>
+      <tr>
+        <td><strong>Murray</strong><br><small style="color:var(--muted)">LG · Lux Bath</small></td>
+        <td>Eleanor Chung-Wernow<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-24<br><small style="color:var(--muted)">45d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#dc2626">29d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Milo</strong><br><small style="color:var(--muted)"> · asked for shave. clipped with a 3mm guard (=7 blade) owner was unhappy .</small></td>
+        <td>Michelle Brady<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-16<br><small style="color:var(--muted)">53d ago</small></td>
+        <td>Every ~24 days (3w)<br><small style="color:#dc2626">28d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Winston</strong><br><small style="color:var(--muted)"> · 7 Westin cut</small></td>
+        <td>Loraine Ricciuto<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-16<br><small style="color:var(--muted)">53d ago</small></td>
+        <td>Every ~25 days (3w)<br><small style="color:#dc2626">28d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Murray</strong><br><small style="color:var(--muted)"> · GEN COAT HI</small></td>
+        <td>Christine Carucci<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-30<br><small style="color:var(--muted)">39d ago</small></td>
+        <td>Every ~11 days (1w)<br><small style="color:#dc2626">27d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Bear</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Carrie Rodriguez<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-25<br><small style="color:var(--muted)">44d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">27d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Aspen</strong><br><small style="color:var(--muted)">LG - 1.00000 · FG</small></td>
+        <td>Phil Zorn<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-22<br><small style="color:var(--muted)">47d ago</small></td>
+        <td>Every ~19 days (2w)<br><small style="color:#dc2626">27d overdue</small></td>
+        <td><small></small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Aspen</strong><br><small style="color:var(--muted)"> · 1</small></td>
+        <td>Phil Zorn<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-22<br><small style="color:var(--muted)">47d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#dc2626">25d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Jim</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Julia Chen<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-03<br><small style="color:var(--muted)">35d ago</small></td>
+        <td>Every ~11 days (1w)<br><small style="color:#dc2626">24d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Snowie</strong><br><small style="color:var(--muted)"> · 3</small></td>
+        <td>Kim Covino<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-29<br><small style="color:var(--muted)">40d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">24d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Tiger</strong><br><small style="color:var(--muted)"> · 2gc ao agc head tbf</small></td>
+        <td>Isaac Maryliza<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-21<br><small style="color:var(--muted)">48d ago</small></td>
+        <td>Every ~24 days (3w)<br><small style="color:#dc2626">24d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>May, Yuna</strong><br><small style="color:var(--muted)"> · WGB Turkey Tendons Full Strip (3 oz) - 1.00000</small></td>
+        <td>Christina Kong<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-04<br><small style="color:var(--muted)">34d ago</small></td>
+        <td>Every ~10 days (1w)<br><small style="color:#dc2626">23d overdue</small></td>
+        <td><small></small></td>
+        <td>24</td>
+      </tr>
+      <tr>
+        <td><strong>Stella</strong><br><small style="color:var(--muted)"> · lightgolden trim Acomb skim butt. hotshop on back left hip. right hip</small></td>
+        <td>Sari Weinstein<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-31<br><small style="color:var(--muted)">38d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#dc2626">23d overdue</small></td>
+        <td><small></small></td>
+        <td>13</td>
+      </tr>
+      <tr>
+        <td><strong>Peanut Butter</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Giovanni Lazala<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-24<br><small style="color:var(--muted)">45d ago</small></td>
+        <td>Every ~21 days (3w)<br><small style="color:#dc2626">23d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Callie</strong><br><small style="color:var(--muted)"> · very uneven 0c body for both scissor with thinners and curved</small></td>
+        <td>Christina Cangiano<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-01<br><small style="color:var(--muted)">37d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#dc2626">20d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Cenzo</strong><br><small style="color:var(--muted)"> · 5 reverse</small></td>
+        <td>Frank Cheung<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-29<br><small style="color:var(--muted)">40d ago</small></td>
+        <td>Every ~20 days (2w)<br><small style="color:#dc2626">20d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Joie</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>Lisa Boico<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-06<br><small style="color:var(--muted)">32d ago</small></td>
+        <td>Every ~13 days (1w)<br><small style="color:#dc2626">19d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td><strong>Cooper</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Christina Cangiano<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-07-31<br><small style="color:var(--muted)">38d ago</small></td>
+        <td>Every ~19 days (2w)<br><small style="color:#dc2626">19d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Leon</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Angelo Ramos<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-13<br><small style="color:var(--muted)">25d ago</small></td>
+        <td>Every ~7 days (1w)<br><small style="color:#dc2626">18d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Max</strong><br><small style="color:var(--muted)"> · booked as PD, matted so couldnt tell if GEN. confirm for next time HI</small></td>
+        <td>Juan Arismesdi<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-06<br><small style="color:var(--muted)">32d ago</small></td>
+        <td>Every ~14 days (2w)<br><small style="color:#dc2626">18d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Fuji, Lucky</strong><br><small style="color:var(--muted)">SM - 1.00000, FG · FG</small></td>
+        <td>Wendy Mair<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-05<br><small style="color:var(--muted)">33d ago</small></td>
+        <td>Every ~14 days (2w)<br><small style="color:#dc2626">18d overdue</small></td>
+        <td><small></small></td>
+        <td>16</td>
+      </tr>
+      <tr>
+        <td><strong>Ruby</strong><br><small style="color:var(--muted)"> · Obody trim head wanted top knott with the white hair uncut</small></td>
+        <td>Juan Arismesdi<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-07<br><small style="color:var(--muted)">31d ago</small></td>
+        <td>Every ~14 days (2w)<br><small style="color:#dc2626">16d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Sammy</strong><br><small style="color:var(--muted)"> · Small Treat Table - 2.00000, WGB Bully Stick Braided 6&quot; - 1.00000, F&amp;T Gisele mini dolphin - 1.00000</small></td>
+        <td>Hailey Imhof<br><small>—</small></td>
+        <td style="color:#dc2626;font-weight:700">Lapsed</td>
+        <td>2026-08-15<br><small style="color:var(--muted)">23d ago</small></td>
+        <td>Every ~10 days (1w)<br><small style="color:#dc2626">12d overdue</small></td>
+        <td><small></small></td>
+        <td>18</td>
+      </tr>
+      <tr>
+        <td><strong>Leona</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Sharitha Muddu<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-05-19<br><small style="color:var(--muted)">111d ago</small></td>
+        <td>Every ~66 days (9w)<br><small style="color:#d97706">45d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Leona</strong><br><small style="color:var(--muted)"> · Farmers Market Bulk Treats - 1.20000, WGB Cologne - Harmony (120 ml) - 1.00000</small></td>
+        <td>Sharitha Muddu<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-05-19<br><small style="color:var(--muted)">111d ago</small></td>
+        <td>Every ~66 days (9w)<br><small style="color:#d97706">45d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Rio</strong><br><small style="color:var(--muted)">MD - 1.00000, SPA UPGRADE · Stella &amp; Chewy's Dog FD Dinner Patties Chicken 25 oz - 1.00000, Fromm 4 Star Dog Can GF Shredded Chicken in Gravy Entree' 12 oz - 2.00000, Cookie - Mini Birthday Cupcake - 1.00000, X-Small Treat Table - 1.00000, MG</small></td>
+        <td>Donna Viesti<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-11<br><small style="color:var(--muted)">88d ago</small></td>
+        <td>Every ~46 days (6w)<br><small style="color:#d97706">42d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Rio</strong><br><small style="color:var(--muted)">MD · MG</small></td>
+        <td>Donna Viesti<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-11<br><small style="color:var(--muted)">88d ago</small></td>
+        <td>Every ~46 days (6w)<br><small style="color:#d97706">42d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Chloe</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>Gabby Hickey<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-14<br><small style="color:var(--muted)">85d ago</small></td>
+        <td>Every ~46 days (6w)<br><small style="color:#d97706">39d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Brooklyn</strong><br><small style="color:var(--muted)">SM - 1.00000 · MG</small></td>
+        <td>Juan Barnett<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-19<br><small style="color:var(--muted)">80d ago</small></td>
+        <td>Every ~42 days (6w)<br><small style="color:#d97706">38d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Apollo</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Shari Staiano<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-16<br><small style="color:var(--muted)">83d ago</small></td>
+        <td>Every ~44 days (6w)<br><small style="color:#d97706">38d overdue</small></td>
+        <td><small>Carol W</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Miley</strong><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
+        <td>Bonnie Fachler<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-05<br><small style="color:var(--muted)">94d ago</small></td>
+        <td>Every ~56 days (8w)<br><small style="color:#d97706">38d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Coco</strong><br><small style="color:var(--muted)">SM - 1.00000 · X-Small Treat Table - 1.00000, FG</small></td>
+        <td>Monita bijoriya<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-04<br><small style="color:var(--muted)">95d ago</small></td>
+        <td>Every ~57 days (8w)<br><small style="color:#d97706">38d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Teddy</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Janett Yacob<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-17<br><small style="color:var(--muted)">82d ago</small></td>
+        <td>Every ~44 days (6w)<br><small style="color:#d97706">37d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Niko</strong><br><small style="color:var(--muted)">LG · MG</small></td>
+        <td>Maxine Epstien<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-23<br><small style="color:var(--muted)">76d ago</small></td>
+        <td>Every ~40 days (5w)<br><small style="color:#d97706">36d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Lucy</strong><br><small style="color:var(--muted)"> · PP  PINK BDAY CAKE - 1.00000</small></td>
+        <td>Rob Fidelman<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-10<br><small style="color:var(--muted)">89d ago</small></td>
+        <td>Every ~52 days (7w)<br><small style="color:#d97706">36d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Violet</strong><br><small style="color:var(--muted)">LG · Lux Bath</small></td>
+        <td>Miranda Ortiz<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-02<br><small style="color:var(--muted)">67d ago</small></td>
+        <td>Every ~35 days (5w)<br><small style="color:#d97706">32d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Oliver</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Jamie Salzar<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-01<br><small style="color:var(--muted)">68d ago</small></td>
+        <td>Every ~36 days (5w)<br><small style="color:#d97706">32d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Charlie</strong><br><small style="color:var(--muted)">SM - 1.00000 · WGB Moo Taffy Slice 12&quot; - 1.00000, FG</small></td>
+        <td>Larissa Souza<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-16<br><small style="color:var(--muted)">83d ago</small></td>
+        <td>Every ~51 days (7w)<br><small style="color:#d97706">32d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Mocha</strong><br><small style="color:var(--muted)"> · nothing booked, let know if cancelations Thurs or Fri CS</small></td>
+        <td>Jessica Schneider<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-02<br><small style="color:var(--muted)">67d ago</small></td>
+        <td>Every ~36 days (5w)<br><small style="color:#d97706">31d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Iggy</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Karen Bennett<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-29<br><small style="color:var(--muted)">70d ago</small></td>
+        <td>Every ~40 days (5w)<br><small style="color:#d97706">30d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Iggy</strong><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
+        <td>Karen Bennett<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-29<br><small style="color:var(--muted)">70d ago</small></td>
+        <td>Every ~40 days (5w)<br><small style="color:#d97706">30d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Leia</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Andrew Weiss<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#d97706">29d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Daisy</strong><br><small style="color:var(--muted)"> · 7</small></td>
+        <td>Shari klarfeld<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~31 days (4w)<br><small style="color:#d97706">28d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Baxter</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Ryan Olshever<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-27<br><small style="color:var(--muted)">72d ago</small></td>
+        <td>Every ~43 days (6w)<br><small style="color:#d97706">28d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Bosco</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Carly Wilder<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-07<br><small style="color:var(--muted)">62d ago</small></td>
+        <td>Every ~34 days (4w)<br><small style="color:#d97706">27d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Opie</strong><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
+        <td>Allison Strohson<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-06-20<br><small style="color:var(--muted)">79d ago</small></td>
+        <td>Every ~51 days (7w)<br><small style="color:#d97706">27d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Adhvi</strong><br><small style="color:var(--muted)"> · 7</small></td>
+        <td>Anusha Chappidi<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-07<br><small style="color:var(--muted)">62d ago</small></td>
+        <td>Every ~35 days (5w)<br><small style="color:#d97706">26d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Paneer</strong><br><small style="color:var(--muted)"> · Large Treat Table - 1.00000, Medium Treat Table - 2.00000, PP white cupcakes - 1.00000, H&amp;K Party Hat Happy Barkday Large - 1.00000</small></td>
+        <td>Anastasia Borisagar<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-02<br><small style="color:var(--muted)">67d ago</small></td>
+        <td>Every ~41 days (5w)<br><small style="color:#d97706">26d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Boccelli</strong><br><small style="color:var(--muted)">MD - 1.00000 · Large Treat Table - 1.00000, Bakery Bulk Treats - 4.20000, FG</small></td>
+        <td>Christina Mammano<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-15<br><small style="color:var(--muted)">54d ago</small></td>
+        <td>Every ~30 days (4w)<br><small style="color:#d97706">24d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Gus</strong><br><small style="color:var(--muted)"> · 7</small></td>
+        <td>Robert Nawrath<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~35 days (5w)<br><small style="color:#d97706">24d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Baxter</strong><br><small style="color:var(--muted)"> · ogc body cgc head</small></td>
+        <td>Amanda Weinstein<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-24<br><small style="color:var(--muted)">45d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#d97706">22d overdue</small></td>
+        <td><small></small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Samantha</strong><br><small style="color:var(--muted)">bow, trim tail and ears · 3</small></td>
+        <td>Loraine Oswald<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-15<br><small style="color:var(--muted)">54d ago</small></td>
+        <td>Every ~32 days (4w)<br><small style="color:#d97706">22d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>honey</strong><br><small style="color:var(--muted)">Grind - 1.00000, WGB Chips - Chicken Chips (4 oz) - 1.00000, WGB Moo Taffy Slice 12&quot; - 2.00000 · WALK-IN SERVICE</small></td>
+        <td>lindsey streitmen<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-10<br><small style="color:var(--muted)">59d ago</small></td>
+        <td>Every ~37 days (5w)<br><small style="color:#d97706">22d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Ella</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>John Dojlidko<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-23<br><small style="color:var(--muted)">46d ago</small></td>
+        <td>Every ~25 days (3w)<br><small style="color:#d97706">21d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Rory</strong><br><small style="color:var(--muted)"> · 5 blade ao o gc head tbf</small></td>
+        <td>Isaac Maryliza<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-21<br><small style="color:var(--muted)">48d ago</small></td>
+        <td>Every ~28 days (4w)<br><small style="color:#d97706">20d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Samantha</strong><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · WGB Straws Chicken (4 oz) - 1.00000, FG</small></td>
+        <td>Loraine Oswald<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-15<br><small style="color:var(--muted)">54d ago</small></td>
+        <td>Every ~34 days (4w)<br><small style="color:#d97706">20d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Milo</strong><br><small style="color:var(--muted)"> · use this account for booking HI</small></td>
+        <td>Irena Ma<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-25<br><small style="color:var(--muted)">44d ago</small></td>
+        <td>Every ~25 days (3w)<br><small style="color:#d97706">19d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Tessa</strong><br><small style="color:var(--muted)"> · alternate between fg and mg</small></td>
+        <td>Donna Lamberti<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-27<br><small style="color:var(--muted)">42d ago</small></td>
+        <td>Every ~24 days (3w)<br><small style="color:#d97706">18d overdue</small></td>
+        <td><small></small></td>
+        <td>8</td>
+      </tr>
+      <tr>
+        <td><strong>Snowball</strong><br><small style="color:var(--muted)"> · 7</small></td>
+        <td>Carmen Talalay<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-17<br><small style="color:var(--muted)">52d ago</small></td>
+        <td>Every ~34 days (4w)<br><small style="color:#d97706">18d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Snowball</strong><br><small style="color:var(--muted)"> · Bakery Bulk Treats - 1.80000</small></td>
+        <td>Carmen Talalay<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-17<br><small style="color:var(--muted)">52d ago</small></td>
+        <td>Every ~34 days (4w)<br><small style="color:#d97706">18d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Luna</strong><br><small style="color:var(--muted)">MD - 1.00000, ADD-ON · Lux Bath</small></td>
+        <td>Kallie Koroneos<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-25<br><small style="color:var(--muted)">44d ago</small></td>
+        <td>Every ~27 days (3w)<br><small style="color:#d97706">17d overdue</small></td>
+        <td><small></small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Romeo</strong><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · FG</small></td>
+        <td>Valeria Mendieta<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-22<br><small style="color:var(--muted)">47d ago</small></td>
+        <td>Every ~29 days (4w)<br><small style="color:#d97706">17d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Apollo</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Jamar Dyer<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-30<br><small style="color:var(--muted)">39d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#d97706">16d overdue</small></td>
+        <td><small>Maria V</small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Oliver</strong><br><small style="color:var(--muted)"> · 7 aotrim ears to leather</small></td>
+        <td>Scott Mathis<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-28<br><small style="color:var(--muted)">41d ago</small></td>
+        <td>Every ~25 days (3w)<br><small style="color:#d97706">16d overdue</small></td>
+        <td><small></small></td>
+        <td>6</td>
+      </tr>
+      <tr>
+        <td><strong>Shoko</strong><br><small style="color:var(--muted)"> · in FL no need for lapsed calls books here when in NY</small></td>
+        <td>LINDA ABOODY<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-28<br><small style="color:var(--muted)">41d ago</small></td>
+        <td>Every ~24 days (3w)<br><small style="color:#d97706">16d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Mickey</strong><br><small style="color:var(--muted)"> · prefers julia HI</small></td>
+        <td>Tina Kash<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-07<br><small style="color:var(--muted)">31d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#d97706">15d overdue</small></td>
+        <td><small></small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Ellie</strong><br><small style="color:var(--muted)"> · WGB Bully Stick Braided 12&quot; - 3.00000, WGB Bully Stick Braided 6&quot; - 2.00000, WGB Pig Ears - 7.00000</small></td>
+        <td>Erica Hartmann<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-06<br><small style="color:var(--muted)">32d ago</small></td>
+        <td>Every ~17 days (2w)<br><small style="color:#d97706">15d overdue</small></td>
+        <td><small></small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Ryder</strong><br><small style="color:var(--muted)"> · 5ao 1gc head 10 tail 10ears due to matting</small></td>
+        <td>Kristin Alexander<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-07-30<br><small style="color:var(--muted)">39d ago</small></td>
+        <td>Every ~23 days (3w)<br><small style="color:#d97706">15d overdue</small></td>
+        <td><small></small></td>
+        <td>11</td>
+      </tr>
+      <tr>
+        <td><strong>Abby</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Cheryl Paraskevopoulos<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-06<br><small style="color:var(--muted)">32d ago</small></td>
+        <td>Every ~18 days (2w)<br><small style="color:#d97706">14d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>14</td>
+      </tr>
+      <tr>
+        <td><strong>Rudy</strong><br><small style="color:var(--muted)">XLG · FG</small></td>
+        <td>Chris Swanson<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-03<br><small style="color:var(--muted)">35d ago</small></td>
+        <td>Every ~21 days (3w)<br><small style="color:#d97706">14d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>7</td>
+      </tr>
+      <tr>
+        <td><strong>Maizey</strong><br><small style="color:var(--muted)">MD · MG</small></td>
+        <td>Jennifer Shickler<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-14<br><small style="color:var(--muted)">24d ago</small></td>
+        <td>Every ~12 days (1w)<br><small style="color:#d97706">11d overdue</small></td>
+        <td><small>Victoria C.</small></td>
+        <td>10</td>
+      </tr>
+      <tr>
+        <td><strong>Oliver</strong><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · FG</small></td>
+        <td>Dot Lindsay<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-08<br><small style="color:var(--muted)">30d ago</small></td>
+        <td>Every ~18 days (2w)<br><small style="color:#d97706">11d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Rocco</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Cathy Mannino<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-08<br><small style="color:var(--muted)">30d ago</small></td>
+        <td>Every ~19 days (2w)<br><small style="color:#d97706">11d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Keaton</strong><br><small style="color:var(--muted)">SM - 1.00000 · MG</small></td>
+        <td>Summer Sun<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-07<br><small style="color:var(--muted)">31d ago</small></td>
+        <td>Every ~20 days (2w)<br><small style="color:#d97706">11d overdue</small></td>
+        <td><small></small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Max</strong><br><small style="color:var(--muted)"> · 8</small></td>
+        <td>Ellen Seo<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-05<br><small style="color:var(--muted)">33d ago</small></td>
+        <td>Every ~22 days (3w)<br><small style="color:#d97706">11d overdue</small></td>
+        <td><small></small></td>
+        <td>12</td>
+      </tr>
+      <tr>
+        <td><strong>Charlie</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Liz Walker<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-13<br><small style="color:var(--muted)">25d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#d97706">10d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Mollie</strong><br><small style="color:var(--muted)">XLG · FG</small></td>
+        <td>Rich Cohen<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-13<br><small style="color:var(--muted)">25d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#d97706">10d overdue</small></td>
+        <td><small>Vanessa M</small></td>
+        <td>14</td>
+      </tr>
+      <tr>
+        <td><strong>Remington</strong><br><small style="color:var(--muted)"> · 7ao, stbf, 1in gc on tail</small></td>
+        <td>Irina Levy<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-12<br><small style="color:var(--muted)">26d ago</small></td>
+        <td>Every ~15 days (2w)<br><small style="color:#d97706">10d overdue</small></td>
+        <td><small></small></td>
+        <td>9</td>
+      </tr>
+      <tr>
+        <td><strong>Maverick</strong><br><small style="color:var(--muted)"> · 3hrs needed for MG 3.5 hour for FG</small></td>
+        <td>Corey Barrett<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-11<br><small style="color:var(--muted)">27d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#d97706">10d overdue</small></td>
+        <td><small></small></td>
+        <td>3</td>
+      </tr>
+      <tr>
+        <td><strong>Minnie</strong><br><small style="color:var(--muted)">LG · FG</small></td>
+        <td>Lesley Miller<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-19<br><small style="color:var(--muted)">19d ago</small></td>
+        <td>Every ~10 days (1w)<br><small style="color:#d97706">9d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td><strong>Remmie</strong><br><small style="color:var(--muted)">MD · FG</small></td>
+        <td>Ray Kim<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-13<br><small style="color:var(--muted)">25d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#d97706">9d overdue</small></td>
+        <td><small>Julianne D</small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Lucky</strong><br><small style="color:var(--muted)">bitey at check in.  Suggested Traz · 8</small></td>
+        <td>Mickey Singh<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-13<br><small style="color:var(--muted)">25d ago</small></td>
+        <td>Every ~16 days (2w)<br><small style="color:#d97706">8d overdue</small></td>
+        <td><small></small></td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td><strong>Georgio</strong><br><small style="color:var(--muted)">SM · FG</small></td>
+        <td>Donna White<br><small>—</small></td>
+        <td style="color:#d97706;font-weight:700">At Risk</td>
+        <td>2026-08-18<br><small style="color:var(--muted)">20d ago</small></td>
+        <td>Every ~13 days (1w)<br><small style="color:#d97706">7d overdue</small></td>
+        <td><small>Julia B</small></td>
+        <td>13</td>
+      </tr></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ANOMALIES -->
+<div class="section" id="tab-anomalies">
+  <div class="card">
+    <h2>Anomaly Detection</h2>
+    <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
+      Flags double visits, service changes, and size inconsistencies per dog.
+    </p>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Type</th><th>Date</th><th>Pet / Owner</th><th>Detail</th></tr></thead>
+      <tbody>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-12</td>
+        <td><strong>Damian</strong><br><small>Heather Lamkin</small></td>
+        <td><small>2 visits on same day: ONLINE SERVICE (#1) - DOG - Full Groom | FG / General / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-05</td>
+        <td><strong>Pawley</strong><br><small>Deanna Rubino</small></td>
+        <td><small>2 visits on same day: 1 comb on body trim ears &amp; trim tail 
+not good for two front legs | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-05</td>
+        <td><strong>Simba</strong><br><small>Yash Sehgal</small></td>
+        <td><small>2 visits on same day: BOTH: 5ao, 3/8gc on head, 1/2in on cheeks. Both are wiggly for face | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-05</td>
+        <td><strong>Griffin</strong><br><small>Joel Weiss</small></td>
+        <td><small>2 visits on same day: Light outline trim all over. Parents like natural long look. Great boy just stubborn | FG / General / XXLG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-04</td>
+        <td><strong>Sadie</strong><br><small>Hal Katz</small></td>
+        <td><small>2 visits on same day: Gen pricing, straight coat HI | FG / Poodle-Doodle / XXLG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-04</td>
+        <td><strong>Mocha</strong><br><small>Ashley Torralba</small></td>
+        <td><small>2 visits on same day: BOTH: 5/8 ao, tbf, trim ears and tail | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-04</td>
+        <td><strong>Willie</strong><br><small>Stacy North</small></td>
+        <td><small>2 visits on same day: Bakery Bulk Treats - 2.00000 | FG / General / SM - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-04</td>
+        <td><strong>Jax</strong><br><small>Lauren Au</small></td>
+        <td><small>2 visits on same day: FG / Poodle-Doodle / SM - 1.00000 | Cannoli - 1.00000, WGB Straws Sweet Potato (4 oz) - 1.00000, WGB Chips - Chicken Chips (4 oz) - 1.00000, WGB Chips - Turkey Chips (4 oz) - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-03</td>
+        <td><strong>Rodger</strong><br><small>John Theocharidis</small></td>
+        <td><small>2 visits on same day: 7ao | FG / Poodle-Doodle / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-03</td>
+        <td><strong>Georgia</strong><br><small>Marisa Wein</small></td>
+        <td><small>2 visits on same day: FG / General / MD | ONLINE SERVICE (#1) - DOG - Full Groom</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-03</td>
+        <td><strong>Odie</strong><br><small>Lia Jarquin</small></td>
+        <td><small>2 visits on same day: only got MG on 9/3 didn't realize and charged FG but was discounted to 70 for first time so it was cheaper then $75 for MG so left as is | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-02</td>
+        <td><strong>Maizey</strong><br><small>Gail Kazin</small></td>
+        <td><small>3 visits on same day: 1 1/4in gc, trim up face, ears, and legs. Did great for everything  | GEN PRICING | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-02</td>
+        <td><strong>Whinnie</strong><br><small>Paula Hall</small></td>
+        <td><small>2 visits on same day: collapsed trachea- no tether around neck | WALK-IN SERVICE / Nail Trim / Grind</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-02</td>
+        <td><strong>Poh</strong><br><small>Effie Zannikos</small></td>
+        <td><small>2 visits on same day: WGB Chips - Sweet Potato Chips (4 oz) - 1.00000 | Broken But Delicious - 1.00000, Small Treat Table - 1.00000, Cat Grooming - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-01</td>
+        <td><strong>Dory</strong><br><small>Sasha Freedman</small></td>
+        <td><small>2 visits on same day: trim ears and tail shorter | FG / Poodle-Doodle / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-01</td>
+        <td><strong>Chuckie</strong><br><small>Jeffrey Quinto</small></td>
+        <td><small>2 visits on same day: 9/1 offered 1130 vs 1, cant do earlier than 1 HI | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-09-01</td>
+        <td><strong>Kali, Maple, Winny</strong><br><small>Roe Keatint</small></td>
+        <td><small>2 visits on same day: WGB Pink Bags Grain Free ROASTED DUCK HEARTS (8 oz) - 1.00000 | FG / General / SM - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-31</td>
+        <td><strong>Snowball</strong><br><small>Catalina Chew</small></td>
+        <td><small>2 visits on same day: Groomer is upset,  nails were cut too short and bleeding, only wants Victoria to groom from now on.  | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-31</td>
+        <td><strong>Badger</strong><br><small>Neil Barbagallo</small></td>
+        <td><small>2 visits on same day: WGB Bully Stick Braided 12&quot; - 1.00000 | MG / General / XXLG - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-29</td>
+        <td><strong>Chico</strong><br><small>Panya Cinar</small></td>
+        <td><small>2 visits on same day: WGB Pink Bags Soft Cookies PUMPKIN LITTLE BITES (8 oz) - 1.00000 | FG / General / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-29</td>
+        <td><strong>Nelson</strong><br><small>Isabelle Thenor-Louis</small></td>
+        <td><small>2 visits on same day: Pupsicle Pops Beef L - 1.00000 | FG / Poodle-Doodle / XLG - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-28</td>
+        <td><strong>Lulu</strong><br><small>Jill Koffler</small></td>
+        <td><small>2 visits on same day: 2a/o 1hd | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-28</td>
+        <td><strong>Chili</strong><br><small>Jessica Wiesler</small></td>
+        <td><small>2 visits on same day: 7 all over | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-28</td>
+        <td><strong>Leela</strong><br><small>Jessica Singh</small></td>
+        <td><small>2 visits on same day: Lux Bath / General / SM | offered 10/1030 vs 130, cant do 130 HI</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-28</td>
+        <td><strong>Maya</strong><br><small>Debby Chiarelli</small></td>
+        <td><small>2 visits on same day: 5a/o 2hd | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-28</td>
+        <td><strong>Queso</strong><br><small>Jessica Wiesler</small></td>
+        <td><small>2 visits on same day: small knots mod/shnauzer cut 7 bod 10ears/ top of head 7 
+
+Owner very nice. nicked quesos front left paw top  | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-28</td>
+        <td><strong>Sadie</strong><br><small>Dolores Murphy</small></td>
+        <td><small>2 visits on same day: 10ao, 3/8 on head. Pp wanted very short. trim ears and tail | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-28</td>
+        <td><strong>Theo</strong><br><small>Ava Zias</small></td>
+        <td><small>2 visits on same day: 1a/o Chead trim ears and tail | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-28</td>
+        <td><strong>Maya, Zoey</strong><br><small>Debby Chiarelli</small></td>
+        <td><small>2 visits on same day: WALK-IN SERVICE / Nail Trim / Grind - 1.00000, FG / General / SM - 1.00000 | WGB Pink Bags SWEET POTATO &amp; HONEY PETITES (8 oz) - 1.00000, WGB Pink Bags Grain Free BACON &amp; QUINOA HEARTS (8 oz) - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-27</td>
+        <td><strong>Cosmo</strong><br><small>Vinaya Sampath</small></td>
+        <td><small>2 visits on same day: book GEN, straight coated HI | MG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-27</td>
+        <td><strong>Luna</strong><br><small>Joanne Degurie</small></td>
+        <td><small>2 visits on same day: Lux Bath / General / LG | FG / General / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-27</td>
+        <td><strong>Molly</strong><br><small>Rob Kuppersmith</small></td>
+        <td><small>2 visits on same day: Julia does not want booked on her HI | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-27</td>
+        <td><strong>Skye</strong><br><small>Rob Kuppersmith</small></td>
+        <td><small>2 visits on same day: Julia does not want booked on her HI | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-27</td>
+        <td><strong>Zoe</strong><br><small>Suzette Armadoros</small></td>
+        <td><small>2 visits on same day: 2 a/o puppy. trim feathers leave tail. | FG / General / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-27</td>
+        <td><strong>Cosmo</strong><br><small>Vinaya Sampath</small></td>
+        <td><small>2 visits on same day: Large Treat Table - 1.00000 | MG / General / MD - 1.00000, ADD-ON / Hypo Allergenic Shampoo - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-25</td>
+        <td><strong>Lulu</strong><br><small>Mario Gutierrez</small></td>
+        <td><small>2 visits on same day: will bite for everything HI | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-25</td>
+        <td><strong>Daisy</strong><br><small>Nancy Neil</small></td>
+        <td><small>2 visits on same day: straight coated HI | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-25</td>
+        <td><strong>Duke</strong><br><small>Nancy Neil</small></td>
+        <td><small>2 visits on same day: straight coated HI | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-25</td>
+        <td><strong>Nico</strong><br><small>Olga Hidago</small></td>
+        <td><small>2 visits on same day: FG / Poodle-Doodle / MD | Cant do earlier HI</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-25</td>
+        <td><strong>Luna</strong><br><small>Ana Lopez</small></td>
+        <td><small>2 visits on same day: SPA UPGRADE / Blueberry Pie Facial - -1.00000 | FG / General / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000, SPA UPGRADE / Blueberry Pie Facial - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-24</td>
+        <td><strong>Spanky</strong><br><small>Susan H</small></td>
+        <td><small>2 visits on same day: 3/8gc ao, tbf, trim tail and ears | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-24</td>
+        <td><strong>Lucky</strong><br><small>Sonny Liang</small></td>
+        <td><small>2 visits on same day: Scissor trim about an inch off body, blend head, 5/8gc on throat for zappy collar (forgot the name) | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-24</td>
+        <td><strong>Sadie</strong><br><small>Jennifer Giordano</small></td>
+        <td><small>2 visits on same day: 7ao, 5 on head, leave ears long | FG / General / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-22</td>
+        <td><strong>Blue</strong><br><small>Stephanie Langan</small></td>
+        <td><small>2 visits on same day: FREE TEETH BRUSHING HI | FG / General / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-22</td>
+        <td><strong>Chase</strong><br><small>David Perez</small></td>
+        <td><small>2 visits on same day: 3F BODY (1 COMB) aGC HEAD TBF LT EARS LT TAIL  | FG / Poodle-Doodle / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-22</td>
+        <td><strong>Maizey</strong><br><small>Gail Kazin</small></td>
+        <td><small>2 visits on same day: Lux Bath / Poodle-Doodle / SM | 8/22 offered 3 vs 330 cant commit to 3 HI</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-22</td>
+        <td><strong>Benny, Billie Jean, BillieJean, Cooper</strong><br><small>Bonnie Vader</small></td>
+        <td><small>3 visits on same day: FG / Poodle-Doodle / SM - 1.00000, Broken But Delicious - 1.00000 | FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000 | FG / Poodle-Doodle / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-22</td>
+        <td><strong>Piper</strong><br><small>Jill Schechter</small></td>
+        <td><small>2 visits on same day: no cologne HI | MG / General / SM - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-22</td>
+        <td><strong>Piper</strong><br><small>Jill Schechter</small></td>
+        <td><small>2 visits on same day: NO COLOGNE | MG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-21</td>
+        <td><strong>Alphaa</strong><br><small>Celine Caur</small></td>
+        <td><small>2 visits on same day: 3/4gc, tbf, trim tail round, trim ears | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-21</td>
+        <td><strong>Zion</strong><br><small>Celine Caur</small></td>
+        <td><small>2 visits on same day: 10ao, stbf, shave base of tail (matted), trim ears | FG / Poodle-Doodle / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-21</td>
+        <td><strong>Emma</strong><br><small>Paula Rallis</small></td>
+        <td><small>2 visits on same day: 3/8gc, tbf, trim tail and ears | FG / Poodle-Doodle / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-21</td>
+        <td><strong>Benton</strong><br><small>Erica Talkofsky</small></td>
+        <td><small>2 visits on same day: WGB Collagen Chew - Chicken Large Roll 10&quot; - 1.00000 | FG / General / XLG - 1.00000, SPA UPGRADE / XL Hairy Beast (Deshedding) - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-21</td>
+        <td><strong>Bailey</strong><br><small>Michelle Liz</small></td>
+        <td><small>2 visits on same day: WGB Bully Stick Regular 12&quot; - 1.00000 | FG / Poodle-Doodle / LG - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-20</td>
+        <td><strong>Alphaa</strong><br><small>Celine Caur</small></td>
+        <td><small>2 visits on same day: more aussie than doodle coat- booke GEN HI | more straight coated, get weight</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-20</td>
+        <td><strong>Cosmo</strong><br><small>Vinaya Sampath</small></td>
+        <td><small>2 visits on same day: MG / Poodle-Doodle / SM | MG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-20</td>
+        <td><strong>Charlie</strong><br><small>Michelle Monsef</small></td>
+        <td><small>2 visits on same day: WGB Toys - Plush - Puffed Up Puffer Fish - 1.00000 | FG / Poodle-Doodle / LG - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-20</td>
+        <td><strong>Charli</strong><br><small>Maya Holcomb</small></td>
+        <td><small>2 visits on same day: I booked a previous appointment for tomorrow at 10:30 but I realized that I have a scheduling conflict so I need to cancel that appointment and use this one. 
+Charli does very well at the groomers! She is only a little sensitive about her nails being clipped, but she’s never had any problem with actually getting that completed. She is reactive to other dogs on the leash, but has no issues with the dogs off leash and is very friendly, has never been aggressive with other dogs
+this time visiting this Salon, and we heard that there is a promotional discount for new clients! | Experiences some leash reactivity, but plays and engages well with other dogs when off leash. She’s very good at the groomer but can be a little sensitive about her nails. </small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-20</td>
+        <td><strong>Max</strong><br><small>Sal Governale</small></td>
+        <td><small>2 visits on same day: minigroom flea bath | MG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-20</td>
+        <td><strong>Teddy</strong><br><small>Alison Derosa</small></td>
+        <td><small>2 visits on same day: 5 on body, light trim on tail and ears (spot shave matting), 1/2 on muzzle, Mohawk | FG / Poodle-Doodle / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-20</td>
+        <td><strong>Teddy</strong><br><small>Jasmine Gomez</small></td>
+        <td><small>2 visits on same day: mini groom. very scared little boy. cute as hell | MG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-19</td>
+        <td><strong>Chip</strong><br><small>Jerri Margolies</small></td>
+        <td><small>2 visits on same day: 3/8gc ao, tbf, trim tail and ears | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-19</td>
+        <td><strong>Ray Ray</strong><br><small>Jason Peck</small></td>
+        <td><small>3 visits on same day: 7ao (matted), trim ears and face | FG / General / MD | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-19</td>
+        <td><strong>Spot</strong><br><small>Mary Cioc</small></td>
+        <td><small>2 visits on same day: 5ao, 7 legs, round cheeks, blend back of head | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-19</td>
+        <td><strong>Stark</strong><br><small>Anthony Catinella</small></td>
+        <td><small>2 visits on same day:  3 BLADE BODY O COMB HEAD TRIM TAIL TRIM EARS TRIM FACE  TO LIP. GOOD DOG COAT TAKES FOREVER TO DRY DO YOURSELF THE FAVOR AND ROUGH IN BEFORE BATH DOES NOT LIKE DRYER NEAR HEAD OR FACE  | FG / Poodle-Doodle / XLG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-19</td>
+        <td><strong>Winnie</strong><br><small>Clare Sorg</small></td>
+        <td><small>3 visits on same day: 7 on body &amp; ears 2 on the head round face. | has collapsed trachea, no slips over neck HI | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Davey</strong><br><small>Mike Alamba</small></td>
+        <td><small>2 visits on same day: 8/18 wants to speak to Cindy about making each dog $80 HI | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Lucky</strong><br><small>Mike Alamba</small></td>
+        <td><small>2 visits on same day: 8/20 OK to charge general $85 CS | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Dolce</strong><br><small>Eugenia Ercole</small></td>
+        <td><small>2 visits on same day: 1/2 in ao and on head. Trim tail blend legs | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Harley</strong><br><small>Adam Scarcela</small></td>
+        <td><small>2 visits on same day: more straight coated HI | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Lulu</strong><br><small>Nancy Fink</small></td>
+        <td><small>2 visits on same day: 0o/b Ao/h | FG / Poodle-Doodle / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Max</strong><br><small>Roslyn Workmen</small></td>
+        <td><small>2 visits on same day: 5ao (matted), tbf, trim tail and ears | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Davey, Lucky</strong><br><small>Mike Alamba</small></td>
+        <td><small>3 visits on same day: Spoke to him on 8/18 first appt, dog with black coat has some kind of skin bacterial thing going on and confirmed with customer he is on meds for it, said the process wont hurt him, did not want hypo shampoo and OK'd regualr shampoo/haircut   | Bakery Bulk Treats - 4.40000, WGB Coffee Wood Chews XS - 1.00000 | FG / General / SM - 1.00000, FG / Poodle-Doodle / SM - 1.00000, WGB Bully Stick Braided 6&quot; - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Lulu</strong><br><small>Nancy Fink</small></td>
+        <td><small>2 visits on same day: WGB Bully Stick Regular 12&quot; - 1.00000 | FG / Poodle-Doodle / MD - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Riddick</strong><br><small>Brenda Blum</small></td>
+        <td><small>2 visits on same day: 7ao matted | FG / Poodle-Doodle / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-18</td>
+        <td><strong>Tucker</strong><br><small>Fred Kaneblei</small></td>
+        <td><small>2 visits on same day: 1/2gc ao, tbf, trim tail and ears | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-17</td>
+        <td><strong>Daisy</strong><br><small>Vishnu Boodoo</small></td>
+        <td><small>2 visits on same day: 5/8gc ao, tbf, trim tail and ears. Shes the sweetest baby  | FG / Poodle-Doodle / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-15</td>
+        <td><strong>Spanky</strong><br><small>Susan H</small></td>
+        <td><small>2 visits on same day: FG / General / SM | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-15</td>
+        <td><strong>Ari</strong><br><small>Doris Cuesta</small></td>
+        <td><small>2 visits on same day: 2 o/b 1o/h round face | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-15</td>
+        <td><strong>Benji</strong><br><small>Doris Cuesta</small></td>
+        <td><small>2 visits on same day: 2o/b 1o/h round face | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-15</td>
+        <td><strong>Lucky</strong><br><small>Lanxin Lin</small></td>
+        <td><small>2 visits on same day: Bath &amp; brushout | Lux Bath / General / XXLG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-15</td>
+        <td><strong>Knight</strong><br><small>Nicole Fernandez</small></td>
+        <td><small>2 visits on same day: Miscellaneous - 1.00000 | WALK-IN SERVICE / Nail Trim / Grind - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-15</td>
+        <td><strong>Wesley</strong><br><small>Audra Fredrick</small></td>
+        <td><small>2 visits on same day: 2 a/o puppycut. leave eyelashes | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Kodi</strong><br><small>Adrianna Russo</small></td>
+        <td><small>3 visits on same day: cage aggressive .? sketchy | 1a/o 0head trim ears n tail | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Dimaggio</strong><br><small>Stacy Falco</small></td>
+        <td><small>2 visits on same day: 1a/o round face  | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Kona</strong><br><small>Donna Eskil</small></td>
+        <td><small>2 visits on same day: Small Treat Table - 1.00000, WGB Toys - Plush - Bunny Love - 1.00000 | FG / Poodle-Doodle / MD - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Dakota</strong><br><small>Janice Pullin</small></td>
+        <td><small>2 visits on same day: Large Treat Table - 1.00000 | FG / Poodle-Doodle / MD - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Lily</strong><br><small>Jackie Contreras</small></td>
+        <td><small>2 visits on same day: 7 a/o | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Max</strong><br><small>Mina Fornino</small></td>
+        <td><small>2 visits on same day: owners wantto grow out Aa/o  | FG / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Rosie</strong><br><small>Rachel Kaplan</small></td>
+        <td><small>2 visits on same day: WGB Toys - Plush - Shark Bait - 1.00000, Fluff &amp; Tuff Bobby Zebra Dog Toy, 9-in - 1.00000 | FG / General / SM - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Winston</strong><br><small>Liz Vulin</small></td>
+        <td><small>2 visits on same day: Carol client only charge as FG GEN SM | FG / General / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-14</td>
+        <td><strong>Jax</strong><br><small>Zach Montanez</small></td>
+        <td><small>2 visits on same day: Flea and Tick Collar - 1.00000 | Large Treat Table - 1.00000, Medium Treat Table - 1.00000, WGB Cheek Roll 6&quot; - 1.00000, WBALL - XLarge (assorted colors) - 1.00000, Lux Bath / General / XLG - 1.00000, SPA UPGRADE / XL Hairy Beast (Deshedding) - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-13</td>
+        <td><strong>Rocky</strong><br><small>Amy Mansfield</small></td>
+        <td><small>3 visits on same day: Lux Bath / General / LG - 1.00000 | FG / Poodle-Doodle / LG - -1.00000 | FG / Poodle-Doodle / LG - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-13</td>
+        <td><strong>Lucky</strong><br><small>Mickey Singh</small></td>
+        <td><small>2 visits on same day: 8/13 didn't do lux bath, dog was too nervous, growly/bitey at check in.  Suggested Traz/Gaba prior to next appt we book. Has some meds at home used for travel so will check what have before rebooking CS | Lux Bath / Poodle-Doodle / SM</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-13</td>
+        <td><strong>Bori</strong><br><small>Mina Pyun</small></td>
+        <td><small>2 visits on same day: WGB Turkey Tendons Half Strip (3 oz) - 1.00000 | FG / Poodle-Doodle / SM - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-13</td>
+        <td><strong>Remmie</strong><br><small>Ray Kim</small></td>
+        <td><small>2 visits on same day: FG / General / MD | FG / General / MD</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-13</td>
+        <td><strong>Mollie</strong><br><small>Rich Cohen</small></td>
+        <td><small>3 visits on same day: WGB Collagen Chew - Beef Large Roll 10&quot; - 1.00000, WGB Bully Stick Braided 6&quot; - 2.00000 | Medium Treat Table - 2.00000, X-Small Treat Table - 2.00000 | FG / Poodle-Doodle / XLG - 1.00000</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-13</td>
+        <td><strong>Rocky</strong><br><small>Amy Mansfield</small></td>
+        <td><small>2 visits on same day: Lux Bath / General / LG | FG / Poodle-Doodle / LG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-12</td>
+        <td><strong>Thomas</strong><br><small>Max Cordoba</small></td>
+        <td><small>2 visits on same day: Very well behaved. Getting surgery for mouth tumor  | Clsc Bath / General / XLG</small></td>
+      </tr>
+      <tr>
+        <td><span style="background:#dc2626;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Double Visit</span></td>
+        <td>2026-08-12</td>
+        <td><strong>Bella</strong><br><small>Merryl Gordon</small></td>
+        <td><small>4 visits on same day: 1/2” comb on body (Brown Comb) trim ears trim tail. | 1/2&quot; comb on body (brown Comb) trim ears trim tail  | 1/2&quot; comb on body (brown comb) trim ears trim tail | FG / General / SM</small></td>
+      </tr></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- PET PROFILES -->
+<div class="section" id="tab-pets">
+  <div class="card">
+    <h2>Pet Profiles (top 50 by visit count)</h2>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Pet</th><th>Owner</th><th>Visits</th><th>Last Visit</th><th>Last Service</th><th>Last Groomer</th></tr></thead>
+      <tbody>
+      <tr>
+        <td><strong>May, Yuna</strong></td>
+        <td><small>Christina Kong</small></td>
+        <td>23</td>
+        <td>2026-08-04<br><span style="background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Active</span></td>
+        <td><small>WGB Turkey Tendons Full Strip (3 oz) - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Charlie</strong></td>
+        <td><small>Elena Flannigan</small></td>
+        <td>19</td>
+        <td>2027-02-02<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / MD</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Sammy</strong></td>
+        <td><small>Hailey Imhof</small></td>
+        <td>18</td>
+        <td>2026-08-15<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>Small Treat Table - 2.00000, WGB Bully Stick Braided 6&quot; - 1.00000, F&amp;T Gisele mini dolphin - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Bentley, Cody, Remi</strong></td>
+        <td><small>Rick Zimmerman</small></td>
+        <td>17</td>
+        <td>2026-08-21<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM - 1.00000, FG / General / SM - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Fuji, Lucky</strong></td>
+        <td><small>Wendy Mair</small></td>
+        <td>13</td>
+        <td>2026-08-05<br><span style="background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Active</span></td>
+        <td><small>FG / General / SM - 1.00000, FG / General / SM - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Bentley</strong></td>
+        <td><small>Rick Zimmerman</small></td>
+        <td>12</td>
+        <td>2026-09-18<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Julianne D</small></td>
+      </tr>
+      <tr>
+        <td><strong>Cody</strong></td>
+        <td><small>Rick Zimmerman</small></td>
+        <td>11</td>
+        <td>2026-09-18<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Zero</strong></td>
+        <td><small>Tiffany Rudolph</small></td>
+        <td>11</td>
+        <td>2026-09-06<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>WGB Pink Bags Soft Cookies CHICKEN POT PIE LITTLE BITES(8 oz) - 1.00000, WGB Pink Bags Grain Free ROASTED DUCK HEARTS (8 oz) - 2.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Mollie</strong></td>
+        <td><small>Rich Cohen</small></td>
+        <td>11</td>
+        <td>2026-08-13<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>WGB Collagen Chew - Beef Large Roll 10&quot; - 1.00000, WGB Bully Stick Braided 6&quot; - 2.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Lucky</strong></td>
+        <td><small>Wendy Mair</small></td>
+        <td>10</td>
+        <td>2026-09-21<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Maria V</small></td>
+      </tr>
+      <tr>
+        <td><strong>Bob</strong></td>
+        <td><small>Jodi Germain</small></td>
+        <td>10</td>
+        <td>2026-09-16<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / SM</small></td>
+        <td><small>Maria V</small></td>
+      </tr>
+      <tr>
+        <td><strong>Hennessey</strong></td>
+        <td><small>Angela Brams</small></td>
+        <td>10</td>
+        <td>2026-09-04<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Victoria C.</small></td>
+      </tr>
+      <tr>
+        <td><strong>Hennessey, Luna</strong></td>
+        <td><small>Angela Brams</small></td>
+        <td>10</td>
+        <td>2026-09-04<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>Farmers Market Bulk Treats - 7.40000, FG / General / SM - 1.00000, FG / General / SM - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>AJ, Charlie</strong></td>
+        <td><small>Patricia Marx</small></td>
+        <td>10</td>
+        <td>2026-08-21<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / MD - 1.00000, SPA UPGRADE / M Hairy Beast (Deshedding) - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Max</strong></td>
+        <td><small>Judi Levine</small></td>
+        <td>10</td>
+        <td>2026-08-19<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / MD - 1.00000, ADD-ON / Hypo Allergenic Shampoo - 1.00000, ADD-ON / Teeth Brushing - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Apollo, Honey, Pancake, Zsa zsa</strong></td>
+        <td><small>Shari Staiano</small></td>
+        <td>10</td>
+        <td>2026-07-15<br><span style="background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Active</span></td>
+        <td><small>No Hide Beef - Stix - 1.00000, FG / General / SM - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Zoe</strong></td>
+        <td><small>Allison Steinberg</small></td>
+        <td>9</td>
+        <td>2026-10-16<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Emme</strong></td>
+        <td><small>Joshua Friesel</small></td>
+        <td>9</td>
+        <td>2026-10-09<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / SM</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Cooper</strong></td>
+        <td><small>Stefani Seiden</small></td>
+        <td>9</td>
+        <td>2026-09-10<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / SM</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Luna</strong></td>
+        <td><small>Angela Brams</small></td>
+        <td>9</td>
+        <td>2026-09-04<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Julianne D</small></td>
+      </tr>
+      <tr>
+        <td><strong>Zoe</strong></td>
+        <td><small>Allison Steinberg</small></td>
+        <td>9</td>
+        <td>2026-09-03<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM - 1.00000, ADD-ON / Teeth Brushing - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Rudy</strong></td>
+        <td><small>Susan Horvath</small></td>
+        <td>9</td>
+        <td>2026-08-28<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / SM - 1.00000, SPA UPGRADE / Blueberry Pie Facial - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Benny, Billie Jean, BillieJean, Cooper</strong></td>
+        <td><small>Bonnie Vader</small></td>
+        <td>9</td>
+        <td>2026-08-22<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / SM - 1.00000, Broken But Delicious - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Max</strong></td>
+        <td><small>Judi Levine</small></td>
+        <td>9</td>
+        <td>2026-08-19<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / MD</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Zander</strong></td>
+        <td><small>Jane Mcdermott</small></td>
+        <td>9</td>
+        <td>2026-08-12<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / LG - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Ellie</strong></td>
+        <td><small>Erica Hartmann</small></td>
+        <td>9</td>
+        <td>2026-08-06<br><span style="background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Active</span></td>
+        <td><small>WGB Bully Stick Braided 12&quot; - 3.00000, WGB Bully Stick Braided 6&quot; - 2.00000, WGB Pig Ears - 7.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Remy</strong></td>
+        <td><small>Joseph Giordano</small></td>
+        <td>9</td>
+        <td>2026-08-03<br><span style="background:#2563eb;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Active</span></td>
+        <td><small>Bakery Bulk Treats - 3.00000, Hamburger - XL - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Venchi</strong></td>
+        <td><small>Ash Puri</small></td>
+        <td>9</td>
+        <td>2026-06-23<br><span style="background:#d97706;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">At Risk</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Wgb Hicksville</small></td>
+      </tr>
+      <tr>
+        <td><strong>Lulu</strong></td>
+        <td><small>Jill Koffler</small></td>
+        <td>8</td>
+        <td>2026-10-09<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Victoria C.</small></td>
+      </tr>
+      <tr>
+        <td><strong>Badger</strong></td>
+        <td><small>Neil Barbagallo</small></td>
+        <td>8</td>
+        <td>2026-10-05<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / XXLG</small></td>
+        <td><small>Julia B</small></td>
+      </tr>
+      <tr>
+        <td><strong>Hershey</strong></td>
+        <td><small>Karyn Raxenberg</small></td>
+        <td>8</td>
+        <td>2026-10-03<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / MD</small></td>
+        <td><small>Vanessa M</small></td>
+      </tr>
+      <tr>
+        <td><strong>Rocky</strong></td>
+        <td><small>Jill Kossoff</small></td>
+        <td>8</td>
+        <td>2026-10-01<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Rosie</strong></td>
+        <td><small>Fiana Klein</small></td>
+        <td>8</td>
+        <td>2026-09-16<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / MD</small></td>
+        <td><small>Maria V</small></td>
+      </tr>
+      <tr>
+        <td><strong>Zoey</strong></td>
+        <td><small>Joel Elstein</small></td>
+        <td>8</td>
+        <td>2026-09-09<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>Full Service Groom SM1 0-22</small></td>
+        <td><small>Lexie C</small></td>
+      </tr>
+      <tr>
+        <td><strong>francesca, Zoey</strong></td>
+        <td><small>Liz Galasso</small></td>
+        <td>8</td>
+        <td>2026-09-05<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / MD - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Willie</strong></td>
+        <td><small>Stacy North</small></td>
+        <td>8</td>
+        <td>2026-09-04<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>Bakery Bulk Treats - 2.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Zoey</strong></td>
+        <td><small>Karen Alvarado</small></td>
+        <td>8</td>
+        <td>2026-09-02<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>WALK-IN SERVICE / Nail Trim / Grind</small></td>
+        <td><small>Julia B</small></td>
+      </tr>
+      <tr>
+        <td><strong>Snuggles, Zoey</strong></td>
+        <td><small>Karen Alvarado</small></td>
+        <td>8</td>
+        <td>2026-09-02<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>WGB Chips - Chicken Chips (4 oz) - 1.00000, FG / General / SM - 1.00000, WALK-IN SERVICE / Nail Trim / Grind - 1.00000, ADD-ON / Scissor Cut - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Lexi</strong></td>
+        <td><small>Lisa Kuba</small></td>
+        <td>8</td>
+        <td>2026-09-01<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / SM</small></td>
+        <td><small>Julia B</small></td>
+      </tr>
+      <tr>
+        <td><strong>Hudson, Teddy</strong></td>
+        <td><small>Elayne Walzhauser</small></td>
+        <td>8</td>
+        <td>2026-08-27<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>Bakery Bulk Treats - 7.20000, FG / Poodle-Doodle / MD - 1.00000, FG / Poodle-Doodle / SM - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Chloe</strong></td>
+        <td><small>Gwen Mitchell</small></td>
+        <td>8</td>
+        <td>2026-08-25<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / SM</small></td>
+        <td><small>Julia B</small></td>
+      </tr>
+      <tr>
+        <td><strong>Nico</strong></td>
+        <td><small>Olga Hidago</small></td>
+        <td>8</td>
+        <td>2026-08-25<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / MD</small></td>
+        <td><small>Julia B</small></td>
+      </tr>
+      <tr>
+        <td><strong>Winston</strong></td>
+        <td><small>Liz Vulin</small></td>
+        <td>8</td>
+        <td>2026-08-14<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>Carol client only charge as FG GEN SM</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Jagger</strong></td>
+        <td><small>Kristine Jacobson</small></td>
+        <td>8</td>
+        <td>2026-08-12<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>MG / General / MD</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Sophie</strong></td>
+        <td><small>Sherry Purzak</small></td>
+        <td>8</td>
+        <td>2026-08-12<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>Lux Bath / Poodle-Doodle / SM - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Sophie</strong></td>
+        <td><small>Sherry Purzak</small></td>
+        <td>8</td>
+        <td>2026-08-12<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>Lux Bath / Poodle-Doodle / SM</small></td>
+        <td><small>Julianne D</small></td>
+      </tr>
+      <tr>
+        <td><strong>Max, Tatortot</strong></td>
+        <td><small>Rachel Furer</small></td>
+        <td>8</td>
+        <td>2026-08-10<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>WGB Toys - I Pawty, You Pawty - 1.00000</small></td>
+        <td><small>None</small></td>
+      </tr>
+      <tr>
+        <td><strong>Friar</strong></td>
+        <td><small>Cynthia Leone</small></td>
+        <td>7</td>
+        <td>2026-10-16<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / Poodle-Doodle / SM</small></td>
+        <td><small>Victoria C.</small></td>
+      </tr>
+      <tr>
+        <td><strong>Tucker</strong></td>
+        <td><small>Lauren Cohen</small></td>
+        <td>7</td>
+        <td>2026-09-29<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>FG / General / MD</small></td>
+        <td><small>Carol W</small></td>
+      </tr>
+      <tr>
+        <td><strong>Maizey</strong></td>
+        <td><small>Gail Kazin</small></td>
+        <td>7</td>
+        <td>2026-09-26<br><span style="background:#16a34a;color:#fff;padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600">Recent</span></td>
+        <td><small>MG / Poodle-Doodle / SM</small></td>
+        <td><small>Maria V</small></td>
+      </tr></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+</main>
+<script>
+function showTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

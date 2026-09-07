@@ -40,7 +40,7 @@ LOCATION_ID = _store.location_id
 TOKEN = _store.token
 
 
-def _compute_period_kpis(df_slice, df_orders_slice):
+def _compute_period_kpis(df_slice, df_orders_slice, pet_visits_by_date=None):
     """Compute KPIs for a single period slice. Returns dict."""
     from formatting import to_py
     groom = df_slice[df_slice["is_groom"] == True]
@@ -49,9 +49,14 @@ def _compute_period_kpis(df_slice, df_orders_slice):
     groom_rev = to_py(groom["net_sales"].sum())
     retail_rev = to_py(retail["net_sales"].sum())
     txns = int(df_orders_slice.shape[0])
-    # Appointments = orders that have at least one grooming item
-    groom_order_ids = set(groom["order_id"].dropna().unique()) if "order_id" in groom.columns else set()
-    appointments = len(groom_order_ids)
+    # Appointments = dogs groomed (from pet_visits.json) — falls back to unique groom orders
+    _pvbd = getattr(sys.modules[__name__], "_PET_VISITS_BY_DATE", None) or pet_visits_by_date
+    if _pvbd and "ymd" in df_slice.columns:
+        dates = set(df_slice["ymd"].unique())
+        appointments = sum(cnt for d, cnt in _pvbd.items() if d in dates)
+    else:
+        groom_order_ids = set(groom["order_id"].dropna().unique()) if "order_id" in groom.columns else set()
+        appointments = len(groom_order_ids)
     days_open = int(df_slice["ymd"].nunique()) if "ymd" in df_slice.columns else 1
     # Groomer days = sum of unique groomers per day
     groomer_days = 0
@@ -358,6 +363,28 @@ def generate_dashboard(store):
     importlib.reload(gd)
 
     df_all, df_orders_all, _ = gd.load_data()
+
+    # Load pet visits for accurate dog-level appointment counts
+    import json as _jv
+    _pet_visits_file = store.data_dir / "pet_visits.json"
+    _pet_visits_by_date = {}  # date str → dog count
+    if _pet_visits_file.exists():
+        try:
+            with open(_pet_visits_file) as _f:
+                _pv = _jv.load(_f)
+            from collections import Counter as _Counter
+            _date_counts = _Counter()
+            for rec in _pv:
+                for v in rec.get("visits", []):
+                    if v.get("date"):
+                        _date_counts[v["date"]] += 1
+            _pet_visits_by_date = dict(_date_counts)
+            print(f"  Pet visits loaded: {sum(_pet_visits_by_date.values())} visits across {len(_pet_visits_by_date)} days")
+        except Exception as _e:
+            print(f"  Pet visits load failed: {_e}")
+
+    # Inject pet_visits_by_date into the module so _compute_period_kpis picks it up
+    this._PET_VISITS_BY_DATE = _pet_visits_by_date
 
     # Build year tabs dynamically based on available data
     available_years = sorted(df_all["year"].unique())

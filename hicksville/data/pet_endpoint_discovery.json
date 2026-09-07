@@ -1,0 +1,514 @@
+{
+  "walkin_booking_appointments_today": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&companyId=205993&dateStr=2026-09-07",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
+  },
+  "walkin_booking_appointments_tomorrow": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&companyId=205993&dateStr=2026-09-08",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
+  },
+  "walkin_booking_appointments_locationid": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993&dateStr=2026-09-07",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993&dateStr=2026-09-"
+  },
+  "walkin_queue": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/queue?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "type": "dict",
+    "keys": [
+      "count",
+      "data"
+    ],
+    "sample": {
+      "data": [],
+      "count": 0
+    }
+  },
+  "walkin_settings": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/205993/settings?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "CompanyId",
+      "CompanyName",
+      "EnableSecondaryContacts",
+      "EnableService",
+      "EnableServiceProvider",
+      "EnableTermsOfService",
+      "Genders",
+      "TermsOfService",
+      "ThankYouPageContent",
+      "ThankYouPageTitle"
+    ],
+    "sample": {
+      "CompanyId": 205993,
+      "CompanyName": 0,
+      "EnableServiceProvider": false,
+      "EnableService": false,
+      "EnableTermsOfService": false,
+      "EnableSecondaryContacts": false,
+      "TermsOfService": null,
+      "ThankYouPageTitle": null,
+      "ThankYouPageContent": null,
+      "Genders": null
+    }
+  },
+  "walkin_simple_services": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/205993/simpleServices?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data"
+    ],
+    "nested_data_count": 7,
+    "nested_data_keys": [
+      "Duration",
+      "EmployeeId",
+      "Id",
+      "Name",
+      "Price",
+      "ServiceId"
+    ],
+    "nested_data_sample": [
+      {
+        "Id": 27462657,
+        "Name": "ONLINE ADD-ON (#60) - Hypoallergenic Shampoo",
+        "Price": 0.0,
+        "EmployeeId": 0,
+        "Duration": 0,
+        "ServiceId": 27462657
+      },
+      {
+        "Id": 27462658,
+        "Name": "ONLINE ADD-ON (#62) - Teeth Brushing",
+        "Price": 0.0,
+        "EmployeeId": 0,
+        "Duration": 0,
+        "ServiceId": 27462658
+      }
+    ],
+    "sample": {
+      "data": [
+        {
+          "Id": 27462657,
+          "Name": "ONLINE ADD-ON (#60) - Hypoallergenic Shampoo",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 27462657
+        },
+        {
+          "Id": 27462658,
+          "Name": "ONLINE ADD-ON (#62) - Teeth Brushing",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 27462658
+        },
+        {
+          "Id": 28185668,
+          "Name": "ONLINE ADD-ON (#70) - SPA Hairy Beast (Deshedding)",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 30,
+          "ServiceId": 28185668
+        },
+        {
+          "Id": 28185669,
+          "Name": "ONLINE ADD-ON (#71) - SPA Blueberry Facial",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 28185669
+        },
+        {
+          "Id": 27462652,
+          "Name": "ONLINE SERVICE (#1) - DOG - Full Groom",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 90,
+          "ServiceId": 27462652
+        },
+        {
+          "Id": 27462653,
+          "Name": "ONLINE SERVICE (#2) - DOG - Mini Groom",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 60,
+          "ServiceId": 27462653
+        },
+        {
+          "Id": 27462654,
+          "Name": "ONLINE SERVICE (#3) - DOG - Luxury Bath",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 30,
+          "ServiceId": 27462654
+        }
+      ]
+    }
+  },
+  "walkin_services": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/205993/services?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data"
+    ],
+    "sample": {
+      "data": []
+    }
+  },
+  "company_formfields": {
+    "status": 500,
+    "url": "https://publicapi.franpos.com/api/company/formfields?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "body": "{\"Message\":\"An error has occurred.\",\"ExceptionMessage\":\"The property 'ID' is part of the object's key information and cannot be modified. \",\"ExceptionType\":\"System.InvalidOperationException\",\"StackTrace\":\"   at System.Data.Entity.Core.Objects.EntityEntry.DetectChangesInProperty(Int32 ordinal, Boolea"
+  },
+  "booking_getstatus": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getstatus?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993'.\",\"MessageDetail\":\"No act"
+  },
+  "walkin_employee_schedules_today": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&companyId=205993&dateStr=2026-09-07",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&companyId=205993&dateStr=2026-09-07'"
+  },
+  "walkin_employee_schedules_tomorrow": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&companyId=205993&dateStr=2026-09-08",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&companyId=205993&dateStr=2026-09-08'"
+  },
+  "customer_history_Chanel": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420612630/json?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 1,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-07-23T10:00:00",
+        "Type": 4,
+        "SalesPerson": "Kayla Moses",
+        "Stylist": "Julia B",
+        "Store": "Woof Gang Hicksville, NY (#265)",
+        "Items": "FG / General / LG"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-07-23T10:00:00",
+          "Type": 4,
+          "SalesPerson": "Kayla Moses",
+          "Stylist": "Julia B",
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "FG / General / LG"
+        }
+      ],
+      "totalVisit": 1,
+      "totalSales": 0.0
+    }
+  },
+  "customer_history_Chanel_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420612630/csv?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-07-23 10:00:00,Visits,Kayla Moses,Julia B,\"Woof Gang Hicksville, NY (#265)\",FG / General / LG\r\n"
+  },
+  "customer_record_Chanel": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/420612630?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 420612630,
+      "FirstName": " Chanel",
+      "LastName": "",
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "",
+      "CellPhone": "3478827173",
+      "WorkPhone": "",
+      "DateOfBirth": "2024-07-20T11:44:28",
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": null,
+      "StateProvinceId": null,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 205993
+    }
+  },
+  "customer_history_Cookie": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420161601/json?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 3,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-07-22T14:00:00",
+        "Type": 4,
+        "SalesPerson": "Kayla Moses",
+        "Stylist": "Julia B",
+        "Store": "Woof Gang Hicksville, NY (#265)",
+        "Items": "Lux Bath / General / SM"
+      },
+      {
+        "Date": "2026-04-28T09:30:00",
+        "Type": 4,
+        "SalesPerson": "Kayla Moses",
+        "Stylist": "Carol W",
+        "Store": "Woof Gang Hicksville, NY (#265)",
+        "Items": "Lux Bath / General / SM"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-07-22T14:00:00",
+          "Type": 4,
+          "SalesPerson": "Kayla Moses",
+          "Stylist": "Julia B",
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "Lux Bath / General / SM"
+        },
+        {
+          "Date": "2026-04-28T09:30:00",
+          "Type": 4,
+          "SalesPerson": "Kayla Moses",
+          "Stylist": "Carol W",
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "Lux Bath / General / SM"
+        },
+        {
+          "Date": "2026-02-18T12:00:00",
+          "Type": 4,
+          "SalesPerson": "Cindy Szczudlo",
+          "Stylist": "Maria V",
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "Lux Bath / General / SM"
+        }
+      ],
+      "totalVisit": 3,
+      "totalSales": 0.0
+    }
+  },
+  "customer_history_Cookie_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420161601/csv?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-07-22 14:00:00,Visits,Kayla Moses,Julia B,\"Woof Gang Hicksville, NY (#265)\",Lux Bath / General / SM\r\n2026-04-28 09:30:00,Visits,Kayla Moses,Carol W,\"Woof Gang Hicksville, NY (#265)\",Lux Bath / General / SM\r\n2026-02-18 12:00:00,Visits,Cindy Szczudlo,Maria V,\"Woof Gang Hicksville, NY (#265)\",Lux Bath / General / SM\r\n"
+  },
+  "customer_record_Cookie": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/420161601?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 420161601,
+      "FirstName": " Cookie",
+      "LastName": "",
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "jvalencia0218@gmail.com",
+      "CellPhone": "5168489383",
+      "WorkPhone": "",
+      "DateOfBirth": "2023-02-17T15:39:02",
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": null,
+      "StateProvinceId": null,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 205993
+    }
+  },
+  "customer_history_Ladoo": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420104890/json?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 1,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-01-20T14:26:41",
+        "Type": 2,
+        "SalesPerson": "Sophia Kurkowski",
+        "Stylist": null,
+        "Store": "Woof Gang Hicksville, NY (#265)",
+        "Items": "FG / General / SM - 1.00000"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-01-20T14:26:41",
+          "Type": 2,
+          "SalesPerson": "Sophia Kurkowski",
+          "Stylist": null,
+          "Store": "Woof Gang Hicksville, NY (#265)",
+          "Items": "FG / General / SM - 1.00000"
+        }
+      ],
+      "totalVisit": 1,
+      "totalSales": 76.04
+    }
+  },
+  "customer_history_Ladoo_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420104890/csv?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-01-20 14:26:41,Sales,Sophia Kurkowski,,\"Woof Gang Hicksville, NY (#265)\",FG / General / SM - 1.00000\r\n"
+  },
+  "customer_record_Ladoo": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/420104890?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&locationId=205993",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 420104890,
+      "FirstName": " Trem ",
+      "LastName": "Sagar",
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "",
+      "CellPhone": "5162387337",
+      "WorkPhone": "",
+      "DateOfBirth": null,
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": 1,
+      "StateProvinceId": 41,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 205993
+    }
+  },
+  "datadump_customers_sample": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/datadump/v1/customers/7/0/2026-09-06/205993?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "pages",
+      "version"
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [],
+      "pages": 0,
+      "version": 761794109
+    }
+  }
+}
