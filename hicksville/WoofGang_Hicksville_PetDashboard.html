@@ -69,6 +69,9 @@
   .lc-modal-close { position:absolute; top:14px; right:16px; background:none; border:none; font-size:22px; line-height:1; cursor:pointer; color:var(--muted); }
   .lc-modal-close:hover { color:var(--text); }
   .lc-modal h2 { font-size:20px; color:var(--brown); margin-bottom:2px; }
+  .lc-modal-owner { font-size:13px; color:var(--text); margin-bottom:4px; }
+  .lc-modal-phone { color:var(--pink); font-weight:600; text-decoration:none; }
+  .lc-modal-phone:hover { text-decoration:underline; }
   .lc-modal-sub { font-size:12px; color:var(--muted); margin-bottom:18px; }
   .lc-modal-section { margin-top:18px; }
   .lc-modal-section h3 { font-size:13px; color:var(--brown); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
@@ -389,7 +392,7 @@
     <table>
       <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Usual Groomer</th><th>Visits</th><th>Call Log</th></tr></thead>
       <tbody id="lc-tbody">
-      <tr class="lapse-row" data-cid="420013500" data-last-visit="2026-02-11" data-pet-name="Nohva" data-owner-name="Khendra Campbell">
+      <tr class="lapse-row" data-cid="420013500" data-last-visit="2026-02-11" data-pet-name="Nohva" data-owner-name="Khendra Campbell" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420013500')">Nohva</button><br><small style="color:var(--muted)"> · first groom: A o</small></td>
         <td>Khendra Campbell<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -403,7 +406,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420025174" data-last-visit="2026-02-27" data-pet-name="Leah" data-owner-name="Shenae Carpenter">
+      <tr class="lapse-row" data-cid="420025174" data-last-visit="2026-02-27" data-pet-name="Leah" data-owner-name="Shenae Carpenter" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420025174')">Leah</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Shenae Carpenter<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -417,7 +420,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420197018" data-last-visit="2026-03-27" data-pet-name="Bella" data-owner-name="Roden Oginar">
+      <tr class="lapse-row" data-cid="420197018" data-last-visit="2026-03-27" data-pet-name="Bella" data-owner-name="Roden Oginar" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420197018')">Bella</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Roden Oginar<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -431,7 +434,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420052334" data-last-visit="2026-03-21" data-pet-name="Nacho" data-owner-name="Leidy Montano">
+      <tr class="lapse-row" data-cid="420052334" data-last-visit="2026-03-21" data-pet-name="Nacho" data-owner-name="Leidy Montano" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420052334')">Nacho</button><br><small style="color:var(--muted)">LG · FG</small></td>
         <td>Leidy Montano<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -445,7 +448,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420006718" data-last-visit="2026-03-21" data-pet-name="Baci" data-owner-name="Gary Peluso">
+      <tr class="lapse-row" data-cid="420006718" data-last-visit="2026-03-21" data-pet-name="Baci" data-owner-name="Gary Peluso" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420006718')">Baci</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Gary Peluso<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -459,7 +462,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420018015" data-last-visit="2026-03-12" data-pet-name="Milo" data-owner-name="Steven Rivera">
+      <tr class="lapse-row" data-cid="420018015" data-last-visit="2026-03-12" data-pet-name="Milo" data-owner-name="Steven Rivera" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420018015')">Milo</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Steven Rivera<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -473,7 +476,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420146979" data-last-visit="2026-04-02" data-pet-name="Shoomie" data-owner-name="Daphne Ruzhiel">
+      <tr class="lapse-row" data-cid="420146979" data-last-visit="2026-04-02" data-pet-name="Shoomie" data-owner-name="Daphne Ruzhiel" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420146979')">Shoomie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Daphne Ruzhiel<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -487,7 +490,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420223848" data-last-visit="2026-04-17" data-pet-name="Journey" data-owner-name="Imani Insuasti">
+      <tr class="lapse-row" data-cid="420223848" data-last-visit="2026-04-17" data-pet-name="Journey" data-owner-name="Imani Insuasti" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420223848')">Journey</button><br><small style="color:var(--muted)">SM · MG</small></td>
         <td>Imani Insuasti<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -501,7 +504,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420172702" data-last-visit="2026-04-10" data-pet-name="Stella" data-owner-name="Kevin Raab">
+      <tr class="lapse-row" data-cid="420172702" data-last-visit="2026-04-10" data-pet-name="Stella" data-owner-name="Kevin Raab" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420172702')">Stella</button><br><small style="color:var(--muted)">SM · Lux Bath</small></td>
         <td>Kevin Raab<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -515,7 +518,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420128678" data-last-visit="2026-03-31" data-pet-name="Gogo" data-owner-name="Crystal Lim">
+      <tr class="lapse-row" data-cid="420128678" data-last-visit="2026-03-31" data-pet-name="Gogo" data-owner-name="Crystal Lim" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420128678')">Gogo</button><br><small style="color:var(--muted)"> · #1 all over A head trim tail... Debby</small></td>
         <td>Crystal Lim<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -529,7 +532,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420099035" data-last-visit="2026-03-27" data-pet-name="Bodhi" data-owner-name="Laura Kelly">
+      <tr class="lapse-row" data-cid="420099035" data-last-visit="2026-03-27" data-pet-name="Bodhi" data-owner-name="Laura Kelly" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420099035')">Bodhi</button><br><small style="color:var(--muted)">SM · MG</small></td>
         <td>Laura Kelly<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -543,7 +546,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420223847" data-last-visit="2026-04-17" data-pet-name="Journey" data-owner-name="Imani Insuasti">
+      <tr class="lapse-row" data-cid="420223847" data-last-visit="2026-04-17" data-pet-name="Journey" data-owner-name="Imani Insuasti" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420223847')">Journey</button><br><small style="color:var(--muted)"> · Cookie - Mini Birthday Cupcake - 1.00000, I Ruv Ice Cream Swirl - 1.00000, X-Small Treat Table - 1.00000, WGB Collagen Chew - Beef Small Roll 5&quot; - 2.00000</small></td>
         <td>Imani Insuasti<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -557,7 +560,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420111935" data-last-visit="2026-04-08" data-pet-name="Mini, Penny" data-owner-name="Sharon Higgins">
+      <tr class="lapse-row" data-cid="420111935" data-last-visit="2026-04-08" data-pet-name="Mini, Penny" data-owner-name="Sharon Higgins" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420111935')">Mini, Penny</button><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
         <td>Sharon Higgins<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -571,7 +574,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420111936" data-last-visit="2026-04-08" data-pet-name="Penny" data-owner-name="Sharon Higgins">
+      <tr class="lapse-row" data-cid="420111936" data-last-visit="2026-04-08" data-pet-name="Penny" data-owner-name="Sharon Higgins" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420111936')">Penny</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Sharon Higgins<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -585,7 +588,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420185634" data-last-visit="2026-04-14" data-pet-name="Vidi" data-owner-name="Ximina Flemming">
+      <tr class="lapse-row" data-cid="420185634" data-last-visit="2026-04-14" data-pet-name="Vidi" data-owner-name="Ximina Flemming" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420185634')">Vidi</button><br><small style="color:var(--muted)">LG · FG</small></td>
         <td>Ximina Flemming<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -599,7 +602,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420139948" data-last-visit="2026-04-10" data-pet-name="Charli Mae" data-owner-name="Jerilyn Kaval">
+      <tr class="lapse-row" data-cid="420139948" data-last-visit="2026-04-10" data-pet-name="Charli Mae" data-owner-name="Jerilyn Kaval" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420139948')">Charli Mae</button><br><small style="color:var(--muted)">LG · MG</small></td>
         <td>Jerilyn Kaval<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -613,7 +616,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420005693" data-last-visit="2026-04-07" data-pet-name="Ozai" data-owner-name="Riya Sharma">
+      <tr class="lapse-row" data-cid="420005693" data-last-visit="2026-04-07" data-pet-name="Ozai" data-owner-name="Riya Sharma" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420005693')">Ozai</button><br><small style="color:var(--muted)">LG · FG</small></td>
         <td>Riya Sharma<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -627,7 +630,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420199828" data-last-visit="2026-05-01" data-pet-name="Winnie" data-owner-name="Dana Walsh">
+      <tr class="lapse-row" data-cid="420199828" data-last-visit="2026-05-01" data-pet-name="Winnie" data-owner-name="Dana Walsh" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420199828')">Winnie</button><br><small style="color:var(--muted)">LG · Lux Bath</small></td>
         <td>Dana Walsh<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -641,7 +644,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420133121" data-last-visit="2026-04-13" data-pet-name="Remy" data-owner-name="Joseph Giordano">
+      <tr class="lapse-row" data-cid="420133121" data-last-visit="2026-04-13" data-pet-name="Remy" data-owner-name="Joseph Giordano" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420133121')">Remy</button><br><small style="color:var(--muted)">MD · Clsc Bath</small></td>
         <td>Joseph Giordano<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -655,7 +658,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420181297" data-last-visit="2026-04-23" data-pet-name="Mocha" data-owner-name="Kimberly Lee">
+      <tr class="lapse-row" data-cid="420181297" data-last-visit="2026-04-23" data-pet-name="Mocha" data-owner-name="Kimberly Lee" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420181297')">Mocha</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Kimberly Lee<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -669,7 +672,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420129461" data-last-visit="2026-04-22" data-pet-name="Roscoe" data-owner-name="Michelle Seid">
+      <tr class="lapse-row" data-cid="420129461" data-last-visit="2026-04-22" data-pet-name="Roscoe" data-owner-name="Michelle Seid" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420129461')">Roscoe</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Michelle Seid<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -683,7 +686,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420114457" data-last-visit="2026-05-14" data-pet-name="Bruno" data-owner-name="German Paris">
+      <tr class="lapse-row" data-cid="420114457" data-last-visit="2026-05-14" data-pet-name="Bruno" data-owner-name="German Paris" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420114457')">Bruno</button><br><small style="color:var(--muted)">LG · FG</small></td>
         <td>German Paris<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -697,7 +700,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420151926" data-last-visit="2026-05-11" data-pet-name="Mack" data-owner-name="Dana Gelber">
+      <tr class="lapse-row" data-cid="420151926" data-last-visit="2026-05-11" data-pet-name="Mack" data-owner-name="Dana Gelber" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420151926')">Mack</button><br><small style="color:var(--muted)"> · Matted skirt. 7sch cut, 5 skirt, sch head, trim tail</small></td>
         <td>Dana Gelber<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -711,7 +714,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420060768" data-last-visit="2026-05-04" data-pet-name="Nicki" data-owner-name="Heather Lonic">
+      <tr class="lapse-row" data-cid="420060768" data-last-visit="2026-05-04" data-pet-name="Nicki" data-owner-name="Heather Lonic" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420060768')">Nicki</button><br><small style="color:var(--muted)"> · accidentally charged fg and julia did a mg</small></td>
         <td>Heather Lonic<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -725,7 +728,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420005689" data-last-visit="2026-04-07" data-pet-name="Ozai" data-owner-name="Riya Sharma">
+      <tr class="lapse-row" data-cid="420005689" data-last-visit="2026-04-07" data-pet-name="Ozai" data-owner-name="Riya Sharma" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420005689')">Ozai</button><br><small style="color:var(--muted)">LG - 1.00000 · FG</small></td>
         <td>Riya Sharma<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -739,7 +742,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420170274" data-last-visit="2026-05-12" data-pet-name="Macie" data-owner-name="Jennifer Pellegrini">
+      <tr class="lapse-row" data-cid="420170274" data-last-visit="2026-05-12" data-pet-name="Macie" data-owner-name="Jennifer Pellegrini" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420170274')">Macie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Jennifer Pellegrini<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -753,7 +756,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420292394" data-last-visit="2026-05-18" data-pet-name="Teddy" data-owner-name="Madeline Pantaleon">
+      <tr class="lapse-row" data-cid="420292394" data-last-visit="2026-05-18" data-pet-name="Teddy" data-owner-name="Madeline Pantaleon" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420292394')">Teddy</button><br><small style="color:var(--muted)"> · 5 ao (matted), tbf, trim tail and ears</small></td>
         <td>Madeline Pantaleon<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -767,7 +770,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420035171" data-last-visit="2026-05-08" data-pet-name="Venchi" data-owner-name="Ash Puri">
+      <tr class="lapse-row" data-cid="420035171" data-last-visit="2026-05-08" data-pet-name="Venchi" data-owner-name="Ash Puri" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420035171')">Venchi</button><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
         <td>Ash Puri<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -781,7 +784,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420286558" data-last-visit="2026-05-30" data-pet-name="Auggie" data-owner-name="Cal Leonard">
+      <tr class="lapse-row" data-cid="420286558" data-last-visit="2026-05-30" data-pet-name="Auggie" data-owner-name="Cal Leonard" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420286558')">Auggie</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Cal Leonard<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -795,7 +798,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420347511" data-last-visit="2026-05-28" data-pet-name="Rupert" data-owner-name="Beth Matlin">
+      <tr class="lapse-row" data-cid="420347511" data-last-visit="2026-05-28" data-pet-name="Rupert" data-owner-name="Beth Matlin" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420347511')">Rupert</button><br><small style="color:var(--muted)"> · mini groom</small></td>
         <td>Beth Matlin<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -809,7 +812,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420107098" data-last-visit="2026-05-02" data-pet-name="Gus" data-owner-name="Ellen Picardi">
+      <tr class="lapse-row" data-cid="420107098" data-last-visit="2026-05-02" data-pet-name="Gus" data-owner-name="Ellen Picardi" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420107098')">Gus</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Ellen Picardi<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -823,7 +826,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420065821" data-last-visit="2026-05-07" data-pet-name="Sloane" data-owner-name="Isaac Gealer">
+      <tr class="lapse-row" data-cid="420065821" data-last-visit="2026-05-07" data-pet-name="Sloane" data-owner-name="Isaac Gealer" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420065821')">Sloane</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Isaac Gealer<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -837,7 +840,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420329368" data-last-visit="2026-05-28" data-pet-name="Piper" data-owner-name="Leona Geneen">
+      <tr class="lapse-row" data-cid="420329368" data-last-visit="2026-05-28" data-pet-name="Piper" data-owner-name="Leona Geneen" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420329368')">Piper</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Leona Geneen<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -851,7 +854,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420114456" data-last-visit="2026-05-14" data-pet-name="Bruno" data-owner-name="German Paris">
+      <tr class="lapse-row" data-cid="420114456" data-last-visit="2026-05-14" data-pet-name="Bruno" data-owner-name="German Paris" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420114456')">Bruno</button><br><small style="color:var(--muted)">LG - 1.00000, ADD-ON · FG</small></td>
         <td>German Paris<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -865,7 +868,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420135016" data-last-visit="2026-05-08" data-pet-name="Benny" data-owner-name="Marjorie Tirsun">
+      <tr class="lapse-row" data-cid="420135016" data-last-visit="2026-05-08" data-pet-name="Benny" data-owner-name="Marjorie Tirsun" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420135016')">Benny</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Marjorie Tirsun<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -879,7 +882,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420099000" data-last-visit="2026-05-14" data-pet-name="Molly" data-owner-name="Rose Karahalis">
+      <tr class="lapse-row" data-cid="420099000" data-last-visit="2026-05-14" data-pet-name="Molly" data-owner-name="Rose Karahalis" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420099000')">Molly</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Rose Karahalis<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -893,7 +896,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420098998" data-last-visit="2026-05-14" data-pet-name="Molly" data-owner-name="Rose Karahalis">
+      <tr class="lapse-row" data-cid="420098998" data-last-visit="2026-05-14" data-pet-name="Molly" data-owner-name="Rose Karahalis" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420098998')">Molly</button><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
         <td>Rose Karahalis<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -907,7 +910,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420114209" data-last-visit="2026-05-18" data-pet-name="Ollie, Sammy" data-owner-name="Brian Munter">
+      <tr class="lapse-row" data-cid="420114209" data-last-visit="2026-05-18" data-pet-name="Ollie, Sammy" data-owner-name="Brian Munter" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420114209')">Ollie, Sammy</button><br><small style="color:var(--muted)">SM - 1.00000, FG · FG</small></td>
         <td>Brian Munter<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -921,7 +924,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420114212" data-last-visit="2026-05-18" data-pet-name="Ollie" data-owner-name="Brian Munter">
+      <tr class="lapse-row" data-cid="420114212" data-last-visit="2026-05-18" data-pet-name="Ollie" data-owner-name="Brian Munter" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420114212')">Ollie</button><br><small style="color:var(--muted)"> · 5ao, tbf, trim tail and ears</small></td>
         <td>Brian Munter<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -935,7 +938,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420114210" data-last-visit="2026-05-18" data-pet-name="Sammy" data-owner-name="Brian Munter">
+      <tr class="lapse-row" data-cid="420114210" data-last-visit="2026-05-18" data-pet-name="Sammy" data-owner-name="Brian Munter" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420114210')">Sammy</button><br><small style="color:var(--muted)"> · 5ao, tbf, trim tail and ears</small></td>
         <td>Brian Munter<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -949,7 +952,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420170272" data-last-visit="2026-05-12" data-pet-name="Harley, Macie" data-owner-name="Jennifer Pellegrini">
+      <tr class="lapse-row" data-cid="420170272" data-last-visit="2026-05-12" data-pet-name="Harley, Macie" data-owner-name="Jennifer Pellegrini" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420170272')">Harley, Macie</button><br><small style="color:var(--muted)">SM - 1.00000, FG · FG</small></td>
         <td>Jennifer Pellegrini<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -963,7 +966,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420151923" data-last-visit="2026-05-11" data-pet-name="Mack" data-owner-name="Dana Gelber">
+      <tr class="lapse-row" data-cid="420151923" data-last-visit="2026-05-11" data-pet-name="Mack" data-owner-name="Dana Gelber" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420151923')">Mack</button><br><small style="color:var(--muted)">MD - 1.00000, ADD-ON · FG</small></td>
         <td>Dana Gelber<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -977,7 +980,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420329817" data-last-visit="2026-06-05" data-pet-name="Ruby" data-owner-name="Linda Mollica">
+      <tr class="lapse-row" data-cid="420329817" data-last-visit="2026-06-05" data-pet-name="Ruby" data-owner-name="Linda Mollica" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420329817')">Ruby</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Linda Mollica<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -991,7 +994,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420217915" data-last-visit="2026-05-11" data-pet-name="Sadie, Sadie Mac" data-owner-name="Max Mogil">
+      <tr class="lapse-row" data-cid="420217915" data-last-visit="2026-05-11" data-pet-name="Sadie, Sadie Mac" data-owner-name="Max Mogil" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420217915')">Sadie, Sadie Mac</button><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · MG</small></td>
         <td>Max Mogil<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1005,7 +1008,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420388992" data-last-visit="2026-06-13" data-pet-name="Mozzie" data-owner-name="Carolyn Miao">
+      <tr class="lapse-row" data-cid="420388992" data-last-visit="2026-06-13" data-pet-name="Mozzie" data-owner-name="Carolyn Miao" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420388992')">Mozzie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Carolyn Miao<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1019,7 +1022,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420062739" data-last-visit="2026-05-30" data-pet-name="Ellie" data-owner-name="Susan Fishelberg">
+      <tr class="lapse-row" data-cid="420062739" data-last-visit="2026-05-30" data-pet-name="Ellie" data-owner-name="Susan Fishelberg" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420062739')">Ellie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Susan Fishelberg<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1033,7 +1036,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420295517" data-last-visit="2026-06-05" data-pet-name="Finn" data-owner-name="Jennifer Gutterson">
+      <tr class="lapse-row" data-cid="420295517" data-last-visit="2026-06-05" data-pet-name="Finn" data-owner-name="Jennifer Gutterson" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420295517')">Finn</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Jennifer Gutterson<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1047,7 +1050,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420203377" data-last-visit="2026-05-29" data-pet-name="Diesel" data-owner-name="Jacklyn Frank">
+      <tr class="lapse-row" data-cid="420203377" data-last-visit="2026-05-29" data-pet-name="Diesel" data-owner-name="Jacklyn Frank" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420203377')">Diesel</button><br><small style="color:var(--muted)"> · ONLINE SERVICE (#1) - DOG - Full Groom</small></td>
         <td>Jacklyn Frank<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1061,7 +1064,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420142390" data-last-visit="2026-05-20" data-pet-name="Ollie" data-owner-name="Jim Werner">
+      <tr class="lapse-row" data-cid="420142390" data-last-visit="2026-05-20" data-pet-name="Ollie" data-owner-name="Jim Werner" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420142390')">Ollie</button><br><small style="color:var(--muted)">SM - 1.00000, ADD-ON · FG</small></td>
         <td>Jim Werner<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1075,7 +1078,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420142391" data-last-visit="2026-05-20" data-pet-name="Ollie" data-owner-name="Jim Werner">
+      <tr class="lapse-row" data-cid="420142391" data-last-visit="2026-05-20" data-pet-name="Ollie" data-owner-name="Jim Werner" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420142391')">Ollie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Jim Werner<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1089,7 +1092,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420126230" data-last-visit="2026-05-19" data-pet-name="Shiba" data-owner-name="Hector Arrivillaga">
+      <tr class="lapse-row" data-cid="420126230" data-last-visit="2026-05-19" data-pet-name="Shiba" data-owner-name="Hector Arrivillaga" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420126230')">Shiba</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Hector Arrivillaga<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1103,7 +1106,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420183742" data-last-visit="2026-05-28" data-pet-name="Ollie" data-owner-name="Melani Heller">
+      <tr class="lapse-row" data-cid="420183742" data-last-visit="2026-05-28" data-pet-name="Ollie" data-owner-name="Melani Heller" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420183742')">Ollie</button><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
         <td>Melani Heller<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1117,7 +1120,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420183743" data-last-visit="2026-05-28" data-pet-name="Ollie" data-owner-name="Melani Heller">
+      <tr class="lapse-row" data-cid="420183743" data-last-visit="2026-05-28" data-pet-name="Ollie" data-owner-name="Melani Heller" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420183743')">Ollie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Melani Heller<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1131,7 +1134,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420035172" data-last-visit="2026-06-23" data-pet-name="Venchi" data-owner-name="Ash Puri">
+      <tr class="lapse-row" data-cid="420035172" data-last-visit="2026-06-23" data-pet-name="Venchi" data-owner-name="Ash Puri" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420035172')">Venchi</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Ash Puri<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1145,7 +1148,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420062738" data-last-visit="2026-05-30" data-pet-name="Ellie" data-owner-name="Susan Fishelberg">
+      <tr class="lapse-row" data-cid="420062738" data-last-visit="2026-05-30" data-pet-name="Ellie" data-owner-name="Susan Fishelberg" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420062738')">Ellie</button><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
         <td>Susan Fishelberg<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1159,7 +1162,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420353483" data-last-visit="2026-06-26" data-pet-name="Polar" data-owner-name="Sunali Nagi">
+      <tr class="lapse-row" data-cid="420353483" data-last-visit="2026-06-26" data-pet-name="Polar" data-owner-name="Sunali Nagi" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420353483')">Polar</button><br><small style="color:var(--muted)"> · 5ao, tbf, trim ears and tail</small></td>
         <td>Sunali Nagi<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1173,7 +1176,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420177639" data-last-visit="2026-06-06" data-pet-name="Clover, Daisy" data-owner-name="Brianna Tietjen">
+      <tr class="lapse-row" data-cid="420177639" data-last-visit="2026-06-06" data-pet-name="Clover, Daisy" data-owner-name="Brianna Tietjen" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420177639')">Clover, Daisy</button><br><small style="color:var(--muted)">XXLG - 1.00000, ADD-ON · Large Treat Table - 2.00000, FG</small></td>
         <td>Brianna Tietjen<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1187,7 +1190,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420424924" data-last-visit="2026-07-03" data-pet-name="Snickers" data-owner-name="Noel Hammaren">
+      <tr class="lapse-row" data-cid="420424924" data-last-visit="2026-07-03" data-pet-name="Snickers" data-owner-name="Noel Hammaren" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420424924')">Snickers</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Noel Hammaren<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1201,7 +1204,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420440659" data-last-visit="2026-07-02" data-pet-name="Rocky" data-owner-name="Gabriella Sosa">
+      <tr class="lapse-row" data-cid="420440659" data-last-visit="2026-07-02" data-pet-name="Rocky" data-owner-name="Gabriella Sosa" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420440659')">Rocky</button><br><small style="color:var(--muted)">XLG · FG</small></td>
         <td>Gabriella Sosa<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1215,7 +1218,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420447620" data-last-visit="2026-07-08" data-pet-name="Marshal" data-owner-name="Michael Gussin">
+      <tr class="lapse-row" data-cid="420447620" data-last-visit="2026-07-08" data-pet-name="Marshal" data-owner-name="Michael Gussin" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420447620')">Marshal</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Michael Gussin<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1229,7 +1232,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420378127" data-last-visit="2026-06-26" data-pet-name="Theo" data-owner-name="Ava Zias">
+      <tr class="lapse-row" data-cid="420378127" data-last-visit="2026-06-26" data-pet-name="Theo" data-owner-name="Ava Zias" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420378127')">Theo</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Ava Zias<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1243,7 +1246,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420348833" data-last-visit="2026-06-23" data-pet-name="Benny" data-owner-name="Jahmeelah Shabazz">
+      <tr class="lapse-row" data-cid="420348833" data-last-visit="2026-06-23" data-pet-name="Benny" data-owner-name="Jahmeelah Shabazz" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420348833')">Benny</button><br><small style="color:var(--muted)">LG · FG</small></td>
         <td>Jahmeelah Shabazz<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1257,7 +1260,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420122403" data-last-visit="2026-06-22" data-pet-name="Odie" data-owner-name="Yiendhy Farrelly">
+      <tr class="lapse-row" data-cid="420122403" data-last-visit="2026-06-22" data-pet-name="Odie" data-owner-name="Yiendhy Farrelly" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420122403')">Odie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Yiendhy Farrelly<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1271,7 +1274,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420495049" data-last-visit="2026-07-16" data-pet-name="Bijou" data-owner-name="Susanne Smith">
+      <tr class="lapse-row" data-cid="420495049" data-last-visit="2026-07-16" data-pet-name="Bijou" data-owner-name="Susanne Smith" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420495049')">Bijou</button><br><small style="color:var(--muted)"> · 1 guard A head tbf trim ears</small></td>
         <td>Susanne Smith<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1285,7 +1288,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420086039" data-last-visit="2026-06-25" data-pet-name="Charlie" data-owner-name="Gary Goltzman">
+      <tr class="lapse-row" data-cid="420086039" data-last-visit="2026-06-25" data-pet-name="Charlie" data-owner-name="Gary Goltzman" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420086039')">Charlie</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Gary Goltzman<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1299,7 +1302,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420392980" data-last-visit="2026-07-10" data-pet-name="Tasha, Teddy" data-owner-name="Ken Partlow">
+      <tr class="lapse-row" data-cid="420392980" data-last-visit="2026-07-10" data-pet-name="Tasha, Teddy" data-owner-name="Ken Partlow" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420392980')">Tasha, Teddy</button><br><small style="color:var(--muted)">MD - 1.00000 · FG</small></td>
         <td>Ken Partlow<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1313,7 +1316,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420319374" data-last-visit="2026-07-02" data-pet-name="Ava" data-owner-name="Kay Kwak">
+      <tr class="lapse-row" data-cid="420319374" data-last-visit="2026-07-02" data-pet-name="Ava" data-owner-name="Kay Kwak" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420319374')">Ava</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Kay Kwak<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1327,7 +1330,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420133757" data-last-visit="2026-06-27" data-pet-name="Ollie" data-owner-name="Lena Nadelman">
+      <tr class="lapse-row" data-cid="420133757" data-last-visit="2026-06-27" data-pet-name="Ollie" data-owner-name="Lena Nadelman" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420133757')">Ollie</button><br><small style="color:var(--muted)"> · 7ao 1gc head short tbf trim ears lion tail (matted)</small></td>
         <td>Lena Nadelman<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1341,7 +1344,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420391834" data-last-visit="2026-07-11" data-pet-name="Dixie" data-owner-name="Jannie Counsell">
+      <tr class="lapse-row" data-cid="420391834" data-last-visit="2026-07-11" data-pet-name="Dixie" data-owner-name="Jannie Counsell" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420391834')">Dixie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Jannie Counsell<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1355,7 +1358,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420319934" data-last-visit="2026-07-16" data-pet-name="Milo" data-owner-name="Michelle Brady">
+      <tr class="lapse-row" data-cid="420319934" data-last-visit="2026-07-16" data-pet-name="Milo" data-owner-name="Michelle Brady" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420319934')">Milo</button><br><small style="color:var(--muted)">MD - -1.00000 · FG</small></td>
         <td>Michelle Brady<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1369,7 +1372,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420393784" data-last-visit="2026-07-08" data-pet-name="Charlie" data-owner-name="Annie Yang Cording">
+      <tr class="lapse-row" data-cid="420393784" data-last-visit="2026-07-08" data-pet-name="Charlie" data-owner-name="Annie Yang Cording" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420393784')">Charlie</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Annie Yang Cording<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1383,7 +1386,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="419994184" data-last-visit="2026-07-15" data-pet-name="Apollo, Honey, Pancake, Zsa zsa" data-owner-name="Shari Staiano">
+      <tr class="lapse-row" data-cid="419994184" data-last-visit="2026-07-15" data-pet-name="Apollo, Honey, Pancake, Zsa zsa" data-owner-name="Shari Staiano" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('419994184')">Apollo, Honey, Pancake, Zsa zsa</button><br><small style="color:var(--muted)">SM - 1.00000 · No Hide Beef - Stix - 1.00000, FG</small></td>
         <td>Shari Staiano<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1397,7 +1400,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420352191" data-last-visit="2026-07-24" data-pet-name="Murray" data-owner-name="Eleanor Chung-Wernow">
+      <tr class="lapse-row" data-cid="420352191" data-last-visit="2026-07-24" data-pet-name="Murray" data-owner-name="Eleanor Chung-Wernow" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420352191')">Murray</button><br><small style="color:var(--muted)">LG · Lux Bath</small></td>
         <td>Eleanor Chung-Wernow<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1411,7 +1414,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420315419" data-last-visit="2026-07-31" data-pet-name="Cooper" data-owner-name="Christina Cangiano">
+      <tr class="lapse-row" data-cid="420315419" data-last-visit="2026-07-31" data-pet-name="Cooper" data-owner-name="Christina Cangiano" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420315419')">Cooper</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Christina Cangiano<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1425,7 +1428,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420557235" data-last-visit="2026-08-07" data-pet-name="Ruby" data-owner-name="Juan Arismesdi">
+      <tr class="lapse-row" data-cid="420557235" data-last-visit="2026-08-07" data-pet-name="Ruby" data-owner-name="Juan Arismesdi" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420557235')">Ruby</button><br><small style="color:var(--muted)"> · Obody trim head wanted top knott with the white hair uncut</small></td>
         <td>Juan Arismesdi<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1439,7 +1442,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420521158" data-last-visit="2026-08-10" data-pet-name="Lucy" data-owner-name="Claudine Knoll">
+      <tr class="lapse-row" data-cid="420521158" data-last-visit="2026-08-10" data-pet-name="Lucy" data-owner-name="Claudine Knoll" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420521158')">Lucy</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Claudine Knoll<br><small>—</small></td>
         <td style="color:#dc2626;font-weight:700">Lapsed</td>
@@ -1453,7 +1456,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420082428" data-last-visit="2026-06-06" data-pet-name="Johnie B" data-owner-name="Robin Chamow">
+      <tr class="lapse-row" data-cid="420082428" data-last-visit="2026-06-06" data-pet-name="Johnie B" data-owner-name="Robin Chamow" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420082428')">Johnie B</button><br><small style="color:var(--muted)">LG · FG</small></td>
         <td>Robin Chamow<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1467,7 +1470,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420251941" data-last-visit="2026-06-19" data-pet-name="Brooklyn" data-owner-name="Juan Barnett">
+      <tr class="lapse-row" data-cid="420251941" data-last-visit="2026-06-19" data-pet-name="Brooklyn" data-owner-name="Juan Barnett" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420251941')">Brooklyn</button><br><small style="color:var(--muted)">SM - 1.00000 · MG</small></td>
         <td>Juan Barnett<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1481,7 +1484,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420083140" data-last-visit="2026-06-16" data-pet-name="Apollo" data-owner-name="Shari Staiano">
+      <tr class="lapse-row" data-cid="420083140" data-last-visit="2026-06-16" data-pet-name="Apollo" data-owner-name="Shari Staiano" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420083140')">Apollo</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Shari Staiano<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1495,7 +1498,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420185375" data-last-visit="2026-06-11" data-pet-name="Bree" data-owner-name="Maryanne Sullivan">
+      <tr class="lapse-row" data-cid="420185375" data-last-visit="2026-06-11" data-pet-name="Bree" data-owner-name="Maryanne Sullivan" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420185375')">Bree</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Maryanne Sullivan<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1509,7 +1512,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420148433" data-last-visit="2026-06-05" data-pet-name="Miley" data-owner-name="Bonnie Fachler">
+      <tr class="lapse-row" data-cid="420148433" data-last-visit="2026-06-05" data-pet-name="Miley" data-owner-name="Bonnie Fachler" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420148433')">Miley</button><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
         <td>Bonnie Fachler<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1523,7 +1526,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420125087" data-last-visit="2026-06-04" data-pet-name="Coco" data-owner-name="Monita bijoriya">
+      <tr class="lapse-row" data-cid="420125087" data-last-visit="2026-06-04" data-pet-name="Coco" data-owner-name="Monita bijoriya" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420125087')">Coco</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Monita bijoriya<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1537,7 +1540,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420125086" data-last-visit="2026-06-04" data-pet-name="Coco" data-owner-name="Monita bijoriya">
+      <tr class="lapse-row" data-cid="420125086" data-last-visit="2026-06-04" data-pet-name="Coco" data-owner-name="Monita bijoriya" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420125086')">Coco</button><br><small style="color:var(--muted)">SM - 1.00000 · X-Small Treat Table - 1.00000, FG</small></td>
         <td>Monita bijoriya<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1551,7 +1554,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420191107" data-last-visit="2026-06-23" data-pet-name="Niko" data-owner-name="Maxine Epstien">
+      <tr class="lapse-row" data-cid="420191107" data-last-visit="2026-06-23" data-pet-name="Niko" data-owner-name="Maxine Epstien" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420191107')">Niko</button><br><small style="color:var(--muted)">LG · MG</small></td>
         <td>Maxine Epstien<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1565,7 +1568,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420191105" data-last-visit="2026-06-23" data-pet-name="Bailey, Jax, Niko" data-owner-name="Maxine Epstien">
+      <tr class="lapse-row" data-cid="420191105" data-last-visit="2026-06-23" data-pet-name="Bailey, Jax, Niko" data-owner-name="Maxine Epstien" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420191105')">Bailey, Jax, Niko</button><br><small style="color:var(--muted)">LG - 1.00000, FG · MG</small></td>
         <td>Maxine Epstien<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1579,7 +1582,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420019134" data-last-visit="2026-06-14" data-pet-name="Chloe" data-owner-name="Gabby Hickey">
+      <tr class="lapse-row" data-cid="420019134" data-last-visit="2026-06-14" data-pet-name="Chloe" data-owner-name="Gabby Hickey" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420019134')">Chloe</button><br><small style="color:var(--muted)">LG · FG</small></td>
         <td>Gabby Hickey<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1593,7 +1596,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420373237" data-last-visit="2026-07-02" data-pet-name="Violet" data-owner-name="Miranda Ortiz">
+      <tr class="lapse-row" data-cid="420373237" data-last-visit="2026-07-02" data-pet-name="Violet" data-owner-name="Miranda Ortiz" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420373237')">Violet</button><br><small style="color:var(--muted)">LG · Lux Bath</small></td>
         <td>Miranda Ortiz<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1607,7 +1610,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420202831" data-last-visit="2026-06-16" data-pet-name="Kobe" data-owner-name="Sharonie Kesselman">
+      <tr class="lapse-row" data-cid="420202831" data-last-visit="2026-06-16" data-pet-name="Kobe" data-owner-name="Sharonie Kesselman" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420202831')">Kobe</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Sharonie Kesselman<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1621,7 +1624,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420125289" data-last-visit="2026-06-05" data-pet-name="Millie" data-owner-name="Karina Widdicombe">
+      <tr class="lapse-row" data-cid="420125289" data-last-visit="2026-06-05" data-pet-name="Millie" data-owner-name="Karina Widdicombe" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420125289')">Millie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Karina Widdicombe<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1635,7 +1638,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420322196" data-last-visit="2026-06-29" data-pet-name="Iggy" data-owner-name="Karen Bennett">
+      <tr class="lapse-row" data-cid="420322196" data-last-visit="2026-06-29" data-pet-name="Iggy" data-owner-name="Karen Bennett" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420322196')">Iggy</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Karen Bennett<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1649,7 +1652,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420083141" data-last-visit="2026-06-19" data-pet-name="Pancake" data-owner-name="Shari Staiano">
+      <tr class="lapse-row" data-cid="420083141" data-last-visit="2026-06-19" data-pet-name="Pancake" data-owner-name="Shari Staiano" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420083141')">Pancake</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Shari Staiano<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1663,7 +1666,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420013613" data-last-visit="2026-07-01" data-pet-name="Tony" data-owner-name="Luis Rodriguez">
+      <tr class="lapse-row" data-cid="420013613" data-last-visit="2026-07-01" data-pet-name="Tony" data-owner-name="Luis Rodriguez" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420013613')">Tony</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Luis Rodriguez<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1677,7 +1680,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420392992" data-last-visit="2026-07-10" data-pet-name="Tasha" data-owner-name="Ken Partlow">
+      <tr class="lapse-row" data-cid="420392992" data-last-visit="2026-07-10" data-pet-name="Tasha" data-owner-name="Ken Partlow" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420392992')">Tasha</button><br><small style="color:var(--muted)">MD · FG</small></td>
         <td>Ken Partlow<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1691,7 +1694,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420083123" data-last-visit="2026-07-07" data-pet-name="Bader" data-owner-name="Lindsay Davis">
+      <tr class="lapse-row" data-cid="420083123" data-last-visit="2026-07-07" data-pet-name="Bader" data-owner-name="Lindsay Davis" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420083123')">Bader</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Lindsay Davis<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1705,7 +1708,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420085942" data-last-visit="2026-06-20" data-pet-name="Opie" data-owner-name="Allison Strohson">
+      <tr class="lapse-row" data-cid="420085942" data-last-visit="2026-06-20" data-pet-name="Opie" data-owner-name="Allison Strohson" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420085942')">Opie</button><br><small style="color:var(--muted)">SM - 1.00000 · FG</small></td>
         <td>Allison Strohson<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1719,7 +1722,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420085947" data-last-visit="2026-06-20" data-pet-name="Opie" data-owner-name="Allison Strohson">
+      <tr class="lapse-row" data-cid="420085947" data-last-visit="2026-06-20" data-pet-name="Opie" data-owner-name="Allison Strohson" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420085947')">Opie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Allison Strohson<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1733,7 +1736,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420374369" data-last-visit="2026-07-17" data-pet-name="Bowser" data-owner-name="Gen Filverio">
+      <tr class="lapse-row" data-cid="420374369" data-last-visit="2026-07-17" data-pet-name="Bowser" data-owner-name="Gen Filverio" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420374369')">Bowser</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Gen Filverio<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1747,7 +1750,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420393211" data-last-visit="2026-07-20" data-pet-name="Murphy" data-owner-name="Sydney Phelan">
+      <tr class="lapse-row" data-cid="420393211" data-last-visit="2026-07-20" data-pet-name="Murphy" data-owner-name="Sydney Phelan" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420393211')">Murphy</button><br><small style="color:var(--muted)">LG · Clsc Bath</small></td>
         <td>Sydney Phelan<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1761,7 +1764,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420154020" data-last-visit="2026-07-22" data-pet-name="Aspen" data-owner-name="Phil Zorn">
+      <tr class="lapse-row" data-cid="420154020" data-last-visit="2026-07-22" data-pet-name="Aspen" data-owner-name="Phil Zorn" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420154020')">Aspen</button><br><small style="color:var(--muted)">LG - 1.00000 · FG</small></td>
         <td>Phil Zorn<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1775,7 +1778,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420349531" data-last-visit="2026-07-25" data-pet-name="Bear" data-owner-name="Carrie Rodriguez">
+      <tr class="lapse-row" data-cid="420349531" data-last-visit="2026-07-25" data-pet-name="Bear" data-owner-name="Carrie Rodriguez" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420349531')">Bear</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Carrie Rodriguez<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1789,7 +1792,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420109339" data-last-visit="2026-07-31" data-pet-name="Stella" data-owner-name="Sari Weinstein">
+      <tr class="lapse-row" data-cid="420109339" data-last-visit="2026-07-31" data-pet-name="Stella" data-owner-name="Sari Weinstein" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420109339')">Stella</button><br><small style="color:var(--muted)"> · lightgolden trim Acomb skim butt. hotshop on back left hip. right hip</small></td>
         <td>Sari Weinstein<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1803,7 +1806,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420144719" data-last-visit="2026-07-25" data-pet-name="Luna" data-owner-name="Kallie Koroneos">
+      <tr class="lapse-row" data-cid="420144719" data-last-visit="2026-07-25" data-pet-name="Luna" data-owner-name="Kallie Koroneos" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420144719')">Luna</button><br><small style="color:var(--muted)">MD - 1.00000, ADD-ON · Lux Bath</small></td>
         <td>Kallie Koroneos<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1817,7 +1820,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420144720" data-last-visit="2026-07-25" data-pet-name="Luna" data-owner-name="Kallie Koroneos">
+      <tr class="lapse-row" data-cid="420144720" data-last-visit="2026-07-25" data-pet-name="Luna" data-owner-name="Kallie Koroneos" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420144720')">Luna</button><br><small style="color:var(--muted)">MD · Lux Bath</small></td>
         <td>Kallie Koroneos<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1831,7 +1834,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420315424" data-last-visit="2026-07-31" data-pet-name="Callie" data-owner-name="Christina Cangiano">
+      <tr class="lapse-row" data-cid="420315424" data-last-visit="2026-07-31" data-pet-name="Callie" data-owner-name="Christina Cangiano" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420315424')">Callie</button><br><small style="color:var(--muted)">SM · FG</small></td>
         <td>Christina Cangiano<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1845,7 +1848,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420136483" data-last-visit="2026-07-27" data-pet-name="Tessa" data-owner-name="Donna Lamberti">
+      <tr class="lapse-row" data-cid="420136483" data-last-visit="2026-07-27" data-pet-name="Tessa" data-owner-name="Donna Lamberti" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420136483')">Tessa</button><br><small style="color:var(--muted)"> · alternate between fg and mg</small></td>
         <td>Donna Lamberti<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -1859,7 +1862,7 @@
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>
-      <tr class="lapse-row" data-cid="420554139" data-last-visit="2026-08-11" data-pet-name="Maverick" data-owner-name="Corey Barrett">
+      <tr class="lapse-row" data-cid="420554139" data-last-visit="2026-08-11" data-pet-name="Maverick" data-owner-name="Corey Barrett" data-owner-phone="">
         <td><button class="lc-name-btn" onclick="openLapseDetail('420554139')">Maverick</button><br><small style="color:var(--muted)"> · 3hrs needed for MG 3.5 hour for FG</small></td>
         <td>Corey Barrett<br><small>—</small></td>
         <td style="color:#d97706;font-weight:700">At Risk</td>
@@ -3075,12 +3078,18 @@ function openLapseDetail(cid){
   lcCurrentCid = cid;
   var tr = findLapseRow(cid);
   var name = tr ? tr.getAttribute('data-pet-name') : '';
+  var ownerName = tr ? tr.getAttribute('data-owner-name') : '';
+  var ownerPhone = tr ? tr.getAttribute('data-owner-phone') : '';
   var rec = lcStatusByCid[cid] || {};
 
+  var phoneHtml = ownerPhone
+    ? '<a href="tel:' + lcEsc(ownerPhone) + '" class="lc-modal-phone">' + lcEsc(ownerPhone) + '</a>'
+    : '';
   document.getElementById('lc-modal-header').innerHTML =
-    '<h2>' + lcEsc(name) + '</h2><div class="lc-modal-sub">' + lcStatusSummary(rec) + '</div>';
+    '<h2>' + lcEsc(name) + '</h2>'
+    + '<div class="lc-modal-owner">' + lcEsc(ownerName || 'Unknown owner') + (phoneHtml ? ' · ' + phoneHtml : '') + '</div>'
+    + '<div class="lc-modal-sub">' + lcStatusSummary(rec) + '</div>';
 
-  var ownerName = tr ? tr.getAttribute('data-owner-name') : '';
   var complaints = complaintsForOwner(ownerName);
   var complaintsSection = document.getElementById('lc-modal-complaints-section');
   if(complaints.length){

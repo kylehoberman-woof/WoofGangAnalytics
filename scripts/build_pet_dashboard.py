@@ -440,7 +440,7 @@ for d in lapsed_dogs:
     phone_link = f'<a href="tel:{phone}" style="color:var(--pink);text-decoration:none">{phone}</a>' if phone else "—"
     cid = esc(d["pet_cid"])
     winback_rows.append(f"""
-      <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}" data-owner-name="{esc(d['owner_name'])}">
+      <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}" data-owner-name="{esc(d['owner_name'])}" data-owner-phone="{esc(d['owner_phone'])}">
         <td><button class="lc-name-btn" onclick="openLapseDetail('{cid}')">{esc(d['pet_name'])}</button><br><small style="color:var(--muted)">{esc(d['size'])} · {esc(d['last_service'])}</small></td>
         <td>{esc(d['owner_name'])}<br><small>{phone_link}</small></td>
         <td style="color:{status_color};font-weight:700">{d['status']}</td>
@@ -480,6 +480,9 @@ LAPSE_CSS = """
   .lc-modal-close { position:absolute; top:14px; right:16px; background:none; border:none; font-size:22px; line-height:1; cursor:pointer; color:var(--muted); }
   .lc-modal-close:hover { color:var(--text); }
   .lc-modal h2 { font-size:20px; color:var(--brown); margin-bottom:2px; }
+  .lc-modal-owner { font-size:13px; color:var(--text); margin-bottom:4px; }
+  .lc-modal-phone { color:var(--pink); font-weight:600; text-decoration:none; }
+  .lc-modal-phone:hover { text-decoration:underline; }
   .lc-modal-sub { font-size:12px; color:var(--muted); margin-bottom:18px; }
   .lc-modal-section { margin-top:18px; }
   .lc-modal-section h3 { font-size:13px; color:var(--brown); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
@@ -620,12 +623,18 @@ function openLapseDetail(cid){
   lcCurrentCid = cid;
   var tr = findLapseRow(cid);
   var name = tr ? tr.getAttribute('data-pet-name') : '';
+  var ownerName = tr ? tr.getAttribute('data-owner-name') : '';
+  var ownerPhone = tr ? tr.getAttribute('data-owner-phone') : '';
   var rec = lcStatusByCid[cid] || {};
 
+  var phoneHtml = ownerPhone
+    ? '<a href="tel:' + lcEsc(ownerPhone) + '" class="lc-modal-phone">' + lcEsc(ownerPhone) + '</a>'
+    : '';
   document.getElementById('lc-modal-header').innerHTML =
-    '<h2>' + lcEsc(name) + '</h2><div class="lc-modal-sub">' + lcStatusSummary(rec) + '</div>';
+    '<h2>' + lcEsc(name) + '</h2>'
+    + '<div class="lc-modal-owner">' + lcEsc(ownerName || 'Unknown owner') + (phoneHtml ? ' · ' + phoneHtml : '') + '</div>'
+    + '<div class="lc-modal-sub">' + lcStatusSummary(rec) + '</div>';
 
-  var ownerName = tr ? tr.getAttribute('data-owner-name') : '';
   var complaints = complaintsForOwner(ownerName);
   var complaintsSection = document.getElementById('lc-modal-complaints-section');
   if(complaints.length){
