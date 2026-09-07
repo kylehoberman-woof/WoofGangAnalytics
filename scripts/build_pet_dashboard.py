@@ -242,6 +242,7 @@ top_pets = sorted(
 # Flag as At Risk if days_since_last > 1.5x avg interval, Lapsed if > 2x.
 today_date = date.today()
 lapsed_dogs = []
+lapse_history = {}  # pet_cid → list of past visits, for the click-through detail modal
 
 for rec in pet_records:
     visits = [v for v in rec.get("visits", []) if v.get("date")]
@@ -282,6 +283,16 @@ for rec in pet_records:
         "size": visits[0].get("size", ""),
         "ratio": ratio,
     })
+
+    lapse_history[str(rec.get("pet_cid", ""))] = [
+        {
+            "date": v.get("date", ""),
+            "service": v.get("service", "") or v.get("items_raw", ""),
+            "size": v.get("size", ""),
+            "groomer": v.get("stylist", ""),
+        }
+        for v in visits[:25]
+    ]
 
 # Sort: lapsed first, then by days overdue descending
 lapsed_dogs.sort(key=lambda x: (-("Lapsed" in x["status"]), -x["days_overdue"]))
@@ -347,23 +358,16 @@ for d in lapsed_dogs:
     cid = esc(d["pet_cid"])
     winback_rows.append(f"""
       <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}">
-        <td><strong>{esc(d['pet_name'])}</strong><br><small style="color:var(--muted)">{esc(d['size'])} · {esc(d['last_service'])}</small></td>
+        <td><button class="lc-name-btn" onclick="openLapseDetail('{cid}')">{esc(d['pet_name'])}</button><br><small style="color:var(--muted)">{esc(d['size'])} · {esc(d['last_service'])}</small></td>
         <td>{esc(d['owner_name'])}<br><small>{phone_link}</small></td>
         <td style="color:{status_color};font-weight:700">{d['status']}</td>
         <td>{d['last_visit']}<br><small style="color:var(--muted)">{d['days_since']}d ago</small></td>
         <td>{freq_str}<br><small style="color:{status_color}">{d['days_overdue']}d overdue</small></td>
         <td><small>{esc(d['preferred_groomer'])}</small></td>
         <td>{d['visit_count']}</td>
-        <td class="lapse-status-cell">
-          <label class="lc-check"><input type="checkbox" class="lc-contacted"> Contacted</label>
-          <label class="lc-check"><input type="checkbox" class="lc-talked"> Talked to customer</label>
-          <label class="lc-check"><input type="checkbox" class="lc-voicemail"> Left voicemail</label>
-          <label class="lc-check"><input type="checkbox" class="lc-booked"> Booked</label>
-        </td>
-        <td>
-          <textarea class="lc-notes" placeholder="Notes…" rows="2"></textarea>
-          <button class="lc-save-btn" onclick="saveLapseCall(this)">Save</button>
-          <span class="lc-saved-indicator"></span>
+        <td class="lapse-log-cell">
+          <button class="lc-log-btn" onclick="openLapseDetail('{cid}')">Log call</button>
+          <div class="lc-log-status">Not yet contacted</div>
         </td>
       </tr>""")
 
@@ -377,19 +381,44 @@ LAPSE_CSS = """
   .lc-preset-btn:hover { opacity:.85; }
   .lc-range-count { font-size:12px; color:var(--muted); margin-left:auto; }
   .lc-check { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text); white-space:nowrap; margin-bottom:3px; }
-  .lapse-status-cell { min-width:150px; }
-  .lc-notes { width:160px; font-size:12px; font-family:inherit; border:1px solid var(--border); border-radius:6px; padding:4px 6px; resize:vertical; }
-  .lc-save-btn { display:block; margin-top:4px; background:var(--pink); color:#fff; border:none; padding:4px 10px; border-radius:6px; font-size:11px; cursor:pointer; }
-  .lc-save-btn:hover { opacity:.85; }
-  .lc-saved-indicator { font-size:11px; color:#16a34a; margin-left:6px; }
+  .lc-name-btn { background:none; border:none; padding:0; margin:0; font:inherit; font-weight:700; color:var(--pink); cursor:pointer; text-decoration:underline; text-align:left; }
+  .lc-name-btn:hover { opacity:.75; }
+  .lapse-log-cell { min-width:150px; }
+  .lc-log-btn { background:var(--brown); color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:11px; cursor:pointer; }
+  .lc-log-btn:hover { opacity:.85; }
+  .lc-log-status { font-size:11px; color:var(--muted); margin-top:5px; max-width:180px; }
   .lapse-row.lc-hidden { display:none; }
+
+  .lc-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:flex-start; justify-content:center; padding:5vh 16px; overflow-y:auto; }
+  .lc-modal-overlay.active { display:flex; }
+  .lc-modal { background:#fff; border-radius:12px; max-width:640px; width:100%; padding:24px; position:relative; }
+  .lc-modal-close { position:absolute; top:14px; right:16px; background:none; border:none; font-size:22px; line-height:1; cursor:pointer; color:var(--muted); }
+  .lc-modal-close:hover { color:var(--text); }
+  .lc-modal h2 { font-size:20px; color:var(--brown); margin-bottom:2px; }
+  .lc-modal-sub { font-size:12px; color:var(--muted); margin-bottom:18px; }
+  .lc-modal-section { margin-top:18px; }
+  .lc-modal-section h3 { font-size:13px; color:var(--brown); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
+  .lc-check-grid { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:10px; }
+  .lc-check-grid label { font-size:13px; display:flex; align-items:center; gap:6px; }
+  .lc-modal textarea { width:100%; font-size:13px; font-family:inherit; border:1px solid var(--border); border-radius:8px; padding:8px 10px; resize:vertical; }
+  .lc-modal-actions { display:flex; align-items:center; gap:10px; margin-top:10px; }
+  .lc-save-btn { background:var(--pink); color:#fff; border:none; padding:7px 16px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; }
+  .lc-save-btn:hover { opacity:.85; }
+  .lc-saved-indicator { font-size:12px; color:#16a34a; }
+  .lc-history-table th, .lc-history-table td { font-size:12px; padding:6px 10px; }
+  .lc-history-empty { color:#999; text-align:center; padding:16px; font-size:13px; }
 """
 
 LAPSE_JS = """
 var LC_STORE = "__STORE__";
+var PET_HISTORY = __PET_HISTORY__;
 var LC_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
 var LC_SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
 var LC_SHD = {'apikey':LC_SK,'Authorization':'Bearer '+LC_SK,'Content-Type':'application/json'};
+
+function lcEsc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 function lcGet(p){ return fetch(LC_SB+p, {headers:LC_SHD}).then(function(r){ return r.json(); }); }
 function lcUpsert(body){
@@ -406,6 +435,15 @@ function lcUpsert(body){
 }
 
 var lcStatusByCid = {};
+var lcCurrentCid = null;
+
+function findLapseRow(cid){
+  var rows = document.querySelectorAll('.lapse-row');
+  for(var i=0;i<rows.length;i++){
+    if(rows[i].getAttribute('data-cid') === cid) return rows[i];
+  }
+  return null;
+}
 
 function loadLapseCalls(){
   lcGet('/lapse_calls?store=eq.'+encodeURIComponent(LC_STORE)).then(function(rows){
@@ -415,42 +453,83 @@ function loadLapseCalls(){
   }).catch(function(){});
 }
 
+function lcStatusSummary(rec){
+  if(!rec || !rec.contacted) return 'Not yet contacted';
+  var bits = [];
+  if(rec.talked_to_customer) bits.push('talked to customer');
+  if(rec.left_voicemail) bits.push('left voicemail');
+  if(rec.booked) bits.push('booked ✓');
+  return bits.length ? ('✓ Contacted — ' + bits.join(', ')) : '✓ Contacted';
+}
+
+function updateLogStatus(cid){
+  var tr = findLapseRow(cid);
+  if(!tr) return;
+  var el = tr.querySelector('.lc-log-status');
+  if(el) el.textContent = lcStatusSummary(lcStatusByCid[cid]);
+}
+
 function applyLapseStatuses(){
   document.querySelectorAll('.lapse-row').forEach(function(tr){
-    var cid = tr.getAttribute('data-cid');
-    var rec = lcStatusByCid[cid];
-    if(!rec) return;
-    tr.querySelector('.lc-contacted').checked = !!rec.contacted;
-    tr.querySelector('.lc-talked').checked = !!rec.talked_to_customer;
-    tr.querySelector('.lc-voicemail').checked = !!rec.left_voicemail;
-    tr.querySelector('.lc-booked').checked = !!rec.booked;
-    tr.querySelector('.lc-notes').value = rec.notes || '';
-    var ind = tr.querySelector('.lc-saved-indicator');
-    if(ind) ind.textContent = '✓ logged';
+    updateLogStatus(tr.getAttribute('data-cid'));
   });
   updateCalledCount();
 }
 
-function saveLapseCall(btn){
-  var tr = btn.closest('tr');
-  var cid = tr.getAttribute('data-cid');
+function openLapseDetail(cid){
+  lcCurrentCid = cid;
+  var tr = findLapseRow(cid);
+  var name = tr ? tr.getAttribute('data-pet-name') : '';
+  var rec = lcStatusByCid[cid] || {};
+
+  document.getElementById('lc-modal-header').innerHTML =
+    '<h2>' + lcEsc(name) + '</h2><div class="lc-modal-sub">' + lcStatusSummary(rec) + '</div>';
+
+  document.getElementById('lc-m-contacted').checked = !!rec.contacted;
+  document.getElementById('lc-m-talked').checked = !!rec.talked_to_customer;
+  document.getElementById('lc-m-voicemail').checked = !!rec.left_voicemail;
+  document.getElementById('lc-m-booked').checked = !!rec.booked;
+  document.getElementById('lc-m-notes').value = rec.notes || '';
+  document.getElementById('lc-m-indicator').textContent = '';
+
+  var hist = PET_HISTORY[cid] || [];
+  var body = document.getElementById('lc-modal-history');
+  body.innerHTML = hist.length
+    ? hist.map(function(v){
+        return '<tr><td>' + lcEsc(v.date) + '</td><td>' + lcEsc(v.service) + '</td><td>' + lcEsc(v.size) + '</td><td>' + lcEsc(v.groomer) + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan=4 class="lc-history-empty">No visit history on file</td></tr>';
+
+  document.getElementById('lc-modal-overlay').classList.add('active');
+}
+
+function closeLapseDetail(){
+  document.getElementById('lc-modal-overlay').classList.remove('active');
+  lcCurrentCid = null;
+}
+
+function saveLapseDetail(){
+  if(!lcCurrentCid) return;
+  var cid = lcCurrentCid;
+  var tr = findLapseRow(cid);
   var body = {
     store: LC_STORE,
     pet_cid: cid,
-    pet_name: tr.getAttribute('data-pet-name'),
-    contacted: tr.querySelector('.lc-contacted').checked,
-    talked_to_customer: tr.querySelector('.lc-talked').checked,
-    left_voicemail: tr.querySelector('.lc-voicemail').checked,
-    booked: tr.querySelector('.lc-booked').checked,
-    notes: tr.querySelector('.lc-notes').value,
+    pet_name: tr ? tr.getAttribute('data-pet-name') : '',
+    contacted: document.getElementById('lc-m-contacted').checked,
+    talked_to_customer: document.getElementById('lc-m-talked').checked,
+    left_voicemail: document.getElementById('lc-m-voicemail').checked,
+    booked: document.getElementById('lc-m-booked').checked,
+    notes: document.getElementById('lc-m-notes').value,
     call_date: new Date().toISOString().slice(0,10)
   };
-  var ind = tr.querySelector('.lc-saved-indicator');
+  var ind = document.getElementById('lc-m-indicator');
   ind.textContent = 'Saving…';
   lcUpsert(body).then(function(res){
     var saved = Array.isArray(res) ? res[0] : res;
     if(saved) lcStatusByCid[cid] = saved;
     ind.textContent = '✓ saved';
+    updateLogStatus(cid);
     updateCalledCount();
   }).catch(function(err){
     ind.textContent = 'Error: ' + (err && err.message ? err.message : 'save failed');
@@ -502,7 +581,9 @@ function clearLapseRange(){
 
 loadLapseCalls();
 filterLapseRows();
-""".replace("__STORE__", store_name)
+""".replace("__STORE__", store_name).replace(
+    "__PET_HISTORY__", json.dumps(lapse_history).replace("</", "<\\/")
+)
 
 html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -619,9 +700,41 @@ html = f"""<!DOCTYPE html>
     </div>
     <div style="overflow-x:auto">
     <table>
-      <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Usual Groomer</th><th>Visits</th><th>Call Status</th><th>Notes</th></tr></thead>
-      <tbody id="lc-tbody">{''.join(winback_rows) if winback_rows else '<tr><td colspan=9 style="color:#999;text-align:center;padding:24px">No lapsed or at-risk dogs</td></tr>'}</tbody>
+      <thead><tr><th>Dog</th><th>Owner / Phone</th><th>Status</th><th>Last Visit</th><th>Frequency</th><th>Usual Groomer</th><th>Visits</th><th>Call Log</th></tr></thead>
+      <tbody id="lc-tbody">{''.join(winback_rows) if winback_rows else '<tr><td colspan=8 style="color:#999;text-align:center;padding:24px">No lapsed or at-risk dogs</td></tr>'}</tbody>
     </table>
+    </div>
+    <p style="color:#9ca3af;font-size:12px;margin-top:10px">Click a dog's name to see its full appointment history and log a call.</p>
+  </div>
+</div>
+
+<!-- LAPSE CALL DETAIL MODAL -->
+<div class="lc-modal-overlay" id="lc-modal-overlay" onclick="if(event.target===this) closeLapseDetail()">
+  <div class="lc-modal">
+    <button class="lc-modal-close" onclick="closeLapseDetail()">&times;</button>
+    <div id="lc-modal-header"></div>
+    <div class="lc-modal-section">
+      <h3>Call Log</h3>
+      <div class="lc-check-grid">
+        <label><input type="checkbox" id="lc-m-contacted"> Contacted</label>
+        <label><input type="checkbox" id="lc-m-talked"> Talked to customer</label>
+        <label><input type="checkbox" id="lc-m-voicemail"> Left voicemail</label>
+        <label><input type="checkbox" id="lc-m-booked"> Booked</label>
+      </div>
+      <textarea id="lc-m-notes" placeholder="Notes…" rows="4"></textarea>
+      <div class="lc-modal-actions">
+        <button class="lc-save-btn" onclick="saveLapseDetail()">Save</button>
+        <span class="lc-saved-indicator" id="lc-m-indicator"></span>
+      </div>
+    </div>
+    <div class="lc-modal-section">
+      <h3>Appointment History</h3>
+      <div style="overflow-x:auto">
+      <table class="lc-history-table">
+        <thead><tr><th>Date</th><th>Service</th><th>Size</th><th>Groomer</th></tr></thead>
+        <tbody id="lc-modal-history"></tbody>
+      </table>
+      </div>
     </div>
   </div>
 </div>
