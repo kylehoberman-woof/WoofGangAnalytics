@@ -18,13 +18,23 @@ from pathlib import Path
 from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import get_store, get_store_display, get_store_fn
+from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY
 
 store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
 store = get_store(store_name)
 data_dir = store.data_dir
 store_label = get_store_display(store_name)
 store_fn = get_store_fn(store_name)
+# FranPOS's customer-history API returns a customer's visits network-wide,
+# not scoped to this location — a family who got groomed at another Woof
+# Gang location (different city, different franchise) shows up in the same
+# feed. Visits are tagged with a "store" field like "Woof Gang West Islip,
+# NY (#450)"; only the (#<store_number>) for THIS location counts.
+_store_number = STORE_REGISTRY.get(store_name, {}).get("store_number")
+_store_tag = f"(#{_store_number})" if _store_number else None
+
+def _is_this_store(v):
+    return _store_tag is None or _store_tag in (v.get("store") or "")
 
 pet_visits_file = data_dir / "pet_visits.json"
 all_data_file = data_dir / "all_data.json"
@@ -41,6 +51,17 @@ if not pet_visits_file.exists():
 
 with open(pet_visits_file) as f:
     pet_records = json.load(f)
+
+# Strip cross-location visits right at the source, so every downstream
+# computation in this file (daily appointments, anomalies, groomer
+# summary, lapse calls) only ever sees this store's own history. Also
+# recompute the summary fields fetch_pet_visits.py stamped on each record
+# (network-wide) so they stay consistent with the now-filtered visits.
+for _rec in pet_records:
+    _rec["visits"] = [v for v in _rec.get("visits", []) if _is_this_store(v)]
+    _rec["total_visits"] = len(_rec["visits"])
+    _dated = [v["date"] for v in _rec["visits"] if v.get("date")]
+    _rec["last_visit"] = max(_dated) if _dated else ""
 
 print(f"Loaded {len(pet_records)} pet records")
 
