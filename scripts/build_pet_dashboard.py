@@ -279,22 +279,35 @@ today_iso = today_date.isoformat()
 
 # Some owners have the same pet registered under more than one FranPOS pet_cid
 # (duplicate/re-created accounts) — e.g. the same dog's older history sits on
-# one account while its active recurring bookings moved to another. A future
-# appointment on either sibling account counts for the pair, keyed by
-# (owner_name, pet_name).
+# one account while its active recurring bookings moved to another. This
+# also shows up as a combined multi-pet account (pet_name "Biscuit, Claire")
+# alongside separate single-pet accounts for "Biscuit" and "Claire" — same
+# real dogs, three different pet_cids. A future appointment on any sibling
+# account counts for the whole (owner_name, individual pet name) group.
+def _pet_name_variants(pet_name):
+    parts = {p.strip() for p in (pet_name or "").split(",") if p.strip()}
+    parts.add((pet_name or "").strip())
+    return parts
+
 owners_with_future_pet = set()
 for rec in pet_records:
     if any(v.get("date", "") > today_iso for v in rec.get("visits", [])):
-        owners_with_future_pet.add((rec.get("owner_name", ""), rec.get("pet_name", "")))
+        owner = rec.get("owner_name", "")
+        for name in _pet_name_variants(rec.get("pet_name", "")):
+            owners_with_future_pet.add((owner, name))
 
 for rec in pet_records:
     all_dated_visits = [v for v in rec.get("visits", []) if v.get("date")]
-    pet_key = (rec.get("owner_name", ""), rec.get("pet_name", ""))
+    owner_name_ = rec.get("owner_name", "")
+    has_future_sibling = any(
+        (owner_name_, name) in owners_with_future_pet
+        for name in _pet_name_variants(rec.get("pet_name", ""))
+    )
 
     # Already has something on the books — no outreach needed regardless of
     # how overdue their past visit history looks. Checked both on this exact
     # account and any sibling account for the same owner+pet name.
-    if any(v["date"] > today_iso for v in all_dated_visits) or pet_key in owners_with_future_pet:
+    if any(v["date"] > today_iso for v in all_dated_visits) or has_future_sibling:
         continue
 
     visits = all_dated_visits  # past/completed visits only, from here on
