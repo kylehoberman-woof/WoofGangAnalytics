@@ -246,25 +246,30 @@ top_pets = sorted(
 # there's no clean flag for it, so classify by shape: a real appointment
 # almost always has a groomer assigned or a breed_group/size tag, or its text
 # names a known service. Free-text notes typically have none of those.
-_SERVICE_KEYWORDS = (
-    "full groom", "lux bath", "bath", "trim", "nail", "groom", "spa",
-    "teeth", "gland", "deshed", "de-shed", "online service", "brush",
-    "blowout", "add-on", "mini",
+# Word-boundary matched (not raw substring) — otherwise "groom" matches
+# inside "groomed", which shows up constantly in note prose like "Maria
+# groomed the dog and noticed...".
+_SERVICE_KEYWORD_RE = re.compile(
+    r"\b(fg|mg|full groom|mini groom|lux bath|bath|trim|nail|groom|spa|"
+    r"teeth|gland|deshed|de-shed|online service|brush|blowout|add-on|mini)\b",
+    re.IGNORECASE,
 )
-_SERVICE_CODE_RE = re.compile(r"\bfg\b", re.IGNORECASE)
+# A free-text note that happens to contain "/" gets split across service /
+# breed_group / size by the same delimiter parsing that handles real
+# "service / breed_group / size" records, so a merely non-empty size field
+# isn't safe on its own — require it to actually look like a size code.
+_SIZE_CODE_RE = re.compile(r"^(xs|sm|md|lg|xlg|xl|general|teeth brushing)\b", re.IGNORECASE)
 
 def _is_real_appointment(v):
     if v.get("stylist"):
         return True
-    if v.get("size"):
-        # breed_group is not used as a signal on its own — groomer notes
-        # frequently land in that field too (delimiter-parsing artifact),
-        # but "size" reliably stays a real SM/MD/LG/XL-style code.
+    size = (v.get("size") or "").strip()
+    if size and _SIZE_CODE_RE.match(size):
         return True
-    text = ((v.get("service") or "") + " " + (v.get("items_raw") or "")).lower()
-    if _SERVICE_CODE_RE.search(text):
-        return True
-    return any(k in text for k in _SERVICE_KEYWORDS)
+    # Only the "service" field itself, not items_raw — for a note-corrupted
+    # record items_raw is just the whole note restated across three fields,
+    # and checking it here would match keywords buried in that prose too.
+    return bool(_SERVICE_KEYWORD_RE.search(v.get("service") or ""))
 
 today_date = date.today()
 lapsed_dogs = []
@@ -344,7 +349,11 @@ for rec in pet_records:
         "notes": [
             {
                 "date": v.get("date", ""),
-                "text": v.get("service", "") or v.get("items_raw", ""),
+                # items_raw first here — for a note that got fragmented
+                # across service/breed_group/size, items_raw is the joined
+                # reconstruction and reads more completely than the
+                # service field's fragment alone.
+                "text": v.get("items_raw", "") or v.get("service", ""),
             }
             for v in visits[:25] if not _is_real_appointment(v)
         ],
@@ -413,7 +422,7 @@ for d in lapsed_dogs:
     phone_link = f'<a href="tel:{phone}" style="color:var(--pink);text-decoration:none">{phone}</a>' if phone else "—"
     cid = esc(d["pet_cid"])
     winback_rows.append(f"""
-      <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}">
+      <tr class="lapse-row" data-cid="{cid}" data-last-visit="{esc(d['last_visit'])}" data-pet-name="{esc(d['pet_name'])}" data-owner-name="{esc(d['owner_name'])}">
         <td><button class="lc-name-btn" onclick="openLapseDetail('{cid}')">{esc(d['pet_name'])}</button><br><small style="color:var(--muted)">{esc(d['size'])} · {esc(d['last_service'])}</small></td>
         <td>{esc(d['owner_name'])}<br><small>{phone_link}</small></td>
         <td style="color:{status_color};font-weight:700">{d['status']}</td>
@@ -424,6 +433,7 @@ for d in lapsed_dogs:
         <td class="lapse-log-cell">
           <button class="lc-log-btn" onclick="openLapseDetail('{cid}')">Log call</button>
           <div class="lc-log-status">Not yet contacted</div>
+          <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
       </tr>""")
 
@@ -443,6 +453,7 @@ LAPSE_CSS = """
   .lc-log-btn { background:var(--brown); color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:11px; cursor:pointer; }
   .lc-log-btn:hover { opacity:.85; }
   .lc-log-status { font-size:11px; color:var(--muted); margin-top:5px; max-width:180px; }
+  .lc-complaint-flag { font-size:11px; color:#dc2626; font-weight:700; margin-top:4px; }
   .lapse-row.lc-hidden { display:none; }
 
   .lc-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:flex-start; justify-content:center; padding:5vh 16px; overflow-y:auto; }
@@ -466,6 +477,14 @@ LAPSE_CSS = """
   .lc-history-note { font-size:12px; color:var(--text); padding:6px 0; border-bottom:1px solid var(--border); }
   .lc-history-note:last-child { border-bottom:none; }
   .lc-history-note-date { color:var(--muted); font-weight:600; margin-right:6px; }
+
+  .lc-modal-section.lc-complaints-section { background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:14px 16px; margin-top:0; }
+  .lc-complaints-section h3 { color:#b91c1c; }
+  .lc-complaint-card { background:#fff; border:1px solid #fecaca; border-radius:8px; padding:10px 12px; margin-bottom:8px; font-size:12px; }
+  .lc-complaint-card:last-child { margin-bottom:0; }
+  .lc-complaint-meta { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
+  .lc-complaint-desc { color:var(--text); margin-bottom:4px; }
+  .lc-complaint-res { color:var(--muted); font-style:italic; }
 """
 
 LAPSE_JS = """
@@ -512,6 +531,42 @@ function loadLapseCalls(){
   }).catch(function(){});
 }
 
+// Complaint records only carry a free-text customer name (no reliable pet_cid
+// link), so match against a dog's owner_name by shared name tokens rather
+// than an exact key. Loose on purpose — associates see the actual complaint
+// text and can judge for themselves whether it's the same customer.
+var lcComplaints = [];
+
+function lcNameTokens(s){
+  return (String(s||'').toLowerCase().match(/[a-z]+/g) || []).filter(function(t){ return t.length >= 3; });
+}
+
+function loadComplaints(){
+  lcGet('/customer_complaints?store=eq.'+encodeURIComponent(LC_STORE)+'&select=customer_name,date,category,description,resolution,status&order=date.desc').then(function(rows){
+    lcComplaints = (Array.isArray(rows) ? rows : []).map(function(c){
+      return {rec: c, tokens: lcNameTokens(c.customer_name)};
+    }).filter(function(c){ return c.tokens.length > 0; });
+    flagComplaintRows();
+  }).catch(function(){});
+}
+
+function complaintsForOwner(ownerName){
+  var ownerToks = lcNameTokens(ownerName);
+  if(!ownerToks.length) return [];
+  return lcComplaints.filter(function(c){
+    return c.tokens.some(function(t){ return ownerToks.indexOf(t) !== -1; });
+  }).map(function(c){ return c.rec; });
+}
+
+function flagComplaintRows(){
+  document.querySelectorAll('.lapse-row').forEach(function(tr){
+    var owner = tr.getAttribute('data-owner-name');
+    var hasComplaint = complaintsForOwner(owner).length > 0;
+    var flag = tr.querySelector('.lc-complaint-flag');
+    if(flag) flag.style.display = hasComplaint ? 'block' : 'none';
+  });
+}
+
 function lcStatusSummary(rec){
   if(!rec || !rec.contacted) return 'Not yet contacted';
   var bits = [];
@@ -543,6 +598,22 @@ function openLapseDetail(cid){
 
   document.getElementById('lc-modal-header').innerHTML =
     '<h2>' + lcEsc(name) + '</h2><div class="lc-modal-sub">' + lcStatusSummary(rec) + '</div>';
+
+  var ownerName = tr ? tr.getAttribute('data-owner-name') : '';
+  var complaints = complaintsForOwner(ownerName);
+  var complaintsSection = document.getElementById('lc-modal-complaints-section');
+  if(complaints.length){
+    document.getElementById('lc-modal-complaints').innerHTML = complaints.map(function(c){
+      return '<div class="lc-complaint-card">'
+        + '<div class="lc-complaint-meta"><span>' + lcEsc(c.date || '') + ' · ' + lcEsc(c.category || '') + '</span><span>' + lcEsc(c.status || '') + '</span></div>'
+        + '<div class="lc-complaint-desc">' + lcEsc(c.description || '') + '</div>'
+        + (c.resolution ? '<div class="lc-complaint-res">Resolution: ' + lcEsc(c.resolution) + '</div>' : '')
+        + '</div>';
+    }).join('');
+    complaintsSection.style.display = 'block';
+  } else {
+    complaintsSection.style.display = 'none';
+  }
 
   document.getElementById('lc-m-contacted').checked = !!rec.contacted;
   document.getElementById('lc-m-talked').checked = !!rec.talked_to_customer;
@@ -649,6 +720,7 @@ function clearLapseRange(){
 }
 
 loadLapseCalls();
+loadComplaints();
 filterLapseRows();
 """.replace("__STORE__", store_name).replace(
     "__PET_HISTORY__", json.dumps(lapse_history).replace("</", "<\\/")
@@ -783,6 +855,10 @@ html = f"""<!DOCTYPE html>
   <div class="lc-modal">
     <button class="lc-modal-close" onclick="closeLapseDetail()">&times;</button>
     <div id="lc-modal-header"></div>
+    <div class="lc-modal-section lc-complaints-section" id="lc-modal-complaints-section" style="display:none">
+      <h3>⚠ Prior Complaints</h3>
+      <div id="lc-modal-complaints"></div>
+    </div>
     <div class="lc-modal-section">
       <h3>Call Log</h3>
       <div class="lc-check-grid">
