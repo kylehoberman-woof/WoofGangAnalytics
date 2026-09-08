@@ -194,6 +194,14 @@ tr:hover td { background:#fef9f5; }
 .lc-complaint-meta { display:flex; justify-content:space-between; color:var(--muted); font-size:11px; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
 .lc-complaint-desc { color:var(--text); margin-bottom:4px; }
 .lc-complaint-res { color:var(--muted); font-style:italic; }
+
+.lc-dnc-banner { background:#1f2937; color:#fff; border-radius:10px; padding:12px 16px; margin-top:14px; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.lc-dnc-banner strong { display:block; margin-bottom:2px; }
+.lc-dnc-section { border:1px dashed var(--border); border-radius:10px; padding:14px 16px; margin-top:18px; }
+.lc-dnc-toggle-btn { background:#1f2937; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; }
+.lc-dnc-toggle-btn:hover { opacity:.85; }
+.lc-dnc-toggle-btn.lc-dnc-remove { background:#fff; color:#1f2937; border:1px solid var(--border); }
+.lc-row.lc-dnc td { opacity:.55; }
 """
 
 JS = """
@@ -237,6 +245,7 @@ function lcPost(t, body){
 // Every logged call is its own dated row (INSERT, never overwritten), so
 // full call history is kept — not just a current status.
 var callLogByCid = {};   // cid -> [entries], newest first
+var dncByCid = {};       // cid -> {reason, created_at} — permanently excluded, not a call outcome
 var lcCurrentCid = null;
 var lcSelectedAction = null;
 var currentBucket = 'initial';
@@ -260,12 +269,21 @@ function loadCallLog(){
   }).catch(function(){});
 }
 
+function loadDoNotContact(){
+  lcGet('/lapse_do_not_contact?store=eq.'+encodeURIComponent(LC_STORE)).then(function(rows){
+    dncByCid = {};
+    (Array.isArray(rows)?rows:[]).forEach(function(r){ dncByCid[r.pet_cid] = r; });
+    applyBuckets();
+  }).catch(function(){});
+}
+
 function currentAction(cid){
   var log = callLogByCid[cid];
   return log && log.length ? log[0].action : null;
 }
 
 function bucketFor(cid){
+  if(dncByCid[cid]) return 'dnc';
   var action = currentAction(cid);
   if(!action) return 'initial';
   if(action === 'left_voicemail') return 'followup';
@@ -273,6 +291,7 @@ function bucketFor(cid){
 }
 
 function actionBadgeHtml(cid){
+  if(dncByCid[cid]) return '<span style="color:#1f2937">🚫 Do Not Contact</span>';
   var action = currentAction(cid);
   if(!action) return 'Not yet contacted';
   var log = callLogByCid[cid];
@@ -285,7 +304,9 @@ function actionBadgeHtml(cid){
 function applyBuckets(){
   document.querySelectorAll('.lc-row').forEach(function(tr){
     var cid = tr.getAttribute('data-cid');
-    tr.setAttribute('data-bucket', bucketFor(cid));
+    var bucket = bucketFor(cid);
+    tr.setAttribute('data-bucket', bucket);
+    tr.classList.toggle('lc-dnc', bucket === 'dnc');
     var badge = tr.querySelector('.lc-action-badge');
     if(badge) badge.innerHTML = actionBadgeHtml(cid);
   });
@@ -294,19 +315,21 @@ function applyBuckets(){
 }
 
 function updateBucketCounts(){
-  var counts = {initial:0, followup:0, resolved:0};
+  var counts = {initial:0, followup:0, resolved:0, dnc:0};
   document.querySelectorAll('.lc-row').forEach(function(tr){
     var b = tr.getAttribute('data-bucket');
     if(counts[b] !== undefined) counts[b]++;
   });
   var totalEl = document.getElementById('bucket-count-all');
-  if(totalEl) totalEl.textContent = document.querySelectorAll('.lc-row').length;
+  if(totalEl) totalEl.textContent = counts.initial + counts.followup + counts.resolved;
   var iEl = document.getElementById('bucket-count-initial');
   if(iEl) iEl.textContent = counts.initial;
   var fEl = document.getElementById('bucket-count-followup');
   if(fEl) fEl.textContent = counts.followup;
   var rEl = document.getElementById('bucket-count-resolved');
   if(rEl) rEl.textContent = counts.resolved;
+  var dEl = document.getElementById('bucket-count-dnc');
+  if(dEl) dEl.textContent = counts.dnc;
 }
 
 function setBucket(b){
@@ -412,6 +435,7 @@ function openLapseDetail(cid){
   }
 
   renderCallHistory(cid);
+  renderDncSection(cid);
 
   document.querySelectorAll('.lc-action-option').forEach(function(btn){ btn.classList.remove('selected'); });
   document.getElementById('lc-m-notes').value = '';
@@ -443,6 +467,82 @@ function openLapseDetail(cid){
 function closeLapseDetail(){
   document.getElementById('lc-modal-overlay').classList.remove('active');
   lcCurrentCid = null;
+}
+
+// Do Not Contact is a standing exclusion, not a call outcome — separate
+// from the 4 action buttons above. Once set, a dog stays off every other
+// view (including "All Candidates") until someone removes it here.
+function renderDncSection(cid){
+  var el = document.getElementById('lc-dnc-section');
+  var flagged = dncByCid[cid];
+  if(flagged){
+    el.innerHTML =
+      '<div class="lc-dnc-banner"><div><strong>🚫 Marked Do Not Contact</strong>'
+      + lcEsc(flagged.reason || 'No reason given') + ' — ' + lcEsc((flagged.created_at||'').slice(0,10))
+      + '</div><button class="lc-dnc-toggle-btn lc-dnc-remove" onclick="removeDoNotContact()">Remove flag</button></div>';
+  } else {
+    el.innerHTML =
+      '<div class="lc-modal-field"><label>Reason (owner passed away, moved, banned, etc.)</label>'
+      + '<textarea id="lc-dnc-reason" placeholder="Why should this dog never be called?" rows="2"></textarea></div>'
+      + '<button class="lc-dnc-toggle-btn" onclick="saveDoNotContact()">🚫 Mark Do Not Contact</button>';
+  }
+}
+
+function lcCheckOk(r){
+  if(!r.ok) return r.json().catch(function(){ return null; }).then(function(err){
+    throw new Error((err && err.message) || ('HTTP ' + r.status));
+  });
+  return r.status === 204 ? null : r.json();
+}
+
+function saveDoNotContact(){
+  if(!lcCurrentCid) return;
+  var cid = lcCurrentCid;
+  var tr = findLapseRow(cid);
+  var btn = document.querySelector('.lc-dnc-toggle-btn');
+  var body = {
+    store: LC_STORE,
+    pet_cid: cid,
+    pet_name: tr ? tr.getAttribute('data-pet-name') : '',
+    owner_name: tr ? tr.getAttribute('data-owner-name') : '',
+    reason: (document.getElementById('lc-dnc-reason') || {}).value || ''
+  };
+  if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
+  fetch(LC_SB + '/lapse_do_not_contact?on_conflict=store,pet_cid', {
+    method: 'POST',
+    headers: Object.assign({}, LC_SHD, {'Prefer': 'resolution=merge-duplicates,return=representation'}),
+    body: JSON.stringify(body)
+  }).then(lcCheckOk).then(function(res){
+    var saved = Array.isArray(res) ? res[0] : res;
+    if(!saved) throw new Error('save did not return a record');
+    dncByCid[cid] = saved;
+    renderDncSection(cid);
+    applyBuckets();
+    closeLapseDetail();
+  }).catch(function(err){
+    var el = document.getElementById('lc-dnc-section');
+    if(el) el.insertAdjacentHTML('afterbegin', '<div style="color:#dc2626;font-size:12px;margin-bottom:8px">Error: ' + lcEsc(err.message) + ' — flag NOT saved, try again</div>');
+    if(btn){ btn.disabled = false; btn.textContent = '🚫 Mark Do Not Contact'; }
+  });
+}
+
+function removeDoNotContact(){
+  if(!lcCurrentCid) return;
+  var cid = lcCurrentCid;
+  var btn = document.querySelector('.lc-dnc-remove');
+  if(btn){ btn.disabled = true; btn.textContent = 'Removing…'; }
+  fetch(LC_SB + '/lapse_do_not_contact?store=eq.' + encodeURIComponent(LC_STORE) + '&pet_cid=eq.' + encodeURIComponent(cid), {
+    method: 'DELETE',
+    headers: LC_SHD
+  }).then(lcCheckOk).then(function(){
+    delete dncByCid[cid];
+    renderDncSection(cid);
+    applyBuckets();
+  }).catch(function(err){
+    var el = document.getElementById('lc-dnc-section');
+    if(el) el.insertAdjacentHTML('afterbegin', '<div style="color:#dc2626;font-size:12px;margin-bottom:8px">Error: ' + lcEsc(err.message) + ' — flag NOT removed, try again</div>');
+    if(btn){ btn.disabled = false; btn.textContent = 'Remove flag'; }
+  });
 }
 
 function saveLapseDetail(){
@@ -485,7 +585,9 @@ function filterLapseRows(){
   rows.forEach(function(tr){
     var lv = tr.getAttribute('data-last-visit');
     var bucket = tr.getAttribute('data-bucket');
-    var visible = currentBucket === 'all' || bucket === currentBucket;
+    // "All Candidates" means everyone still callable — Do Not Contact stays
+    // hidden there too, only visible under its own dedicated bucket.
+    var visible = currentBucket === 'all' ? bucket !== 'dnc' : bucket === currentBucket;
     if(from && lv && lv < from) visible = false;
     if(to && lv && lv > to) visible = false;
     tr.classList.toggle('lc-hidden', !visible);
@@ -512,6 +614,7 @@ function clearLapseRange(){
 }
 
 loadCallLog();
+loadDoNotContact();
 loadComplaints();
 """.replace("__STORE__", store_name).replace("__PET_HISTORY__", PET_HISTORY_JSON)
 
@@ -549,6 +652,10 @@ html = f"""<!DOCTYPE html>
       <div class="val" id="bucket-count-all">{len(lapsed_dogs)}</div>
       <div class="lbl">All Candidates</div>
     </button>
+    <button class="bucket-btn" data-bucket-btn="dnc" onclick="setBucket('dnc')">
+      <div class="val" id="bucket-count-dnc">0</div>
+      <div class="lbl">🚫 Do Not Contact</div>
+    </button>
   </div>
 
   <div class="card">
@@ -585,6 +692,7 @@ html = f"""<!DOCTYPE html>
       <h3>⚠ Prior Complaints</h3>
       <div id="lc-modal-complaints"></div>
     </div>
+    <div class="lc-dnc-section" id="lc-dnc-section"></div>
     <div class="lc-modal-section">
       <h3>Call History</h3>
       <div id="lc-modal-call-history"></div>
