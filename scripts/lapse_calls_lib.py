@@ -144,6 +144,106 @@ def pet_name_variants(pet_name):
     return parts
 
 
+def group_records_by_dog(pet_records):
+    """(owner_name, pet_name) -> merged, deduped info for one real dog.
+
+    Plain duplicate accounts: many (owner, pet name) pairs have more than
+    one FranPOS pet_cid for what's clearly the same dog — same owner,
+    identical name, history just split across accounts however FranPOS
+    happened to create them (and often the SAME real appointment logged
+    separately under each one on the same day — see dedupe_same_day).
+    Every non-comma record sharing (owner_name, pet_name) is merged into
+    one group here, plus any combined multi-pet account ("Lucy, Mason")
+    whose name doesn't already have its own individual account (the
+    normal case is that it does, and duplicates one of the merged groups,
+    so it's left out).
+
+    This is THE place fragmented per-account data gets consolidated —
+    used for lapse-call candidates, Daily Appointments, Groomer Summary,
+    and Pet Profiles alike, so a dog with duplicate accounts is one dog
+    everywhere, not two.
+
+    Returns: dict[(owner_name, pet_name)] -> {
+        "pet_cid": str,            # smallest contributing pet_cid, stable
+        "pet_name": str, "owner_name": str, "owner_phone": str,
+        "all_visits": [...],       # every dated visit, tagged _origin_cid, sorted desc
+        "real_visits": [...],      # is_real_appointment(v) only, same-day deduped
+    }
+    """
+    individual_groups = defaultdict(list)  # (owner_name, pet_name) -> [records]
+    combined_records = []
+    for rec in pet_records:
+        name = (rec.get("pet_name") or "").strip()
+        if "," in name:
+            combined_records.append(rec)
+        else:
+            individual_groups[(rec.get("owner_name", ""), name)].append(rec)
+
+    individual_pet_names = set(individual_groups.keys())
+
+    for rec in combined_records:
+        owner = rec.get("owner_name", "")
+        names = [n.strip() for n in (rec.get("pet_name") or "").split(",") if n.strip()]
+        for n in names:
+            if (owner, n) not in individual_pet_names:
+                individual_groups[(owner, n)].append(rec)
+
+    groups = {}
+    for (owner_name_, pet_name_), group_records in individual_groups.items():
+        all_dated_visits = []
+        for rec in group_records:
+            origin_cid = rec.get("pet_cid")
+            all_dated_visits.extend(
+                {**v, "_origin_cid": origin_cid} for v in rec.get("visits", []) if v.get("date")
+            )
+        all_dated_visits.sort(key=lambda v: v["date"], reverse=True)
+
+        real_visits = dedupe_same_day([v for v in all_dated_visits if is_real_appointment(v)])
+
+        cid = str(min(rec.get("pet_cid", 0) for rec in group_records))
+        owner_phone = next((rec.get("owner_phone", "") for rec in group_records if rec.get("owner_phone")), "")
+
+        groups[(owner_name_, pet_name_)] = {
+            "pet_cid": cid,
+            "pet_name": pet_name_,
+            "owner_name": owner_name_,
+            "owner_phone": owner_phone,
+            "all_visits": all_dated_visits,
+            "real_visits": real_visits,
+        }
+    return groups
+
+
+def build_merged_pet_records(pet_records):
+    """One record per real dog — same shape as the raw pet_visits.json
+    records (pet_cid, pet_name, owner_name, owner_phone, visits,
+    total_visits, last_visit), but with duplicate accounts consolidated
+    and same-day duplicate real appointments collapsed. Use this instead
+    of raw pet_records wherever a dog's identity, visit count, or
+    appointment list needs to be accurate rather than fragmented.
+
+    "visits" here is real_visits only — retail purchases and notes are
+    dropped, since every consumer (Daily Appointments, Groomer Summary,
+    Pet Profiles) is about who was actually groomed, not who bought a bag
+    of treats.
+    """
+    groups = group_records_by_dog(pet_records)
+    merged = []
+    for g in groups.values():
+        visits = g["real_visits"]
+        last = visits[0]["date"] if visits else ""
+        merged.append({
+            "pet_cid": g["pet_cid"],
+            "pet_name": g["pet_name"],
+            "owner_name": g["owner_name"],
+            "owner_phone": g["owner_phone"],
+            "visits": visits,
+            "total_visits": len(visits),
+            "last_visit": last,
+        })
+    return merged
+
+
 def compute_lapse_candidates(pet_records, customer_visit_staff, today_date=None):
     """Returns (lapsed_dogs: list[dict], lapse_history: dict[cid -> {...}]).
 
@@ -162,51 +262,11 @@ def compute_lapse_candidates(pet_records, customer_visit_staff, today_date=None)
             for name in pet_name_variants(rec.get("pet_name", "")):
                 owners_with_future_pet.add((owner, name))
 
-    # Plain duplicate accounts: many (owner, pet name) pairs have more than
-    # one FranPOS pet_cid for what's clearly the same dog — same owner,
-    # identical name, history just split across accounts however FranPOS
-    # happened to create them. Merge every non-comma record sharing
-    # (owner_name, pet_name) into one group before computing anything.
-    individual_groups = defaultdict(list)  # (owner_name, pet_name) -> [records]
-    combined_records = []
-    for rec in pet_records:
-        name = (rec.get("pet_name") or "").strip()
-        if "," in name:
-            combined_records.append(rec)
-        else:
-            individual_groups[(rec.get("owner_name", ""), name)].append(rec)
+    groups = group_records_by_dog(pet_records)
 
-    individual_pet_names = set(individual_groups.keys())
-
-    # A combined multi-pet account ("Lucy, Mason") almost always duplicates
-    # individual accounts that already exist for each name under the same
-    # owner. Skip it entirely once every one of its names already has its
-    # own individual group; otherwise fold its visits into the group(s) for
-    # the name(s) that don't, so a genuinely orphaned combined account
-    # still contributes (and still shows as its own line item once split
-    # per name below).
-    for rec in combined_records:
-        owner = rec.get("owner_name", "")
-        names = [n.strip() for n in (rec.get("pet_name") or "").split(",") if n.strip()]
-        for n in names:
-            if (owner, n) not in individual_pet_names:
-                individual_groups[(owner, n)].append(rec)
-
-    for (owner_name_, pet_name_), group_records in individual_groups.items():
-        all_dated_visits = []
-        for rec in group_records:
-            origin_cid = rec.get("pet_cid")
-            all_dated_visits.extend(
-                {**v, "_origin_cid": origin_cid} for v in rec.get("visits", []) if v.get("date")
-            )
-        all_dated_visits.sort(key=lambda v: v["date"], reverse=True)
-
-        # Retail purchases (treats, food, shampoo) and internal notes ride
-        # along in the same history feed as real grooming appointments —
-        # last-visit and cadence are service-based only, not "last time
-        # they bought something here."
-        real_visits = [v for v in all_dated_visits if is_real_appointment(v)]
-        real_visits = dedupe_same_day(real_visits)
+    for (owner_name_, pet_name_), g in groups.items():
+        all_dated_visits = g["all_visits"]
+        real_visits = g["real_visits"]
         has_future_sibling = (owner_name_, pet_name_) in owners_with_future_pet
 
         # Already has something on the books — no outreach needed
@@ -291,10 +351,8 @@ def compute_lapse_candidates(pet_records, customer_visit_staff, today_date=None)
             for v in all_dated_visits[:25] if not is_real_appointment(v)
         ]
 
-        # Stable representative cid for the merged group — smallest
-        # contributing pet_cid, deterministic across rebuilds.
-        cid = str(min(rec.get("pet_cid", 0) for rec in group_records))
-        owner_phone = next((rec.get("owner_phone", "") for rec in group_records if rec.get("owner_phone")), "")
+        cid = g["pet_cid"]
+        owner_phone = g["owner_phone"]
 
         lapsed_dogs.append({
             "pet_cid": cid,

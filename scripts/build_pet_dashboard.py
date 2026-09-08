@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY
 from lapse_calls_lib import (
     get_store_tag, filter_pet_records_to_store, load_customer_visit_staff,
-    compute_lapse_candidates,
+    compute_lapse_candidates, build_merged_pet_records,
 )
 
 store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
@@ -54,7 +54,18 @@ with open(pet_visits_file) as f:
 # location — see lapse_calls_lib for the full story.
 filter_pet_records_to_store(pet_records, _store_tag)
 
-print(f"Loaded {len(pet_records)} pet records")
+# One record per real dog — duplicate FranPOS accounts for the same dog
+# consolidated, same-day duplicate real appointments deduped. Daily
+# Appointments, Groomer Summary, and Pet Profiles all read from this
+# instead of raw pet_records so a dog with duplicate accounts (roughly
+# 1,850 of them in Port Washington alone) doesn't inflate dog counts or
+# show up twice. Anomaly detection intentionally still reads raw
+# pet_records — collapsing same-day duplicates there would hide a
+# genuine double-booking within one account, which is exactly what that
+# check exists to catch.
+merged_pet_records = build_merged_pet_records(pet_records)
+
+print(f"Loaded {len(pet_records)} pet records ({len(merged_pet_records)} unique dogs)")
 
 today = date.today()
 
@@ -70,7 +81,7 @@ daily_by_groomer = defaultdict(lambda: defaultdict(list))
 daily_totals = defaultdict(int)  # date → dog count
 
 all_visits_flat = []
-for rec in pet_records:
+for rec in merged_pet_records:
     for v in rec.get("visits", []):
         entry = {
             "date": v["date"],
@@ -79,16 +90,16 @@ for rec in pet_records:
             "pet_cid": rec["pet_cid"],
             "owner_name": rec["owner_name"],
             "owner_phone": rec.get("owner_phone", ""),
-            "stylist": v["stylist"],
-            "service": v["service"],
-            "breed_group": v["breed_group"],
-            "size": v["size"],
-            "items_raw": v["items_raw"],
+            "stylist": v.get("stylist"),
+            "service": v.get("service"),
+            "breed_group": v.get("breed_group"),
+            "size": v.get("size"),
+            "items_raw": v.get("items_raw"),
             "salesperson": v.get("salesperson", ""),
         }
         all_visits_flat.append(entry)
         if v["date"]:
-            daily_by_groomer[v["date"]][v["stylist"]].append(entry)
+            daily_by_groomer[v["date"]][v.get("stylist")].append(entry)
             daily_totals[v["date"]] += 1
 
 # ── Load order items for price join ──────────────────────────────────────────
@@ -158,7 +169,7 @@ for (cid, day), visits in pet_day_visits.items():
         })
 
 # 2. Service change: pet has inconsistent service history (e.g., always bath, suddenly full groom)
-for rec in pet_records:
+for rec in merged_pet_records:
     visits = rec.get("visits", [])
     if len(visits) < 3:
         continue
@@ -180,7 +191,7 @@ for rec in pet_records:
             break
 
 # 3. Size inconsistency: pet's size changed between visits
-for rec in pet_records:
+for rec in merged_pet_records:
     visits = [v for v in rec.get("visits", []) if v.get("size")]
     if len(visits) < 2:
         continue
@@ -249,7 +260,7 @@ recent_dates = sorted(
 
 # ── Top pets by visit count ───────────────────────────────────────────────────
 top_pets = sorted(
-    [r for r in pet_records if r.get("total_visits", 0) > 0],
+    [r for r in merged_pet_records if r.get("total_visits", 0) > 0],
     key=lambda x: x.get("total_visits", 0),
     reverse=True
 )[:50]
@@ -378,8 +389,8 @@ html = f"""<!DOCTYPE html>
 <!-- DAILY -->
 <div class="section active" id="tab-daily">
   <div class="stat-row">
-    <div class="stat"><div class="val">{len(pet_records)}</div><div class="lbl">Pet accounts</div></div>
-    <div class="stat"><div class="val">{sum(1 for r in pet_records if r.get('last_visit','') >= (today - timedelta(days=30)).isoformat())}</div><div class="lbl">Active last 30d</div></div>
+    <div class="stat"><div class="val">{len(merged_pet_records)}</div><div class="lbl">Dogs on record</div></div>
+    <div class="stat"><div class="val">{sum(1 for r in merged_pet_records if r.get('last_visit','') >= (today - timedelta(days=30)).isoformat())}</div><div class="lbl">Active last 30d</div></div>
     <div class="stat"><div class="val">{len(all_visits_flat)}</div><div class="lbl">Total visits on record</div></div>
     <div class="stat" style="border-color:#dc2626"><div class="val" style="color:#dc2626">{n_lapsed}</div><div class="lbl">Lapsed dogs</div></div>
     <div class="stat" style="border-color:#d97706"><div class="val" style="color:#d97706">{n_at_risk}</div><div class="lbl">At-risk dogs</div></div>
