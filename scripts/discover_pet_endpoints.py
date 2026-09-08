@@ -115,10 +115,43 @@ probe("company_formfields",
       f"{BASE_URL}/api/company/formfields",
       params={"locationId": location_id})
 
-# 7. Booking status (might list current/recent appointments)
-probe("booking_getstatus",
-      f"{BASE_URL}/api/booking/getstatus",
-      params={"locationId": location_id})
+# 7. Booking status — needs a real bookingId, not just locationId (the
+# earlier no-bookingId probe 404'd). Test against a UniqueID from the old
+# cached appointments.json (from when the bulk bookings endpoint still
+# worked) to see if per-booking status lookup is what actually works now.
+appts_file = data_dir / "appointments.json"
+sample_booking_ids = []
+if appts_file.exists():
+    with open(appts_file) as f:
+        cached_appts = json.load(f)
+    sample_booking_ids = [a["UniqueID"] for a in cached_appts[:3] if a.get("UniqueID")]
+
+if sample_booking_ids:
+    for bid in sample_booking_ids:
+        probe(f"booking_getstatus_{bid}",
+              f"{BASE_URL}/api/booking/getstatus",
+              params={"bookingId": bid, "locationId": location_id})
+else:
+    probe("booking_getstatus_no_sample_id",
+          f"{BASE_URL}/api/booking/getstatus",
+          params={"locationId": location_id})
+
+# getstatus needs a bookingId we don't have a source for going forward —
+# guessing at sibling endpoints under the same "api/booking/" namespace
+# (now confirmed real) that might list bookings for a date range instead
+# of requiring one ID at a time.
+probe("booking_list_by_date",
+      f"{BASE_URL}/api/booking/list",
+      params={"locationId": location_id, "dateStr": today})
+probe("booking_getbookings",
+      f"{BASE_URL}/api/booking/getbookings",
+      params={"locationId": location_id, "dateStr": today})
+probe("booking_bydate",
+      f"{BASE_URL}/api/booking/bydate",
+      params={"locationId": location_id, "dateStr": today})
+probe("booking_search",
+      f"{BASE_URL}/api/booking/search",
+      params={"locationId": location_id, "startDate": today, "endDate": today})
 
 # Employee schedules — who is working on a given date (companyId + dateStr)
 probe("walkin_employee_schedules_today",
