@@ -1,0 +1,49 @@
+name: FranPOS Endpoint Discovery
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+
+# Standalone, fast-iteration workflow for probing FranPOS API endpoints
+# (scripts/discover_pet_endpoints.py) without waiting on the full nightly
+# pipeline (~75+ min). Only touches data/pet_endpoint_discovery.json.
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        store: [port-washington, hicksville]
+      fail-fast: false
+    env:
+      FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
+      FRANPOS_TOKEN_PW: ${{ secrets.FRANPOS_TOKEN }}
+      FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          fetch-tags: false
+          token: ${{ secrets.PAT_TOKEN }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: pip install httpx requests
+
+      - name: ${{ matrix.store }} - Discover pet endpoints
+        run: python3 scripts/discover_pet_endpoints.py ${{ matrix.store }}
+
+      - name: ${{ matrix.store }} - Commit discovery results
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout origin/main -- .github/workflows/update.yml .github/workflows/discover.yml
+          git add -A
+          git diff --staged --quiet || git commit -m "Endpoint discovery: ${{ matrix.store }} $(date +'%Y-%m-%d %H:%M')"
+          git pull --rebase --autostash origin main || {
+            git diff --name-only --diff-filter=U | xargs -r git checkout --ours --
+            git diff --name-only --diff-filter=U | xargs -r git add
+            GIT_EDITOR=true git rebase --continue
+          }
+          git push origin HEAD:main
