@@ -504,7 +504,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 2,
+    "nested_data_count": 4,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -690,10 +690,97 @@
               "name": "3"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "6468649844",
+          "City": "Hicksville",
+          "CompanyId": 205993,
+          "CustomerId": 420874560,
+          "DateOfBirth": null,
+          "Email": "c9cody@gmail.com",
+          "FirstName": "Theresa",
+          "LastName": "Condon",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-09-08T13:23:23",
+          "ModifiedDate": "2026-09-08T13:24:15",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "6468649844",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420874561,
+          "DateOfBirth": "2021-09-08T09:24:51",
+          "Email": "c9cody@gmail.com",
+          "FirstName": "Rocky",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-09-08T13:24:15",
+          "ModifiedDate": "2026-09-08T13:26:10",
+          "ParentCustomerId": 420874560,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "Vetco Bellmore"
+            },
+            {
+              "id": 6121,
+              "name": "Dachshund"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "115"
+            },
+            {
+              "id": 377,
+              "name": "28.0"
+            },
+            {
+              "id": 380,
+              "name": "2027-07-08 09:26:05"
+            },
+            {
+              "id": 375,
+              "name": "1"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 762858279
+      "version": 763429369
     }
   }
 }
