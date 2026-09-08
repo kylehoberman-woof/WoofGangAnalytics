@@ -1,6 +1,8 @@
 {
   "walkin_booking_appointments_iso": {
-    "error": "The read operation timed out"
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=E57ACC082340B7FF58B5ABA5A99BE77D9501852A6C8F4D759A64D02EAED38ABE214A4026CA9A5D962ED5A141B7C061BC9BAA609365F8FE21F2F9EEF80DE04CA8&companyId=205993&dateStr=2026-09-08",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_iso_midnight": {
     "status": 400,
@@ -1214,7 +1216,7 @@
         }
       ],
       "pages": 1,
-      "version": 764034612
+      "version": 764100439
     }
   }
 }
