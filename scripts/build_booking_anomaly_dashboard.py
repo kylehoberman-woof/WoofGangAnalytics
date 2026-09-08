@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores, STORE_REGISTRY
 from formatting import esc
-from lapse_calls_lib import get_store_tag, filter_pet_records_to_store, group_records_by_dog, is_real_appointment, clean_size
+from lapse_calls_lib import get_store_tag, filter_pet_records_to_store, group_records_by_dog, is_real_appointment, clean_size, SERVICE_KEYWORD_RE
 
 # ── Store setup ───────────────────────────────────────────────────────────────
 
@@ -104,7 +104,7 @@ for (owner_name, pet_name), g in dog_groups.items():
     # "usual" size/service/breed pattern is service-based only, not "last
     # time they bought a bag of chicken chips."
     visits = g["real_visits"]  # already same-day deduped, sorted desc
-    if len(visits) < MIN_VISITS:
+    if len(visits) < 2:
         continue
 
     # Skip if most recent real visit is stale
@@ -142,53 +142,75 @@ for (owner_name, pet_name), g in dog_groups.items():
     flags = []
     flag_details = {}
 
-    # 1. Breed group change: General ↔ Poodle-Doodle
-    if modal_breed and last_breed and last_breed != modal_breed:
-        breed_modal_pct = Counter(breed_groups)[modal_breed] / len(breed_groups)
-        if breed_modal_pct >= SERVICE_THRESHOLD:
-            flags.append("breed_change")
-            flag_details["breed_change"] = {"from": modal_breed, "to": last_breed}
+    # 0. Two real appointments within 10 days of each other — almost always
+    # an accidental double-booking rather than a legitimate re-groom.
+    # Checked on visit count alone (no MIN_VISITS/modal-pattern requirement)
+    # so it also catches a brand-new customer's very first two visits.
+    # is_real_appointment() alone isn't enough here — it also passes a
+    # checkout-only transaction (retail items, a free-text note) as long as
+    # a staff member is attached, which isn't a grooming appointment at
+    # all. Require the service text itself to name a real service.
+    prior_visit = visits[1]
+    both_real_services = (
+        SERVICE_KEYWORD_RE.search(last_visit.get("service") or "")
+        and SERVICE_KEYWORD_RE.search(prior_visit.get("service") or "")
+    )
+    if both_real_services and last_visit.get("date") and prior_visit.get("date"):
+        gap_days = abs((date.fromisoformat(last_visit["date"]) - date.fromisoformat(prior_visit["date"])).days)
+        if 0 < gap_days <= 10:
+            flags.append("close_together")
+            flag_details["close_together"] = {
+                "date_a": prior_visit["date"], "date_b": last_visit["date"], "gap_days": gap_days,
+            }
 
-    # 2. Size change: must differ by ≥1 step AND modal size must dominate
-    if modal_size and last_size and last_size != modal_size:
-        if modal_size in SIZE_ORDER and last_size in SIZE_ORDER:
-            gap = abs(SIZE_ORDER[last_size] - SIZE_ORDER[modal_size])
-            size_modal_pct = Counter(sizes)[modal_size] / len(sizes)
-            if gap >= 1 and size_modal_pct >= SIZE_THRESHOLD:
-                direction = "↑" if SIZE_ORDER[last_size] > SIZE_ORDER[modal_size] else "↓"
-                flags.append("size_change")
-                flag_details["size_change"] = {
-                    "from": modal_size, "to": last_size,
-                    "direction": direction, "gap": gap,
-                }
+    if len(visits) >= MIN_VISITS:
+        # 1. Breed group change: General ↔ Poodle-Doodle
+        if modal_breed and last_breed and last_breed != modal_breed:
+            breed_modal_pct = Counter(breed_groups)[modal_breed] / len(breed_groups)
+            if breed_modal_pct >= SERVICE_THRESHOLD:
+                flags.append("breed_change")
+                flag_details["breed_change"] = {"from": modal_breed, "to": last_breed}
 
-    # 3. Service change: ≥75% of history is modal service, last visit differs
-    swap_key = frozenset({modal_service.strip().lower(), last_service.strip().lower()})
-    if modal_service and last_service and last_service != modal_service and swap_key not in IGNORED_SERVICE_SWAPS:
-        modal_pct = Counter(services)[modal_service] / len(services)
-        if modal_pct >= SERVICE_THRESHOLD:
-            flags.append("service_change")
-            flag_details["service_change"] = {"from": modal_service, "to": last_service}
+        # 2. Size change: must differ by ≥1 step AND modal size must dominate
+        if modal_size and last_size and last_size != modal_size:
+            if modal_size in SIZE_ORDER and last_size in SIZE_ORDER:
+                gap = abs(SIZE_ORDER[last_size] - SIZE_ORDER[modal_size])
+                size_modal_pct = Counter(sizes)[modal_size] / len(sizes)
+                if gap >= 1 and size_modal_pct >= SIZE_THRESHOLD:
+                    direction = "↑" if SIZE_ORDER[last_size] > SIZE_ORDER[modal_size] else "↓"
+                    flags.append("size_change")
+                    flag_details["size_change"] = {
+                        "from": modal_size, "to": last_size,
+                        "direction": direction, "gap": gap,
+                    }
 
-    # 4. Pricing anomaly: price deviates >30% from dog's own average for same service+size
-    if last_price and last_price > 0:
-        same_svc_prices = [
-            v["price"] for v in visits[1:]  # exclude last visit itself
-            if v.get("price") and v.get("price_match") in ("exact",)
-            and v.get("service") == last_service
-            and clean_size(v.get("size", "")) == last_size
-        ]
-        if len(same_svc_prices) >= 2:
-            avg_price = sum(same_svc_prices) / len(same_svc_prices)
-            pct_diff = abs(last_price - avg_price) / avg_price if avg_price else 0
-            if pct_diff >= 0.30 and last_visit.get("price_match") == "exact":
-                flags.append("price_anomaly")
-                flag_details["price_anomaly"] = {
-                    "expected": round(avg_price, 2),
-                    "actual": round(last_price, 2),
-                    "pct_diff": round(pct_diff * 100, 1),
-                    "direction": "↑" if last_price > avg_price else "↓",
-                }
+        # 3. Service change: ≥75% of history is modal service, last visit differs
+        swap_key = frozenset({modal_service.strip().lower(), last_service.strip().lower()})
+        if modal_service and last_service and last_service != modal_service and swap_key not in IGNORED_SERVICE_SWAPS:
+            modal_pct = Counter(services)[modal_service] / len(services)
+            if modal_pct >= SERVICE_THRESHOLD:
+                flags.append("service_change")
+                flag_details["service_change"] = {"from": modal_service, "to": last_service}
+
+        # 4. Pricing anomaly: price deviates >30% from dog's own average for same service+size
+        if last_price and last_price > 0:
+            same_svc_prices = [
+                v["price"] for v in visits[1:]  # exclude last visit itself
+                if v.get("price") and v.get("price_match") in ("exact",)
+                and v.get("service") == last_service
+                and clean_size(v.get("size", "")) == last_size
+            ]
+            if len(same_svc_prices) >= 2:
+                avg_price = sum(same_svc_prices) / len(same_svc_prices)
+                pct_diff = abs(last_price - avg_price) / avg_price if avg_price else 0
+                if pct_diff >= 0.30 and last_visit.get("price_match") == "exact":
+                    flags.append("price_anomaly")
+                    flag_details["price_anomaly"] = {
+                        "expected": round(avg_price, 2),
+                        "actual": round(last_price, 2),
+                        "pct_diff": round(pct_diff * 100, 1),
+                        "direction": "↑" if last_price > avg_price else "↓",
+                    }
 
     if not flags:
         continue
@@ -247,11 +269,13 @@ for (owner_name, pet_name), g in dog_groups.items():
 
 
 def _flag_severity(flags):
-    if "breed_change" in flags:
+    if "close_together" in flags:
         return 0
-    if "size_change" in flags:
+    if "breed_change" in flags:
         return 1
-    return 2
+    if "size_change" in flags:
+        return 2
+    return 3
 
 
 # Upcoming bookings sort first regardless of date — fixable-before-it-
@@ -265,13 +289,14 @@ n_breed = sum(1 for a in anomalies if "breed_change" in a["flags"])
 n_size = sum(1 for a in anomalies if "size_change" in a["flags"])
 n_service = sum(1 for a in anomalies if "service_change" in a["flags"])
 n_price = sum(1 for a in anomalies if "price_anomaly" in a["flags"])
+n_close = sum(1 for a in anomalies if "close_together" in a["flags"])
 n_future = sum(1 for a in anomalies if a["is_future"])
 n_total = len(anomalies)
 
 # Collect all groomers for filter dropdown
 all_groomers = sorted(set(a["last_groomer"] for a in anomalies if a["last_groomer"] and a["last_groomer"] != "Unknown"))
 
-print(f"  {n_total} anomalies found: {n_breed} breed, {n_size} size, {n_service} service")
+print(f"  {n_total} anomalies found: {n_breed} breed, {n_size} size, {n_service} service, {n_close} close-together")
 
 # Serialize for JS
 import json as _json
@@ -331,7 +356,9 @@ body{{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background
 .kpi.orange{{border-top:3px solid #e65100}}
 .kpi.gray{{border-top:3px solid #aaa}}
 .kpi.blue{{border-top:3px solid #1565c0}}
+.kpi.purple{{border-top:3px solid #6a1b9a}}
 .kpi.blue .kpi-val{{color:#1565c0}}
+.kpi.purple .kpi-val{{color:#6a1b9a}}
 .kpi.red .kpi-val{{color:#e53935}}
 .kpi.yellow .kpi-val{{color:#F9A825}}
 .kpi.orange .kpi-val{{color:#e65100}}
@@ -370,6 +397,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 .badge.red{{background:#fce4ec;color:#c62828}}
 .badge.yellow{{background:#fff9e6;color:#b45309}}
 .badge.orange{{background:#fff3e0;color:#bf360c}}
+.badge.purple{{background:#f3e5f5;color:#6a1b9a}}
 
 /* ── CID link ── */
 .cid-link{{color:#C4276E;text-decoration:none;font-weight:600;font-family:monospace;font-size:0.9rem}}
@@ -440,6 +468,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   <button class="tab" onclick="setTab('size_change',this)">&#x1F7E1; Size Changes ({n_size})</button>
   <button class="tab" onclick="setTab('service_change',this)">&#x1F7E0; Service Changes ({n_service})</button>
   <button class="tab" onclick="setTab('price_anomaly',this)">&#x1F4B2; Price Anomalies ({n_price})</button>
+  <button class="tab" onclick="setTab('close_together',this)">&#x1F7E3; Booked Too Close Together ({n_close})</button>
 </div>
 
 <div class="page">
@@ -449,13 +478,15 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   🔴 <strong>Breed</strong> = General ↔ Poodle-Doodle switch &nbsp;|&nbsp;
   🟡 <strong>Size</strong> = size category changed (XS/SM/MD/LG/XL) when ≥75% of history was one size &nbsp;|&nbsp;
   🟠 <strong>Service</strong> = service type switched when ≥75% of history was one type &nbsp;|&nbsp;
-  💲 <strong>Price</strong> = last price deviated &gt;30% from this dog's own average for same service+size.
+  💲 <strong>Price</strong> = last price deviated &gt;30% from this dog's own average for same service+size &nbsp;|&nbsp;
+  🟣 <strong>Booked Too Close Together</strong> = two real appointments within 10 days of each other — usually an accidental double-booking. Checked on every dog with 2+ visits, no pattern history required.
   &#x1F52E; <strong>Upcoming Bookings</strong> = the flagged visit hasn't happened yet — a future appointment already on the books doesn't match this dog's pattern, so it's still fixable before the customer shows up. Those sort to the top and are highlighted blue everywhere.
   Click any row to see full visit history. Acknowledge resolved items to hide them.
 </div>
 
 <div class="kpi-grid">
   <div class="kpi blue"><div class="kpi-val" id="kpi-future">{n_future}</div><div class="kpi-label">&#x1F52E; Upcoming Bookings</div></div>
+  <div class="kpi purple"><div class="kpi-val" id="kpi-close">{n_close}</div><div class="kpi-label">&#x1F7E3; Booked Too Close Together</div></div>
   <div class="kpi red"><div class="kpi-val" id="kpi-breed">{n_breed}</div><div class="kpi-label">&#x1F534; Breed Changes</div></div>
   <div class="kpi yellow"><div class="kpi-val" id="kpi-size">{n_size}</div><div class="kpi-label">&#x1F7E1; Size Changes</div></div>
   <div class="kpi orange"><div class="kpi-val" id="kpi-service">{n_service}</div><div class="kpi-label">&#x1F7E0; Service Changes</div></div>
@@ -598,6 +629,10 @@ function flagBadge(f, details) {{
     var d = details.price_anomaly;
     return '<span class="badge yellow">&#x1F4B2; $' + (d ? d.actual.toFixed(0) + ' vs avg $' + d.expected.toFixed(0) : 'Price') + '</span>';
   }}
+  if (f === 'close_together') {{
+    var d = details.close_together;
+    return '<span class="badge purple">&#x1F7E3; ' + (d ? d.gap_days + 'd apart (' + d.date_a + ', ' + d.date_b + ')' : 'Too close together') + '</span>';
+  }}
   return '';
 }}
 
@@ -623,7 +658,7 @@ function setTab(tab, el) {{
   _tab = tab;
   document.querySelectorAll('.tab').forEach(function(t) {{ t.classList.remove('active'); }});
   if (el) el.classList.add('active');
-  var labels = {{all:'All Anomalies',upcoming:'&#x1F52E; Upcoming Bookings',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes'}};
+  var labels = {{all:'All Anomalies',upcoming:'&#x1F52E; Upcoming Bookings',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes',close_together:'&#x1F7E3; Booked Too Close Together'}};
   document.getElementById('table-title').innerHTML = labels[tab] || 'Anomalies';
   render();
 }}
@@ -759,6 +794,7 @@ function render() {{
   document.getElementById('kpi-size').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('size_change') !== -1; }}).length;
   document.getElementById('kpi-service').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('service_change') !== -1; }}).length;
   document.getElementById('kpi-price').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('price_anomaly') !== -1; }}).length;
+  document.getElementById('kpi-close').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('close_together') !== -1; }}).length;
 }}
 
 // ── Modal ────────────────────────────────────────────────────────────────────
@@ -827,4 +863,4 @@ render();
 out_file = OUTPUT_DIR / f"WoofGang_{_fn_display}_BookingAnomalies.html"
 out_file.write_text(html, encoding="utf-8")
 print(f"  Written to: {out_file}")
-print(f"Done! {n_total} anomalies: {n_breed} breed, {n_size} size, {n_service} service, {n_price} price")
+print(f"Done! {n_total} anomalies: {n_breed} breed, {n_size} size, {n_service} service, {n_price} price, {n_close} close-together")
