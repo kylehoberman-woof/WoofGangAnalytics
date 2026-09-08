@@ -142,6 +142,7 @@ tr:hover td { background:#fef9f5; }
 .lc-filter-bar { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; padding:12px; background:#f9fafb; border-radius:8px; }
 .lc-filter-bar label { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
 .lc-filter-bar input[type=date] { padding:4px 6px; border:1px solid var(--border); border-radius:6px; font-size:13px; }
+.lc-filter-bar input[type=text] { padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:13px; min-width:240px; }
 .lc-preset-btn { background:var(--brown); color:#fff; border:none; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; }
 .lc-preset-btn:hover { opacity:.85; }
 .lc-range-count { font-size:12px; color:var(--muted); margin-left:auto; }
@@ -585,16 +586,28 @@ function saveLapseDetail(){
 function filterLapseRows(){
   var from = document.getElementById('lc-from').value;
   var to = document.getElementById('lc-to').value;
+  var q = (document.getElementById('lc-search').value || '').trim().toLowerCase();
   var rows = document.querySelectorAll('.lc-row');
   var shown = 0;
   rows.forEach(function(tr){
     var lv = tr.getAttribute('data-last-visit');
     var bucket = tr.getAttribute('data-bucket');
-    // "All Candidates" means everyone still callable — Do Not Contact stays
-    // hidden there too, only visible under its own dedicated bucket.
-    var visible = currentBucket === 'all' ? bucket !== 'dnc' : bucket === currentBucket;
-    if(from && lv && lv < from) visible = false;
-    if(to && lv && lv > to) visible = false;
+    var visible;
+    if(q){
+      // A search looks across every candidate regardless of bucket or date
+      // range — finding a specific dog shouldn't depend on which filter
+      // happens to be active. Do Not Contact stays excluded either way.
+      var petName = (tr.getAttribute('data-pet-name') || '').toLowerCase();
+      var ownerName = (tr.getAttribute('data-owner-name') || '').toLowerCase();
+      var ownerPhone = (tr.getAttribute('data-owner-phone') || '').toLowerCase();
+      visible = bucket !== 'dnc' && (petName.indexOf(q) !== -1 || ownerName.indexOf(q) !== -1 || ownerPhone.indexOf(q) !== -1);
+    } else {
+      // "All Candidates" means everyone still callable — Do Not Contact stays
+      // hidden there too, only visible under its own dedicated bucket.
+      visible = currentBucket === 'all' ? bucket !== 'dnc' : bucket === currentBucket;
+      if(from && lv && lv < from) visible = false;
+      if(to && lv && lv > to) visible = false;
+    }
     tr.classList.toggle('lc-hidden', !visible);
     if(visible) shown++;
   });
@@ -671,6 +684,7 @@ html = f"""<!DOCTYPE html>
       A groomer marked with * means no stylist was recorded — showing front desk/checkout staff instead.
     </p>
     <div class="lc-filter-bar">
+      <input type="text" id="lc-search" placeholder="🔍 Search dog or owner name / phone…" oninput="filterLapseRows()">
       <label>Last visit from <input type="date" id="lc-from" onchange="filterLapseRows()"></label>
       <label>to <input type="date" id="lc-to" onchange="filterLapseRows()"></label>
       <button class="lc-preset-btn" onclick="setLapseRange(84, 42)">6–12 Weeks Ago</button>
