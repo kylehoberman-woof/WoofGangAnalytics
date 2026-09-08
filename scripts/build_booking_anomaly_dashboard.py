@@ -10,7 +10,9 @@ Usage:
 """
 
 import json
+import re
 import sys
+import requests
 from pathlib import Path
 from collections import defaultdict, Counter
 from datetime import datetime, date, timedelta
@@ -18,6 +20,7 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).parent))
 
+import config
 from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores, STORE_REGISTRY
 from formatting import esc
 from lapse_calls_lib import get_store_tag, filter_pet_records_to_store, group_records_by_dog, is_real_appointment, clean_size, SERVICE_KEYWORD_RE
@@ -56,6 +59,57 @@ IGNORED_SERVICE_SWAPS = {
     frozenset({"lux bath", "clsc bath"}),
 }
 
+# time_off entries whose type means the groomer is out for the whole day —
+# "Leaving Early"/"Late Arrival" are partial-day and we have no cutoff time
+# to compare an appointment against, so those are deliberately excluded.
+FULL_DAY_OFF_TYPES = {"vacation", "pto", "sick", "personal"}
+
+
+def _norm_staff_name(s):
+    return re.sub(r"[.\s]+", " ", (s or "")).strip().lower()
+
+
+def fetch_approved_time_off(store_key):
+    """Groomer -> [(start_date, end_date, type), ...] for approved, full-day
+    time off at this store. Empty dict (not a crash) if Supabase is down —
+    this check is best-effort, not load-bearing for the rest of the page."""
+    try:
+        url = f"{config.SUPABASE_URL}/rest/v1/time_off"
+        params = {
+            "store_key": f"eq.{store_key}",
+            "status": "eq.approved",
+            "select": "employee_name,start_date,end_date,type",
+        }
+        headers = {
+            "apikey": config.SUPABASE_ANON_KEY,
+            "Authorization": f"Bearer {config.SUPABASE_ANON_KEY}",
+        }
+        resp = requests.get(url, params=params, headers=headers, timeout=10)
+        resp.raise_for_status()
+        rows = resp.json()
+    except Exception as exc:
+        print(f"  WARNING: time_off fetch failed, skipping groomer-off check: {exc}")
+        return {}
+
+    off_ranges = defaultdict(list)
+    for r in rows if isinstance(rows, list) else []:
+        off_type = (r.get("type") or "").strip().lower()
+        if off_type not in FULL_DAY_OFF_TYPES:
+            continue
+        name = _norm_staff_name(r.get("employee_name"))
+        if not name or not r.get("start_date") or not r.get("end_date"):
+            continue
+        off_ranges[name].append((r["start_date"], r["end_date"], r.get("type", "")))
+    return off_ranges
+
+
+def groomer_off_on(off_ranges, groomer_name, iso_date):
+    for start, end, off_type in off_ranges.get(_norm_staff_name(groomer_name), []):
+        if start <= iso_date <= end:
+            return {"off_type": off_type, "off_start": start, "off_end": end}
+    return None
+
+
 # ── Load pet visit history ────────────────────────────────────────────────────
 
 _pet_visits_file = DATA_DIR / "pet_visits.json"
@@ -89,6 +143,9 @@ filter_pet_records_to_store(pet_records, _store_tag)
 dog_groups = group_records_by_dog(pet_records)
 print(f"  {len(dog_groups)} unique dogs after merging duplicate/combined accounts")
 
+off_ranges = fetch_approved_time_off(_store_name)
+print(f"  {sum(len(v) for v in off_ranges.values())} approved full-day time-off entries loaded for {len(off_ranges)} staff")
+
 # ── Detect anomalies ──────────────────────────────────────────────────────────
 
 today_str = date.today().isoformat()
@@ -104,7 +161,7 @@ for (owner_name, pet_name), g in dog_groups.items():
     # "usual" size/service/breed pattern is service-based only, not "last
     # time they bought a bag of chicken chips."
     visits = g["real_visits"]  # already same-day deduped, sorted desc
-    if len(visits) < 2:
+    if not visits:
         continue
 
     # Skip if most recent real visit is stale
@@ -150,18 +207,31 @@ for (owner_name, pet_name), g in dog_groups.items():
     # checkout-only transaction (retail items, a free-text note) as long as
     # a staff member is attached, which isn't a grooming appointment at
     # all. Require the service text itself to name a real service.
-    prior_visit = visits[1]
-    both_real_services = (
-        SERVICE_KEYWORD_RE.search(last_visit.get("service") or "")
-        and SERVICE_KEYWORD_RE.search(prior_visit.get("service") or "")
-    )
-    if both_real_services and last_visit.get("date") and prior_visit.get("date"):
-        gap_days = abs((date.fromisoformat(last_visit["date"]) - date.fromisoformat(prior_visit["date"])).days)
-        if 0 < gap_days <= 10:
-            flags.append("close_together")
-            flag_details["close_together"] = {
-                "date_a": prior_visit["date"], "date_b": last_visit["date"], "gap_days": gap_days,
-            }
+    if len(visits) >= 2:
+        prior_visit = visits[1]
+        both_real_services = (
+            SERVICE_KEYWORD_RE.search(last_visit.get("service") or "")
+            and SERVICE_KEYWORD_RE.search(prior_visit.get("service") or "")
+        )
+        if both_real_services and last_visit.get("date") and prior_visit.get("date"):
+            gap_days = abs((date.fromisoformat(last_visit["date"]) - date.fromisoformat(prior_visit["date"])).days)
+            if 0 < gap_days <= 10:
+                flags.append("close_together")
+                flag_details["close_together"] = {
+                    "date_a": prior_visit["date"], "date_b": last_visit["date"], "gap_days": gap_days,
+                }
+
+    # 0b. The appointment's assigned groomer has approved full-day time off
+    # covering that date — either it needs reassigning, or the appointment
+    # date/groomer was booked before the time off was approved. Only counts
+    # if the visit's service text names a real service, same reasoning as
+    # above — a checkout-only row's "stylist" is often just whoever rang it
+    # up, not the groomer who'd actually be missing.
+    if last_groomer and last_visit.get("date") and SERVICE_KEYWORD_RE.search(last_visit.get("service") or ""):
+        off = groomer_off_on(off_ranges, last_groomer, last_visit["date"])
+        if off:
+            flags.append("groomer_off")
+            flag_details["groomer_off"] = dict(off, groomer=last_groomer)
 
     if len(visits) >= MIN_VISITS:
         # 1. Breed group change: General ↔ Poodle-Doodle
@@ -269,13 +339,15 @@ for (owner_name, pet_name), g in dog_groups.items():
 
 
 def _flag_severity(flags):
-    if "close_together" in flags:
+    if "groomer_off" in flags:
         return 0
-    if "breed_change" in flags:
+    if "close_together" in flags:
         return 1
-    if "size_change" in flags:
+    if "breed_change" in flags:
         return 2
-    return 3
+    if "size_change" in flags:
+        return 3
+    return 4
 
 
 # Upcoming bookings sort first regardless of date — fixable-before-it-
@@ -290,13 +362,14 @@ n_size = sum(1 for a in anomalies if "size_change" in a["flags"])
 n_service = sum(1 for a in anomalies if "service_change" in a["flags"])
 n_price = sum(1 for a in anomalies if "price_anomaly" in a["flags"])
 n_close = sum(1 for a in anomalies if "close_together" in a["flags"])
+n_groomer_off = sum(1 for a in anomalies if "groomer_off" in a["flags"])
 n_future = sum(1 for a in anomalies if a["is_future"])
 n_total = len(anomalies)
 
 # Collect all groomers for filter dropdown
 all_groomers = sorted(set(a["last_groomer"] for a in anomalies if a["last_groomer"] and a["last_groomer"] != "Unknown"))
 
-print(f"  {n_total} anomalies found: {n_breed} breed, {n_size} size, {n_service} service, {n_close} close-together")
+print(f"  {n_total} anomalies found: {n_breed} breed, {n_size} size, {n_service} service, {n_close} close-together, {n_groomer_off} groomer-off")
 
 # Serialize for JS
 import json as _json
@@ -357,8 +430,10 @@ body{{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background
 .kpi.gray{{border-top:3px solid #aaa}}
 .kpi.blue{{border-top:3px solid #1565c0}}
 .kpi.purple{{border-top:3px solid #6a1b9a}}
+.kpi.teal{{border-top:3px solid #00796b}}
 .kpi.blue .kpi-val{{color:#1565c0}}
 .kpi.purple .kpi-val{{color:#6a1b9a}}
+.kpi.teal .kpi-val{{color:#00796b}}
 .kpi.red .kpi-val{{color:#e53935}}
 .kpi.yellow .kpi-val{{color:#F9A825}}
 .kpi.orange .kpi-val{{color:#e65100}}
@@ -398,6 +473,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 .badge.yellow{{background:#fff9e6;color:#b45309}}
 .badge.orange{{background:#fff3e0;color:#bf360c}}
 .badge.purple{{background:#f3e5f5;color:#6a1b9a}}
+.badge.teal{{background:#e0f2f1;color:#00796b}}
 
 /* ── CID link ── */
 .cid-link{{color:#C4276E;text-decoration:none;font-weight:600;font-family:monospace;font-size:0.9rem}}
@@ -469,6 +545,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   <button class="tab" onclick="setTab('service_change',this)">&#x1F7E0; Service Changes ({n_service})</button>
   <button class="tab" onclick="setTab('price_anomaly',this)">&#x1F4B2; Price Anomalies ({n_price})</button>
   <button class="tab" onclick="setTab('close_together',this)">&#x1F7E3; Booked Too Close Together ({n_close})</button>
+  <button class="tab" onclick="setTab('groomer_off',this)">&#x1F334; Groomer Not Working ({n_groomer_off})</button>
 </div>
 
 <div class="page">
@@ -480,12 +557,14 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   🟠 <strong>Service</strong> = service type switched when ≥75% of history was one type &nbsp;|&nbsp;
   💲 <strong>Price</strong> = last price deviated &gt;30% from this dog's own average for same service+size &nbsp;|&nbsp;
   🟣 <strong>Booked Too Close Together</strong> = two real appointments within 10 days of each other — usually an accidental double-booking. Checked on every dog with 2+ visits, no pattern history required.
+  🌴 <strong>Groomer Not Working</strong> = the appointment's assigned groomer has approved Vacation/PTO/Sick/Personal time off covering that date. Cross-checked against Supabase time_off; partial-day types (Leaving Early, Late Arrival) are excluded since we can't compare against a specific cutoff time.
   &#x1F52E; <strong>Upcoming Bookings</strong> = the flagged visit hasn't happened yet — a future appointment already on the books doesn't match this dog's pattern, so it's still fixable before the customer shows up. Those sort to the top and are highlighted blue everywhere.
   Click any row to see full visit history. Acknowledge resolved items to hide them.
 </div>
 
 <div class="kpi-grid">
   <div class="kpi blue"><div class="kpi-val" id="kpi-future">{n_future}</div><div class="kpi-label">&#x1F52E; Upcoming Bookings</div></div>
+  <div class="kpi teal"><div class="kpi-val" id="kpi-groomer-off">{n_groomer_off}</div><div class="kpi-label">&#x1F334; Groomer Not Working</div></div>
   <div class="kpi purple"><div class="kpi-val" id="kpi-close">{n_close}</div><div class="kpi-label">&#x1F7E3; Booked Too Close Together</div></div>
   <div class="kpi red"><div class="kpi-val" id="kpi-breed">{n_breed}</div><div class="kpi-label">&#x1F534; Breed Changes</div></div>
   <div class="kpi yellow"><div class="kpi-val" id="kpi-size">{n_size}</div><div class="kpi-label">&#x1F7E1; Size Changes</div></div>
@@ -633,6 +712,10 @@ function flagBadge(f, details) {{
     var d = details.close_together;
     return '<span class="badge purple">&#x1F7E3; ' + (d ? d.gap_days + 'd apart (' + d.date_a + ', ' + d.date_b + ')' : 'Too close together') + '</span>';
   }}
+  if (f === 'groomer_off') {{
+    var d = details.groomer_off;
+    return '<span class="badge teal">&#x1F334; ' + (d ? d.groomer + ' off (' + d.off_type + ', ' + d.off_start + (d.off_end !== d.off_start ? '→' + d.off_end : '') + ')' : 'Groomer off') + '</span>';
+  }}
   return '';
 }}
 
@@ -658,7 +741,7 @@ function setTab(tab, el) {{
   _tab = tab;
   document.querySelectorAll('.tab').forEach(function(t) {{ t.classList.remove('active'); }});
   if (el) el.classList.add('active');
-  var labels = {{all:'All Anomalies',upcoming:'&#x1F52E; Upcoming Bookings',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes',close_together:'&#x1F7E3; Booked Too Close Together'}};
+  var labels = {{all:'All Anomalies',upcoming:'&#x1F52E; Upcoming Bookings',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes',close_together:'&#x1F7E3; Booked Too Close Together',groomer_off:'&#x1F334; Groomer Not Working'}};
   document.getElementById('table-title').innerHTML = labels[tab] || 'Anomalies';
   render();
 }}
@@ -795,6 +878,7 @@ function render() {{
   document.getElementById('kpi-service').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('service_change') !== -1; }}).length;
   document.getElementById('kpi-price').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('price_anomaly') !== -1; }}).length;
   document.getElementById('kpi-close').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('close_together') !== -1; }}).length;
+  document.getElementById('kpi-groomer-off').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('groomer_off') !== -1; }}).length;
 }}
 
 // ── Modal ────────────────────────────────────────────────────────────────────
@@ -863,4 +947,4 @@ render();
 out_file = OUTPUT_DIR / f"WoofGang_{_fn_display}_BookingAnomalies.html"
 out_file.write_text(html, encoding="utf-8")
 print(f"  Written to: {out_file}")
-print(f"Done! {n_total} anomalies: {n_breed} breed, {n_size} size, {n_service} service, {n_price} price, {n_close} close-together")
+print(f"Done! {n_total} anomalies: {n_breed} breed, {n_size} size, {n_service} service, {n_price} price, {n_close} close-together, {n_groomer_off} groomer-off")
