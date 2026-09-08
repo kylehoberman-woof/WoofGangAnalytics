@@ -69,6 +69,18 @@
       </div>
 
       <div class="card">
+        <div class="card-icon">📞</div>
+        <div class="card-title">Lapse Calls</div>
+        <div class="card-desc">Sales associate outreach tool — customers overdue for a visit with nothing booked. Pick a last-visit date range to build a calling batch, log each call's outcome, and track who needs a follow-up.</div>
+        <div class="card-tags">
+          <span class="tag">Outreach</span>
+          <span class="tag">Retention</span>
+          <span class="tag">Call Log</span>
+        </div>
+        <a class="card-btn" id="link-lapse" href="port-washington/WoofGang_PortWashington_LapseCalls.html">Open Lapse Calls</a>
+      </div>
+
+      <div class="card">
         <div class="card-icon">🛍️</div>
         <div class="card-title">Retail Products Dashboard</div>
         <div class="card-desc">Top-selling retail products by revenue and units. Category breakdown, monthly bestsellers, weekly revenue trend, and brand performance — all-time and YTD.</div>
@@ -249,14 +261,16 @@ var STORES = {
     base: 'port-washington/',
     inv: 'WoofGang_PortWashington_Inventory_Dashboard.html',
     anomaly: 'WoofGang_PortWashington_BookingAnomalies.html',
-    retail: 'WoofGang_PortWashington_Retail_Dashboard.html'
+    retail: 'WoofGang_PortWashington_Retail_Dashboard.html',
+    lapse: 'WoofGang_PortWashington_LapseCalls.html'
   },
   'hicksville': {
     title: 'Woof Gang Hicksville',
     base: 'hicksville/',
     inv: 'WoofGang_Hicksville_Inventory_Dashboard.html',
     anomaly: 'WoofGang_Hicksville_BookingAnomalies.html',
-    retail: 'WoofGang_Hicksville_Retail_Dashboard.html'
+    retail: 'WoofGang_Hicksville_Retail_Dashboard.html',
+    lapse: 'WoofGang_Hicksville_LapseCalls.html'
   }
 };
 
@@ -266,6 +280,7 @@ function switchStore(key) {
   document.getElementById('link-inv').href = s.base + s.inv;
   document.getElementById('link-anomaly').href = s.base + s.anomaly;
   document.getElementById('link-retail').href = s.base + s.retail;
+  document.getElementById('link-lapse').href = s.base + s.lapse;
   localStorage.setItem('selectedStore', key);
 }
 

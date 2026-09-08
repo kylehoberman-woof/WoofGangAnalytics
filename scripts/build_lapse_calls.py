@@ -21,7 +21,7 @@ import json, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY
+from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY, PORTAL_BACK_JS
 from lapse_calls_lib import (
     get_store_tag, filter_pet_records_to_store, load_customer_visit_staff,
     compute_lapse_candidates,
@@ -613,6 +613,7 @@ function clearLapseRange(){
   filterLapseRows();
 }
 
+setLapseRange(84, 42);  // default view: last visit 6-12 weeks ago
 loadCallLog();
 loadDoNotContact();
 loadComplaints();
@@ -630,7 +631,7 @@ html = f"""<!DOCTYPE html>
 <header>
   <h1>📞 Lapse Calls — {store_label}</h1>
   <nav>
-    <a href="../index.html">Portal Home</a>
+    <a id="portal-back" href="../index.html">&larr; Home</a>{PORTAL_BACK_JS}
     <a href="WoofGang_{store_fn}_PetDashboard.html">Pet Dashboard</a>
   </nav>
 </header>
