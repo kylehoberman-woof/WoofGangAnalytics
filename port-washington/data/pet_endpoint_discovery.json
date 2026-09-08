@@ -167,10 +167,58 @@
     "url": "https://publicapi.franpos.com/api/company/formfields?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
     "body": "{\"Message\":\"An error has occurred.\",\"ExceptionMessage\":\"The property 'ID' is part of the object's key information and cannot be modified. \",\"ExceptionType\":\"System.InvalidOperationException\",\"StackTrace\":\"   at System.Data.Entity.Core.Objects.EntityEntry.DetectChangesInProperty(Int32 ordinal, Boolea"
   },
-  "booking_getstatus": {
+  "booking_getstatus_15155293": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&bookingId=15155293&locationId=203698",
+    "type": "dict",
+    "keys": [
+      "Status"
+    ],
+    "sample": {
+      "Status": 6
+    }
+  },
+  "booking_getstatus_15185067": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&bookingId=15185067&locationId=203698",
+    "type": "dict",
+    "keys": [
+      "Status"
+    ],
+    "sample": {
+      "Status": 6
+    }
+  },
+  "booking_getstatus_15198913": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&bookingId=15198913&locationId=203698",
+    "type": "dict",
+    "keys": [
+      "Status"
+    ],
+    "sample": {
+      "Status": 6
+    }
+  },
+  "booking_list_by_date": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getstatus?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698'.\",\"MessageDetail\":\"No act"
+    "url": "https://publicapi.franpos.com/api/booking/list?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-09-08",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/list?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-09-08'.\",\"MessageD"
+  },
+  "booking_getbookings": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/getbookings?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-09-08",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getbookings?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-09-08'.\",\"M"
+  },
+  "booking_bydate": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/bydate?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-09-08",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/bydate?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-09-08'.\",\"Messag"
+  },
+  "booking_search": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/search?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&startDate=2026-09-08&endDate=2026-09-08",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/search?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&startDate=2026-09-08&endDate="
   },
   "walkin_employee_schedules_today": {
     "status": 404,
@@ -803,7 +851,7 @@
         "ZipPostal": null,
         "IsAdmin": true,
         "CreationDate": "2024-06-12T19:47:48.73",
-        "ModifiedDate": "2026-09-08T16:30:38.137",
+        "ModifiedDate": "2026-09-08T20:40:51.597",
         "ParentCustomerId": null,
         "CustomerCode": null,
         "CustomFieldValues": []
@@ -853,7 +901,7 @@
           "ZipPostal": null,
           "IsAdmin": true,
           "CreationDate": "2024-06-12T19:47:48.73",
-          "ModifiedDate": "2026-09-08T16:30:38.137",
+          "ModifiedDate": "2026-09-08T20:40:51.597",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
@@ -899,7 +947,7 @@
           "ZipPostal": null,
           "IsAdmin": true,
           "CreationDate": "2025-02-26T01:58:17.83",
-          "ModifiedDate": "2026-09-08T16:02:45.273",
+          "ModifiedDate": "2026-09-08T20:02:43.153",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
@@ -985,7 +1033,7 @@
         }
       ],
       "pages": 1,
-      "version": 763490873
+      "version": 764027933
     }
   }
 }
