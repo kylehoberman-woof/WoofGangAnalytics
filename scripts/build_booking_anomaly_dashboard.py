@@ -203,11 +203,18 @@ for (owner_name, pet_name), g in dog_groups.items():
             "addon": not is_real_appointment(v),
         })
 
+    # A future-dated "last visit" is an UPCOMING booking, not history — the
+    # dog's next appointment is already scheduled with a breed/size/service
+    # that doesn't match their pattern. That's the most actionable case:
+    # the appointment hasn't happened yet, so it can still be corrected.
+    is_future = last_visit.get("date", "") > today_str
+
     anomalies.append({
         "cid": dog_key,
         "dog_key": dog_key,
         "customer_name": owner_name,
         "pet_name": pet_name,
+        "is_future": is_future,
         "visit_count": len(visits),
         "modal_size": modal_size,
         "modal_size_short": modal_size,
@@ -238,14 +245,18 @@ def _flag_severity(flags):
     return 2
 
 
+# Upcoming bookings sort first regardless of date — fixable-before-it-
+# happens beats everything else — then by date/severity as before.
 anomalies.sort(key=lambda x: (x["last_date"], _flag_severity(x["flags"])))
 anomalies.reverse()  # most recent first
+anomalies.sort(key=lambda x: not x["is_future"])
 
 # Count by type
 n_breed = sum(1 for a in anomalies if "breed_change" in a["flags"])
 n_size = sum(1 for a in anomalies if "size_change" in a["flags"])
 n_service = sum(1 for a in anomalies if "service_change" in a["flags"])
 n_price = sum(1 for a in anomalies if "price_anomaly" in a["flags"])
+n_future = sum(1 for a in anomalies if a["is_future"])
 n_total = len(anomalies)
 
 # Collect all groomers for filter dropdown
@@ -310,6 +321,8 @@ body{{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background
 .kpi.yellow{{border-top:3px solid #F9A825}}
 .kpi.orange{{border-top:3px solid #e65100}}
 .kpi.gray{{border-top:3px solid #aaa}}
+.kpi.blue{{border-top:3px solid #1565c0}}
+.kpi.blue .kpi-val{{color:#1565c0}}
 .kpi.red .kpi-val{{color:#e53935}}
 .kpi.yellow .kpi-val{{color:#F9A825}}
 .kpi.orange .kpi-val{{color:#e65100}}
@@ -412,6 +425,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
 </div>
 
 <div class="tabs">
+  <button class="tab" onclick="setTab('upcoming',this)">&#x1F52E; Upcoming Bookings ({n_future})</button>
   <button class="tab active" onclick="setTab('all',this)">All Anomalies ({n_total})</button>
   <button class="tab" onclick="setTab('breed_change',this)">&#x1F534; Breed Changes ({n_breed})</button>
   <button class="tab" onclick="setTab('size_change',this)">&#x1F7E1; Size Changes ({n_size})</button>
@@ -427,10 +441,12 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   🟡 <strong>Size</strong> = size category changed (XS/SM/MD/LG/XL) when ≥75% of history was one size &nbsp;|&nbsp;
   🟠 <strong>Service</strong> = service type switched when ≥75% of history was one type &nbsp;|&nbsp;
   💲 <strong>Price</strong> = last price deviated &gt;30% from this dog's own average for same service+size.
+  &#x1F52E; <strong>Upcoming Bookings</strong> = the flagged visit hasn't happened yet — a future appointment already on the books doesn't match this dog's pattern, so it's still fixable before the customer shows up. Those sort to the top and are highlighted blue everywhere.
   Click any row to see full visit history. Acknowledge resolved items to hide them.
 </div>
 
 <div class="kpi-grid">
+  <div class="kpi blue"><div class="kpi-val" id="kpi-future">{n_future}</div><div class="kpi-label">&#x1F52E; Upcoming Bookings</div></div>
   <div class="kpi red"><div class="kpi-val" id="kpi-breed">{n_breed}</div><div class="kpi-label">&#x1F534; Breed Changes</div></div>
   <div class="kpi yellow"><div class="kpi-val" id="kpi-size">{n_size}</div><div class="kpi-label">&#x1F7E1; Size Changes</div></div>
   <div class="kpi orange"><div class="kpi-val" id="kpi-service">{n_service}</div><div class="kpi-label">&#x1F7E0; Service Changes</div></div>
@@ -598,7 +614,7 @@ function setTab(tab, el) {{
   _tab = tab;
   document.querySelectorAll('.tab').forEach(function(t) {{ t.classList.remove('active'); }});
   if (el) el.classList.add('active');
-  var labels = {{all:'All Anomalies',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes'}};
+  var labels = {{all:'All Anomalies',upcoming:'&#x1F52E; Upcoming Bookings',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes'}};
   document.getElementById('table-title').innerHTML = labels[tab] || 'Anomalies';
   render();
 }}
@@ -646,7 +662,8 @@ function getFiltered(excludeAcked) {{
   }}
   return ANOMALIES.filter(function(a) {{
     if (_days > 0 && a.last_date < cutoffStr) return false;
-    if (_tab !== 'all' && a.flags.indexOf(_tab) === -1) return false;
+    if (_tab === 'upcoming' && !a.is_future) return false;
+    if (_tab !== 'all' && _tab !== 'upcoming' && a.flags.indexOf(_tab) === -1) return false;
     if (_groomer && a.last_groomer !== _groomer) return false;
     if (excludeAcked && isAcked(a.dog_key || a.cid)) return false;
     return true;
@@ -665,7 +682,10 @@ function makeRow(a, isAckedRow) {{
     ? '<button class="unack-btn" onclick="unack(\\'' + dk + '\\')">↩ Undo</button>'
     : '<button class="ack-btn" onclick="ack(\\'' + dk + '\\')">&#x2713; Ack</button>';
   var cidShort = a.cid.length > 8 ? '#…' + a.cid.slice(-6) : '#' + a.cid;
-  return '<tr>' +
+  var dateHtml = a.is_future
+    ? '<span style="color:#1565c0;font-weight:700">&#x1F52E; ' + a.last_date + '</span>'
+    : a.last_date;
+  return '<tr' + (a.is_future ? ' style="background:#e3f2fd"' : '') + '>' +
     '<td><a class="cid-link" href="#" onclick="openModal(\\'' + dk + '\\');return false;">' + cidShort + '</a></td>' +
     '<td>' + (a.customer_name || '') + '</td>' +
     '<td><a class="cid-link" href="#" onclick="openModal(\\'' + dk + '\\');return false;">' + (a.pet_name || '') + '</a></td>' +
@@ -674,7 +694,7 @@ function makeRow(a, isAckedRow) {{
     '<td>' + lastDisplay + '</td>' +
     '<td>' + flagsHtml + '</td>' +
     '<td>' + (a.last_groomer || '') + '</td>' +
-    '<td>' + a.last_date + '</td>' +
+    '<td>' + dateHtml + '</td>' +
     '<td>' + actionBtn + '</td>' +
     '</tr>';
 }}
@@ -687,7 +707,8 @@ function render() {{
       var cutoff = new Date(Date.now() - _days * 86400 * 1000).toISOString().slice(0,10);
       if (a.last_date < cutoff) return false;
     }}
-    if (_tab !== 'all' && a.flags.indexOf(_tab) === -1) return false;
+    if (_tab === 'upcoming' && !a.is_future) return false;
+    if (_tab !== 'all' && _tab !== 'upcoming' && a.flags.indexOf(_tab) === -1) return false;
     if (_groomer && a.last_groomer !== _groomer) return false;
     return isAcked(a.dog_key || a.cid);
   }});
@@ -724,6 +745,7 @@ function render() {{
   // Update KPI counts
   var countAll = getFiltered(false);
   document.getElementById('kpi-total').textContent = countAll.length;
+  document.getElementById('kpi-future').textContent = countAll.filter(function(a) {{ return a.is_future; }}).length;
   document.getElementById('kpi-breed').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('breed_change') !== -1; }}).length;
   document.getElementById('kpi-size').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('size_change') !== -1; }}).length;
   document.getElementById('kpi-service').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('service_change') !== -1; }}).length;
@@ -745,8 +767,9 @@ function openModal(dogKey) {{
     if (anomaly.pet_name) profHtml += '<div class="modal-stat"><strong>' + anomaly.pet_name + '</strong><span>Pet Name</span></div>';
     profHtml += '<div class="modal-stat"><strong>' + anomaly.visit_count + '</strong><span>Visits</span></div>';
     profHtml += '<div class="modal-stat"><strong>' + (anomaly.modal_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.modal_size_short + '</strong><span>Usual</span></div>';
-    profHtml += '<div class="modal-stat"><strong>' + (anomaly.last_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.last_size_short + '</strong><span>Last Visit</span></div>';
+    profHtml += '<div class="modal-stat"><strong>' + (anomaly.last_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.last_size_short + '</strong><span>' + (anomaly.is_future ? 'Upcoming Booking' : 'Last Visit') + '</span></div>';
     var flagsHtml = anomaly.flags.map(function(f) {{ return flagBadge(f, anomaly.flag_details); }}).join(' ');
+    if (anomaly.is_future) flagsHtml = '<span class="badge" style="background:#e3f2fd;color:#1565c0">&#x1F52E; Upcoming — not yet happened</span> ' + flagsHtml;
     profHtml += '<div class="modal-stat"><strong>' + flagsHtml + '</strong><span>Flags</span></div>';
   }}
   document.getElementById('modal-profile').innerHTML = profHtml;
