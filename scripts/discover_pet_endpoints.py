@@ -76,15 +76,24 @@ company_id = store.location_id  # may differ — try both
 
 print(f"Probing FranPOS for pet-level data ({store_name})...")
 
-# 1. Walk-in booking appointments — API doc says companyId + dateStr
-# Try companyId = location_id (they may be the same value)
-probe("walkin_booking_appointments_today",
-      f"{BASE_URL}/api/walkin/booking/appointments",
-      params={"companyId": location_id, "dateStr": today})
-
-probe("walkin_booking_appointments_tomorrow",
-      f"{BASE_URL}/api/walkin/booking/appointments",
-      params={"companyId": location_id, "dateStr": (date.today() + timedelta(days=1)).isoformat()})
+# 1. Walk-in booking appointments — API doc says companyId + dateStr.
+# The first attempt (ISO dateStr) 400'd with "String was not recognized
+# as a valid DateTime" — companyId itself was accepted (a bad param name
+# would 404, not 400), so this is a date-format problem, not a wrong
+# endpoint. Trying the date formats a .NET DateTime.Parse without an
+# explicit culture is most likely to accept.
+_today_d = date.today()
+_date_formats = {
+    "iso": _today_d.strftime("%Y-%m-%d"),
+    "iso_midnight": _today_d.strftime("%Y-%m-%dT00:00:00"),
+    "us_slash": _today_d.strftime("%m/%d/%Y"),
+    "us_dash": _today_d.strftime("%m-%d-%Y"),
+    "iso_space": _today_d.strftime("%Y-%m-%d 00:00:00"),
+}
+for fmt_name, date_val in _date_formats.items():
+    probe(f"walkin_booking_appointments_{fmt_name}",
+          f"{BASE_URL}/api/walkin/booking/appointments",
+          params={"companyId": location_id, "dateStr": date_val})
 
 # Also try with locationId in case companyId != locationId
 probe("walkin_booking_appointments_locationid",
