@@ -652,10 +652,6 @@ html = f"""<!DOCTYPE html>
       <div class="val" id="bucket-count-all">{len(lapsed_dogs)}</div>
       <div class="lbl">All Candidates</div>
     </button>
-    <button class="bucket-btn" data-bucket-btn="dnc" onclick="setBucket('dnc')">
-      <div class="val" id="bucket-count-dnc">0</div>
-      <div class="lbl">🚫 Do Not Contact</div>
-    </button>
   </div>
 
   <div class="card">
