@@ -73,8 +73,16 @@ for window_start, window_end in windows:
     total_pages = 1
 
     while page < total_pages:
-        # Try endpoints until one works
-        endpoints_to_try = [working_endpoint] if working_endpoint else ENDPOINTS
+        # Prefer whichever endpoint worked last (saves a wasted 404 round
+        # trip), but always fall back to the full candidate list if it
+        # fails for this window — locking onto a single endpoint forever
+        # is why this cache stalled at 3 days of 2025-01 data for 20
+        # months: the first window's endpoint choice got "stuck" and every
+        # later window silently failed against it with no retry.
+        endpoints_to_try = (
+            [working_endpoint] + [e for e in ENDPOINTS if e != working_endpoint]
+            if working_endpoint else ENDPOINTS
+        )
 
         fetched = False
         for endpoint_template in endpoints_to_try:
@@ -127,33 +135,39 @@ for window_start, window_end in windows:
                 continue
 
         if not fetched:
-            if not working_endpoint:
-                # No endpoint works — try the Bookings endpoint directly
-                try:
-                    r = httpx.get(
-                        f"{BASE_URL}/api/Bookings",
-                        params={"Token": token, "startDate": from_date,
-                                "endDate": window_end.strftime("%Y-%m-%d"),
-                                "locationId": location_id},
-                        timeout=45,
-                    )
-                    if r.status_code == 200:
-                        items = r.json()
-                        if isinstance(items, dict):
-                            items = items.get("data", [])
-                        added = 0
-                        for item in items:
-                            uid = item.get("UniqueID")
-                            if uid is not None and uid not in seen:
-                                seen.add(uid)
-                                new_appointments.append(item)
-                                added += 1
-                        print(f"  {from_date}: {len(items)} items ({added} new) [via /api/Bookings]")
-                        working_endpoint = "API_BOOKINGS"
-                    else:
-                        print(f"  {from_date}: /api/Bookings returned {r.status_code}")
-                except Exception as e:
-                    print(f"  {from_date}: /api/Bookings ERROR {e}")
+            # Every candidate failed for this window (including whichever
+            # one worked previously) — clear it so the next window tries
+            # the full list fresh instead of repeating a dead endpoint.
+            working_endpoint = None
+            # No endpoint works — try the Bookings endpoint directly as a
+            # last resort for this window.
+            try:
+                r = httpx.get(
+                    f"{BASE_URL}/api/Bookings",
+                    params={"Token": token, "startDate": from_date,
+                            "endDate": window_end.strftime("%Y-%m-%d"),
+                            "locationId": location_id},
+                    timeout=45,
+                )
+                if r.status_code == 200:
+                    items = r.json()
+                    if isinstance(items, dict):
+                        items = items.get("data", [])
+                    added = 0
+                    for item in items:
+                        uid = item.get("UniqueID")
+                        if uid is not None and uid not in seen:
+                            seen.add(uid)
+                            new_appointments.append(item)
+                            added += 1
+                    print(f"  {from_date}: {len(items)} items ({added} new) [via /api/Bookings]")
+                    # Not re-set as working_endpoint — /api/Bookings uses a
+                    # different URL shape than the {days}/{page}/{from_date}
+                    # templates, so it can't be reused as one of those.
+                else:
+                    print(f"  {from_date}: /api/Bookings returned {r.status_code}")
+            except Exception as e:
+                print(f"  {from_date}: /api/Bookings ERROR {e}")
             break  # No working endpoint found for this window
 
         page += 1
