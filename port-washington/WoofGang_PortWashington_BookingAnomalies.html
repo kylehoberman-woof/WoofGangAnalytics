@@ -133,7 +133,7 @@ tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
 <body>
 
 <div class="header">
-  <div class="header-timestamp">Updated September 07, 2026 at 08:56 PM ET<br><a href="../hicksville/WoofGang_Hicksville_BookingAnomalies.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
+  <div class="header-timestamp">Updated September 07, 2026 at 09:02 PM ET<br><a href="../hicksville/WoofGang_Hicksville_BookingAnomalies.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
   <h1>Woof Gang Port Washington</h1>
   <div class="subtitle">Booking Anomaly Detector</div>
   <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
@@ -210,8 +210,8 @@ tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
       <thead>
         <tr>
           <th onclick="sortBy('cid')">ID <span class="sort-arrow">↕</span></th>
-          <th onclick="sortBy('customer_name')">Customer <span class="sort-arrow">↕</span></th>
           <th onclick="sortBy('pet_name')">Pet <span class="sort-arrow">↕</span></th>
+          <th onclick="sortBy('customer_name')">Customer <span class="sort-arrow">↕</span></th>
           <th class="n" onclick="sortBy('visit_count')">Visits <span class="sort-arrow">↕</span></th>
           <th onclick="sortBy('modal_size_short')">History (Mode) <span class="sort-arrow">↕</span></th>
           <th onclick="sortBy('last_size_short')">Last Visit <span class="sort-arrow">↕</span></th>
@@ -237,8 +237,8 @@ tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
         <thead>
           <tr>
             <th>ID</th>
-            <th>Customer</th>
             <th>Pet</th>
+            <th>Customer</th>
             <th class="n">Visits</th>
             <th>History</th>
             <th>Last Visit</th>
@@ -420,8 +420,8 @@ function makeRow(a, isAckedRow) {
     : a.last_date;
   return '<tr' + (a.is_future ? ' style="background:#e3f2fd"' : '') + '>' +
     '<td><a class="cid-link" href="#" onclick="openModal(\'' + dk + '\');return false;">' + cidShort + '</a></td>' +
-    '<td>' + (a.customer_name || '') + '</td>' +
     '<td><a class="cid-link" href="#" onclick="openModal(\'' + dk + '\');return false;">' + (a.pet_name || '') + '</a></td>' +
+    '<td>' + (a.customer_name || '') + '</td>' +
     '<td class="n">' + a.visit_count + '</td>' +
     '<td>' + histDisplay + '</td>' +
     '<td>' + lastDisplay + '</td>' +
@@ -496,8 +496,8 @@ function openModal(dogKey) {
   // Profile summary
   var profHtml = '';
   if (anomaly) {
-    if (anomaly.customer_name) profHtml += '<div class="modal-stat"><strong>' + anomaly.customer_name + '</strong><span>Customer</span></div>';
     if (anomaly.pet_name) profHtml += '<div class="modal-stat"><strong>' + anomaly.pet_name + '</strong><span>Pet Name</span></div>';
+    if (anomaly.customer_name) profHtml += '<div class="modal-stat"><strong>' + anomaly.customer_name + '</strong><span>Customer</span></div>';
     profHtml += '<div class="modal-stat"><strong>' + anomaly.visit_count + '</strong><span>Visits</span></div>';
     profHtml += '<div class="modal-stat"><strong>' + (anomaly.modal_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.modal_size_short + '</strong><span>Usual</span></div>';
     profHtml += '<div class="modal-stat"><strong>' + (anomaly.last_doodle ? 'Poodle-Doodle' : 'General') + ' / ' + anomaly.last_size_short + '</strong><span>' + (anomaly.is_future ? 'Upcoming Booking' : 'Last Visit') + '</span></div>';
