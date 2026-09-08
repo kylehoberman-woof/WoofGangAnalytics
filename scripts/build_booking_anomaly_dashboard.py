@@ -48,6 +48,14 @@ SIZE_THRESHOLD = 0.75     # ≥75% of visits must be modal size to flag a change
 
 SIZE_ORDER = {"XS": 0, "SM": 1, "MD": 2, "LG": 3, "XL": 4}
 
+# Service swaps that are normal variation, not a booking mistake — owners
+# routinely alternate between a full groom and a mini groom, or between a
+# classic and a luxury bath, and that alone shouldn't be flagged.
+IGNORED_SERVICE_SWAPS = {
+    frozenset({"fg", "mg"}),
+    frozenset({"lux bath", "clsc bath"}),
+}
+
 # ── Load pet visit history ────────────────────────────────────────────────────
 
 _pet_visits_file = DATA_DIR / "pet_visits.json"
@@ -155,7 +163,8 @@ for (owner_name, pet_name), g in dog_groups.items():
                 }
 
     # 3. Service change: ≥75% of history is modal service, last visit differs
-    if modal_service and last_service and last_service != modal_service:
+    swap_key = frozenset({modal_service.strip().lower(), last_service.strip().lower()})
+    if modal_service and last_service and last_service != modal_service and swap_key not in IGNORED_SERVICE_SWAPS:
         modal_pct = Counter(services)[modal_service] / len(services)
         if modal_pct >= SERVICE_THRESHOLD:
             flags.append("service_change")
