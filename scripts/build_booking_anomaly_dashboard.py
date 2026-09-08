@@ -18,8 +18,9 @@ from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores
+from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores, STORE_REGISTRY
 from formatting import esc
+from lapse_calls_lib import get_store_tag, filter_pet_records_to_store, group_records_by_dog, is_real_appointment, clean_size
 
 # ── Store setup ───────────────────────────────────────────────────────────────
 
@@ -47,14 +48,6 @@ SIZE_THRESHOLD = 0.75     # ≥75% of visits must be modal size to flag a change
 
 SIZE_ORDER = {"XS": 0, "SM": 1, "MD": 2, "LG": 3, "XL": 4}
 
-_ADDON_PREFIXES = ("add-on", "online add-on", "online service")
-
-def _is_addon(visit):
-    """True if this visit record is an add-on or online service, not a primary groom."""
-    svc = (visit.get("service") or "").lower()
-    raw = (visit.get("items_raw") or "").lower()
-    return any(svc.startswith(p) or raw.startswith(p) for p in _ADDON_PREFIXES)
-
 # ── Load pet visit history ────────────────────────────────────────────────────
 
 _pet_visits_file = DATA_DIR / "pet_visits.json"
@@ -76,6 +69,18 @@ with open(_pet_visits_file) as f:
 
 print(f"  {len(pet_records)} pet accounts loaded")
 
+# Same pipeline as the Lapse Calls widget: strip cross-location visits (the
+# customer-history API is network-wide, not scoped to this store), then
+# merge duplicate FranPOS accounts and orphaned combined multi-pet accounts
+# ("Lucy, Mason") into one group per real dog — otherwise a multi-dog
+# household's combined account shows up as a single garbled "customer",
+# and a dog with two duplicate accounts gets analyzed as two different
+# dogs with fragmented, individually-too-short histories.
+_store_tag = get_store_tag(_store_name, STORE_REGISTRY)
+filter_pet_records_to_store(pet_records, _store_tag)
+dog_groups = group_records_by_dog(pet_records)
+print(f"  {len(dog_groups)} unique dogs after merging duplicate/combined accounts")
+
 # ── Detect anomalies ──────────────────────────────────────────────────────────
 
 today_str = date.today().isoformat()
@@ -84,24 +89,28 @@ cutoff_str = (date.today() - timedelta(days=STALE_DAYS)).isoformat()
 anomalies = []
 profiles = {}
 
-for rec in pet_records:
-    all_visits = rec.get("visits", [])
-    # Filter to primary grooming visits only — exclude add-ons and online services
-    visits = [v for v in all_visits if not _is_addon(v)]
+for (owner_name, pet_name), g in dog_groups.items():
+    all_visits = g["all_visits"]
+    # Retail purchases (treats, food, shampoo) and internal notes ride along
+    # in the same history feed as real grooming appointments — a pet's
+    # "usual" size/service/breed pattern is service-based only, not "last
+    # time they bought a bag of chicken chips."
+    visits = g["real_visits"]  # already same-day deduped, sorted desc
     if len(visits) < MIN_VISITS:
         continue
 
-    # Skip if most recent primary visit is stale
-    last_visit = visits[0]  # sorted desc (first non-addon)
+    # Skip if most recent real visit is stale
+    last_visit = visits[0]
     if last_visit.get("date", "") < cutoff_str:
         continue
 
-    pet_name = rec.get("pet_name", "").strip()
-    owner_name = rec.get("owner_name", "").strip()
-    dog_key = str(rec["pet_cid"])
+    dog_key = g["pet_cid"]
 
-    # Build history arrays from primary visits only
-    sizes = [v["size"] for v in visits if v.get("size")]
+    # Build history arrays from primary visits only. Sizes are cleaned of
+    # their POS quantity suffix ("SM - 1.00000, ADD-ON" -> "SM") — without
+    # this, SIZE_ORDER lookups below almost never match a raw size string,
+    # so size-change detection has effectively never fired.
+    sizes = [clean_size(v["size"]) for v in visits if v.get("size")]
     services = [v["service"] for v in visits if v.get("service")]
     breed_groups = [v["breed_group"] for v in visits if v.get("breed_group")]
 
@@ -113,7 +122,7 @@ for rec in pet_records:
     modal_service = Counter(services).most_common(1)[0][0] if services else ""
     modal_breed = Counter(breed_groups).most_common(1)[0][0] if breed_groups else ""
 
-    last_size = last_visit.get("size", "")
+    last_size = clean_size(last_visit.get("size", ""))
     last_service = last_visit.get("service", "")
     last_breed = last_visit.get("breed_group", "")
     last_groomer = last_visit.get("stylist", "")
@@ -158,7 +167,7 @@ for rec in pet_records:
             v["price"] for v in visits[1:]  # exclude last visit itself
             if v.get("price") and v.get("price_match") in ("exact",)
             and v.get("service") == last_service
-            and v.get("size") == last_size
+            and clean_size(v.get("size", "")) == last_size
         ]
         if len(same_svc_prices) >= 2:
             avg_price = sum(same_svc_prices) / len(same_svc_prices)
@@ -175,20 +184,23 @@ for rec in pet_records:
     if not flags:
         continue
 
-    # Build full history for modal (most recent first)
-    # Show all visits in modal (including add-ons) but flag them
+    # Full history for the modal shows everything (real services plus
+    # retail/notes) for context, each marked so the UI can dim non-service
+    # rows — same "addon" field name kept for the JS side, now meaning
+    # "not a real grooming service" rather than the old narrow add-on
+    # prefix check.
     history = []
     for v in all_visits:
         history.append({
             "date": v.get("date", ""),
             "service": v.get("service", ""),
-            "size": v.get("size", ""),
+            "size": clean_size(v.get("size", "")),
             "breed_group": v.get("breed_group", ""),
             "items_raw": v.get("items_raw", ""),
             "groomer": v.get("stylist", ""),
             "price": round(v["price"], 2) if v.get("price") else 0,
             "price_match": v.get("price_match", ""),
-            "addon": _is_addon(v),
+            "addon": not is_real_appointment(v),
         })
 
     anomalies.append({
@@ -656,7 +668,7 @@ function makeRow(a, isAckedRow) {{
   return '<tr>' +
     '<td><a class="cid-link" href="#" onclick="openModal(\\'' + dk + '\\');return false;">' + cidShort + '</a></td>' +
     '<td>' + (a.customer_name || '') + '</td>' +
-    '<td>' + (a.pet_name || '') + '</td>' +
+    '<td><a class="cid-link" href="#" onclick="openModal(\\'' + dk + '\\');return false;">' + (a.pet_name || '') + '</a></td>' +
     '<td class="n">' + a.visit_count + '</td>' +
     '<td>' + histDisplay + '</td>' +
     '<td>' + lastDisplay + '</td>' +
