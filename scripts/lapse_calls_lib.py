@@ -99,6 +99,45 @@ def load_customer_visit_staff(all_data_file):
     return customer_visit_staff
 
 
+def dedupe_same_day(real_visits):
+    """Collapse multiple real-appointment entries that land on the same
+    date into one, keeping the sort order (already newest-first).
+
+    Merging duplicate FranPOS accounts for the same dog (see
+    individual_groups below) surfaces a second data-quality issue: the
+    same real-world appointment is often logged separately under BOTH
+    accounts on the same day — Chester (owner Maria Merani) has this on
+    every single shared visit date across his two accounts. Without this,
+    a merged dog's history — and therefore last-visit spacing — double-
+    counts every such day.
+    """
+    best_by_date = {}
+    for v in real_visits:
+        d = v["date"]
+        if d not in best_by_date or (not best_by_date[d].get("stylist") and v.get("stylist")):
+            best_by_date[d] = v
+    seen = set()
+    out = []
+    for v in real_visits:
+        d = v["date"]
+        if d in seen:
+            continue
+        seen.add(d)
+        out.append(best_by_date[d])
+    return out
+
+
+# Size values carry a POS line-item quantity glued on, e.g. "SM - 1.00000"
+# or "LG - 1.00000, ADD-ON" — the "1.00000" is just "quantity: 1" on that
+# line item, not meaningful to show. Strips it while keeping real
+# qualifiers like ", ADD-ON" or ", SPA UPGRADE".
+_QUANTITY_SUFFIX_RE = re.compile(r"\s*-\s*\d+\.\d+")
+
+
+def clean_size(size):
+    return _QUANTITY_SUFFIX_RE.sub("", size or "").strip()
+
+
 def pet_name_variants(pet_name):
     parts = {p.strip() for p in (pet_name or "").split(",") if p.strip()}
     parts.add((pet_name or "").strip())
@@ -167,6 +206,7 @@ def compute_lapse_candidates(pet_records, customer_visit_staff, today_date=None)
         # last-visit and cadence are service-based only, not "last time
         # they bought something here."
         real_visits = [v for v in all_dated_visits if is_real_appointment(v)]
+        real_visits = dedupe_same_day(real_visits)
         has_future_sibling = (owner_name_, pet_name_) in owners_with_future_pet
 
         # Already has something on the books — no outreach needed
@@ -234,10 +274,10 @@ def compute_lapse_candidates(pet_records, customer_visit_staff, today_date=None)
             {
                 "date": v.get("date", ""),
                 "service": v.get("service", "") or v.get("items_raw", ""),
-                "size": v.get("size", ""),
+                "size": clean_size(v.get("size", "")),
                 "groomer": v.get("stylist", ""),
             }
-            for v in all_dated_visits[:25] if is_real_appointment(v)
+            for v in visits[:25]
         ]
         notes_history = [
             {
@@ -270,7 +310,7 @@ def compute_lapse_candidates(pet_records, customer_visit_staff, today_date=None)
             "last_groomer": last_groomer,
             "last_groomer_confirmed": last_groomer_confirmed,
             "last_service": visits[0].get("service", ""),
-            "size": visits[0].get("size", ""),
+            "size": clean_size(visits[0].get("size", "")),
             "ratio": ratio,
         })
         lapse_history[cid] = {"appointments": appointments_history, "notes": notes_history}
