@@ -556,7 +556,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   🟡 <strong>Size</strong> = size category changed (XS/SM/MD/LG/XL) when ≥75% of history was one size &nbsp;|&nbsp;
   🟠 <strong>Service</strong> = service type switched when ≥75% of history was one type &nbsp;|&nbsp;
   💲 <strong>Price</strong> = last price deviated &gt;30% from this dog's own average for same service+size &nbsp;|&nbsp;
-  🟣 <strong>Booked Too Close Together</strong> = two real appointments within 10 days of each other — usually an accidental double-booking. Checked on every dog with 2+ visits, no pattern history required.
+  🟣 <strong>Booked Too Close Together</strong> = two real appointments within 10 days of each other — usually an accidental double-booking. Checked on every dog with 2+ visits, no pattern history required. FranPOS doesn't expose cancellation status on this data, so a flagged pair can sometimes be a rescheduled booking rather than a real double-booking — a quick glance and Acknowledge is fine if so.
   🌴 <strong>Groomer Not Working</strong> = the appointment's assigned groomer has approved Vacation/PTO/Sick/Personal time off covering that date. Cross-checked against Supabase time_off; partial-day types (Leaving Early, Late Arrival) are excluded since we can't compare against a specific cutoff time.
   &#x1F52E; <strong>Upcoming Bookings</strong> = the flagged visit hasn't happened yet — a future appointment already on the books doesn't match this dog's pattern, so it's still fixable before the customer shows up. Those sort to the top and are highlighted blue everywhere.
   Click any row to see full visit history. Acknowledge resolved items to hide them.
