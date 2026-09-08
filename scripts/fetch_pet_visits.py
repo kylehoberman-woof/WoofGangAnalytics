@@ -218,6 +218,11 @@ for i, pet in enumerate(to_fetch):
                     "order_id": price_match["order_id"] if price_match else None,
                     "price": price_match["price"] if price_match else None,
                     "price_match": price_match["match"] if price_match else "no_match",
+                    # Previously discarded — the raw feed carries a "Type" per
+                    # record (4 = real visit, 1 = free-text note, in samples
+                    # seen so far) that might also distinguish cancelled/
+                    # rescheduled bookings from ones that actually happened.
+                    "type": v.get("Type"),
                 }
                 visits.append(visit)
             # Sort by date desc
