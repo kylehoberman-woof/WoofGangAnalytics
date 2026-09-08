@@ -42,21 +42,6 @@ tr:hover td { background:#fef9f5; }
 .lc-row.lc-hidden { display:none; }
 @media(max-width:600px) { th,td { padding:8px 6px; font-size:12px; } }
 
-.lc-progress-row { cursor:pointer; }
-.lc-progress-row td.n, th.n { text-align:right; }
-.lc-progress-row .lc-progress-date { font-weight:700; color:var(--brown); }
-.lc-progress-caret { display:inline-block; margin-right:6px; transition:transform .15s; color:var(--muted); }
-.lc-progress-row.open .lc-progress-caret { transform:rotate(90deg); }
-.lc-progress-detail-row.lc-pd-hidden { display:none; }
-.lc-progress-detail-row td { background:#f9fafb; padding:12px 16px; }
-.lc-progress-entry { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
-.lc-progress-entry:last-child { border-bottom:none; }
-.lc-progress-entry-dog { font-weight:700; min-width:160px; }
-.lc-progress-entry-owner { font-weight:400; color:var(--muted); }
-.lc-progress-entry-action { font-weight:600; min-width:170px; }
-.lc-progress-entry-notes { color:var(--muted); flex:1; }
-.lc-progress-empty { color:#9ca3af; text-align:center; padding:24px; }
-
 .lc-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:flex-start; justify-content:center; padding:5vh 16px; overflow-y:auto; }
 .lc-modal-overlay.active { display:flex; }
 .lc-modal { background:#fff; border-radius:12px; max-width:640px; width:100%; padding:24px; position:relative; }
@@ -117,6 +102,7 @@ tr:hover td { background:#fef9f5; }
   <nav>
     <a id="portal-back" href="../index.html">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
     <a href="WoofGang_PortWashington_PetDashboard.html">Pet Dashboard</a>
+    <a href="WoofGang_PortWashington_LapseProgress.html">📊 Progress</a>
   </nav>
 </header>
 <main>
@@ -137,19 +123,6 @@ tr:hover td { background:#fef9f5; }
       <div class="val" id="bucket-count-all">2281</div>
       <div class="lbl">All Candidates</div>
     </button>
-  </div>
-
-  <div class="card">
-    <h2>📊 Day-by-Day Progress</h2>
-    <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
-      Every call logged, grouped by the day it was logged. Click a day to see exactly which dogs were called and the outcome of each.
-    </p>
-    <div style="overflow-x:auto">
-    <table>
-      <thead><tr><th>Date</th><th class="n">Calls Logged</th><th class="n">✅ Booked</th><th class="n">📞 Voicemail</th><th class="n">📅 Will Book</th><th class="n">✗ Not Interested</th></tr></thead>
-      <tbody id="lc-progress-body"><tr><td colspan=6 class="lc-progress-empty">Loading…</td></tr></tbody>
-    </table>
-    </div>
   </div>
 
   <div class="card">
@@ -32277,65 +32250,6 @@ function applyBuckets(){
   });
   updateBucketCounts();
   filterLapseRows();
-  renderDayProgress();
-}
-
-// Groups every logged call by the day it was logged (not the dog's last
-// visit date) so an owner can see actual outreach activity day by day —
-// no per-associate attribution exists yet, this is store-wide volume.
-function renderDayProgress(){
-  var body = document.getElementById('lc-progress-body');
-  if(!body) return;
-  var byDate = {};
-  Object.keys(callLogByCid).forEach(function(cid){
-    callLogByCid[cid].forEach(function(entry){
-      var d = entry.call_date;
-      if(!d) return;
-      if(!byDate[d]) byDate[d] = [];
-      byDate[d].push(Object.assign({cid:cid}, entry));
-    });
-  });
-  var dates = Object.keys(byDate).sort().reverse();
-  if(!dates.length){
-    body.innerHTML = '<tr><td colspan=6 class="lc-progress-empty">No calls logged yet</td></tr>';
-    return;
-  }
-  var cidToOwner = {};
-  document.querySelectorAll('.lc-row').forEach(function(tr){
-    cidToOwner[tr.getAttribute('data-cid')] = tr.getAttribute('data-owner-name');
-  });
-  body.innerHTML = dates.map(function(d){
-    var entries = byDate[d];
-    var counts = {booked:0, left_voicemail:0, will_book:0, not_interested:0};
-    entries.forEach(function(e){ if(counts[e.action] !== undefined) counts[e.action]++; });
-    var rowId = 'lc-day-' + d.replace(/[^0-9]/g, '');
-    var detailHtml = entries.map(function(e){
-      var label = ACTION_LABELS[e.action] || e.action;
-      var color = ACTION_COLORS[e.action] || '#6b7280';
-      var owner = cidToOwner[e.cid] || '';
-      return '<div class="lc-progress-entry">'
-        + '<span class="lc-progress-entry-dog">' + lcEsc(e.pet_name || '') + (owner ? ' <span class="lc-progress-entry-owner">(' + lcEsc(owner) + ')</span>' : '') + '</span>'
-        + '<span class="lc-progress-entry-action" style="color:' + color + '">' + lcEsc(label) + '</span>'
-        + (e.notes ? '<span class="lc-progress-entry-notes">' + lcEsc(e.notes) + '</span>' : '')
-        + '</div>';
-    }).join('');
-    return '<tr class="lc-progress-row" id="' + rowId + '-toggle" onclick="toggleDayDetail(\'' + rowId + '\')">'
-      + '<td class="lc-progress-date"><span class="lc-progress-caret">&#9656;</span>' + lcEsc(d) + '</td>'
-      + '<td class="n">' + entries.length + '</td>'
-      + '<td class="n">' + counts.booked + '</td>'
-      + '<td class="n">' + counts.left_voicemail + '</td>'
-      + '<td class="n">' + counts.will_book + '</td>'
-      + '<td class="n">' + counts.not_interested + '</td>'
-      + '</tr>'
-      + '<tr class="lc-progress-detail-row lc-pd-hidden" id="' + rowId + '"><td colspan=6>' + detailHtml + '</td></tr>';
-  }).join('');
-}
-
-function toggleDayDetail(rowId){
-  var detail = document.getElementById(rowId);
-  var toggleRow = document.getElementById(rowId + '-toggle');
-  if(detail) detail.classList.toggle('lc-pd-hidden');
-  if(toggleRow) toggleRow.classList.toggle('open');
 }
 
 function updateBucketCounts(){

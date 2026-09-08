@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY, PORTAL_BACK_JS
 from lapse_calls_lib import (
     get_store_tag, filter_pet_records_to_store, load_customer_visit_staff,
-    compute_lapse_candidates,
+    compute_lapse_candidates, group_records_by_dog,
 )
 
 store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
@@ -58,6 +58,11 @@ customer_visit_staff = load_customer_visit_staff(all_data_file)
 
 lapsed_dogs, lapse_history = compute_lapse_candidates(pet_records, customer_visit_staff)
 print(f"{len(lapsed_dogs)} lapse call candidates")
+
+# Every dog, not just current candidates — a call log entry for a dog that
+# has since been booked (the best outcome!) would otherwise have no owner
+# name to show on the standalone Progress page.
+cid_owner_map = {g["pet_cid"]: g["owner_name"] for g in group_records_by_dog(pet_records).values()}
 
 n_lapsed = sum(1 for d in lapsed_dogs if d["status"] == "Lapsed")
 n_at_risk = sum(1 for d in lapsed_dogs if d["status"] == "At Risk")
@@ -149,21 +154,6 @@ tr:hover td { background:#fef9f5; }
 .lc-complaint-flag { font-size:11px; color:#dc2626; font-weight:700; margin-top:4px; }
 .lc-row.lc-hidden { display:none; }
 @media(max-width:600px) { th,td { padding:8px 6px; font-size:12px; } }
-
-.lc-progress-row { cursor:pointer; }
-.lc-progress-row td.n, th.n { text-align:right; }
-.lc-progress-row .lc-progress-date { font-weight:700; color:var(--brown); }
-.lc-progress-caret { display:inline-block; margin-right:6px; transition:transform .15s; color:var(--muted); }
-.lc-progress-row.open .lc-progress-caret { transform:rotate(90deg); }
-.lc-progress-detail-row.lc-pd-hidden { display:none; }
-.lc-progress-detail-row td { background:#f9fafb; padding:12px 16px; }
-.lc-progress-entry { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
-.lc-progress-entry:last-child { border-bottom:none; }
-.lc-progress-entry-dog { font-weight:700; min-width:160px; }
-.lc-progress-entry-owner { font-weight:400; color:var(--muted); }
-.lc-progress-entry-action { font-weight:600; min-width:170px; }
-.lc-progress-entry-notes { color:var(--muted); flex:1; }
-.lc-progress-empty { color:#9ca3af; text-align:center; padding:24px; }
 
 .lc-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:flex-start; justify-content:center; padding:5vh 16px; overflow-y:auto; }
 .lc-modal-overlay.active { display:flex; }
@@ -327,65 +317,6 @@ function applyBuckets(){
   });
   updateBucketCounts();
   filterLapseRows();
-  renderDayProgress();
-}
-
-// Groups every logged call by the day it was logged (not the dog's last
-// visit date) so an owner can see actual outreach activity day by day —
-// no per-associate attribution exists yet, this is store-wide volume.
-function renderDayProgress(){
-  var body = document.getElementById('lc-progress-body');
-  if(!body) return;
-  var byDate = {};
-  Object.keys(callLogByCid).forEach(function(cid){
-    callLogByCid[cid].forEach(function(entry){
-      var d = entry.call_date;
-      if(!d) return;
-      if(!byDate[d]) byDate[d] = [];
-      byDate[d].push(Object.assign({cid:cid}, entry));
-    });
-  });
-  var dates = Object.keys(byDate).sort().reverse();
-  if(!dates.length){
-    body.innerHTML = '<tr><td colspan=6 class="lc-progress-empty">No calls logged yet</td></tr>';
-    return;
-  }
-  var cidToOwner = {};
-  document.querySelectorAll('.lc-row').forEach(function(tr){
-    cidToOwner[tr.getAttribute('data-cid')] = tr.getAttribute('data-owner-name');
-  });
-  body.innerHTML = dates.map(function(d){
-    var entries = byDate[d];
-    var counts = {booked:0, left_voicemail:0, will_book:0, not_interested:0};
-    entries.forEach(function(e){ if(counts[e.action] !== undefined) counts[e.action]++; });
-    var rowId = 'lc-day-' + d.replace(/[^0-9]/g, '');
-    var detailHtml = entries.map(function(e){
-      var label = ACTION_LABELS[e.action] || e.action;
-      var color = ACTION_COLORS[e.action] || '#6b7280';
-      var owner = cidToOwner[e.cid] || '';
-      return '<div class="lc-progress-entry">'
-        + '<span class="lc-progress-entry-dog">' + lcEsc(e.pet_name || '') + (owner ? ' <span class="lc-progress-entry-owner">(' + lcEsc(owner) + ')</span>' : '') + '</span>'
-        + '<span class="lc-progress-entry-action" style="color:' + color + '">' + lcEsc(label) + '</span>'
-        + (e.notes ? '<span class="lc-progress-entry-notes">' + lcEsc(e.notes) + '</span>' : '')
-        + '</div>';
-    }).join('');
-    return '<tr class="lc-progress-row" id="' + rowId + '-toggle" onclick="toggleDayDetail(\\'' + rowId + '\\')">'
-      + '<td class="lc-progress-date"><span class="lc-progress-caret">&#9656;</span>' + lcEsc(d) + '</td>'
-      + '<td class="n">' + entries.length + '</td>'
-      + '<td class="n">' + counts.booked + '</td>'
-      + '<td class="n">' + counts.left_voicemail + '</td>'
-      + '<td class="n">' + counts.will_book + '</td>'
-      + '<td class="n">' + counts.not_interested + '</td>'
-      + '</tr>'
-      + '<tr class="lc-progress-detail-row lc-pd-hidden" id="' + rowId + '"><td colspan=6>' + detailHtml + '</td></tr>';
-  }).join('');
-}
-
-function toggleDayDetail(rowId){
-  var detail = document.getElementById(rowId);
-  var toggleRow = document.getElementById(rowId + '-toggle');
-  if(detail) detail.classList.toggle('lc-pd-hidden');
-  if(toggleRow) toggleRow.classList.toggle('open');
 }
 
 function updateBucketCounts(){
@@ -707,6 +638,7 @@ html = f"""<!DOCTYPE html>
   <nav>
     <a id="portal-back" href="../index.html">&larr; Home</a>{PORTAL_BACK_JS}
     <a href="WoofGang_{store_fn}_PetDashboard.html">Pet Dashboard</a>
+    <a href="WoofGang_{store_fn}_LapseProgress.html">📊 Progress</a>
   </nav>
 </header>
 <main>
@@ -727,19 +659,6 @@ html = f"""<!DOCTYPE html>
       <div class="val" id="bucket-count-all">{len(lapsed_dogs)}</div>
       <div class="lbl">All Candidates</div>
     </button>
-  </div>
-
-  <div class="card">
-    <h2>📊 Day-by-Day Progress</h2>
-    <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
-      Every call logged, grouped by the day it was logged. Click a day to see exactly which dogs were called and the outcome of each.
-    </p>
-    <div style="overflow-x:auto">
-    <table>
-      <thead><tr><th>Date</th><th class="n">Calls Logged</th><th class="n">✅ Booked</th><th class="n">📞 Voicemail</th><th class="n">📅 Will Book</th><th class="n">✗ Not Interested</th></tr></thead>
-      <tbody id="lc-progress-body"><tr><td colspan=6 class="lc-progress-empty">Loading…</td></tr></tbody>
-    </table>
-    </div>
   </div>
 
   <div class="card">
@@ -826,3 +745,167 @@ with open(out_html, "w") as f:
     f.write(html)
 
 print(f"Lapse Calls widget written → {out_html}")
+
+# ── Day-by-Day Progress — standalone page ──────────────────────────────────
+# Kept separate from the main Lapse Calls page so it doesn't distract
+# associates working the outreach list; owners check it on its own.
+
+out_progress_html = data_dir.parent / f"WoofGang_{store_fn}_LapseProgress.html"
+CID_OWNER_JSON = json.dumps(cid_owner_map).replace("</", "<\\/")
+
+PROGRESS_CSS = """
+:root { --brown:#2C1A0E; --pink:#E8006A; --bg:#fdf8f5; --card:#fff; --border:#e5e7eb; --text:#1f2937; --muted:#6b7280; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); font-size:14px; }
+header { background:var(--brown); color:#fff; padding:16px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; position:sticky; top:0; z-index:100; }
+header h1 { font-size:18px; font-weight:700; }
+header nav { display:flex; gap:8px; margin-left:auto; }
+header nav a { color:rgba(255,255,255,0.75); text-decoration:none; font-size:13px; padding:6px 12px; border-radius:6px; }
+header nav a:hover { background:rgba(255,255,255,0.12); color:#fff; }
+main { max-width:1100px; margin:0 auto; padding:24px 16px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px; }
+.card h2 { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--brown); }
+table { width:100%; border-collapse:collapse; }
+th { background:var(--brown); color:#fff; padding:10px 12px; text-align:left; font-size:12px; font-weight:600; }
+td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+th.n, td.n { text-align:right; }
+.lc-progress-row { cursor:pointer; }
+.lc-progress-row:hover td { background:#fef9f5; }
+.lc-progress-date { font-weight:700; color:var(--brown); }
+.lc-progress-caret { display:inline-block; margin-right:6px; transition:transform .15s; color:var(--muted); }
+.lc-progress-row.open .lc-progress-caret { transform:rotate(90deg); }
+.lc-progress-detail-row.lc-pd-hidden { display:none; }
+.lc-progress-detail-row td { background:#f9fafb; padding:12px 16px; }
+.lc-progress-entry { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.lc-progress-entry:last-child { border-bottom:none; }
+.lc-progress-entry-dog { font-weight:700; min-width:160px; }
+.lc-progress-entry-owner { font-weight:400; color:var(--muted); }
+.lc-progress-entry-action { font-weight:600; min-width:170px; }
+.lc-progress-entry-notes { color:var(--muted); flex:1; }
+.lc-progress-empty { color:#9ca3af; text-align:center; padding:24px; }
+@media(max-width:600px) { th,td { padding:8px 6px; font-size:12px; } }
+"""
+
+PROGRESS_JS = """
+var LC_STORE = "__STORE__";
+var CID_OWNER = __CID_OWNER__;
+var LC_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var LC_SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var LC_SHD = {'apikey':LC_SK,'Authorization':'Bearer '+LC_SK,'Content-Type':'application/json'};
+
+var ACTION_LABELS = {
+  booked: '✅ Booked',
+  left_voicemail: '📞 Left Voicemail',
+  will_book: '📅 Will Book When Ready',
+  not_interested: '✗ Not Interested'
+};
+var ACTION_COLORS = {
+  booked: '#16a34a',
+  left_voicemail: '#d97706',
+  will_book: '#2563eb',
+  not_interested: '#dc2626'
+};
+
+function lcEsc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function loadDayProgress(){
+  fetch(LC_SB + '/lapse_call_log?store=eq.' + encodeURIComponent(LC_STORE) + '&order=call_date.desc,created_at.desc', {headers:LC_SHD})
+    .then(function(r){ return r.json(); })
+    .then(renderDayProgress)
+    .catch(function(){
+      document.getElementById('lc-progress-body').innerHTML = '<tr><td colspan=6 class="lc-progress-empty">Failed to load call log</td></tr>';
+    });
+}
+
+function renderDayProgress(rows){
+  var body = document.getElementById('lc-progress-body');
+  var byDate = {};
+  (Array.isArray(rows) ? rows : []).forEach(function(entry){
+    var d = entry.call_date;
+    if(!d) return;
+    if(!byDate[d]) byDate[d] = [];
+    byDate[d].push(entry);
+  });
+  var dates = Object.keys(byDate).sort().reverse();
+  if(!dates.length){
+    body.innerHTML = '<tr><td colspan=6 class="lc-progress-empty">No calls logged yet</td></tr>';
+    return;
+  }
+  body.innerHTML = dates.map(function(d){
+    var entries = byDate[d];
+    var counts = {booked:0, left_voicemail:0, will_book:0, not_interested:0};
+    entries.forEach(function(e){ if(counts[e.action] !== undefined) counts[e.action]++; });
+    var rowId = 'lc-day-' + d.replace(/[^0-9]/g, '');
+    var detailHtml = entries.map(function(e){
+      var label = ACTION_LABELS[e.action] || e.action;
+      var color = ACTION_COLORS[e.action] || '#6b7280';
+      var owner = CID_OWNER[e.pet_cid] || '';
+      return '<div class="lc-progress-entry">'
+        + '<span class="lc-progress-entry-dog">' + lcEsc(e.pet_name || '') + (owner ? ' <span class="lc-progress-entry-owner">(' + lcEsc(owner) + ')</span>' : '') + '</span>'
+        + '<span class="lc-progress-entry-action" style="color:' + color + '">' + lcEsc(label) + '</span>'
+        + (e.notes ? '<span class="lc-progress-entry-notes">' + lcEsc(e.notes) + '</span>' : '')
+        + '</div>';
+    }).join('');
+    return '<tr class="lc-progress-row" id="' + rowId + '-toggle" onclick="toggleDayDetail(\\'' + rowId + '\\')">'
+      + '<td class="lc-progress-date"><span class="lc-progress-caret">&#9656;</span>' + lcEsc(d) + '</td>'
+      + '<td class="n">' + entries.length + '</td>'
+      + '<td class="n">' + counts.booked + '</td>'
+      + '<td class="n">' + counts.left_voicemail + '</td>'
+      + '<td class="n">' + counts.will_book + '</td>'
+      + '<td class="n">' + counts.not_interested + '</td>'
+      + '</tr>'
+      + '<tr class="lc-progress-detail-row lc-pd-hidden" id="' + rowId + '"><td colspan=6>' + detailHtml + '</td></tr>';
+  }).join('');
+}
+
+function toggleDayDetail(rowId){
+  var detail = document.getElementById(rowId);
+  var toggleRow = document.getElementById(rowId + '-toggle');
+  if(detail) detail.classList.toggle('lc-pd-hidden');
+  if(toggleRow) toggleRow.classList.toggle('open');
+}
+
+loadDayProgress();
+""".replace("__STORE__", store_name).replace("__CID_OWNER__", CID_OWNER_JSON)
+
+progress_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lapse Calls Progress — {store_label}</title>
+<style>{PROGRESS_CSS}</style>
+</head>
+<body>
+<header>
+  <h1>📊 Lapse Calls Progress — {store_label}</h1>
+  <nav>
+    <a id="portal-back" href="../index.html">&larr; Home</a>{PORTAL_BACK_JS}
+    <a href="WoofGang_{store_fn}_LapseCalls.html">Lapse Calls</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h2>Day-by-Day Progress</h2>
+    <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
+      Every call logged, grouped by the day it was logged. Click a day to see exactly which dogs were called and the outcome of each.
+    </p>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Date</th><th class="n">Calls Logged</th><th class="n">✅ Booked</th><th class="n">📞 Voicemail</th><th class="n">📅 Will Book</th><th class="n">✗ Not Interested</th></tr></thead>
+      <tbody id="lc-progress-body"><tr><td colspan=6 class="lc-progress-empty">Loading…</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+</main>
+<script>{PROGRESS_JS}</script>
+</body>
+</html>"""
+
+with open(out_progress_html, "w") as f:
+    f.write(progress_html)
+
+print(f"Lapse Calls Progress page written → {out_progress_html}")
