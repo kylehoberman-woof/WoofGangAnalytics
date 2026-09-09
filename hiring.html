@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>if(sessionStorage.getItem('wg_portal_auth')!=='1')window.location.href='index.html';</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — Hiring Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:36px 32px 32px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px;transition:background 0.2s}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.header h1{font-size:1.8rem;font-weight:800;margin-bottom:4px;letter-spacing:-0.02em}
+.header p{font-size:0.9rem;opacity:0.85}
+.brand{display:inline-block;margin-top:10px;background:rgba(255,255,255,0.15);padding:3px 14px;border-radius:20px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase}
+.store-tabs{display:flex;justify-content:center;gap:8px;padding:14px 16px;background:white;border-bottom:2px solid #eee;flex-wrap:wrap}
+.tab{padding:7px 20px;border:2px solid #ddd;border-radius:24px;font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;background:white;color:#666;transition:all 0.2s}
+.tab:hover{border-color:#C4276E;color:#C4276E}
+.tab.active{background:#C4276E;color:white;border-color:#C4276E}
+.main{max-width:1100px;margin:0 auto;padding:32px 24px 60px}
+.summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:16px;margin-bottom:28px}
+.sc{background:white;border-radius:12px;padding:20px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);text-align:center;border-top:4px solid #C4276E;cursor:pointer;transition:transform 0.15s}
+.sc:hover{transform:translateY(-2px)}
+.sc:nth-child(2){border-top-color:#F9A825}.sc:nth-child(3){border-top-color:#2E7D32}.sc:nth-child(4){border-top-color:#888}
+.sc-val{font-size:2.2rem;font-weight:800;color:#C4276E;line-height:1}
+.sc:nth-child(2) .sc-val{color:#F9A825}.sc:nth-child(3) .sc-val{color:#2E7D32}.sc:nth-child(4) .sc-val{color:#888}
+.sc-label{font-size:0.74rem;font-weight:700;color:#888;margin-top:6px;text-transform:uppercase;letter-spacing:0.04em}
+.card{background:white;border-radius:16px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:24px}
+.card-title{font-size:1.05rem;font-weight:700;color:#1a1a2e;margin-bottom:20px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;align-items:end}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.04em}
+.fg select,.fg input,.fg textarea{padding:9px 10px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;color:#1a1a2e;transition:border-color 0.2s;background:white;-webkit-appearance:none}
+.fg select:focus,.fg input:focus,.fg textarea:focus{outline:none;border-color:#C4276E;box-shadow:0 0 0 3px rgba(196,39,110,0.08)}
+.fg textarea{resize:vertical;min-height:68px}
+.span-full{grid-column:1/-1}
+.btn-primary{padding:10px 24px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.btn-primary:hover{background:#a31f5b;transform:translateY(-1px)}
+.btn-primary:disabled{background:#ccc;transform:none;cursor:not-allowed}
+.list-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.search-input{padding:8px 12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.85rem;min-width:220px}
+.search-input:focus{outline:none;border-color:#C4276E}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filter-sel{padding:7px 10px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.82rem;color:#1a1a2e;cursor:pointer;background:white;-webkit-appearance:none}
+.filter-sel:focus{outline:none;border-color:#C4276E}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 12px;text-align:left;font-size:0.72rem;font-weight:700;color:#777;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid #eee;white-space:nowrap}
+td{padding:11px 12px;font-size:0.86rem;vertical-align:middle;border-bottom:1px solid #f4f4f4}
+tr.cand-row{cursor:pointer}
+tr.cand-row:hover td{background:#fef7fa}
+.empty{text-align:center;padding:40px 20px;color:#aaa;font-size:0.9rem;line-height:1.8}
+.cand-name{font-weight:700;color:#1a1a2e}
+.cand-sub{font-size:0.76rem;color:#999;margin-top:1px}
+.badge{display:inline-block;padding:3px 8px;border-radius:8px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
+.b-pw{background:#FDF0F5;color:#C4276E}.b-hv{background:#e0f2f1;color:#1B6B6B}.b-both{background:#f3e5f5;color:#6A1B9A}
+.b-new{background:#e3f2fd;color:#1565C0}
+.b-in_progress{background:#fff8e1;color:#B8880A}
+.b-hired{background:#e8f5e9;color:#2E7D32}
+.b-not_moving_forward{background:#f0f0f0;color:#888}
+.last-contact{font-size:0.8rem;color:#666}
+.last-contact .none{color:#bbb;font-style:italic}
+/* Setup notice */
+.notice{background:#fff8e1;border:2px solid #F9A825;border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:0.88rem;line-height:1.7;color:#7a5c00}
+.notice code{background:#f0e8c0;padding:1px 5px;border-radius:4px;font-size:0.82rem}
+.notice pre{background:#f0e8c0;padding:12px;border-radius:6px;font-size:0.72rem;line-height:1.6;overflow-x:auto;margin-top:8px;white-space:pre-wrap}
+.hidden{display:none!important}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:flex-start;justify-content:center;z-index:200;padding:5vh 20px;overflow-y:auto}
+.modal-overlay.hidden{display:none}
+.modal{background:white;border-radius:14px;padding:26px;width:100%;max-width:600px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+.modal-close{float:right;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#999;line-height:1}
+.modal-close:hover{color:#333}
+.modal-hdr h2{font-size:1.3rem;font-weight:800;color:#1a1a2e}
+.modal-hdr .sub{font-size:0.85rem;color:#777;margin-top:3px}
+.modal-hdr a{color:#C4276E;text-decoration:none;font-weight:600}
+.modal-section{margin-top:20px}
+.modal-section h3{font-size:0.75rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+.status-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.status-btn{padding:7px 14px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;background:white;color:#666;transition:all 0.2s}
+.status-btn:hover{border-color:#C4276E;color:#C4276E}
+.status-btn.active{background:#C4276E;color:white;border-color:#C4276E}
+.log-entry{background:#fafbfc;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:0.82rem}
+.log-entry-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}
+.log-entry-date{font-weight:700;color:#1a1a2e}
+.log-entry-method{font-weight:600;color:#C4276E}
+.log-entry-by{color:#999;font-size:0.76rem;margin-top:2px}
+.log-entry-notes{color:#555;margin-top:4px;line-height:1.5}
+.log-empty{color:#bbb;font-size:0.85rem;text-align:center;padding:14px}
+.method-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.method-btn{padding:9px 8px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;background:white;color:#555;transition:all 0.2s;text-align:center}
+.method-btn:hover{border-color:#C4276E}
+.method-btn.selected{background:#C4276E;color:white;border-color:#C4276E}
+.saved-ind{font-size:0.8rem;color:#2E7D32;font-weight:600;margin-left:10px}
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;color:white;font-weight:700;font-size:0.88rem;box-shadow:0 4px 16px rgba(0,0,0,0.15);z-index:999;transition:opacity 0.4s;pointer-events:none}
+.toast.hidden{opacity:0}.toast.success{background:#2E7D32}.toast.error{background:#c62828}
+@media(max-width:700px){
+  .header{padding:24px 16px 20px}
+  .back-link{position:static;transform:none;display:inline-block;margin-bottom:10px;font-size:0.75rem}
+  .main{padding:20px 12px 40px}
+  .form-grid{grid-template-columns:1fr 1fr}
+  .method-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="index.html" class="back-link" id="portal-back">&#8592; Portal</a><script>!function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.textContent='← Manager Portal';}else if(l==='store'){a.href='store.html';a.textContent='← Store Portal';}else{a.textContent='← Owner Portal';}}();</script>
+  <h1>&#128101; Hiring Portal</h1>
+  <p>Track candidates, log every outreach, keep notes in one place</p>
+  <div class="brand">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
+<div class="store-tabs">
+  <button class="tab active" onclick="setStore('all')">All Stores</button>
+  <button class="tab" onclick="setStore('port-washington')">Port Washington</button>
+  <button class="tab" onclick="setStore('hicksville')">Hicksville</button>
+</div>
+
+<div class="main">
+
+  <div id="setup-notice" class="notice hidden">
+    <strong>&#9888; One-time Supabase setup required.</strong> Run the following SQL in your
+    <a href="https://supabase.com/dashboard" target="_blank" style="color:#C4276E">Supabase dashboard</a>
+    &rarr; SQL Editor, then refresh this page:<br>
+    <pre>CREATE TABLE hiring_candidates (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamptz DEFAULT now(),
+  name text NOT NULL,
+  phone text,
+  email text,
+  position text,
+  store text NOT NULL DEFAULT 'both',
+  source text,
+  status text NOT NULL DEFAULT 'new',
+  added_by text
+);
+ALTER TABLE hiring_candidates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON hiring_candidates FOR ALL USING (true) WITH CHECK (true);
+
+CREATE TABLE hiring_contact_log (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamptz DEFAULT now(),
+  candidate_id uuid NOT NULL REFERENCES hiring_candidates(id) ON DELETE CASCADE,
+  contact_date date NOT NULL,
+  method text NOT NULL,
+  logged_by text,
+  notes text
+);
+ALTER TABLE hiring_contact_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON hiring_contact_log FOR ALL USING (true) WITH CHECK (true);</pre>
+  </div>
+
+  <div class="summary-cards">
+    <div class="sc" onclick="setStatusFilter('new')"><div class="sc-val" id="stat-new">–</div><div class="sc-label">Not Yet Contacted</div></div>
+    <div class="sc" onclick="setStatusFilter('in_progress')"><div class="sc-val" id="stat-progress">–</div><div class="sc-label">In Progress</div></div>
+    <div class="sc" onclick="setStatusFilter('hired')"><div class="sc-val" id="stat-hired">–</div><div class="sc-label">Hired</div></div>
+    <div class="sc" onclick="setStatusFilter('')"><div class="sc-val" id="stat-total">–</div><div class="sc-label">All Candidates</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">&#43; Add Candidate</div>
+    <div class="form-grid">
+      <div class="fg"><label>Name *</label><input type="text" id="new-name" placeholder="Full name"></div>
+      <div class="fg"><label>Phone</label><input type="text" id="new-phone" placeholder="Phone"></div>
+      <div class="fg"><label>Email</label><input type="text" id="new-email" placeholder="Email"></div>
+      <div class="fg"><label>Position</label><input type="text" id="new-position" placeholder="Groomer, Bather, Retail..." list="position-options">
+        <datalist id="position-options">
+          <option value="Groomer"><option value="Bather"><option value="Sales Associate"><option value="Front Desk"><option value="Manager">
+        </datalist>
+      </div>
+      <div class="fg"><label>Store</label>
+        <select id="new-store">
+          <option value="both">Either / Not sure</option>
+          <option value="port-washington">Port Washington</option>
+          <option value="hicksville">Hicksville</option>
+        </select>
+      </div>
+      <div class="fg"><label>Source</label><input type="text" id="new-source" placeholder="Indeed, referral, walk-in..." list="source-options">
+        <datalist id="source-options">
+          <option value="Indeed"><option value="Referral"><option value="Walk-in"><option value="Instagram"><option value="Other">
+        </datalist>
+      </div>
+      <div class="fg"><label>Added By</label>
+        <select id="new-added-by">
+          <option value="Kyle">Kyle</option>
+          <option value="Cindy">Cindy</option>
+        </select>
+      </div>
+      <div class="fg"><button class="btn-primary" id="add-btn" onclick="addCandidate()">Add Candidate</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="list-toolbar">
+      <div class="card-title" style="margin-bottom:0">Candidates</div>
+      <div class="filters">
+        <input type="text" class="search-input" id="search-input" placeholder="Search name, position, phone..." oninput="renderList()">
+        <select class="filter-sel" id="status-filter" onchange="renderList()">
+          <option value="">All Statuses</option>
+          <option value="new">Not Yet Contacted</option>
+          <option value="in_progress">In Progress</option>
+          <option value="hired">Hired</option>
+          <option value="not_moving_forward">Not Moving Forward</option>
+        </select>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Position</th><th>Store</th><th>Source</th><th>Status</th><th>Last Contact</th></tr></thead>
+        <tbody id="cand-tbody"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay hidden" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal-hdr">
+      <h2 id="modal-name"></h2>
+      <div class="sub" id="modal-sub"></div>
+    </div>
+
+    <div class="status-row" id="modal-status-row"></div>
+
+    <div class="modal-section">
+      <h3>Contact History</h3>
+      <div id="modal-log-history"></div>
+    </div>
+
+    <div class="modal-section">
+      <h3>Log a Contact</h3>
+      <div class="method-grid" id="method-grid">
+        <button class="method-btn" data-method="called" onclick="selectMethod('called')">&#128222; Called</button>
+        <button class="method-btn" data-method="emailed" onclick="selectMethod('emailed')">&#128231; Emailed</button>
+        <button class="method-btn" data-method="texted" onclick="selectMethod('texted')">&#128172; Texted</button>
+        <button class="method-btn" data-method="interviewed" onclick="selectMethod('interviewed')">&#129309; Interviewed</button>
+        <button class="method-btn" data-method="walk_in" onclick="selectMethod('walk_in')">&#128694; Walk-in</button>
+        <button class="method-btn" data-method="other" onclick="selectMethod('other')">&#128221; Other</button>
+      </div>
+      <div class="form-grid" style="margin-bottom:10px">
+        <div class="fg"><label>Date</label><input type="date" id="log-date"></div>
+        <div class="fg"><label>Logged By</label>
+          <select id="log-by"><option value="Kyle">Kyle</option><option value="Cindy">Cindy</option></select>
+        </div>
+      </div>
+      <div class="fg span-full" style="margin-bottom:12px"><label>Notes</label><textarea id="log-notes" placeholder="What was said, next steps..."></textarea></div>
+      <button class="btn-primary" id="log-save-btn" onclick="saveLog()" disabled>Save</button>
+      <span class="saved-ind" id="log-saved-ind"></span>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+/* ── Config ───────────────────────────────────── */
+var SB_URL  = 'https://bqzinttbjeeaybywhhet.supabase.co';
+var SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SB_HDR  = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+
+function sbFetch(path, opts) {
+  return fetch(SB_URL + path, Object.assign({ headers: SB_HDR }, opts));
+}
+
+/* ── State ────────────────────────────────────── */
+var candidates = [];
+var logsByCandidate = {};
+var storeFilter = 'all';
+var currentCandidateId = null;
+var selectedMethod = null;
+
+var METHOD_LABELS = { called:'📞 Called', emailed:'📧 Emailed', texted:'💬 Texted', interviewed:'🤝 Interviewed', walk_in:'🚶 Walk-in', other:'📝 Other' };
+var STATUS_LABELS = { new:'Not Yet Contacted', in_progress:'In Progress', hired:'Hired', not_moving_forward:'Not Moving Forward' };
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || 'success');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.classList.add('hidden'); }, 2800);
+}
+
+/* ── Load ─────────────────────────────────────── */
+function loadCandidates() {
+  sbFetch('/rest/v1/hiring_candidates?select=*&order=created_at.desc')
+    .then(function(r) {
+      if (r.status === 404 || r.status === 400) {
+        return r.text().then(function(txt) {
+          if (txt.indexOf('does not exist') !== -1 || txt.indexOf('relation') !== -1 || txt.indexOf('Could not find the table') !== -1 || txt.indexOf('PGRST205') !== -1) {
+            document.getElementById('setup-notice').classList.remove('hidden');
+            candidates = [];
+            renderList();
+            renderStats();
+          } else { throw new Error(txt); }
+        });
+      }
+      if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+      return r.json().then(function(data) {
+        candidates = data;
+        renderList();
+        renderStats();
+      });
+    })
+    .catch(function(err){ console.error(err); });
+}
+
+function loadLogs() {
+  sbFetch('/rest/v1/hiring_contact_log?select=*&order=contact_date.desc,created_at.desc')
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(rows){
+      logsByCandidate = {};
+      (Array.isArray(rows) ? rows : []).forEach(function(row){
+        if(!logsByCandidate[row.candidate_id]) logsByCandidate[row.candidate_id] = [];
+        logsByCandidate[row.candidate_id].push(row);
+      });
+      renderList();
+    })
+    .catch(function(){});
+}
+
+/* ── Store tabs ───────────────────────────────── */
+function setStore(s) {
+  storeFilter = s;
+  document.querySelectorAll('.store-tabs .tab').forEach(function(b){ b.classList.remove('active'); });
+  event.target.classList.add('active');
+  renderList();
+}
+
+function setStatusFilter(s) {
+  document.getElementById('status-filter').value = s;
+  renderList();
+}
+
+/* ── Render ───────────────────────────────────── */
+function lastContactFor(cid) {
+  var logs = logsByCandidate[cid];
+  return (logs && logs.length) ? logs[0] : null;
+}
+
+function renderStats() {
+  var counts = { new:0, in_progress:0, hired:0, not_moving_forward:0 };
+  candidates.forEach(function(c){ if(counts[c.status] !== undefined) counts[c.status]++; });
+  document.getElementById('stat-new').textContent = counts.new;
+  document.getElementById('stat-progress').textContent = counts.in_progress;
+  document.getElementById('stat-hired').textContent = counts.hired;
+  document.getElementById('stat-total').textContent = candidates.length;
+}
+
+function renderList() {
+  var q = (document.getElementById('search-input').value || '').trim().toLowerCase();
+  var statusF = document.getElementById('status-filter').value;
+  var rows = candidates.filter(function(c){
+    if (storeFilter !== 'all' && c.store !== storeFilter && c.store !== 'both') return false;
+    if (statusF && c.status !== statusF) return false;
+    if (q) {
+      var hay = [c.name, c.position, c.phone, c.email, c.source].join(' ').toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  var tbody = document.getElementById('cand-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">No candidates match.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(function(c){
+    var storeLabel = c.store === 'port-washington' ? 'PW' : (c.store === 'hicksville' ? 'HV' : 'Either');
+    var storeClass = c.store === 'port-washington' ? 'b-pw' : (c.store === 'hicksville' ? 'b-hv' : 'b-both');
+    var last = lastContactFor(c.id);
+    var lastHtml = last
+      ? esc(last.contact_date) + ' &middot; ' + esc(METHOD_LABELS[last.method] || last.method)
+      : '<span class="none">Not contacted yet</span>';
+    return '<tr class="cand-row" onclick="openModal(\'' + c.id + '\')">'
+      + '<td><div class="cand-name">' + esc(c.name) + '</div>' + (c.phone ? '<div class="cand-sub">' + esc(c.phone) + '</div>' : '') + '</td>'
+      + '<td>' + esc(c.position || '—') + '</td>'
+      + '<td><span class="badge ' + storeClass + '">' + storeLabel + '</span></td>'
+      + '<td>' + esc(c.source || '—') + '</td>'
+      + '<td><span class="badge b-' + c.status + '">' + (STATUS_LABELS[c.status] || c.status) + '</span></td>'
+      + '<td class="last-contact">' + lastHtml + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+/* ── Add candidate ────────────────────────────── */
+function addCandidate() {
+  var name = document.getElementById('new-name').value.trim();
+  if (!name) { showToast('Name is required', 'error'); return; }
+  var body = {
+    name: name,
+    phone: document.getElementById('new-phone').value.trim(),
+    email: document.getElementById('new-email').value.trim(),
+    position: document.getElementById('new-position').value.trim(),
+    store: document.getElementById('new-store').value,
+    source: document.getElementById('new-source').value.trim(),
+    added_by: document.getElementById('new-added-by').value,
+    status: 'new'
+  };
+  var btn = document.getElementById('add-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  sbFetch('/rest/v1/hiring_candidates', {
+    method: 'POST',
+    headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+    body: JSON.stringify(body)
+  }).then(function(r){
+    if (!r.ok) return r.json().catch(function(){return null;}).then(function(err){ throw new Error((err && err.message) || ('HTTP '+r.status)); });
+    return r.json();
+  }).then(function(res){
+    var saved = Array.isArray(res) ? res[0] : res;
+    if (saved) candidates.unshift(saved);
+    ['new-name','new-phone','new-email','new-position','new-source'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('new-store').value = 'both';
+    renderList(); renderStats();
+    showToast('Candidate added');
+  }).catch(function(err){
+    showToast('Error: ' + err.message, 'error');
+  }).finally(function(){
+    btn.disabled = false; btn.textContent = 'Add Candidate';
+  });
+}
+
+/* ── Modal ────────────────────────────────────── */
+function findCandidate(id) { return candidates.find(function(c){ return c.id === id; }); }
+
+function openModal(id) {
+  currentCandidateId = id;
+  selectedMethod = null;
+  var c = findCandidate(id);
+  if (!c) return;
+
+  document.getElementById('modal-name').textContent = c.name;
+  var subParts = [];
+  if (c.position) subParts.push(c.position);
+  if (c.phone) subParts.push('<a href="tel:'+esc(c.phone)+'">'+esc(c.phone)+'</a>');
+  if (c.email) subParts.push('<a href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>');
+  if (c.source) subParts.push('via ' + esc(c.source));
+  document.getElementById('modal-sub').innerHTML = subParts.join(' &middot; ');
+
+  var statusRow = document.getElementById('modal-status-row');
+  statusRow.innerHTML = Object.keys(STATUS_LABELS).map(function(s){
+    return '<button class="status-btn' + (c.status === s ? ' active' : '') + '" onclick="setCandidateStatus(\'' + s + '\')">' + STATUS_LABELS[s] + '</button>';
+  }).join('');
+
+  renderLogHistory(id);
+
+  document.querySelectorAll('.method-btn').forEach(function(b){ b.classList.remove('selected'); });
+  document.getElementById('log-date').value = todayStr();
+  document.getElementById('log-notes').value = '';
+  document.getElementById('log-save-btn').disabled = true;
+  document.getElementById('log-saved-ind').textContent = '';
+
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+  currentCandidateId = null;
+}
+
+function renderLogHistory(id) {
+  var logs = logsByCandidate[id] || [];
+  var el = document.getElementById('modal-log-history');
+  el.innerHTML = logs.length
+    ? logs.map(function(l){
+        return '<div class="log-entry">'
+          + '<div class="log-entry-meta"><span class="log-entry-date">' + esc(l.contact_date) + '</span>'
+          + '<span class="log-entry-method">' + esc(METHOD_LABELS[l.method] || l.method) + '</span></div>'
+          + (l.logged_by ? '<div class="log-entry-by">Logged by ' + esc(l.logged_by) + '</div>' : '')
+          + (l.notes ? '<div class="log-entry-notes">' + esc(l.notes) + '</div>' : '')
+          + '</div>';
+      }).join('')
+    : '<div class="log-empty">No contact logged yet</div>';
+}
+
+function selectMethod(m) {
+  selectedMethod = m;
+  document.querySelectorAll('.method-btn').forEach(function(b){ b.classList.toggle('selected', b.getAttribute('data-method') === m); });
+  document.getElementById('log-save-btn').disabled = false;
+}
+
+function saveLog() {
+  if (!currentCandidateId || !selectedMethod) return;
+  var cid = currentCandidateId;
+  var body = {
+    candidate_id: cid,
+    contact_date: document.getElementById('log-date').value || todayStr(),
+    method: selectedMethod,
+    logged_by: document.getElementById('log-by').value,
+    notes: document.getElementById('log-notes').value
+  };
+  var ind = document.getElementById('log-saved-ind');
+  ind.textContent = 'Saving…';
+  sbFetch('/rest/v1/hiring_contact_log', {
+    method: 'POST',
+    headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+    body: JSON.stringify(body)
+  }).then(function(r){
+    if (!r.ok) return r.json().catch(function(){return null;}).then(function(err){ throw new Error((err && err.message) || ('HTTP '+r.status)); });
+    return r.json();
+  }).then(function(res){
+    var saved = Array.isArray(res) ? res[0] : res;
+    if (saved) {
+      if (!logsByCandidate[cid]) logsByCandidate[cid] = [];
+      logsByCandidate[cid].unshift(saved);
+    }
+    ind.textContent = '✓ saved';
+    renderLogHistory(cid);
+    document.getElementById('log-notes').value = '';
+    selectedMethod = null;
+    document.querySelectorAll('.method-btn').forEach(function(b){ b.classList.remove('selected'); });
+    document.getElementById('log-save-btn').disabled = true;
+    // Contacting someone new moves them out of "Not Yet Contacted" automatically.
+    var c = findCandidate(cid);
+    if (c && c.status === 'new') setCandidateStatus('in_progress', true);
+    renderList();
+  }).catch(function(err){
+    ind.textContent = 'Error: ' + err.message;
+  });
+}
+
+function setCandidateStatus(status, silent) {
+  if (!currentCandidateId) return;
+  var cid = currentCandidateId;
+  var c = findCandidate(cid);
+  if (!c) return;
+  var prevStatus = c.status;
+  c.status = status; // optimistic
+  document.querySelectorAll('.status-btn').forEach(function(b){
+    b.classList.toggle('active', b.textContent === STATUS_LABELS[status]);
+  });
+  renderList(); renderStats();
+  sbFetch('/rest/v1/hiring_candidates?id=eq.' + cid, {
+    method: 'PATCH',
+    headers: Object.assign({}, SB_HDR, {'Prefer':'return=minimal'}),
+    body: JSON.stringify({ status: status })
+  }).then(function(r){
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!silent) showToast('Status updated');
+  }).catch(function(err){
+    c.status = prevStatus; // revert on failure
+    renderList(); renderStats();
+    showToast('Error updating status: ' + err.message, 'error');
+  });
+}
+
+/* ── Init ─────────────────────────────────────── */
+loadCandidates();
+loadLogs();
+</script>
+</body>
+</html>
