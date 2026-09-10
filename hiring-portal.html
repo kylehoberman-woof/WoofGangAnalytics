@@ -29,6 +29,9 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .sc-label{font-size:0.74rem;font-weight:700;color:#888;margin-top:6px;text-transform:uppercase;letter-spacing:0.04em}
 .card{background:white;border-radius:16px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-bottom:24px}
 .card-title{font-size:1.05rem;font-weight:700;color:#1a1a2e;margin-bottom:20px}
+.card-title-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:20px}
+.card-title-row .card-title{margin-bottom:0}
+.card-hint{font-size:0.78rem;color:#999}
 .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;align-items:end}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg label{font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.04em}
@@ -55,13 +58,25 @@ tr.cand-row:hover td{background:#fef7fa}
 .cand-name{font-weight:700;color:#1a1a2e}
 .cand-sub{font-size:0.76rem;color:#999;margin-top:1px}
 .badge{display:inline-block;padding:3px 8px;border-radius:8px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
-.b-pw{background:#FDF0F5;color:#C4276E}.b-hv{background:#e0f2f1;color:#1B6B6B}.b-both{background:#f3e5f5;color:#6A1B9A}
+.b-open{background:#e8f5e9;color:#2E7D32}.b-filled{background:#e3f2fd;color:#1565C0}.b-closed{background:#f0f0f0;color:#888}
 .b-new{background:#e3f2fd;color:#1565C0}
 .b-in_progress{background:#fff8e1;color:#B8880A}
 .b-hired{background:#e8f5e9;color:#2E7D32}
 .b-not_moving_forward{background:#f0f0f0;color:#888}
 .last-contact{font-size:0.8rem;color:#666}
 .last-contact .none{color:#bbb;font-style:italic}
+/* Roles */
+.role-list{display:flex;flex-direction:column;gap:10px}
+.role-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid #f0f0f0;border-radius:10px;flex-wrap:wrap}
+.role-row.is-open{border-color:#c8e6c9}
+.role-main{flex:1;min-width:180px}
+.role-title{font-weight:700;color:#1a1a2e;font-size:0.95rem}
+.role-meta{font-size:0.76rem;color:#999;margin-top:2px}
+.role-count{font-size:1.4rem;font-weight:800;color:#C4276E;min-width:36px;text-align:center}
+.role-count-label{font-size:0.66rem;color:#999;text-transform:uppercase;letter-spacing:0.04em;text-align:center;margin-top:-2px}
+.role-actions{display:flex;gap:6px;flex-wrap:wrap}
+.role-actions button{padding:5px 12px;border:2px solid #ddd;border-radius:7px;font-family:inherit;font-size:0.74rem;font-weight:600;cursor:pointer;background:white;color:#666}
+.role-actions button:hover{border-color:#C4276E;color:#C4276E}
 /* Setup notice */
 .notice{background:#fff8e1;border:2px solid #F9A825;border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:0.88rem;line-height:1.7;color:#7a5c00}
 .notice code{background:#f0e8c0;padding:1px 5px;border-radius:4px;font-size:0.82rem}
@@ -103,6 +118,7 @@ tr.cand-row:hover td{background:#fef7fa}
   .main{padding:20px 12px 40px}
   .form-grid{grid-template-columns:1fr 1fr}
   .method-grid{grid-template-columns:repeat(2,1fr)}
+  .role-row{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
@@ -111,14 +127,12 @@ tr.cand-row:hover td{background:#fef7fa}
 <div class="header">
   <a href="index.html" class="back-link" id="portal-back">&#8592; Portal</a><script>!function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.textContent='← Manager Portal';}else if(l==='store'){a.href='store.html';a.textContent='← Store Portal';}else{a.textContent='← Owner Portal';}}();</script>
   <h1>&#128101; Hiring Portal</h1>
-  <p>Track candidates, log every outreach, keep notes in one place</p>
+  <p>Open roles, candidates, and every outreach logged in one place</p>
   <div class="brand">Woof Gang Bakery &amp; Grooming</div>
 </div>
 
-<div class="store-tabs">
-  <button class="tab active" onclick="setStore('all')">All Stores</button>
-  <button class="tab" onclick="setStore('port-washington')">Port Washington</button>
-  <button class="tab" onclick="setStore('hicksville')">Hicksville</button>
+<div class="store-tabs" id="location-tabs">
+  <button class="tab active" onclick="setStore('all')">All Locations</button>
 </div>
 
 <div class="main">
@@ -127,14 +141,26 @@ tr.cand-row:hover td{background:#fef7fa}
     <strong>&#9888; One-time Supabase setup required.</strong> Run the following SQL in your
     <a href="https://supabase.com/dashboard" target="_blank" style="color:#C4276E">Supabase dashboard</a>
     &rarr; SQL Editor, then refresh this page:<br>
-    <pre>CREATE TABLE hiring_candidates (
+    <pre>CREATE TABLE hiring_roles (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at timestamptz DEFAULT now(),
+  location text NOT NULL,
+  position text NOT NULL,
+  openings integer NOT NULL DEFAULT 1,
+  status text NOT NULL DEFAULT 'open',
+  notes text,
+  created_by text
+);
+ALTER TABLE hiring_roles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all" ON hiring_roles FOR ALL USING (true) WITH CHECK (true);
+
+CREATE TABLE hiring_candidates (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   created_at timestamptz DEFAULT now(),
   name text NOT NULL,
   phone text,
   email text,
-  position text,
-  store text NOT NULL DEFAULT 'both',
+  role_id uuid REFERENCES hiring_roles(id),
   source text,
   status text NOT NULL DEFAULT 'new',
   added_by text
@@ -163,22 +189,39 @@ CREATE POLICY "Allow all" ON hiring_contact_log FOR ALL USING (true) WITH CHECK 
   </div>
 
   <div class="card">
+    <div class="card-title-row">
+      <div class="card-title">Open Roles</div>
+      <div class="card-hint">Create a role, then tag candidates against it below</div>
+    </div>
+    <div class="form-grid" style="margin-bottom:20px">
+      <div class="fg"><label>Location *</label><input type="text" id="new-role-location" placeholder="Port Washington..." list="location-options">
+        <datalist id="location-options">
+          <option value="Port Washington"><option value="Hicksville"><option value="Glen Cove">
+        </datalist>
+      </div>
+      <div class="fg"><label>Position *</label><input type="text" id="new-role-position" placeholder="Groomer, Bather..." list="position-options">
+        <datalist id="position-options">
+          <option value="Groomer"><option value="Bather"><option value="Sales Associate"><option value="Front Desk"><option value="Manager">
+        </datalist>
+      </div>
+      <div class="fg"><label>Openings</label><input type="number" id="new-role-openings" value="1" min="1"></div>
+      <div class="fg"><label>Created By</label>
+        <select id="new-role-added-by"><option value="Kyle">Kyle</option><option value="Cindy">Cindy</option></select>
+      </div>
+      <div class="fg span-full"><label>Notes</label><input type="text" id="new-role-notes" placeholder="Optional — pay range, start date, etc."></div>
+      <div class="fg"><button class="btn-primary" id="add-role-btn" onclick="addRole()">Add Role</button></div>
+    </div>
+    <div class="role-list" id="role-list"><div class="empty">Loading…</div></div>
+  </div>
+
+  <div class="card">
     <div class="card-title">&#43; Add Candidate</div>
     <div class="form-grid">
       <div class="fg"><label>Name *</label><input type="text" id="new-name" placeholder="Full name"></div>
       <div class="fg"><label>Phone</label><input type="text" id="new-phone" placeholder="Phone"></div>
       <div class="fg"><label>Email</label><input type="text" id="new-email" placeholder="Email"></div>
-      <div class="fg"><label>Position</label><input type="text" id="new-position" placeholder="Groomer, Bather, Retail..." list="position-options">
-        <datalist id="position-options">
-          <option value="Groomer"><option value="Bather"><option value="Sales Associate"><option value="Front Desk"><option value="Manager">
-        </datalist>
-      </div>
-      <div class="fg"><label>Store</label>
-        <select id="new-store">
-          <option value="both">Either / Not sure</option>
-          <option value="port-washington">Port Washington</option>
-          <option value="hicksville">Hicksville</option>
-        </select>
+      <div class="fg"><label>Role</label>
+        <select id="new-role-id"><option value="">General inquiry (no role yet)</option></select>
       </div>
       <div class="fg"><label>Source</label><input type="text" id="new-source" placeholder="Indeed, referral, walk-in..." list="source-options">
         <datalist id="source-options">
@@ -199,7 +242,7 @@ CREATE POLICY "Allow all" ON hiring_contact_log FOR ALL USING (true) WITH CHECK 
     <div class="list-toolbar">
       <div class="card-title" style="margin-bottom:0">Candidates</div>
       <div class="filters">
-        <input type="text" class="search-input" id="search-input" placeholder="Search name, position, phone..." oninput="renderList()">
+        <input type="text" class="search-input" id="search-input" placeholder="Search name, role, phone..." oninput="renderList()">
         <select class="filter-sel" id="status-filter" onchange="renderList()">
           <option value="">All Statuses</option>
           <option value="new">Not Yet Contacted</option>
@@ -211,8 +254,8 @@ CREATE POLICY "Allow all" ON hiring_contact_log FOR ALL USING (true) WITH CHECK 
     </div>
     <div class="tbl-wrap">
       <table>
-        <thead><tr><th>Name</th><th>Position</th><th>Store</th><th>Source</th><th>Status</th><th>Last Contact</th></tr></thead>
-        <tbody id="cand-tbody"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+        <thead><tr><th>Name</th><th>Role</th><th>Source</th><th>Status</th><th>Last Contact</th></tr></thead>
+        <tbody id="cand-tbody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -271,6 +314,7 @@ function sbFetch(path, opts) {
 
 /* ── State ────────────────────────────────────── */
 var candidates = [];
+var roles = [];
 var logsByCandidate = {};
 var storeFilter = 'all';
 var currentCandidateId = null;
@@ -278,6 +322,7 @@ var selectedMethod = null;
 
 var METHOD_LABELS = { called:'📞 Called', emailed:'📧 Emailed', texted:'💬 Texted', interviewed:'🤝 Interviewed', walk_in:'🚶 Walk-in', other:'📝 Other' };
 var STATUS_LABELS = { new:'Not Yet Contacted', in_progress:'In Progress', hired:'Hired', not_moving_forward:'Not Moving Forward' };
+var ROLE_STATUS_LABELS = { open:'Open', filled:'Filled', closed:'Closed' };
 
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
@@ -290,25 +335,49 @@ function showToast(msg, type) {
   t._timer = setTimeout(function(){ t.classList.add('hidden'); }, 2800);
 }
 
+function isMissingTableError(txt) {
+  return txt.indexOf('does not exist') !== -1 || txt.indexOf('relation') !== -1
+    || txt.indexOf('Could not find the table') !== -1 || txt.indexOf('PGRST205') !== -1;
+}
+
 /* ── Load ─────────────────────────────────────── */
+function loadRoles() {
+  sbFetch('/rest/v1/hiring_roles?select=*&order=created_at.desc')
+    .then(function(r) {
+      if (r.status === 404 || r.status === 400) {
+        return r.text().then(function(txt) {
+          if (isMissingTableError(txt)) {
+            document.getElementById('setup-notice').classList.remove('hidden');
+            roles = [];
+            buildLocationTabs(); renderRoles(); populateRoleSelect(); renderList();
+          } else { throw new Error(txt); }
+        });
+      }
+      if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+      return r.json().then(function(data) {
+        roles = data;
+        buildLocationTabs(); renderRoles(); populateRoleSelect(); renderList();
+      });
+    })
+    .catch(function(err){ console.error(err); });
+}
+
 function loadCandidates() {
   sbFetch('/rest/v1/hiring_candidates?select=*&order=created_at.desc')
     .then(function(r) {
       if (r.status === 404 || r.status === 400) {
         return r.text().then(function(txt) {
-          if (txt.indexOf('does not exist') !== -1 || txt.indexOf('relation') !== -1 || txt.indexOf('Could not find the table') !== -1 || txt.indexOf('PGRST205') !== -1) {
+          if (isMissingTableError(txt)) {
             document.getElementById('setup-notice').classList.remove('hidden');
             candidates = [];
-            renderList();
-            renderStats();
+            renderList(); renderStats(); renderRoles();
           } else { throw new Error(txt); }
         });
       }
       if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
       return r.json().then(function(data) {
         candidates = data;
-        renderList();
-        renderStats();
+        renderList(); renderStats(); renderRoles();
       });
     })
     .catch(function(err){ console.error(err); });
@@ -328,11 +397,134 @@ function loadLogs() {
     .catch(function(){});
 }
 
-/* ── Store tabs ───────────────────────────────── */
+/* ── Roles ────────────────────────────────────── */
+function roleLabel(role) {
+  return (role.location || '') + ' ' + (role.position || '');
+}
+
+function findRole(id) { return roles.find(function(r){ return r.id === id; }); }
+
+function candidateRoleLabel(c) {
+  if (!c.role_id) return 'General inquiry';
+  var role = findRole(c.role_id);
+  return role ? roleLabel(role) : 'General inquiry';
+}
+
+function candidateCountForRole(roleId) {
+  return candidates.filter(function(c){ return c.role_id === roleId; }).length;
+}
+
+function buildLocationTabs() {
+  var locations = [];
+  roles.forEach(function(r){
+    if (r.location && locations.indexOf(r.location) === -1) locations.push(r.location);
+  });
+  locations.sort();
+  var el = document.getElementById('location-tabs');
+  var activeLabel = storeFilter === 'all' ? 'All Locations' : storeFilter;
+  el.innerHTML = '<button class="tab' + (storeFilter === 'all' ? ' active' : '') + '" onclick="setStore(\'all\')">All Locations</button>'
+    + locations.map(function(loc){
+        return '<button class="tab' + (storeFilter === loc ? ' active' : '') + '" onclick="setStore(\'' + esc(loc).replace(/'/g,"\\'") + '\')">' + esc(loc) + '</button>';
+      }).join('');
+}
+
+function renderRoles() {
+  var el = document.getElementById('role-list');
+  if (!roles.length) {
+    el.innerHTML = '<div class="empty">No roles yet — add one above.</div>';
+    return;
+  }
+  var sorted = roles.slice().sort(function(a, b){
+    if (a.status !== b.status) return a.status === 'open' ? -1 : 1;
+    return (a.location || '').localeCompare(b.location || '');
+  });
+  el.innerHTML = sorted.map(function(r){
+    var count = candidateCountForRole(r.id);
+    var actions = '';
+    if (r.status === 'open') {
+      actions = '<button onclick="setRoleStatus(\'' + r.id + '\',\'filled\')">&#x2713; Mark Filled</button>'
+        + '<button onclick="setRoleStatus(\'' + r.id + '\',\'closed\')">Close</button>';
+    } else {
+      actions = '<button onclick="setRoleStatus(\'' + r.id + '\',\'open\')">&#x21ba; Reopen</button>';
+    }
+    return '<div class="role-row' + (r.status === 'open' ? ' is-open' : '') + '">'
+      + '<div class="role-main"><div class="role-title">' + esc(roleLabel(r)) + '</div>'
+      + '<div class="role-meta">' + r.openings + ' opening' + (r.openings === 1 ? '' : 's') + (r.notes ? ' &middot; ' + esc(r.notes) : '') + '</div></div>'
+      + '<div><span class="badge b-' + r.status + '">' + (ROLE_STATUS_LABELS[r.status] || r.status) + '</span></div>'
+      + '<div><div class="role-count">' + count + '</div><div class="role-count-label">Candidate' + (count === 1 ? '' : 's') + '</div></div>'
+      + '<div class="role-actions">' + actions + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function populateRoleSelect() {
+  var sel = document.getElementById('new-role-id');
+  var openRoles = roles.filter(function(r){ return r.status === 'open'; });
+  var otherRoles = roles.filter(function(r){ return r.status !== 'open'; });
+  sel.innerHTML = '<option value="">General inquiry (no role yet)</option>'
+    + openRoles.map(function(r){ return '<option value="' + r.id + '">' + esc(roleLabel(r)) + '</option>'; }).join('')
+    + otherRoles.map(function(r){ return '<option value="' + r.id + '">' + esc(roleLabel(r)) + ' (' + (ROLE_STATUS_LABELS[r.status] || r.status) + ')</option>'; }).join('');
+}
+
+function addRole() {
+  var location = document.getElementById('new-role-location').value.trim();
+  var position = document.getElementById('new-role-position').value.trim();
+  if (!location || !position) { showToast('Location and position are required', 'error'); return; }
+  var body = {
+    location: location,
+    position: position,
+    openings: parseInt(document.getElementById('new-role-openings').value, 10) || 1,
+    notes: document.getElementById('new-role-notes').value.trim(),
+    created_by: document.getElementById('new-role-added-by').value,
+    status: 'open'
+  };
+  var btn = document.getElementById('add-role-btn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  sbFetch('/rest/v1/hiring_roles', {
+    method: 'POST',
+    headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+    body: JSON.stringify(body)
+  }).then(function(r){
+    if (!r.ok) return r.json().catch(function(){return null;}).then(function(err){ throw new Error((err && err.message) || ('HTTP '+r.status)); });
+    return r.json();
+  }).then(function(res){
+    var saved = Array.isArray(res) ? res[0] : res;
+    if (saved) roles.unshift(saved);
+    ['new-role-location','new-role-position','new-role-notes'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('new-role-openings').value = '1';
+    buildLocationTabs(); renderRoles(); populateRoleSelect();
+    showToast('Role added');
+  }).catch(function(err){
+    showToast('Error: ' + err.message, 'error');
+  }).finally(function(){
+    btn.disabled = false; btn.textContent = 'Add Role';
+  });
+}
+
+function setRoleStatus(roleId, status) {
+  var role = findRole(roleId);
+  if (!role) return;
+  var prev = role.status;
+  role.status = status; // optimistic
+  renderRoles(); populateRoleSelect(); buildLocationTabs();
+  sbFetch('/rest/v1/hiring_roles?id=eq.' + roleId, {
+    method: 'PATCH',
+    headers: Object.assign({}, SB_HDR, {'Prefer':'return=minimal'}),
+    body: JSON.stringify({ status: status })
+  }).then(function(r){
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    showToast('Role updated');
+  }).catch(function(err){
+    role.status = prev;
+    renderRoles(); populateRoleSelect(); buildLocationTabs();
+    showToast('Error updating role: ' + err.message, 'error');
+  });
+}
+
+/* ── Location tabs ────────────────────────────── */
 function setStore(s) {
   storeFilter = s;
-  document.querySelectorAll('.store-tabs .tab').forEach(function(b){ b.classList.remove('active'); });
-  event.target.classList.add('active');
+  buildLocationTabs();
   renderList();
 }
 
@@ -357,33 +549,34 @@ function renderStats() {
 }
 
 function renderList() {
-  var q = (document.getElementById('search-input').value || '').trim().toLowerCase();
+  var searchEl = document.getElementById('search-input');
+  var q = (searchEl ? searchEl.value : '').trim().toLowerCase();
   var statusF = document.getElementById('status-filter').value;
   var rows = candidates.filter(function(c){
-    if (storeFilter !== 'all' && c.store !== storeFilter && c.store !== 'both') return false;
+    if (storeFilter !== 'all') {
+      var role = findRole(c.role_id);
+      if (!role || role.location !== storeFilter) return false;
+    }
     if (statusF && c.status !== statusF) return false;
     if (q) {
-      var hay = [c.name, c.position, c.phone, c.email, c.source].join(' ').toLowerCase();
+      var hay = [c.name, candidateRoleLabel(c), c.phone, c.email, c.source].join(' ').toLowerCase();
       if (hay.indexOf(q) === -1) return false;
     }
     return true;
   });
   var tbody = document.getElementById('cand-tbody');
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="empty">No candidates match.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">No candidates match.</td></tr>';
     return;
   }
   tbody.innerHTML = rows.map(function(c){
-    var storeLabel = c.store === 'port-washington' ? 'PW' : (c.store === 'hicksville' ? 'HV' : 'Either');
-    var storeClass = c.store === 'port-washington' ? 'b-pw' : (c.store === 'hicksville' ? 'b-hv' : 'b-both');
     var last = lastContactFor(c.id);
     var lastHtml = last
       ? esc(last.contact_date) + ' &middot; ' + esc(METHOD_LABELS[last.method] || last.method)
       : '<span class="none">Not contacted yet</span>';
     return '<tr class="cand-row" onclick="openModal(\'' + c.id + '\')">'
       + '<td><div class="cand-name">' + esc(c.name) + '</div>' + (c.phone ? '<div class="cand-sub">' + esc(c.phone) + '</div>' : '') + '</td>'
-      + '<td>' + esc(c.position || '—') + '</td>'
-      + '<td><span class="badge ' + storeClass + '">' + storeLabel + '</span></td>'
+      + '<td>' + esc(candidateRoleLabel(c)) + '</td>'
       + '<td>' + esc(c.source || '—') + '</td>'
       + '<td><span class="badge b-' + c.status + '">' + (STATUS_LABELS[c.status] || c.status) + '</span></td>'
       + '<td class="last-contact">' + lastHtml + '</td>'
@@ -399,8 +592,7 @@ function addCandidate() {
     name: name,
     phone: document.getElementById('new-phone').value.trim(),
     email: document.getElementById('new-email').value.trim(),
-    position: document.getElementById('new-position').value.trim(),
-    store: document.getElementById('new-store').value,
+    role_id: document.getElementById('new-role-id').value || null,
     source: document.getElementById('new-source').value.trim(),
     added_by: document.getElementById('new-added-by').value,
     status: 'new'
@@ -417,9 +609,9 @@ function addCandidate() {
   }).then(function(res){
     var saved = Array.isArray(res) ? res[0] : res;
     if (saved) candidates.unshift(saved);
-    ['new-name','new-phone','new-email','new-position','new-source'].forEach(function(id){ document.getElementById(id).value = ''; });
-    document.getElementById('new-store').value = 'both';
-    renderList(); renderStats();
+    ['new-name','new-phone','new-email','new-source'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('new-role-id').value = '';
+    renderList(); renderStats(); renderRoles();
     showToast('Candidate added');
   }).catch(function(err){
     showToast('Error: ' + err.message, 'error');
@@ -439,7 +631,7 @@ function openModal(id) {
 
   document.getElementById('modal-name').textContent = c.name;
   var subParts = [];
-  if (c.position) subParts.push(c.position);
+  subParts.push(candidateRoleLabel(c));
   if (c.phone) subParts.push('<a href="tel:'+esc(c.phone)+'">'+esc(c.phone)+'</a>');
   if (c.email) subParts.push('<a href="mailto:'+esc(c.email)+'">'+esc(c.email)+'</a>');
   if (c.source) subParts.push('via ' + esc(c.source));
@@ -553,6 +745,7 @@ function setCandidateStatus(status, silent) {
 }
 
 /* ── Init ─────────────────────────────────────── */
+loadRoles();
 loadCandidates();
 loadLogs();
 </script>
