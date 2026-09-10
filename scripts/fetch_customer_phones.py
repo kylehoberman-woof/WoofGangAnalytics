@@ -1,16 +1,27 @@
-"""Fetch customer phone numbers from FranPOS's customers datadump endpoint.
+"""Fetch customer phone numbers from FranPOS's customers datadump endpoint —
+and, as a side effect, backfill any customer missing from customer_names.json
+entirely (a dog registered after whatever last regenerated that file, e.g. a
+new pet added after an older one passed away, would otherwise be invisible
+to every tool in this system: Lapse Calls, Pet Dashboard, Booking Anomalies).
 
 customer_names.json (the pet_cid -> {pet, owner} registry other scripts read)
 has never carried phone numbers — nothing in this pipeline currently
-regenerates that file, and whatever originally built it never captured phone
-either. FranPOS's own customer records do have real phone numbers, just
-under "CellPhone" (the plain "Phone" field is consistently empty), and a pet
-account often has "ParentCustomerId" pointing at its owner's account — the
-owner's record is a more reliable place to find a populated phone than the
-pet's own record.
+regenerates that file, and whatever originally built it is gone from the
+repo. FranPOS's own customer records do have real phone numbers, just under
+"CellPhone" (the plain "Phone" field is consistently empty), and a pet
+account has "ParentCustomerId" pointing at its owner's account — the owner's
+record is a more reliable place to find a populated phone than the pet's
+own record, and is how a pet's display name ("George") gets resolved to an
+owner name ("Mirjana Ristic") in the first place.
 
 Output: {store}/data/customer_phones.json
   { "<customer_id>": {"phone": "5165551234", "parent_id": 419012345 or null} }
+
+Also updates {store}/data/customer_names.json — additive only, never
+touches or overwrites an existing entry, only adds pet_cids that aren't in
+it yet. A record with ParentCustomerId set is a pet account (its own
+FirstName is the pet's name, owner resolved from the parent record); one
+without is treated as a standalone/owner account.
 
 fetch_pet_visits.py resolves a pet's phone as: the pet's own record's phone,
 falling back to its parent (owner) record's phone via parent_id.
@@ -63,10 +74,18 @@ while current <= end_dt:
     windows.append((window_start, window_end))
     current = next_month
 
+names_file = data_dir / "customer_names.json"
+existing_names = {}
+if names_file.exists():
+    with open(names_file) as f:
+        existing_names = json.load(f)
+    print(f"Existing customer_names.json: {len(existing_names)} entries")
+
 print(f"Fetching customers for {store_name} ({len(windows)} monthly windows)...")
 
 new_count = 0
 working_endpoint = None
+raw_customers = {}  # cid -> full FranPOS record, for the customer_names.json backfill below
 
 for window_start, window_end in windows:
     fetch_start = window_start - timedelta(days=ET_BUFFER_DAYS)
@@ -103,8 +122,9 @@ for window_start, window_end in windows:
                     cid = item.get("CustomerId")
                     if cid is None:
                         continue
-                    phone = (item.get("CellPhone") or item.get("Phone") or "").strip()
                     key = str(cid)
+                    raw_customers[key] = item
+                    phone = (item.get("CellPhone") or item.get("Phone") or "").strip()
                     if key not in cached or (phone and not cached[key].get("phone")):
                         cached[key] = {
                             "phone": phone,
@@ -137,3 +157,38 @@ with open(out_file, "w") as f:
 
 with_phone = sum(1 for v in cached.values() if v.get("phone"))
 print(f"\nDone! {new_count} new/updated, {len(cached)} total customers cached, {with_phone} with a phone number → {out_file}")
+
+# ── Backfill customer_names.json with anyone missing entirely ────────────────
+# Additive only — an existing entry is never touched, even if this record
+# would resolve it differently, since customer_names.json's original builder
+# may have used logic this doesn't fully replicate (e.g. the "Bella, Cannoli"
+# combined-multi-pet convention). New entries only get the simple two cases:
+# pet account (has a parent) or standalone account (doesn't).
+backfilled = 0
+new_pets = []
+for cid, item in raw_customers.items():
+    if cid in existing_names:
+        continue
+    first = (item.get("FirstName") or "").strip()
+    last = (item.get("LastName") or "").strip()
+    parent_id = item.get("ParentCustomerId")
+    if parent_id:
+        parent = raw_customers.get(str(parent_id))
+        owner = f"{parent.get('FirstName','')} {parent.get('LastName','')}".strip() if parent else ""
+        existing_names[cid] = {"pet": first, "owner": owner}
+        if first and owner:
+            new_pets.append(f"{first} ({owner})")
+    else:
+        owner = f"{first} {last}".strip()
+        if owner:
+            existing_names[cid] = {"pet": "", "owner": owner}
+    backfilled += 1
+
+if backfilled:
+    with open(names_file, "w") as f:
+        json.dump(existing_names, f, indent=2)
+    print(f"Backfilled {backfilled} customers missing from customer_names.json ({len(new_pets)} pet accounts)")
+    if new_pets:
+        print("  New pets:", ", ".join(new_pets[:20]) + (f" ... +{len(new_pets)-20} more" if len(new_pets) > 20 else ""))
+else:
+    print("No new customers to backfill into customer_names.json")
