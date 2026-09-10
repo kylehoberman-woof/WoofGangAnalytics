@@ -18,6 +18,7 @@ from config import (
     STORE_OPEN_DATES, get_royalty_rate, get_monthly_rent,
     SUPABASE_URL, SUPABASE_ANON_KEY, PORTAL_BACK_JS,
     STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
+    PAYROLL_TAX_RATE, CC_RATE_PCT, CC_RATE_FLAT, CC_PAYMENT_METHODS,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data, get_exclude_set, get_gusto_payroll_config
@@ -80,6 +81,30 @@ order_groomer_rev = {}
 
 with open(DATA_DIR / "all_data.json") as f:
     data = json.load(f)
+
+# ── CC processing fees (from ticket-level payment data) ──────────────────────
+_tickets = {}
+_tickets_file = DATA_DIR / "tickets.json"
+if _tickets_file.exists():
+    with open(_tickets_file) as _f:
+        _tickets = json.load(_f)
+
+
+def get_period_cc_fees(period_start, period_end):
+    """Sum estimated card-processing fees for tickets paid by card within
+    [period_start, period_end] (date objects, inclusive). Same formula as
+    the Financial Dashboard's monthly calc (CC_RATE_PCT + CC_RATE_FLAT per
+    transaction) so the two stay consistent."""
+    ps = period_start.isoformat()
+    pe = period_end.isoformat()
+    total_fee = 0.0
+    for t in _tickets.values():
+        d = t.get("date", "")
+        if d < ps or d > pe:
+            continue
+        if t.get("payment_method", "") in CC_PAYMENT_METHODS:
+            total_fee += round(float(t.get("total", 0)) * CC_RATE_PCT + CC_RATE_FLAT, 2)
+    return round(total_fee, 2)
 if True:
     for item in data["order_items"]:
         sku    = str(item.get("Sku",""))
@@ -354,7 +379,9 @@ while m_start <= TODAY:
     m_retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in m_retail_hours.items()), 2)
     m_disc = round(sum(v for g in groom_disc_by_day for d, v in groom_disc_by_day[g].items()
                        if m_start.isoformat() <= d <= m_end.isoformat()), 2)
-    m_total_cost = m_paid + m_mgr + m_bather_pay + m_retail_pay + m_royalties + m_rent
+    m_payroll_tax = round((m_mgr + m_bather_pay + m_retail_pay + m_paid) * PAYROLL_TAX_RATE, 2)
+    m_cc_fees = get_period_cc_fees(m_start, m_end)
+    m_total_cost = m_paid + m_mgr + m_bather_pay + m_retail_pay + m_royalties + m_rent + m_payroll_tax + m_cc_fees
     m_net_margin = round(m_rev - m_disc - m_total_cost, 2)
     m_net_margin_pct = round(m_net_margin / m_rev * 100, 1) if m_rev else 0
     monthly_data.append({
@@ -368,6 +395,8 @@ while m_start <= TODAY:
         "retail_pay": m_retail_pay,
         "royalties": m_royalties,
         "rent": m_rent,
+        "payroll_tax": m_payroll_tax,
+        "cc_fees": m_cc_fees,
         "payroll": round(m_paid + m_mgr, 2),
         "margin": m_net_margin,
         "margin_pct": m_net_margin_pct,
@@ -387,6 +416,9 @@ monthly_json = _json2.dumps(monthly_data)
 # YTD royalties and rent from monthly data (uses tiered rates)
 ytd_royalties = sum(m["royalties"] for m in monthly_data if m["year"] == 2026)
 ytd_rent = sum(m["rent"] for m in monthly_data if m["year"] == 2026)
+ytd_payroll_tax = round((ytd_manager + ytd_bather_pay + ytd_retail_pay + ytd_total["paid"]) * PAYROLL_TAX_RATE, 2)
+ytd_cc_fees = get_period_cc_fees(ytd_start, TODAY)
+ytd_margin = round(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_royalties - ytd_rent - ytd_payroll_tax - ytd_cc_fees, 2)
 
 # Last 30 days
 l30_start = TODAY - timedelta(days=29)
@@ -463,6 +495,7 @@ for i, (s, e) in enumerate(pay_periods):
         mgr_pay, mgr_old, mgr_new, mgr_daily, mgr_bonus = 0, 0, 0, [], 0
     pp_data[f"pp_{i}"]["_royalty_rate"] = get_royalty_rate(_store_name, s)
     pp_data[f"pp_{i}"]["_monthly_rent"] = get_monthly_rent(_store_name, s)
+    pp_data[f"pp_{i}"]["_cc_fees"] = get_period_cc_fees(s, e)
     pp_data[f"pp_{i}"]["_manager_salary"] = mgr_pay
     pp_data[f"pp_{i}"]["_manager_old_days"] = mgr_old
     pp_data[f"pp_{i}"]["_manager_new_days"] = mgr_new
@@ -806,7 +839,9 @@ tr:hover td{{background:#fafaf8!important}}
     <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">{fc(ytd_retail_pay)}</div><div class="kpi-label">Retail Staff Pay</div></div>
     <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">{fc(ytd_royalties)}</div><div class="kpi-label">Royalties + Marketing</div></div>
     <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">{fc(ytd_rent)}</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">{ytd_days_count} days</div></div>
-    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_royalties - ytd_rent)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_royalties - ytd_rent) / (ytd_total["rev"] or 1) * 100:.1f}%</div></div>
+    <div class="kpi" style="border-color:#D84315"><div class="kpi-val" style="color:#D84315">{fc(ytd_payroll_tax)}</div><div class="kpi-label">Payroll Tax</div><div style="font-size:0.78rem;color:#D84315;margin-top:3px">{PAYROLL_TAX_RATE*100:.2f}% of wages</div></div>
+    {"" if ytd_cc_fees <= 0 else '<div class="kpi" style="border-color:#757575"><div class="kpi-val" style="color:#757575">' + fc(ytd_cc_fees) + '</div><div class="kpi-label">CC Processing Fees</div></div>'}
+    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">{fc(ytd_margin)}</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">{(ytd_margin / (ytd_total["rev"] or 1) * 100):.1f}%</div></div>
     <div class="kpi grey"><div class="kpi-val">{int(ytd_total["guar_days"])}</div><div class="kpi-label">Guarantee Days</div></div>
   </div>
   <div class="info-box">Commission = 50% of daily grooming revenue. All groomers (except Kimberly) receive a <strong>$200/day guarantee</strong> for their first 90 days (Sue M: $300/day). Paid whichever is higher. Tips assigned to the groomer who performed the service.</div>
@@ -934,6 +969,7 @@ var BATHER_RATE_MAP = {bather_rate_map_json};
 var SUE_WEEKLY = {sue_weekly_json};
 var PP_DATES = {pp_dates_json};
 var GUSTO_PAYROLL_CONFIG = {gusto_payroll_config_json};
+var PAYROLL_TAX_RATE = {PAYROLL_TAX_RATE};
 
 function fc(v) {{ return '$' + parseFloat(v).toLocaleString('en-US', {{minimumFractionDigits:2,maximumFractionDigits:2}}); }}
 
@@ -1254,7 +1290,14 @@ function renderPayPeriod(ppId) {{
   var retailHours = data._retail_hours || {{}};
   var retailRates = data._retail_rates || {{}};
   var totRetailPay = Object.values(retailPay).reduce(function(a,b){{return a+b;}}, 0);
-  var totMargin = totRev - totDisc - totPaid - totRoyalties - totRent - totManager - totBatherPay - totRetailPay;
+  // Payroll tax computed live off the (possibly override-adjusted) totPaid,
+  // not a server-precomputed figure — matches how totRoyalties already
+  // tracks live totRev rather than a frozen dollar amount.
+  var totPayrollTax = (totManager + totBatherPay + totRetailPay + totPaid) * PAYROLL_TAX_RATE;
+  // CC fees come from actual ticket payment methods, not touched by the
+  // commission-adjustment system, so this one is safe to precompute server-side.
+  var totCcFees = data._cc_fees || 0;
+  var totMargin = totRev - totDisc - totPaid - totRoyalties - totRent - totManager - totBatherPay - totRetailPay - totPayrollTax - totCcFees;
   var totMarginPct = totRev > 0 ? (totMargin / totRev * 100).toFixed(1) : '0.0';
   var totPtoPay = 0;
   GROOMERS.forEach(function(g) {{ totPtoPay += getPtoPayout(g, ppId); }});
@@ -1270,6 +1313,8 @@ function renderPayPeriod(ppId) {{
     (totRetailPay ? '<div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">'+fc(totRetailPay)+'</div><div class="kpi-label">Retail Staff Pay</div></div>' : '')+
     '<div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">'+fc(totRoyalties)+'</div><div class="kpi-label">Royalties + Marketing</div></div>'+
     '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totRent)+'</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">'+PP_LENGTH+' days</div></div>'+
+    '<div class="kpi" style="border-color:#D84315"><div class="kpi-val" style="color:#D84315">'+fc(totPayrollTax)+'</div><div class="kpi-label">Payroll Tax</div><div style="font-size:0.78rem;color:#D84315;margin-top:3px">'+(PAYROLL_TAX_RATE*100).toFixed(2)+'% of wages</div></div>'+
+    (totCcFees > 0 ? '<div class="kpi" style="border-color:#757575"><div class="kpi-val" style="color:#757575">'+fc(totCcFees)+'</div><div class="kpi-label">CC Processing Fees</div></div>' : '')+
     '<div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">'+fc(totMargin)+'</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">'+totMarginPct+'%</div></div>'+
     '<div class="kpi grey"><div class="kpi-val">'+totGuar+'</div><div class="kpi-label">Guarantee Days</div></div>'+
     (totPtoPay > 0 ? '<div class="kpi" style="border-color:#16a34a"><div class="kpi-val" style="color:#16a34a">'+fc(totPtoPay)+'</div><div class="kpi-label">PTO Payouts</div></div>' : '');
@@ -1734,6 +1779,8 @@ function renderExec() {{
   var ytdRetail = ytd.reduce(function(a,m){{return a+(m.retail_pay||0);}},0);
   var ytdRoyalties = ytd.reduce(function(a,m){{return a+(m.royalties||0);}},0);
   var ytdRent = ytd.reduce(function(a,m){{return a+(m.rent||0);}},0);
+  var ytdPayrollTax = ytd.reduce(function(a,m){{return a+(m.payroll_tax||0);}},0);
+  var ytdCcFees = ytd.reduce(function(a,m){{return a+(m.cc_fees||0);}},0);
   var ytdMargin = ytd.reduce(function(a,m){{return a+m.margin;}},0);
   var ytdMarginPct = ytdRev ? (ytdMargin/ytdRev*100).toFixed(1) : 0;
   var ytdRevDay = ytd.reduce(function(a,m){{return a+m.working_days;}},0);
@@ -1746,6 +1793,8 @@ function renderExec() {{
     kpiCard(ytdMgr > 0 ? 'Manager + Retail Staff' : 'Retail Staff Pay', fc(ytdMgr + ytdRetail), '#7B1FA2') +
     kpiCard('Royalties + Marketing', fc(ytdRoyalties), '#AD1457') +
     kpiCard('Rent', fc(ytdRent), '#6D4C41') +
+    kpiCard('Payroll Tax', fc(ytdPayrollTax), '#D84315') +
+    kpiCard('CC Processing Fees', fc(ytdCcFees), '#757575') +
     kpiCard('Net Margin', fc(ytdMargin) + ' ('+ytdMarginPct+'%)', parseFloat(ytdMarginPct) >= 0 ? '#558B2F' : '#e53935');
 
   // Monthly table
