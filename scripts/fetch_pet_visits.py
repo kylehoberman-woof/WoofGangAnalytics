@@ -60,6 +60,31 @@ if not names_file.exists():
 with open(names_file) as f:
     names = json.load(f)
 
+# customer_names.json itself has never carried a phone number — this is a
+# separate registry (see fetch_customer_phones.py) keyed by CustomerId, with
+# a parent_id link from a pet's own account to its owner's account, since
+# the owner's record is often the one with a populated phone.
+phones_file = data_dir / "customer_phones.json"
+phones = {}
+if phones_file.exists():
+    with open(phones_file) as f:
+        phones = json.load(f)
+
+
+def resolve_phone(cid):
+    rec = phones.get(str(cid))
+    if not rec:
+        return ""
+    if rec.get("phone"):
+        return rec["phone"]
+    parent_id = rec.get("parent_id")
+    if parent_id:
+        parent = phones.get(str(parent_id))
+        if parent and parent.get("phone"):
+            return parent["phone"]
+    return ""
+
+
 # Build owner phone → owner info map for linking pets to owners
 phone_to_owner = {}
 for cid, info in names.items():
@@ -75,7 +100,7 @@ for cid, info in names.items():
             "pet_cid": int(cid),
             "pet_name": info["pet"].strip(),
             "owner_name": info["owner"],
-            "owner_phone": info.get("phone", ""),
+            "owner_phone": resolve_phone(cid) or info.get("phone", ""),
         })
 
 print(f"Found {len(pet_accounts)} pet accounts for {store_name}")

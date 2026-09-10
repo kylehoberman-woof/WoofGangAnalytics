@@ -31,6 +31,9 @@ jobs:
           python-version: "3.11"
       - run: pip install httpx requests
 
+      - name: ${{ matrix.store }} - Fetch customer phone numbers
+        run: python3 scripts/fetch_customer_phones.py ${{ matrix.store }}
+
       - name: ${{ matrix.store }} - Refetch pet visits
         run: python3 scripts/fetch_pet_visits.py ${{ matrix.store }}
 

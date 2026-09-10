@@ -70,6 +70,9 @@ jobs:
       - name: ${{ matrix.store }} - Discover pet endpoints
         run: python3 scripts/discover_pet_endpoints.py ${{ matrix.store }}
 
+      - name: ${{ matrix.store }} - Fetch customer phone numbers
+        run: python3 scripts/fetch_customer_phones.py ${{ matrix.store }}
+
       - name: ${{ matrix.store }} - Fetch pet visits
         run: python3 scripts/fetch_pet_visits.py ${{ matrix.store }}
 
