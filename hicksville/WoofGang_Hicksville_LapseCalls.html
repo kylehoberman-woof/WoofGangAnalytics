@@ -13,6 +13,8 @@ header h1 { font-size:18px; font-weight:700; }
 header nav { display:flex; gap:8px; margin-left:auto; }
 header nav a { color:rgba(255,255,255,0.75); text-decoration:none; font-size:13px; padding:6px 12px; border-radius:6px; }
 header nav a:hover { background:rgba(255,255,255,0.12); color:#fff; }
+header nav a.lc-store-switch { background:rgba(255,255,255,0.18); color:#fff; font-weight:700; }
+header nav a.lc-store-switch:hover { background:rgba(255,255,255,0.3); }
 main { max-width:1400px; margin:0 auto; padding:24px 16px; }
 .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px; }
 .card h2 { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--brown); }
@@ -103,6 +105,7 @@ tr:hover td { background:#fef9f5; }
   <h1>📞 Lapse Calls — Hicksville</h1>
   <nav>
     <a id="portal-back" href="../index.html">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
+    <a href="../port-washington/WoofGang_PortWashington_LapseCalls.html" class="lc-store-switch">&#x21C4; Port Washington</a>
     <a href="WoofGang_Hicksville_PetDashboard.html">Pet Dashboard</a>
     <a href="WoofGang_Hicksville_LapseProgress.html">📊 Progress</a>
   </nav>
@@ -13865,6 +13868,14 @@ function setBucket(b){
   document.querySelectorAll('.bucket-btn').forEach(function(btn){
     btn.classList.toggle('active', btn.getAttribute('data-bucket-btn') === b);
   });
+  // Follow-up/Resolved/All are status views, not date-range views — a dog
+  // waiting on a follow-up call could have any last-visit date, so the
+  // 6-12wk default (meant for the initial-contact bucket) would otherwise
+  // hide most of them until Clear Dates was clicked manually.
+  if(b !== 'initial'){
+    document.getElementById('lc-from').value = '';
+    document.getElementById('lc-to').value = '';
+  }
   filterLapseRows();
 }
 

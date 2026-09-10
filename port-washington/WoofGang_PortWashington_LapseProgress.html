@@ -13,6 +13,8 @@ header h1 { font-size:18px; font-weight:700; }
 header nav { display:flex; gap:8px; margin-left:auto; }
 header nav a { color:rgba(255,255,255,0.75); text-decoration:none; font-size:13px; padding:6px 12px; border-radius:6px; }
 header nav a:hover { background:rgba(255,255,255,0.12); color:#fff; }
+header nav a.lc-store-switch { background:rgba(255,255,255,0.18); color:#fff; font-weight:700; }
+header nav a.lc-store-switch:hover { background:rgba(255,255,255,0.3); }
 main { max-width:1100px; margin:0 auto; padding:24px 16px; }
 .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px; }
 .card h2 { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--brown); }
@@ -43,6 +45,7 @@ th.n, td.n { text-align:right; }
   <h1>📊 Lapse Calls Progress — Port Washington</h1>
   <nav>
     <a id="portal-back" href="../index.html">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
+    <a href="../hicksville/WoofGang_Hicksville_LapseProgress.html" class="lc-store-switch">&#x21C4; Hicksville</a>
     <a href="WoofGang_PortWashington_LapseCalls.html">Lapse Calls</a>
   </nav>
 </header>

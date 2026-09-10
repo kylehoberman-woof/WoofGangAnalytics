@@ -21,7 +21,7 @@ import json, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY, PORTAL_BACK_JS
+from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY, PORTAL_BACK_JS, get_other_stores
 from lapse_calls_lib import (
     get_store_tag, filter_pet_records_to_store, load_customer_visit_staff,
     compute_lapse_candidates, group_records_by_dog,
@@ -33,6 +33,11 @@ data_dir = store.data_dir
 store_label = get_store_display(store_name)
 store_fn = get_store_fn(store_name)
 store_tag = get_store_tag(store_name, STORE_REGISTRY)
+
+_other_keys = get_other_stores(store_name)
+_other_store = get_store_display(_other_keys[0]) if _other_keys else ""
+_other_fn = get_store_fn(_other_keys[0]) if _other_keys else ""
+_switch_url = f"../{_other_keys[0]}/WoofGang_{_other_fn}_LapseCalls.html" if _other_keys else ""
 
 pet_visits_file = data_dir / "pet_visits.json"
 all_data_file = data_dir / "all_data.json"
@@ -126,6 +131,8 @@ header h1 { font-size:18px; font-weight:700; }
 header nav { display:flex; gap:8px; margin-left:auto; }
 header nav a { color:rgba(255,255,255,0.75); text-decoration:none; font-size:13px; padding:6px 12px; border-radius:6px; }
 header nav a:hover { background:rgba(255,255,255,0.12); color:#fff; }
+header nav a.lc-store-switch { background:rgba(255,255,255,0.18); color:#fff; font-weight:700; }
+header nav a.lc-store-switch:hover { background:rgba(255,255,255,0.3); }
 main { max-width:1400px; margin:0 auto; padding:24px 16px; }
 .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px; }
 .card h2 { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--brown); }
@@ -358,6 +365,14 @@ function setBucket(b){
   document.querySelectorAll('.bucket-btn').forEach(function(btn){
     btn.classList.toggle('active', btn.getAttribute('data-bucket-btn') === b);
   });
+  // Follow-up/Resolved/All are status views, not date-range views — a dog
+  // waiting on a follow-up call could have any last-visit date, so the
+  // 6-12wk default (meant for the initial-contact bucket) would otherwise
+  // hide most of them until Clear Dates was clicked manually.
+  if(b !== 'initial'){
+    document.getElementById('lc-from').value = '';
+    document.getElementById('lc-to').value = '';
+  }
   filterLapseRows();
 }
 
@@ -687,6 +702,7 @@ html = f"""<!DOCTYPE html>
   <h1>📞 Lapse Calls — {store_label}</h1>
   <nav>
     <a id="portal-back" href="../index.html">&larr; Home</a>{PORTAL_BACK_JS}
+    <a href="{esc(_switch_url)}" class="lc-store-switch">&#x21C4; {esc(_other_store)}</a>
     <a href="WoofGang_{store_fn}_PetDashboard.html">Pet Dashboard</a>
     <a href="WoofGang_{store_fn}_LapseProgress.html">📊 Progress</a>
   </nav>
@@ -802,6 +818,7 @@ print(f"Lapse Calls widget written → {out_html}")
 # associates working the outreach list; owners check it on its own.
 
 out_progress_html = data_dir.parent / f"WoofGang_{store_fn}_LapseProgress.html"
+_progress_switch_url = f"../{_other_keys[0]}/WoofGang_{_other_fn}_LapseProgress.html" if _other_keys else ""
 CID_OWNER_JSON = json.dumps(cid_owner_map).replace("</", "<\\/")
 
 PROGRESS_CSS = """
@@ -813,6 +830,8 @@ header h1 { font-size:18px; font-weight:700; }
 header nav { display:flex; gap:8px; margin-left:auto; }
 header nav a { color:rgba(255,255,255,0.75); text-decoration:none; font-size:13px; padding:6px 12px; border-radius:6px; }
 header nav a:hover { background:rgba(255,255,255,0.12); color:#fff; }
+header nav a.lc-store-switch { background:rgba(255,255,255,0.18); color:#fff; font-weight:700; }
+header nav a.lc-store-switch:hover { background:rgba(255,255,255,0.3); }
 main { max-width:1100px; margin:0 auto; padding:24px 16px; }
 .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px; }
 .card h2 { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--brown); }
@@ -935,6 +954,7 @@ progress_html = f"""<!DOCTYPE html>
   <h1>📊 Lapse Calls Progress — {store_label}</h1>
   <nav>
     <a id="portal-back" href="../index.html">&larr; Home</a>{PORTAL_BACK_JS}
+    <a href="{esc(_progress_switch_url)}" class="lc-store-switch">&#x21C4; {esc(_other_store)}</a>
     <a href="WoofGang_{store_fn}_LapseCalls.html">Lapse Calls</a>
   </nav>
 </header>
