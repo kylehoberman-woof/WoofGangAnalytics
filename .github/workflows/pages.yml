@@ -37,7 +37,7 @@ jobs:
              my-schedule.html onboarding.html retail-staffing.html \
              supplies.html bonus-tracker.html hiring-portal.html \
              portal-auth.js portal.css CNAME _site/
-          cp -r data port-washington hicksville _site/
+          cp -r data port-washington hicksville glen-cove _site/
 
       - uses: actions/upload-pages-artifact@v3
         with:

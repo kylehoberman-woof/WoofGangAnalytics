@@ -40,5 +40,25 @@
       "anchor": "2026-03-28"
     },
     "retail_staffing_start_month": "2025-12"
+  },
+  "glen-cove": {
+    "display_name": "Glen Cove",
+    "abbreviation": "GC",
+    "store_number": null,
+    "location_id": null,
+    "_pending": "store_number and location_id come from FranPOS once the location is set up there. Once known: fill these in, add FRANPOS_TOKEN_GC as a GitHub Actions secret, add 'glen-cove' to config.py's STORES dict (location_id + token + data_dir/output_dir), and add 'glen-cove' to update.yml's matrix.",
+    "franpos_token_env": "FRANPOS_TOKEN_GC",
+    "franpos_token_fallback_env": "FRANPOS_TOKEN",
+    "address": "195 Forest Avenue, Suite B, Glen Cove, NY 11542",
+    "open_date": "2026-09-24",
+    "include_manager": false,
+    "monthly_rent_schedule": [
+      {"start": "2026-09-24", "monthly_rent": 4500.00}
+    ],
+    "_rent_note": "Start date approximated to open_date — lease has 120 days free rent from permit issuance (Para. 40), actual commencement date unconfirmed. Correct before this feeds a real P&L.",
+    "pay_period": {
+      "length_days": 7,
+      "anchor": "2026-09-24"
+    }
   }
 }

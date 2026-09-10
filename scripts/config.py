@@ -82,6 +82,20 @@ STORES = {
         data_dir=PROJ_ROOT / "hicksville" / "data",
         output_dir=PROJ_ROOT / "hicksville",
     ),
+    # Opens 2026-09-24. location_id/token are placeholders until FranPOS is
+    # set up for this location — fill in once known, add FRANPOS_TOKEN_GC as
+    # a GitHub Actions secret, and add "glen-cove" to update.yml's matrix.
+    # Until then this entry exists so config/get_store("glen-cove") works for
+    # prep scripts, but nothing runs it automatically.
+    "glen-cove": StoreConfig(
+        name="Woof Gang Bakery & Grooming -- Glen Cove, NY",
+        location_id=0,
+        token="",
+        start_date="2026-09-24",
+        end_date="2027-12-31",
+        data_dir=PROJ_ROOT / "glen-cove" / "data",
+        output_dir=PROJ_ROOT / "glen-cove",
+    ),
 }
 
 

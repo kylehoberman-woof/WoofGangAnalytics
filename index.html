@@ -36,6 +36,7 @@
   <select id="store-select" onchange="switchStore(this.value)">
     <option value="port-washington">📍 Port Washington, NY</option>
     <option value="hicksville">📍 Hicksville, NY</option>
+    <option value="glen-cove">📍 Glen Cove, NY</option>
     <!-- <option value="glen-cove">📍 Glen Cove, NY</option> -->
   </select>
 </div>
@@ -427,19 +428,22 @@ var STORES = {
     retail: 'WoofGang_Hicksville_Retail_Dashboard.html',
     pet: 'WoofGang_Hicksville_PetDashboard.html',
     lapse: 'WoofGang_Hicksville_LapseCalls.html'
+  },
+  // Opens 2026-09-24 — cards will 404 until FranPOS is connected and the
+  // build scripts run for this store for the first time.
+  'glen-cove': {
+    title: 'Woof Gang Glen Cove',
+    base: 'glen-cove/',
+    exec: 'WoofGang_GlenCove_NY_AllYears_Dashboard.html',
+    comm: 'WoofGang_GlenCove_Commission_Dashboard.html',
+    inv: 'WoofGang_GlenCove_Inventory_Dashboard.html',
+    fin: 'WoofGang_GlenCove_Financial_Dashboard.html',
+    cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
+    anomaly: 'WoofGang_GlenCove_BookingAnomalies.html',
+    retail: 'WoofGang_GlenCove_Retail_Dashboard.html',
+    pet: 'WoofGang_GlenCove_PetDashboard.html',
+    lapse: 'WoofGang_GlenCove_LapseCalls.html'
   }
-  // NEW STORE TEMPLATE (uncomment and fill in):
-  // 'glen-cove': {
-  //   title: 'Woof Gang Glen Cove',
-  //   base: 'glen-cove/',
-  //   exec: 'WoofGang_GlenCove_NY_AllYears_Dashboard.html',
-  //   comm: 'WoofGang_GlenCove_Commission_Dashboard.html',
-  //   inv: 'WoofGang_GlenCove_Inventory_Dashboard.html',
-  //   fin: 'WoofGang_GlenCove_Financial_Dashboard.html',
-  //   cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
-  //   anomaly: 'WoofGang_GlenCove_BookingAnomalies.html',
-  //   retail: 'WoofGang_GlenCove_Retail_Dashboard.html'
-  // }
 };
 
 function switchStore(key) {

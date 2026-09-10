@@ -53,7 +53,7 @@ td{padding:11px 12px;font-size:0.86rem;vertical-align:middle;border-bottom:1px s
 tr:hover td{background:#fef7fa}
 .empty{text-align:center;padding:40px 20px;color:#aaa;font-size:0.9rem;line-height:1.8}
 .badge{display:inline-block;padding:3px 8px;border-radius:8px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;white-space:nowrap}
-.b-pw{background:#FDF0F5;color:#C4276E}.b-hv{background:#e0f2f1;color:#1B6B6B}
+.b-pw{background:#FDF0F5;color:#C4276E}.b-hv{background:#e0f2f1;color:#1B6B6B}.b-gc{background:#f3e5f5;color:#6A1B9A}
 .b-pto{background:#FDF0F5;color:#C4276E}.b-sick{background:#fce4ec;color:#c62828}
 .b-personal{background:#e0f2f1;color:#1B6B6B}.b-vacation{background:#e8f5e9;color:#2E7D32}
 .b-leftearly{background:#fff3e0;color:#E65100}
@@ -174,6 +174,7 @@ tr:hover td{background:#fef7fa}
   <button class="tab active" onclick="setStore('all')">All Stores</button>
   <button class="tab" onclick="setStore('port-washington')">Port Washington</button>
   <button class="tab" onclick="setStore('hicksville')">Hicksville</button>
+  <button class="tab" onclick="setStore('glen-cove')">Glen Cove</button>
 </div>
 
 <div class="main">
@@ -213,6 +214,7 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
           <option value="">— Select —</option>
           <option value="port-washington">Port Washington</option>
           <option value="hicksville">Hicksville</option>
+          <option value="glen-cove">Glen Cove</option>
         </select>
       </div>
       <div class="fg">
@@ -353,6 +355,7 @@ CREATE POLICY "Allow all" ON time_off FOR ALL USING (true) WITH CHECK (true);</p
         <select id="e-store" onchange="updateEditEmployees()">
           <option value="port-washington">Port Washington</option>
           <option value="hicksville">Hicksville</option>
+          <option value="glen-cove">Glen Cove</option>
         </select>
       </div>
       <div class="fg">
@@ -414,14 +417,14 @@ var SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJl
 var SB_HDR  = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
 
 /* ── Employee lists (loaded from Supabase) ────── */
-var empsByStore = { 'port-washington': [], 'hicksville': [] };
+var empsByStore = { 'port-washington': [], 'hicksville': [], 'glen-cove': [] };
 var groomersSet = {}; // label → store
 
 function loadEmployees() {
   sbFetch('/rest/v1/schedule_employees?is_active=eq.true&order=name&select=name,full_name,store,role,is_full_time')
     .then(function(r){ return r.ok ? r.json() : []; })
     .then(function(data){
-      empsByStore = { 'port-washington': [], 'hicksville': [] };
+      empsByStore = { 'port-washington': [], 'hicksville': [], 'glen-cove': [] };
       groomersSet = {};
       data.forEach(function(e){
         var label = e.full_name || e.name;
@@ -429,6 +432,10 @@ function loadEmployees() {
           empsByStore['port-washington'].push(label);
         if(e.store === 'hicksville' || e.store === 'both')
           empsByStore['hicksville'].push(label);
+        // "both" is the established PW+HV convention — Glen Cove staff need
+        // their own explicit store value, not lumped into it.
+        if(e.store === 'glen-cove')
+          empsByStore['glen-cove'].push(label);
         if(e.role === 'groomer' && e.is_full_time) groomersSet[label] = e.store;
       });
       updateEmployees();
@@ -461,13 +468,16 @@ function fmtDate(d) {
 function daysBetween(a, b) {
   return Math.max(1, Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 86400000) + 1);
 }
-function storeName(k) { return k === 'port-washington' ? 'Port Washington' : 'Hicksville'; }
+var STORE_NAMES = { 'port-washington':'Port Washington', 'hicksville':'Hicksville', 'glen-cove':'Glen Cove' };
+var STORE_ABBR  = { 'port-washington':'PW', 'hicksville':'HV', 'glen-cove':'GC' };
+var STORE_BADGE_CLS = { 'port-washington':'b-pw', 'hicksville':'b-hv', 'glen-cove':'b-gc' };
+function storeName(k) { return STORE_NAMES[k] || k; }
 function typeBadge(t) {
   var m = {PTO:'pto',Sick:'sick',Personal:'personal',Vacation:'vacation','Left Early':'leftearly','Leaving Early':'leavingearly','Late Arrival':'latearrival'};
   return '<span class="badge b-'+(m[t]||'pto')+'">'+t+'</span>';
 }
 function storeBadge(k) {
-  return '<span class="badge '+(k==='port-washington'?'b-pw':'b-hv')+'">'+(k==='port-washington'?'PW':'HV')+'</span>';
+  return '<span class="badge '+(STORE_BADGE_CLS[k]||'b-pw')+'">'+(STORE_ABBR[k]||k)+'</span>';
 }
 function statusBadge(s) { return '<span class="badge b-'+s+'">'+s+'</span>'; }
 function showToast(msg, type) {
@@ -921,7 +931,7 @@ function setView(v) {
 function setStore(s) {
   storeFilter = s;
   document.querySelectorAll('.tab').forEach(function(t, i){
-    t.classList.toggle('active', ['all','port-washington','hicksville'][i] === s);
+    t.classList.toggle('active', ['all','port-washington','hicksville','glen-cove'][i] === s);
   });
   // Pre-fill store in form
   if (s !== 'all') {
@@ -1011,7 +1021,7 @@ function renderUsage() {
     var d = byEmp[name];
     return { name: name, pto: d.PTO||0, vac: d.Vacation||0, pers: d.Personal||0, sick: d.Sick||0,
              leaving: d['Leaving Early']||0, early: d['Left Early']||0, late: d['Late Arrival']||0, total: d.total||0,
-             stores: Object.keys(d.stores).map(function(s){return s==='port-washington'?'PW':'HV';}).join('/') };
+             stores: Object.keys(d.stores).map(function(s){return STORE_ABBR[s]||s;}).join('/') };
   }).sort(function(a,b){ return b.total - a.total; });
 
   if (empRows.length === 0) {
@@ -1055,7 +1065,7 @@ function renderUsage() {
       var rem  = Math.max(0, PTO_DAYS - used);
       var pct  = Math.min(100, (used / PTO_DAYS) * 100);
       var store = groomersSet[name];
-      var storeLabel = store === 'port-washington' ? 'Port Washington' : store === 'hicksville' ? 'Hicksville' : 'Both';
+      var storeLabel = store === 'both' ? 'Both' : (STORE_NAMES[store] || store);
       balHtml += '<div class="pto-bal-card' + (rem === 0 ? ' depleted' : '') + '">' +
         '<div class="pto-bal-name" title="'+esc(name)+'">'+esc(name)+'</div>' +
         '<div class="pto-bal-store">'+storeLabel+'</div>' +
