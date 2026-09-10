@@ -53,6 +53,7 @@ tr:hover td { background:#fef9f5; }
 .lc-modal-phone { color:var(--pink); font-weight:600; text-decoration:none; }
 .lc-modal-phone:hover { text-decoration:underline; }
 .lc-modal-sub { font-size:12px; color:var(--muted); margin-bottom:18px; }
+.lc-modal-siblings { font-size:12px; color:var(--brown); background:#fff5fa; border:1px solid #f7d6e6; border-radius:8px; padding:8px 12px; margin-bottom:14px; line-height:1.5; }
 .lc-modal-section { margin-top:18px; }
 .lc-modal-section h3 { font-size:13px; color:var(--brown); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
 .lc-action-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
@@ -32520,6 +32521,20 @@ function findLapseRow(cid){
   return null;
 }
 
+// Other dogs for the same owner still on this outreach list — a phone call
+// reaches the household, not just one dog, so logging a call here logs the
+// same entry for them too rather than leaving them looking un-contacted.
+function siblingRows(ownerName, excludeCid){
+  var out = [];
+  if(!ownerName) return out;
+  document.querySelectorAll('.lc-row').forEach(function(tr){
+    if(tr.getAttribute('data-owner-name') === ownerName && tr.getAttribute('data-cid') !== excludeCid){
+      out.push(tr);
+    }
+  });
+  return out;
+}
+
 function loadCallLog(){
   lcGet('/lapse_call_log?store=eq.'+encodeURIComponent(LC_STORE)+'&order=call_date.desc,created_at.desc').then(function(rows){
     callLogByCid = {};
@@ -32676,10 +32691,17 @@ function openLapseDetail(cid){
   var phoneHtml = ownerPhone
     ? '<a href="tel:' + lcEsc(ownerPhone) + '" class="lc-modal-phone">' + lcEsc(ownerPhone) + '</a>'
     : '';
+  var siblings = siblingRows(ownerName, cid);
+  var siblingsHtml = siblings.length
+    ? '<div class="lc-modal-siblings">🐾 Also has ' + siblings.map(function(s){ return lcEsc(s.getAttribute('data-pet-name')); }).join(', ')
+      + ' in this list — logging a call here logs the same call for ' + (siblings.length === 1 ? 'them' : 'all of them') + ' too.</div>'
+    : '';
+
   document.getElementById('lc-modal-header').innerHTML =
     '<h2>' + lcEsc(name) + '</h2>'
     + '<div class="lc-modal-owner">' + lcEsc(ownerName || 'Unknown owner') + (phoneHtml ? ' · ' + phoneHtml : '') + '</div>'
-    + '<div class="lc-modal-sub">' + actionBadgeHtml(cid).replace(/<br>/, ' — ').replace(/<[^>]+>/g, '') + '</div>';
+    + '<div class="lc-modal-sub">' + actionBadgeHtml(cid).replace(/<br>/, ' — ').replace(/<[^>]+>/g, '') + '</div>'
+    + siblingsHtml;
 
   var complaints = complaintsForOwner(ownerName);
   var complaintsSection = document.getElementById('lc-modal-complaints-section');
@@ -32811,31 +32833,46 @@ function saveLapseDetail(){
   if(!lcCurrentCid || !lcSelectedAction) return;
   var cid = lcCurrentCid;
   var tr = findLapseRow(cid);
-  var body = {
-    store: LC_STORE,
-    pet_cid: cid,
-    pet_name: tr ? tr.getAttribute('data-pet-name') : '',
-    action: lcSelectedAction,
-    notes: document.getElementById('lc-m-notes').value,
-    call_date: document.getElementById('lc-m-date').value || new Date().toISOString().slice(0,10)
-  };
+  var ownerName = tr ? tr.getAttribute('data-owner-name') : '';
+  var siblings = siblingRows(ownerName, cid);
+  var action = lcSelectedAction;
+  var notes = document.getElementById('lc-m-notes').value;
+  var callDate = document.getElementById('lc-m-date').value || new Date().toISOString().slice(0,10);
+
+  // A call to the owner covers every dog they have in this list, not just
+  // the one the modal was opened from — log the same entry for each.
+  var targets = [{cid: cid, pet_name: tr ? tr.getAttribute('data-pet-name') : ''}]
+    .concat(siblings.map(function(s){ return {cid: s.getAttribute('data-cid'), pet_name: s.getAttribute('data-pet-name')}; }));
+
   var ind = document.getElementById('lc-m-indicator');
   ind.textContent = 'Saving…';
-  lcPost('lapse_call_log', body).then(function(res){
-    var saved = Array.isArray(res) ? res[0] : res;
-    if(saved){
-      if(!callLogByCid[cid]) callLogByCid[cid] = [];
-      callLogByCid[cid].unshift(saved);
+
+  Promise.all(targets.map(function(t){
+    var body = { store: LC_STORE, pet_cid: t.cid, pet_name: t.pet_name, action: action, notes: notes, call_date: callDate };
+    return lcPost('lapse_call_log', body).then(function(res){
+      var saved = Array.isArray(res) ? res[0] : res;
+      if(saved){
+        if(!callLogByCid[t.cid]) callLogByCid[t.cid] = [];
+        callLogByCid[t.cid].unshift(saved);
+      }
+      return {ok:true};
+    }).catch(function(err){
+      return {ok:false, error:err};
+    });
+  })).then(function(results){
+    var failed = results.filter(function(r){ return !r.ok; });
+    if(failed.length === results.length){
+      ind.textContent = 'Error: ' + ((failed[0].error && failed[0].error.message) || 'save failed');
+      return;
     }
-    ind.textContent = '✓ saved';
+    var n = siblings.length;
+    ind.textContent = '✓ saved' + (n ? ' (+' + n + ' sibling' + (n > 1 ? 's' : '') + ')' : '') + (failed.length ? ' — ' + failed.length + ' failed' : '');
     renderCallHistory(cid);
     document.getElementById('lc-m-notes').value = '';
     lcSelectedAction = null;
     document.querySelectorAll('.lc-action-option').forEach(function(btn){ btn.classList.remove('selected'); });
     document.getElementById('lc-save-btn').disabled = true;
     applyBuckets();
-  }).catch(function(err){
-    ind.textContent = 'Error: ' + (err && err.message ? err.message : 'save failed');
   });
 }
 
