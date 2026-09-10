@@ -33,6 +33,16 @@ GROOM_KEYWORDS = {"full groom", "bath", "lux bath", "groom", "trim", "nail"}
 
 
 def is_real_appointment(v):
+    # FranPOS's own record type is authoritative when present: 1 is always
+    # a free-text staff note in every sample checked, regardless of what
+    # keywords the note's prose happens to contain — "able to complete
+    # groom w/ him on medicine, very sleepy..." matches SERVICE_KEYWORD_RE
+    # below on the standalone word "groom", which the keyword check alone
+    # can't tell apart from a real service. Records fetched before this
+    # field was captured have type=None and fall through to the older
+    # heuristics below.
+    if v.get("type") == 1:
+        return False
     if v.get("stylist"):
         return True
     size = (v.get("size") or "").strip()
