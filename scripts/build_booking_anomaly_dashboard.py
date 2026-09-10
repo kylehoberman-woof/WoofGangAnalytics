@@ -688,21 +688,39 @@ var SIZE_LABELS = {{
 }};
 function shortSize(s) {{ return SIZE_LABELS[s] || s || '?'; }}
 
+function escAttr(s) {{
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}}
+
 // ── Flag badge HTML ─────────────────────────────────────────────────────────
+// FranPOS's history feed sometimes tags a free-text groomer note with a
+// real stylist, so it slips through as if it were a real visit — its
+// "service"/"breed"/"size" text can then be a full sentence. A real
+// service/breed/size value is always short, so anything long enough to
+// blow out the table is a note, not real data — clip it and keep the
+// full text in a tooltip rather than trying to perfectly classify notes.
+function clipBadgeText(s, max) {{
+  s = String(s || '');
+  return s.length > max ? s.slice(0, max) + '…' : s;
+}}
+
 function flagBadge(f, details) {{
   if (f === 'breed_change') {{
     var d = details.breed_change;
-    return '<span class="badge red">&#x1F534; ' + (d ? d.from + '→' + d.to : 'Breed') + '</span>';
+    var label = d ? d.from + '→' + d.to : 'Breed';
+    return '<span class="badge red" title="' + escAttr(label) + '">&#x1F534; ' + clipBadgeText(label, 28) + '</span>';
   }}
   if (f === 'size_change') {{
     var d = details.size_change;
-    return '<span class="badge yellow">&#x1F7E1; ' + (d ? d.from + d.direction + d.to : 'Size') + '</span>';
+    var label = d ? d.from + d.direction + d.to : 'Size';
+    return '<span class="badge yellow" title="' + escAttr(label) + '">&#x1F7E1; ' + clipBadgeText(label, 28) + '</span>';
   }}
   if (f === 'service_change') {{
     var d = details.service_change;
+    var full = d ? (d.from || '') + ' → ' + (d.to || '') : 'Service';
     var from = d ? (d.from || '').split(' ')[0] : '';
     var to = d ? (d.to || '').split(' ')[0] : '';
-    return '<span class="badge orange">&#x1F7E0; ' + from + '→' + to + '</span>';
+    return '<span class="badge orange" title="' + escAttr(full) + '">&#x1F7E0; ' + clipBadgeText(from, 14) + '→' + clipBadgeText(to, 14) + '</span>';
   }}
   if (f === 'price_anomaly') {{
     var d = details.price_anomaly;
