@@ -33,6 +33,9 @@ jobs:
       - name: ${{ matrix.store }} - Discover pet endpoints
         run: python3 scripts/discover_pet_endpoints.py ${{ matrix.store }}
 
+      - name: ${{ matrix.store }} - Dump raw customers (temp diagnostic)
+        run: python3 scripts/dump_raw_customers.py ${{ matrix.store }}
+
       - name: ${{ matrix.store }} - Commit discovery results
         run: |
           git config --global user.name "github-actions[bot]"
