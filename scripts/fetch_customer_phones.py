@@ -159,19 +159,32 @@ with_phone = sum(1 for v in cached.values() if v.get("phone"))
 print(f"\nDone! {new_count} new/updated, {len(cached)} total customers cached, {with_phone} with a phone number → {out_file}")
 
 # ── Backfill customer_names.json with anyone missing entirely ────────────────
-# Additive only — an existing entry is never touched, even if this record
-# would resolve it differently, since customer_names.json's original builder
+# Additive only for entries that already have a value — an existing pet/owner
+# pairing is never overwritten, since customer_names.json's original builder
 # may have used logic this doesn't fully replicate (e.g. the "Bella, Cannoli"
-# combined-multi-pet convention). New entries only get the simple two cases:
-# pet account (has a parent) or standalone account (doesn't).
+# combined-multi-pet convention). The one exception: an existing entry with a
+# blank owner ("" — unambiguously broken, not a plausible different mapping)
+# gets repaired if a parent now resolves it. This is exactly what happened to
+# George (Mirjana Ristic's dog): a prior run added him with pet="George",
+# owner="" because his parent record wasn't in that run's fetched batch yet.
 backfilled = 0
+repaired = 0
 new_pets = []
 for cid, item in raw_customers.items():
-    if cid in existing_names:
-        continue
     first = (item.get("FirstName") or "").strip()
     last = (item.get("LastName") or "").strip()
     parent_id = item.get("ParentCustomerId")
+
+    if cid in existing_names:
+        entry = existing_names[cid]
+        if parent_id and not entry.get("owner"):
+            parent = raw_customers.get(str(parent_id))
+            owner = f"{parent.get('FirstName','')} {parent.get('LastName','')}".strip() if parent else ""
+            if owner:
+                entry["owner"] = owner
+                repaired += 1
+        continue
+
     if parent_id:
         parent = raw_customers.get(str(parent_id))
         owner = f"{parent.get('FirstName','')} {parent.get('LastName','')}".strip() if parent else ""
@@ -184,11 +197,14 @@ for cid, item in raw_customers.items():
             existing_names[cid] = {"pet": "", "owner": owner}
     backfilled += 1
 
-if backfilled:
+if backfilled or repaired:
     with open(names_file, "w") as f:
         json.dump(existing_names, f, indent=2)
-    print(f"Backfilled {backfilled} customers missing from customer_names.json ({len(new_pets)} pet accounts)")
-    if new_pets:
-        print("  New pets:", ", ".join(new_pets[:20]) + (f" ... +{len(new_pets)-20} more" if len(new_pets) > 20 else ""))
+    if backfilled:
+        print(f"Backfilled {backfilled} customers missing from customer_names.json ({len(new_pets)} pet accounts)")
+        if new_pets:
+            print("  New pets:", ", ".join(new_pets[:20]) + (f" ... +{len(new_pets)-20} more" if len(new_pets) > 20 else ""))
+    if repaired:
+        print(f"Repaired {repaired} existing entries with a blank owner (parent record now resolved)")
 else:
     print("No new customers to backfill into customer_names.json")
