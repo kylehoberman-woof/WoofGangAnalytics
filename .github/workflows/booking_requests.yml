@@ -1,0 +1,29 @@
+name: Online Booking Requests
+
+on:
+  schedule:
+    # Hourly 9am-7pm ET. Fixed UTC-4 (EDT) offset, same convention as
+    # update.yml's nightly cron — shifts an hour during EST without a DST-aware
+    # adjustment.
+    - cron: "0 13-23 * * *"
+  workflow_dispatch:
+
+# No `contents: write` needed — this only reads the shared Gmail inbox and
+# writes to Supabase, it never touches the repo.
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    env:
+      GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: pip install requests
+
+      - name: Fetch new online booking request leads
+        run: python3 scripts/fetch_booking_requests.py
