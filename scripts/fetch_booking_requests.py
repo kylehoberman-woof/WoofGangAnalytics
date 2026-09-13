@@ -182,7 +182,9 @@ def parse_waitlist_signup(body):
     )
     customer_phone = re.sub(r"\D", "", fields.get("Phone", ""))
 
-    date_match = re.search(r"Date:\s*\w+,\s*(\w+ \d+, \d+ at \d+:\d+ [AP]M)", body)
+    # Outlook for Mac renders some of these with a Unicode narrow no-break
+    # space (U+202F) before AM/PM instead of a regular space — \s covers both.
+    date_match = re.search(r"Date:\s*\w+,\s*(\w+ \d+, \d+ at \d+:\d+\s*[AP]M)", body)
     requested_at = parse_datetime_loose(date_match.group(1)) if date_match else None
 
     notes_parts = []
