@@ -74,6 +74,37 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .btn-reset{padding:8px 20px;border:2px solid #ddd;background:white;border-radius:8px;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;color:#888;transition:all 0.15s}
 .btn-reset:hover{border-color:#C62828;color:#C62828}
 
+/* Edit mode (owner/manager only) */
+.edit-toggle-wrap{text-align:center;margin-bottom:16px}
+.btn-edit-toggle{background:#1a1a2e;color:white;border:none;padding:9px 20px;border-radius:20px;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer}
+.btn-edit-toggle:hover{opacity:0.85}
+.btn-edit-toggle.active{background:#C4276E}
+.topic-edit-btns{display:flex;gap:4px;flex-shrink:0}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:0.9rem;color:#aaa;padding:4px}
+.icon-btn:hover{color:#C4276E}
+.btn-add{padding:8px 16px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer;margin-top:10px}
+.btn-add:hover{background:#a31f5b}
+.btn-add.ghost{background:white;color:#C4276E;border:2px dashed #e8b8cc}
+.ref-edit-btns{display:flex;gap:4px;margin-left:auto}
+.ref-toggle-row{display:flex;align-items:center}
+
+/* Edit modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9998;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:white;border-radius:14px;padding:26px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto}
+.modal-box h3{font-size:1.1rem;font-weight:800;margin-bottom:16px}
+.modal-fg{margin-bottom:14px}
+.modal-fg label{display:block;font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:5px}
+.modal-fg input,.modal-fg textarea{width:100%;padding:9px 11px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;color:#1a1a2e}
+.modal-fg input:focus,.modal-fg textarea:focus{outline:none;border-color:#C4276E}
+.modal-fg textarea{min-height:70px;resize:vertical;font-family:ui-monospace,monospace;font-size:0.78rem}
+.modal-fg .hint{font-size:0.72rem;color:#999;margin-top:4px}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.modal-btns button{padding:9px 20px;border-radius:8px;font-family:inherit;font-size:0.86rem;font-weight:700;cursor:pointer;border:none}
+.modal-btns .btn-cancel{background:#eee;color:#555}
+.modal-btns .btn-save{background:#C4276E;color:white}
+.modal-btns .btn-save:hover{background:#a31f5b}
+
 /* Colors for topic numbers */
 .c1{background:#C4276E}.c2{background:#6B3520}.c3{background:#1B6B6B}.c4{background:#E65100}
 .c5{background:#1565C0}.c6{background:#7B1FA2}.c7{background:#2E7D32}.c8{background:#C62828}
@@ -118,7 +149,15 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
   <div class="done-banner" id="done-banner">All onboarding topics completed!</div>
 </div>
 
+<div class="edit-toggle-wrap" id="edit-toggle-wrap" style="display:none">
+  <button class="btn-edit-toggle" id="edit-toggle-btn" onclick="toggleEditMode()">&#9998; Edit Topics</button>
+</div>
+
 <div id="topics"></div>
+
+<div id="add-topic-wrap" style="display:none;text-align:center;margin-top:6px">
+  <button class="btn-add ghost" onclick="openTopicModal(null)">+ Add Topic</button>
+</div>
 
 <div class="actions">
   <button class="btn-reset" onclick="resetProgress()">Reset Progress</button>
@@ -126,267 +165,123 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 
 </div>
 
-<script>
-var TOPICS=[
-{id:1,title:'Team Introduction',color:'c1',
- outcome:'Understand who\'s who in the store and each person\'s role. Meet the owners, groomers, and retail team.',
- notes:'Introduce the new hire to every team member. Explain each person\'s role, responsibilities, and how the team works together.',
- hub:['Onboarding: Welcome to the Team','Woof Gang Way: Our Genuine Care About Our Customer Experience'],
- refs:[{title:'The Woof Gang Way — Customer Service',content:
-  '<h4>Core Values</h4>'+
-  '<ul><li><strong>Purrsonal Welcome:</strong> Give a warm and sincere greeting with eye contact. Offer a Woof Gang bulk treat (always ask pet parents\' permission first).</li>'+
-  '<li><strong>Pawsitive Attention:</strong> Anticipate and meet the needs of every pet parent. Always use the pet\'s name.</li>'+
-  '<li><strong>Sweet Goodbye:</strong> Give a kind goodbye and use the pet\'s name.</li></ul>'
- }]
-},
-{id:2,title:'Brand Mission & Values',color:'c2',
- outcome:'Able to communicate and embody the Woof Gang brand and service philosophy.',
- notes:'Share the brand story and commitment to pet wellness and customer service. Every pet deserves a happy and healthy life of quality while looking good!',
- hub:['Woof Gang Way Videos'],
- refs:[{title:'The Woof Gang Way — Philosophy',content:
-  '<h4>Our Mission</h4>'+
-  '<p>"We believe every pet deserves a happy and healthy life of quality while looking good!"</p>'+
-  '<h4>Pack Rules</h4>'+
-  '<ul><li><strong>First Impression:</strong> A friendly greeting, helpful support, and clean store make guests feel welcome — leading to more bookings, purchases, and long-term loyalty.</li>'+
-  '<li><strong>Customer Experience:</strong> Delivering a positive experience builds trust and encourages repeat visits.</li>'+
-  '<li><strong>Store Presentation:</strong> A clean, welcoming store reinforces our boutique atmosphere.</li></ul>'+
-  '<h4>Customer Care</h4>'+
-  '<p>Always be kind and helpful. Find solutions and pivot to more positive responses:</p>'+
-  '<ul><li>Instead of "No" or "You are wrong" — say: "I\'m very sorry about how you feel. Here is what we can do____."</li>'+
-  '<li>Instead of "I do not have any availability on this date" — say: "I\'m sorry, I don\'t have that specific date; how about this (date)?"</li></ul>'
- }]
-},
-{id:11,title:'Your Role as a Sales Associate',color:'c11',
- outcome:'Understand what it means to be a Woof Gang sales associate — the first face customers see, and the person who ties the whole in-store experience together.',
- notes:'You set the tone for every visit. Greet warmly, stay attentive, and make sure every customer — whether they\'re there to shop, book, or drop off for grooming — feels taken care of from the moment they walk in.',
- hub:[],
- refs:[{title:'Your Role as a Sales Associate',content:
-  '<h4>You Are the First Impression</h4>'+
-  '<p>You are usually the very first person a customer sees and talks to — before they ever meet a groomer, before they even look at a product. That first moment sets the tone for their entire visit. A warm greeting, a genuine smile, and your full attention tell a customer they\'re in the right place.</p>'+
-  '<h4>Embody the Woof Gang Way</h4>'+
-  '<p>Being warm and friendly isn\'t just politeness — it\'s the job. Every interaction is a chance to live out our mission: every pet deserves a happy, healthy life of quality while looking good. That starts with how you treat the humans on the other end of the leash.</p>'+
-  '<h4>You Help With Everything</h4>'+
-  '<p>Customers come in for a lot of different reasons, and you\'re the one who helps with all of it:</p>'+
-  '<ul><li><strong>Bookings:</strong> Scheduling, rescheduling, and answering questions about grooming services and pricing.</li>'+
-  '<li><strong>Retail:</strong> Helping customers find the right food, treats, and products for their pet — and recommending add-ons or spa upgrades when it makes sense.</li>'+
-  '<li><strong>Check-in / Check-out:</strong> Making drop-off and pick-up smooth, and making sure the right notes get passed along.</li>'+
-  '<li><strong>Questions:</strong> If you don\'t know the answer, find someone who does — never leave a customer guessing.</li></ul>'+
-  '<h4>Listen First</h4>'+
-  '<p>Every dog and every owner is different. Listen closely to what a customer tells you about their pet — a nervous dog, a skin issue, a specific cut they love — and actually hear it, not just check a box.</p>'+
-  '<h4>Liaise With Groomers</h4>'+
-  '<p>You\'re the bridge between the customer and the groomer. Pass along anything a customer tells you that a groomer needs to know — behavior notes, health concerns, style requests — clearly and before the appointment starts, not after. Good communication here is what makes a great groom happen.</p>'
- }]
-},
-{id:3,title:'Grooming Services Overview',color:'c3',
- outcome:'Understand what grooming services are offered and how they\'re priced. Know the core services by size/coat, time differences, Spa upgrades, and walk-in policies.',
- notes:'Review all service types and waivers: General, Senior, and Shave Down. Pricing is never quoted over the phone — groomers assess size, weight, and coat condition at check-in.',
- hub:['Elevating Customer Experience in Grooming','Grooming & Bathing Experience','WGB Bathing Video Series'],
- refs:[{title:'Service Descriptions',content:
-  '<h4>Full Groom</h4>'+
-  '<p>Full-style haircut, luxurious bath with shampoo &amp; conditioner, hand drying, full-body brushing &amp; styling, nail clipping &amp; filing, gentle ear cleansing, sanitary trimming, and anal glands expression as requested.</p>'+
-  '<h4>Mini Groom</h4>'+
-  '<p>Bath with shampoo &amp; conditioner, hand drying, full body brushing &amp; styling, nail clipping &amp; filing, gentle ear cleansing, sanitary trimming, anal gland expression if needed, and trimming of the face, paws, tail, ears, and sanitary area.</p>'+
-  '<p><em>Difference from Full Groom: Mini Groom only trims face, paws, tail, ears, and sanitary area — Full Groom provides a haircut on the entire body.</em></p>'+
-  '<h4>Luxury Bath</h4>'+
-  '<p>Bath with shampoo &amp; conditioner, hand drying, nail clipping, filing, gentle ear cleansing, and full body brushing &amp; styling. <strong>Does not include a haircut.</strong></p>'+
-  '<h4>Classic Bath</h4>'+
-  '<p>Bath with shampoo &amp; conditioner, hand drying, gentle ear cleansing, and full body brushing &amp; styling. <strong>Does not include a haircut.</strong></p>'+
-  '<h4>Spa Upgrades</h4>'+
-  '<p>Always offer spa upgrades at check-in — ask about coat and skin condition to recommend the right one. These are the real names as they appear in FranPOS:</p>'+
-  '<ul><li><strong>Hairy Beast (Deshedding):</strong> A deep deshedding treatment that loosens and removes loose undercoat — recommend for heavy-shedding breeds. Priced by size (S through XXL).</li>'+
-  '<li><strong>Diamond Dog (Spotless and Bright):</strong> A brightening treatment that leaves the coat looking clean, glossy, and bright — good for a dull or discolored coat.</li>'+
-  '<li><strong>Blueberry Pie Facial:</strong> A facial-focused treatment for the face, beard, and eye area — helps with tear staining and keeps the face fresh between visits.</li>'+
-  '<li><strong>Plush Pup (Smooth &amp; Silky):</strong> Leaves the coat extra soft and silky to the touch.</li>'+
-  '<li><strong>The Teddy Bear (Maximum Volume):</strong> Adds volume and fluff for a rounder, "teddy bear" look — popular on fluffier breeds and doodles.</li></ul>'+
-  '<p><em>These are the customer-facing names and what to tell pet parents they do — for exact technique/products per upgrade, confirm with your groomer trainer.</em></p>'+
-  '<h4>Add-Ons</h4>'+
-  '<p>Add-ons are individual extras added to any service based on what the dog actually needs:</p>'+
-  '<ul><li><strong>Teeth Brushing:</strong> Brushes the dog\'s teeth to help with breath and dental health.</li>'+
-  '<li><strong>Deshedding Treatment:</strong> Removes loose undercoat to reduce shedding at home (the standalone add-on version of Hairy Beast).</li>'+
-  '<li><strong>De-Matting:</strong> Removes mats and tangles from the coat, priced per 10 minutes — flag a heavily matted dog early since it adds real time to the appointment.</li>'+
-  '<li><strong>Brushing Out:</strong> Thorough brush-out of the coat, priced per 10 minutes.</li>'+
-  '<li><strong>Hand Stripping:</strong> A hand technique (not clipped) used on certain wiry/terrier coats to maintain proper coat texture.</li>'+
-  '<li><strong>Sanitary Trim:</strong> Trims hair around the sanitary area for hygiene; "both areas" covers front and rear.</li>'+
-  '<li><strong>Scissor Cut:</strong> Hand-scissored finishing work instead of clipper work.</li>'+
-  '<li><strong>Paw Pads &amp; Scissor Feet:</strong> Trims hair between paw pads and scissors the feet for a clean, tidy look.</li>'+
-  '<li><strong>Nail Polish / Nail Polish GEL:</strong> Polish applied after a nail trim — GEL lasts longer.</li>'+
-  '<li><strong>Anal Glands:</strong> Manual expression of the anal glands, offered as requested.</li>'+
-  '<li><strong>Flea &amp; Tick Shampoo:</strong> A medicated shampoo upgrade for dogs with fleas or ticks.</li>'+
-  '<li><strong>Hypo Allergenic Shampoo:</strong> A gentler shampoo for dogs with sensitive skin or allergies.</li>'+
-  '<li><strong>Conditioner:</strong> A leave-in conditioner for extra coat softness.</li>'+
-  '<li><strong>Handling (Extra Care):</strong> Additional time and care for anxious, elderly, or difficult-to-handle dogs.</li></ul>'+
-  '<p>Always explain the benefit when offering, e.g.: "Would you like to add a teeth brushing to help keep (pet\'s name)\'s teeth healthy and clean?"</p>'
- },{title:'Dog Grooming Booking Checklist',content:
-  '<ul><li><strong>Dog Size:</strong> Ask the pet parent the size (small, medium, large, extra-large) — affects grooming time and pricing.</li>'+
-  '<li><strong>Coat Type:</strong> Identify coat type (curly, straight, long, short). Doodles take longer than standard breeds. Confirm if the dog needs a bath or haircut.</li>'+
-  '<li><strong>Groomer Experience:</strong> Know which groomer is available and their expertise — each has different styles and speeds.</li>'+
-  '<li><strong>Health &amp; Age:</strong> Check for health concerns or elderly dogs requiring special handling.</li>'+
-  '<li><strong>Rabies Vaccination:</strong> Remind owners to check expiration and ensure it\'s up-to-date before the appointment.</li>'+
-  '<li><strong>Pricing:</strong> Pricing is NOT quoted over the phone. Services "start at" a certain amount.</li>'+
-  '<li><strong>Schedule Balance:</strong> Avoid too many similar breeds (e.g., goldendoodles) in one day.</li></ul>'
- }]
-},
-{id:4,title:'Retail Product Knowledge',color:'c4',
- outcome:'Can describe top sellers and their sourcing, and upsell appropriately.',
- notes:'Highlight treats, toys, and grooming products. Emphasize USA-made brands where applicable. Keep treat tables clean, organized, and fully stocked throughout the day.',
- hub:['6 Courses on Retail Sales Categories','Product Education Resources','Best Practices to Increase Retail Sales'],
- refs:[{title:'Retail & Inventory — From Playbook Routines',content:
-  '<h4>Daily Tasks (Sales Associate)</h4>'+
-  '<ul><li>Keep treat tables clean, organized, and fully stocked throughout the day</li>'+
-  '<li>Keep the cash wrap area clean and inviting</li></ul>'+
-  '<h4>Weekly Tasks (Owner/Manager)</h4>'+
-  '<ul><li>Order weekly for a steady inventory flow — ensure items are always kept in stock</li>'+
-  '<li>Review Inventory &amp; Pricing Guidelines</li>'+
-  '<li>Make ordering decisions based on data (Sales Report)</li>'+
-  '<li>Check that store merchandising aligns with Merchandising Guide</li></ul>'+
-  '<h4>Ongoing</h4>'+
-  '<ul><li>Ensure team members complete product training</li></ul>'
- }]
-},
-{id:5,title:'Introduction to FranPos',color:'c5',
- outcome:'Confident using POS for customer transactions and appointment management.',
- notes:'Learn how to: Add a customer, Book an appointment, Checkout, Process refunds, Handle gift cards.',
- hub:['POS Videos for Sales Associates','Front Desk Help Guide for Sales Associates'],
- refs:[{title:'POS Tips from Playbook',content:
-  '<ul><li>Create customer and pet profiles accurately</li>'+
-  '<li>Look up existing customers by phone number</li>'+
-  '<li>Share any alerts that come up on customer accounts (vaccinations, etc.)</li>'+
-  '<li>Follow POS icons and color codes to prevent long wait times in the kennels</li>'+
-  '<li>Ensure all grooming notes are documented clearly in FranPos — if it\'s not in FranPos, it doesn\'t exist</li>'+
-  '<li>Check that online booking SKUs are converted to in-store service SKUs (weekly)</li></ul>'
- }]
-},
-{id:6,title:'Receiving Product Deliveries',color:'c6',
- outcome:'Accurately receive and log incoming inventory.',
- notes:'Understand the difference between Woof Gang Marketplace deliveries vs. non-Marketplace deliveries. Each has a different receiving process.',
- hub:[],
- refs:[{title:'Inventory Management',content:
-  '<ul><li>First Saturday of every month: Inventory day</li>'+
-  '<li>Perform weekly inventory checks on grooming supplies</li>'+
-  '<li>Notify management of any inventory that needs to be reordered</li>'+
-  '<li>Replenish inventory on the floor, dust off items, rearrange to showcase new products and fill wall holes</li></ul>'
- }]
-},
-{id:7,title:'Role in Check-in / Check-out',color:'c7',
- outcome:'Knows how to support smooth drop-off and pick-up experiences.',
- notes:'Review talking points, dog tags, alerting groomers, and rebooking. Every customer leaves with their next appointment scheduled — no exceptions.',
- hub:[],
- refs:[{title:'Check-In Process (from Playbook)',content:
-  '<h4>Groomer Responsibilities at Check-In</h4>'+
-  '<ul><li>Read pet profile for preferences (safety, health, special requests) BEFORE the pet arrives</li>'+
-  '<li>Personally handle check-in for each pet</li>'+
-  '<li>Confirm haircut details using photos, combs, &amp; spa menus</li>'+
-  '<li>Clearly explain pricing &amp; service expectations before the service begins</li>'+
-  '<li>Explain de-matting (no longer than 10 minutes) and shave-down (waiver signed) services</li>'+
-  '<li>Consistently offer Routine Care, Spa Wellness, &amp; Add-Ons with benefits explained</li></ul>'+
-  '<h4>Sales Associate at Check-In</h4>'+
-  '<ul><li>Follow POS icons and color codes to prevent long wait times in kennels</li>'+
-  '<li>Anticipate scheduled pet arrivals and welcome them by name</li>'+
-  '<li>Confirm the dog\'s weight and coat condition</li></ul>'
- },{title:'Check-Out & Rebooking (from Playbook)',content:
-  '<h4>Before the Pet Leaves</h4>'+
-  '<ul><li>Every dog must be fully dried, brushed, wearing a bandana/bow/bow tie, cotton balls removed from ears, finished with cologne</li>'+
-  '<li>Ensure every pet parent is satisfied — provide touch-ups when needed</li>'+
-  '<li>Provide a completed Pup\'s Spa Day Report, requesting a Google review</li></ul>'+
-  '<h4>Rebooking — Non-Negotiable</h4>'+
-  '<ul><li>Consistently rebook customers at check-out — every customer, every time, no exceptions</li>'+
-  '<li>Actively request rebooking from every customer</li>'+
-  '<li>If customer declines, note it and follow up later</li></ul>'
- }]
-},
-{id:8,title:'Safety Protocols',color:'c8',
- outcome:'Understands procedures to ensure safety for all pets and staff. Covers leash policy, dog handling, and emergency response steps.',
- notes:'Review all 5 Safety Protocols. Ensure the new hire has signed the WGB Safety Protocol.',
- hub:['Safety Protocol 1: A Preventative Plan','Safety Protocol 2: While Pets are in Our Store','Safety Protocol 3: Cleaning and Disinfecting','Safety Protocol 4: PPE, Equipment and Ergonomics Safety','Safety Protocol 5: Emergency Protocol'],
- refs:[{title:'Safety Management — From Playbook',content:
-  '<h4>Weekly</h4>'+
-  '<ul><li>Safety Inspection &amp; Conversation — conduct a Safety Pause: 5-minute discussion on core safety behaviors</li>'+
-  '<li>Incident Follow-Up — 100% follow-up on any incident within 24 hours</li></ul>'+
-  '<h4>Ongoing</h4>'+
-  '<ul><li>Ensure all team members are familiar with and have signed the WGB Safety Protocol</li>'+
-  '<li>Ensure all team members are AKC-certified</li></ul>'
- }]
-},
-{id:9,title:'Handling Customer Complaints',color:'c9',
- outcome:'Can respond calmly, professionally, and escalate when needed.',
- notes:'Role-play common situations and review the manager escalation procedure. At any moment a complaint escalates, have the customer speak to a manager.',
- hub:[],
- refs:[{title:'Complaint Resolution Steps',content:
-  '<h4>Step 1 — Empathize &amp; Offer</h4>'+
-  '<ul><li>Listen attentively to customer concerns</li>'+
-  '<li>Offer a free spa upgrade &amp; teeth brushing and the option of a different groomer next time</li></ul>'+
-  '<h4>Step 2 — Escalate if Needed</h4>'+
-  '<ul><li>If a customer is very upset, a full refund can be offered at management\'s discretion (rare — no more than once every six weeks)</li></ul>'+
-  '<h4>If a Customer Reports Injury or Illness</h4>'+
-  '<ol><li>Show care, empathy, and concern for the pet\'s well-being</li>'+
-  '<li>Let them know we will review the situation with the groomer and check security footage</li>'+
-  '<li>Advise them to visit a vet if they have any concerns</li>'+
-  '<li>Assure them their pet\'s well-being is our top priority and we will follow up within 24 hours</li>'+
-  '<li>If a vet bill reimbursement is requested, management will review</li></ol>'
- },{title:'Customer Care Language',content:
-  '<div class="script"><span class="role">Instead of:</span> "No," "You are wrong," or "This is not true"<br><span class="role">Say:</span> "I\'m very sorry about how you feel. Here is what we can do____."</div>'+
-  '<div class="script"><span class="role">Instead of:</span> "I do not have any availability on this date"<br><span class="role">Say:</span> "I\'m sorry, I don\'t have that specific date; how about this (date)?"</div>'+
-  '<div class="script"><span class="role">Instead of:</span> Escalating tension<br><span class="role">Say:</span> "Can I put you on our waiting list?" or offer to have them speak with a manager.</div>'
- }]
-},
-{id:10,title:'Daily / Weekly Task Routine',color:'c10',
- outcome:'Follows expected rhythm for opening, closing, cleaning, and restocking.',
- notes:'Refer to the Playbook Routines for the full daily AM/PM checklist and weekly tasks: inventory, lapsed customer calls, etc.',
- hub:['Standard Store Procedures — Opening, Daily, Closing','Cleaning Sample Schedule'],
- refs:[{title:'Before Store Opens',content:
-  '<h4>Sales Associate — Daily</h4>'+
-  '<ul><li>Follow the Opening Procedures checklist — initial each item to confirm completion</li>'+
-  '<li>Clean the retail area (smells good, no dust, floors clean)</li>'+
-  '<li>Review the schedule for today AND tomorrow — stay ahead of changes</li>'+
-  '<li>Check all rabies vaccinations &amp; waivers are current in FranPos</li>'+
-  '<li>Confirm all appointments 24 hours in advance to reduce no-shows</li></ul>'
- },{title:'Throughout the Day',content:
-  '<h4>Greeting — Every Customer</h4>'+
-  '<ul><li>Make eye contact &amp; verbally greet every customer the moment they enter</li>'+
-  '<li>Move from behind the counter to give a warm, sincere greeting</li>'+
-  '<li>Use the pet\'s name when available in the POS system</li>'+
-  '<li>Ask permission before offering a bulk treat; give appropriately</li>'+
-  '<li>Give a kind, friendly goodbye using the pet\'s name</li></ul>'+
-  '<h4>Phone &amp; Online Booking — Every Call</h4>'+
-  '<ul><li>Use the "Talking to Customers Over the Phone" laminated cards</li>'+
-  '<li>Answer 100% of calls; return voicemails &amp; missed calls quickly</li>'+
-  '<li>Speak with a friendly, professional tone on every call</li>'+
-  '<li>Accurately answer questions about services; always offer teeth brushing</li>'+
-  '<li>Actively promote online booking to customers</li></ul>'+
-  '<h4>Schedule Management — Ongoing</h4>'+
-  '<ul><li>Move appointments to reduce downtime and accommodate more appointments</li>'+
-  '<li>Balance dog volume across groomers while honoring requests</li>'+
-  '<li>Fill cancellations by contacting future appointments and offering early spots</li>'+
-  '<li>Enforce late arrival policy — call pet parents 5 minutes after scheduled time if not arrived</li>'+
-  '<li>Enter clear, helpful grooming notes in FranPos pet profiles</li></ul>'
- },{title:'End of Day',content:
-  '<h4>Sales Associate — Daily</h4>'+
-  '<ul><li>Follow the Closing Procedures checklist — initial each item to confirm completion</li></ul>'+
-  '<h4>Lapsed Customers — During Quiet Periods</h4>'+
-  '<ul><li>Call lapsed customers per the manager-defined routine</li>'+
-  '<li>Best made during slow periods — mid-morning or early afternoon</li>'+
-  '<li>Track every call in the POS</li></ul>'
- },{title:'Phone Scripts — Answering Calls',content:
-  '<div class="script"><span class="role">Greeting:</span> "Good [morning/afternoon/evening], and thank you for calling Woof Gang [store name]. This is [your name], how may I assist you today?"</div>'+
-  '<div class="script"><span class="role">New Customer:</span> "Welcome! I\'m sure you will love our groomers and how we pamper your furry friend! I will create a customer profile in our system. Could you please spell your first and last name?"<br><br>Collect: phone number, email, pet name, breed, and any health/temperament notes.</div>'+
-  '<div class="script"><span class="role">Existing Customer:</span> "Can I please have the phone number attached to your account, to look you up in our system?"<br><br>Share any alerts on their account (vaccinations, etc.)</div>'+
-  '<div class="script"><span class="role">Booking:</span> "We are excited to see [pet\'s name]. I just had an appointment open on [date] at [time] and on [date] at [time]."<br><br>Always offer the first available time slots — usually 2 options.</div>'+
-  '<div class="script"><span class="role">Pricing:</span> "The service starts at [$$] depending on the weight, size, and condition of the coat. The groomer will conduct a consultation at check-in to determine the final price."<br><br><em>Never quote exact price over the phone.</em></div>'+
-  '<div class="script"><span class="role">Ending:</span> "We look forward to seeing you and [pet\'s name] on [date] at [time] for a [service]. Thank you for calling Woof Gang [store name] and have a great day!"</div>'
- }]
-}
-];
+<div class="modal-overlay" id="topic-modal-overlay">
+  <div class="modal-box">
+    <h3 id="topic-modal-title">Add Topic</h3>
+    <div class="modal-fg"><label>Title</label><input type="text" id="tm-title"></div>
+    <div class="modal-fg"><label>Learning Outcome</label><input type="text" id="tm-outcome" placeholder="What the new hire should be able to do after this topic"></div>
+    <div class="modal-fg"><label>Key Points</label><textarea id="tm-notes" style="font-family:inherit;min-height:56px"></textarea></div>
+    <div class="modal-fg"><label>Learning Hub Docs (comma-separated, optional)</label><input type="text" id="tm-hub"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeTopicModal()">Cancel</button>
+      <button class="btn-save" onclick="saveTopicModal()">Save</button>
+    </div>
+  </div>
+</div>
 
-// State
+<div class="modal-overlay" id="ref-modal-overlay">
+  <div class="modal-box">
+    <h3 id="ref-modal-title">Add Reference</h3>
+    <div class="modal-fg"><label>Section Title</label><input type="text" id="rm-title"></div>
+    <div class="modal-fg">
+      <label>Content</label>
+      <textarea id="rm-content" style="min-height:220px"></textarea>
+      <div class="hint">Basic HTML only: &lt;h4&gt;, &lt;p&gt;, &lt;ul&gt;&lt;li&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;. Anything else is stripped when displayed.</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeRefModal()">Cancel</button>
+      <button class="btn-save" onclick="saveRefModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Config ───────────────────────────────────── */
+var SB_URL = 'https://bqzinttbjeeaybywhhet.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SB_HDR = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+function sbFetch(path, opts) { return fetch(SB_URL + path, Object.assign({ headers: SB_HDR }, opts)); }
+
+var COLOR_PALETTE = ['c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11'];
+function colorFor(idx) { return COLOR_PALETTE[idx % COLOR_PALETTE.length]; }
+
+var portalLevel = sessionStorage.getItem('wg_portal_level') || '';
+var canEdit = (portalLevel === 'owner' || portalLevel === 'manager');
+var editMode = false;
+
+var topics = [];       // [{id, title, outcome, notes, hub:[...], refs:[{id,title,content,sort_order}, ...]}]
+var editingTopicId = null;  // null = adding new
+var editingRefId = null;
+var editingRefTopicId = null;
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── HTML sanitizer for reference content ────────
+   Only admins (owner/manager) can write this content, but we sanitize on
+   render anyway as defense in depth — strips anything outside a small
+   known-safe tag/attribute allowlist via the browser's own HTML parser
+   (DOMParser never executes scripts), so a typo or copy-paste mistake
+   can't inject something unexpected into every trainee's screen. */
+var ALLOWED_TAGS = {h4:[], p:[], ul:[], li:[], strong:[], em:[], br:[], div:['class'], span:['class']};
+function sanitizeHtml(html){
+  var doc = new DOMParser().parseFromString('<div>' + html + '</div>', 'text/html');
+  var root = doc.body.firstChild;
+  if (!root) return '';
+  (function clean(node){
+    var toRemove = [];
+    Array.prototype.forEach.call(node.childNodes, function(child){
+      if (child.nodeType === 1) {
+        var tag = child.tagName.toLowerCase();
+        if (!ALLOWED_TAGS.hasOwnProperty(tag)) { toRemove.push(child); return; }
+        var allowedAttrs = ALLOWED_TAGS[tag];
+        Array.prototype.slice.call(child.attributes).forEach(function(attr){
+          if (allowedAttrs.indexOf(attr.name) === -1) child.removeAttribute(attr.name);
+        });
+        clean(child);
+      } else if (child.nodeType !== 3) {
+        toRemove.push(child);
+      }
+    });
+    toRemove.forEach(function(n){ node.removeChild(n); });
+  })(root);
+  return root.innerHTML;
+}
+
+/* ── Load ─────────────────────────────────────── */
+function loadTopics(){
+  Promise.all([
+    sbFetch('/rest/v1/onboarding_topics?is_active=eq.true&order=sort_order,created_at').then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('topics: ' + r.status)); }),
+    sbFetch('/rest/v1/onboarding_refs?order=sort_order,created_at').then(function(r){ return r.ok ? r.json() : Promise.reject(new Error('refs: ' + r.status)); })
+  ]).then(function(results){
+    var rawTopics = results[0], rawRefs = results[1];
+    var refsByTopic = {};
+    rawRefs.forEach(function(r){
+      if (!refsByTopic[r.topic_id]) refsByTopic[r.topic_id] = [];
+      refsByTopic[r.topic_id].push(r);
+    });
+    topics = rawTopics.map(function(t){
+      var hub = [];
+      try { hub = typeof t.hub === 'string' ? JSON.parse(t.hub) : (t.hub || []); } catch(e) { hub = []; }
+      return { id: t.id, title: t.title, outcome: t.outcome || '', notes: t.notes || '', hub: hub, refs: refsByTopic[t.id] || [] };
+    });
+    if (canEdit) document.getElementById('edit-toggle-wrap').style.display = '';
+    renderTopics();
+  }).catch(function(err){
+    console.error(err);
+    document.getElementById('topics').innerHTML = '<div style="text-align:center;color:#c62828;padding:30px;background:white;border-radius:14px">Could not load onboarding content — refresh to retry.</div>';
+  });
+}
+
+/* ── Completion state (per-browser, unchanged from before) ─────────── */
 var KEY='wg_onboarding';
 function getChecked(){try{return JSON.parse(localStorage.getItem(KEY))||[];}catch(e){return[];}}
 function setChecked(arr){localStorage.setItem(KEY,JSON.stringify(arr));}
 
 function updateProgress(){
-  var checked=getChecked(), total=TOPICS.length, done=checked.length;
+  var checked=getChecked(), total=topics.length, done=checked.filter(function(id){ return topics.some(function(t){ return t.id===id; }); }).length;
   document.getElementById('prog-count').textContent=done+' of '+total;
-  document.getElementById('prog-fill').style.width=Math.round(done/total*100)+'%';
-  document.getElementById('done-banner').className='done-banner'+(done===total?' show':'');
+  document.getElementById('prog-fill').style.width=(total?Math.round(done/total*100):0)+'%';
+  document.getElementById('done-banner').className='done-banner'+(total>0&&done===total?' show':'');
 }
 
 function toggleCheck(id){
@@ -411,38 +306,197 @@ function resetProgress(){
   renderTopics();
 }
 
+/* ── Edit mode ────────────────────────────────── */
+function toggleEditMode(){
+  editMode = !editMode;
+  var btn = document.getElementById('edit-toggle-btn');
+  btn.classList.toggle('active', editMode);
+  btn.textContent = editMode ? '✓ Done Editing' : '✎ Edit Topics';
+  document.getElementById('add-topic-wrap').style.display = editMode ? '' : 'none';
+  renderTopics();
+}
+
+function moveTopic(id, dir){
+  var idx = topics.findIndex(function(t){ return t.id === id; });
+  var swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= topics.length) return;
+  var a = topics[idx], b = topics[swapIdx];
+  topics[idx] = b; topics[swapIdx] = a;
+  renderTopics();
+  Promise.all([
+    sbFetch('/rest/v1/onboarding_topics?id=eq.' + a.id, { method:'PATCH', headers:SB_HDR, body: JSON.stringify({ sort_order: swapIdx+1 }) }),
+    sbFetch('/rest/v1/onboarding_topics?id=eq.' + b.id, { method:'PATCH', headers:SB_HDR, body: JSON.stringify({ sort_order: idx+1 }) })
+  ]).catch(function(){ alert('Could not save the new order — refresh to retry.'); });
+}
+
+function deleteTopic(id){
+  if(!confirm('Remove this topic and all its reference sections? This cannot be undone.')) return;
+  sbFetch('/rest/v1/onboarding_topics?id=eq.' + id, { method:'DELETE', headers:SB_HDR })
+    .then(function(r){
+      if(!r.ok) throw new Error('delete failed');
+      topics = topics.filter(function(t){ return t.id !== id; });
+      renderTopics();
+    })
+    .catch(function(){ alert('Could not remove topic — try again.'); });
+}
+
+/* ── Topic modal ──────────────────────────────── */
+function openTopicModal(id){
+  editingTopicId = id;
+  var t = id ? topics.find(function(x){ return x.id === id; }) : null;
+  document.getElementById('topic-modal-title').textContent = t ? 'Edit Topic' : 'Add Topic';
+  document.getElementById('tm-title').value = t ? t.title : '';
+  document.getElementById('tm-outcome').value = t ? t.outcome : '';
+  document.getElementById('tm-notes').value = t ? t.notes : '';
+  document.getElementById('tm-hub').value = t ? t.hub.join(', ') : '';
+  document.getElementById('topic-modal-overlay').classList.add('open');
+}
+function closeTopicModal(){ document.getElementById('topic-modal-overlay').classList.remove('open'); }
+
+function saveTopicModal(){
+  var title = document.getElementById('tm-title').value.trim();
+  if(!title){ alert('Title is required'); return; }
+  var body = {
+    title: title,
+    outcome: document.getElementById('tm-outcome').value.trim(),
+    notes: document.getElementById('tm-notes').value.trim(),
+    hub: JSON.stringify(document.getElementById('tm-hub').value.split(',').map(function(s){return s.trim();}).filter(Boolean))
+  };
+  if(editingTopicId){
+    sbFetch('/rest/v1/onboarding_topics?id=eq.' + editingTopicId, {
+      method:'PATCH', headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+      body: JSON.stringify(body)
+    }).then(function(r){ return r.json(); }).then(function(res){
+      var saved = Array.isArray(res)?res[0]:res;
+      var t = topics.find(function(x){ return x.id === editingTopicId; });
+      if(t && saved){ t.title=saved.title; t.outcome=saved.outcome||''; t.notes=saved.notes||''; try{t.hub=JSON.parse(saved.hub);}catch(e){} }
+      closeTopicModal(); renderTopics();
+    }).catch(function(){ alert('Could not save changes.'); });
+  } else {
+    body.sort_order = topics.length + 1;
+    sbFetch('/rest/v1/onboarding_topics', {
+      method:'POST', headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+      body: JSON.stringify(body)
+    }).then(function(r){ return r.json(); }).then(function(res){
+      var saved = Array.isArray(res)?res[0]:res;
+      if(saved){
+        var hub=[]; try{hub=JSON.parse(saved.hub);}catch(e){}
+        topics.push({ id:saved.id, title:saved.title, outcome:saved.outcome||'', notes:saved.notes||'', hub:hub, refs:[] });
+      }
+      closeTopicModal(); renderTopics();
+    }).catch(function(){ alert('Could not add topic.'); });
+  }
+}
+
+/* ── Reference modal ──────────────────────────── */
+function openRefModal(topicId, refId){
+  editingRefTopicId = topicId;
+  editingRefId = refId;
+  var r = null;
+  if(refId){
+    var t = topics.find(function(x){ return x.id === topicId; });
+    r = t.refs.find(function(x){ return x.id === refId; });
+  }
+  document.getElementById('ref-modal-title').textContent = r ? 'Edit Reference' : 'Add Reference';
+  document.getElementById('rm-title').value = r ? r.title : '';
+  document.getElementById('rm-content').value = r ? r.content : '';
+  document.getElementById('ref-modal-overlay').classList.add('open');
+}
+function closeRefModal(){ document.getElementById('ref-modal-overlay').classList.remove('open'); }
+
+function saveRefModal(){
+  var title = document.getElementById('rm-title').value.trim();
+  var content = document.getElementById('rm-content').value.trim();
+  if(!title || !content){ alert('Both a title and content are required'); return; }
+  var t = topics.find(function(x){ return x.id === editingRefTopicId; });
+  if(editingRefId){
+    sbFetch('/rest/v1/onboarding_refs?id=eq.' + editingRefId, {
+      method:'PATCH', headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+      body: JSON.stringify({ title: title, content: content })
+    }).then(function(r){ return r.json(); }).then(function(res){
+      var saved = Array.isArray(res)?res[0]:res;
+      var ref = t.refs.find(function(x){ return x.id === editingRefId; });
+      if(ref && saved){ ref.title=saved.title; ref.content=saved.content; }
+      closeRefModal(); renderTopics();
+    }).catch(function(){ alert('Could not save changes.'); });
+  } else {
+    sbFetch('/rest/v1/onboarding_refs', {
+      method:'POST', headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+      body: JSON.stringify({ topic_id: editingRefTopicId, title: title, content: content, sort_order: t.refs.length + 1 })
+    }).then(function(r){ return r.json(); }).then(function(res){
+      var saved = Array.isArray(res)?res[0]:res;
+      if(saved) t.refs.push(saved);
+      closeRefModal(); renderTopics();
+    }).catch(function(){ alert('Could not add reference.'); });
+  }
+}
+
+function deleteRef(topicId, refId){
+  if(!confirm('Remove this reference section?')) return;
+  sbFetch('/rest/v1/onboarding_refs?id=eq.' + refId, { method:'DELETE', headers:SB_HDR })
+    .then(function(r){
+      if(!r.ok) throw new Error('delete failed');
+      var t = topics.find(function(x){ return x.id === topicId; });
+      t.refs = t.refs.filter(function(x){ return x.id !== refId; });
+      renderTopics();
+    })
+    .catch(function(){ alert('Could not remove reference — try again.'); });
+}
+
+/* ── Render ───────────────────────────────────── */
 function renderTopics(){
   var checked=getChecked();
-  var html=TOPICS.map(function(t,idx){
+  var openTopics=[];
+  document.querySelectorAll('.topic.open').forEach(function(el){openTopics.push(el.dataset.topic);});
+
+  var html=topics.map(function(t,idx){
     var isDone=checked.indexOf(t.id)>=0;
-    var openTopics=[];
-    document.querySelectorAll('.topic.open').forEach(function(el){openTopics.push(+el.dataset.topic);});
     var isOpen=openTopics.indexOf(t.id)>=0;
 
     var h='<div class="topic'+(isDone?' completed':'')+(isOpen?' open':'')+'" data-topic="'+t.id+'">';
-    h+='<div class="topic-header" onclick="toggleTopic('+t.id+')">';
-    h+='<div class="topic-num '+t.color+'">'+(idx+1)+'</div>';
-    h+='<div class="topic-title">'+t.title+'</div>';
-    h+='<div class="topic-check'+(isDone?' checked':'')+'" onclick="event.stopPropagation();toggleCheck('+t.id+')"></div>';
+    h+='<div class="topic-header" onclick="toggleTopic(\''+t.id+'\')">';
+    h+='<div class="topic-num '+colorFor(idx)+'">'+(idx+1)+'</div>';
+    h+='<div class="topic-title">'+esc(t.title)+'</div>';
+    if(editMode){
+      h+='<div class="topic-edit-btns" onclick="event.stopPropagation()">';
+      h+='<button class="icon-btn" onclick="moveTopic(\''+t.id+'\',-1)" title="Move up">&#8593;</button>';
+      h+='<button class="icon-btn" onclick="moveTopic(\''+t.id+'\',1)" title="Move down">&#8595;</button>';
+      h+='<button class="icon-btn" onclick="openTopicModal(\''+t.id+'\')" title="Edit">&#9998;</button>';
+      h+='<button class="icon-btn" onclick="deleteTopic(\''+t.id+'\')" title="Delete">&#128465;</button>';
+      h+='</div>';
+    } else {
+      h+='<div class="topic-check'+(isDone?' checked':'')+'" onclick="event.stopPropagation();toggleCheck(\''+t.id+'\')"></div>';
+    }
     h+='<div class="topic-arrow">&#9654;</div>';
     h+='</div>';
 
     h+='<div class="topic-body">';
-    h+='<div class="outcome"><strong>Learning Outcome</strong>'+t.outcome+'</div>';
-    h+='<div class="notes"><strong>Key Points</strong>'+t.notes+'</div>';
+    if (t.outcome) h+='<div class="outcome"><strong>Learning Outcome</strong>'+esc(t.outcome)+'</div>';
+    if (t.notes) h+='<div class="notes"><strong>Key Points</strong>'+esc(t.notes)+'</div>';
 
     if(t.hub.length){
       h+='<div style="margin-top:10px"><strong style="font-size:0.75rem;color:#888;text-transform:uppercase;letter-spacing:0.05em">Learning Hub</strong></div>';
-      h+='<div class="hub-docs">'+t.hub.map(function(d){return '<span class="hub-pill">'+d+'</span>';}).join('')+'</div>';
+      h+='<div class="hub-docs">'+t.hub.map(function(d){return '<span class="hub-pill">'+esc(d)+'</span>';}).join('')+'</div>';
     }
 
     if(t.refs&&t.refs.length){
       t.refs.forEach(function(r){
         h+='<div class="ref-section">';
-        h+='<div class="ref-toggle" onclick="toggleRef(this)"><span class="ref-arrow">&#9654;</span> '+r.title+'</div>';
-        h+='<div class="ref-content">'+r.content+'</div>';
+        h+='<div class="ref-toggle-row"><div class="ref-toggle" onclick="toggleRef(this)"><span class="ref-arrow">&#9654;</span> '+esc(r.title)+'</div>';
+        if(editMode){
+          h+='<div class="ref-edit-btns">';
+          h+='<button class="icon-btn" onclick="openRefModal(\''+t.id+'\',\''+r.id+'\')" title="Edit">&#9998;</button>';
+          h+='<button class="icon-btn" onclick="deleteRef(\''+t.id+'\',\''+r.id+'\')" title="Delete">&#128465;</button>';
+          h+='</div>';
+        }
+        h+='</div>';
+        h+='<div class="ref-content">'+sanitizeHtml(r.content)+'</div>';
         h+='</div>';
       });
+    }
+
+    if(editMode){
+      h+='<button class="btn-add ghost" onclick="openRefModal(\''+t.id+'\',null)">+ Add Reference Section</button>';
     }
 
     h+='</div></div>';
@@ -453,7 +507,7 @@ function renderTopics(){
   updateProgress();
 }
 
-renderTopics();
+loadTopics();
 </script>
 </body>
 </html>
