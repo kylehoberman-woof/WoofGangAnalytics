@@ -1,4 +1,9 @@
-name: Online Booking Requests
+name: Shared Inbox Ingestion
+
+# Both pipelines read the same shared Gmail inbox (woofganglongislandops@
+# gmail.com) that all 3 stores' Outlook mailboxes forward into, so they run
+# as two steps in one job rather than duplicating the checkout/setup/secret
+# wiring across separate workflow files.
 
 on:
   schedule:
@@ -27,3 +32,6 @@ jobs:
 
       - name: Fetch new online booking request leads
         run: python3 scripts/fetch_booking_requests.py
+
+      - name: Fetch new hiring applications
+        run: python3 scripts/fetch_hiring_applications.py
