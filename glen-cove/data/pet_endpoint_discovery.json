@@ -1,0 +1,422 @@
+{
+  "walkin_booking_appointments_iso": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-09-13",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
+  },
+  "walkin_booking_appointments_iso_midnight": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-09-13T00%3A00%3A00",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
+  },
+  "walkin_booking_appointments_us_slash": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=09%2F13%2F2026",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
+  },
+  "walkin_booking_appointments_us_dash": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=09-13-2026",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
+  },
+  "walkin_booking_appointments_iso_space": {
+    "status": 400,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-09-13+00%3A00%3A00",
+    "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
+  },
+  "walkin_booking_appointments_locationid": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-09-13",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-09-"
+  },
+  "walkin_queue": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/queue?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058",
+    "type": "dict",
+    "keys": [
+      "count",
+      "data"
+    ],
+    "sample": {
+      "data": [],
+      "count": 0
+    }
+  },
+  "walkin_settings": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/207058/settings?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "type": "dict",
+    "keys": [
+      "CompanyId",
+      "CompanyName",
+      "EnableSecondaryContacts",
+      "EnableService",
+      "EnableServiceProvider",
+      "EnableTermsOfService",
+      "Genders",
+      "TermsOfService",
+      "ThankYouPageContent",
+      "ThankYouPageTitle"
+    ],
+    "sample": {
+      "CompanyId": 207058,
+      "CompanyName": 0,
+      "EnableServiceProvider": false,
+      "EnableService": false,
+      "EnableTermsOfService": false,
+      "EnableSecondaryContacts": false,
+      "TermsOfService": null,
+      "ThankYouPageTitle": null,
+      "ThankYouPageContent": null,
+      "Genders": null
+    }
+  },
+  "walkin_simple_services": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/207058/simpleServices?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "type": "dict",
+    "keys": [
+      "data"
+    ],
+    "nested_data_count": 7,
+    "nested_data_keys": [
+      "Duration",
+      "EmployeeId",
+      "Id",
+      "Name",
+      "Price",
+      "ServiceId"
+    ],
+    "nested_data_sample": [
+      {
+        "Id": 28550789,
+        "Name": "ONLINE ADD-ON (#60) - Hypoallergenic Shampoo",
+        "Price": 0.0,
+        "EmployeeId": 0,
+        "Duration": 0,
+        "ServiceId": 28550789
+      },
+      {
+        "Id": 28550790,
+        "Name": "ONLINE ADD-ON (#62) - Teeth Brushing",
+        "Price": 0.0,
+        "EmployeeId": 0,
+        "Duration": 0,
+        "ServiceId": 28550790
+      }
+    ],
+    "sample": {
+      "data": [
+        {
+          "Id": 28550789,
+          "Name": "ONLINE ADD-ON (#60) - Hypoallergenic Shampoo",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 28550789
+        },
+        {
+          "Id": 28550790,
+          "Name": "ONLINE ADD-ON (#62) - Teeth Brushing",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 28550790
+        },
+        {
+          "Id": 28550791,
+          "Name": "ONLINE ADD-ON (#70) - SPA Hairy Beast (Deshedding)",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 30,
+          "ServiceId": 28550791
+        },
+        {
+          "Id": 28550792,
+          "Name": "ONLINE ADD-ON (#71) - SPA Blueberry Facial",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 0,
+          "ServiceId": 28550792
+        },
+        {
+          "Id": 28550786,
+          "Name": "ONLINE SERVICE (#1) - DOG - Full Groom",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 90,
+          "ServiceId": 28550786
+        },
+        {
+          "Id": 28550787,
+          "Name": "ONLINE SERVICE (#2) - DOG - Mini Groom",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 60,
+          "ServiceId": 28550787
+        },
+        {
+          "Id": 28550788,
+          "Name": "ONLINE SERVICE (#3) - DOG - Luxury Bath",
+          "Price": 0.0,
+          "EmployeeId": 0,
+          "Duration": 30,
+          "ServiceId": 28550788
+        }
+      ]
+    }
+  },
+  "walkin_services": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/walkin/207058/services?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "type": "dict",
+    "keys": [
+      "data"
+    ],
+    "sample": {
+      "data": []
+    }
+  },
+  "company_formfields": {
+    "status": 500,
+    "url": "https://publicapi.franpos.com/api/company/formfields?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058",
+    "body": "{\"Message\":\"An error has occurred.\",\"ExceptionMessage\":\"The property 'ID' is part of the object's key information and cannot be modified. \",\"ExceptionType\":\"System.InvalidOperationException\",\"StackTrace\":\"   at System.Data.Entity.Core.Objects.EntityEntry.DetectChangesInProperty(Int32 ordinal, Boolea"
+  },
+  "booking_getstatus_no_sample_id": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/getstatus?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getstatus?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058'.\",\"MessageDetail\":\"No act"
+  },
+  "booking_list_by_date": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/list?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-09-13",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/list?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-09-13'.\",\"MessageD"
+  },
+  "booking_getbookings": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/getbookings?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-09-13",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getbookings?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-09-13'.\",\"M"
+  },
+  "booking_bydate": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/bydate?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-09-13",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/bydate?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-09-13'.\",\"Messag"
+  },
+  "booking_search": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/booking/search?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&startDate=2026-09-13&endDate=2026-09-13",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/search?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&startDate=2026-09-13&endDate="
+  },
+  "walkin_employee_schedules_today": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-09-13",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-09-13'"
+  },
+  "walkin_employee_schedules_tomorrow": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-09-14",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-09-14'"
+  },
+  "datadump_customers_sample": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/datadump/v1/customers/7/0/2026-09-12/207058?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "pages",
+      "version"
+    ],
+    "nested_data_count": 2,
+    "nested_data_keys": [
+      "Address",
+      "CellPhone",
+      "City",
+      "CompanyId",
+      "CreationDate",
+      "CustomFieldValues",
+      "CustomerCode",
+      "CustomerId",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "IsAdmin",
+      "LastName",
+      "Membership",
+      "MembershipBalance",
+      "MembershipId",
+      "ModifiedDate",
+      "ParentCustomerId",
+      "Phone",
+      "StateProvinceId",
+      "ZipPostal"
+    ],
+    "nested_data_sample": [
+      {
+        "Address": null,
+        "CellPhone": "5162880466",
+        "City": null,
+        "CompanyId": 207058,
+        "CustomerId": 420887142,
+        "DateOfBirth": null,
+        "Email": "hugoisrraelcisnerosalvarez8@gmail.com",
+        "FirstName": "Hugo",
+        "LastName": "Cisneros",
+        "Membership": null,
+        "MembershipBalance": null,
+        "MembershipId": null,
+        "Phone": "5162880466",
+        "StateProvinceId": null,
+        "ZipPostal": null,
+        "IsAdmin": false,
+        "CreationDate": "2026-09-13T03:32:37.59",
+        "ModifiedDate": "2026-09-13T03:32:38.527",
+        "ParentCustomerId": null,
+        "CustomerCode": null,
+        "CustomFieldValues": []
+      },
+      {
+        "Address": null,
+        "CellPhone": "5162880466",
+        "City": null,
+        "CompanyId": 207058,
+        "CustomerId": 420887143,
+        "DateOfBirth": "2025-02-04T00:00:00",
+        "Email": "hugoisrraelcisnerosalvarez8@gmail.com",
+        "FirstName": "Milo",
+        "LastName": null,
+        "Membership": null,
+        "MembershipBalance": null,
+        "MembershipId": null,
+        "Phone": null,
+        "StateProvinceId": null,
+        "ZipPostal": null,
+        "IsAdmin": false,
+        "CreationDate": "2026-09-13T03:32:38.947",
+        "ModifiedDate": "2026-09-13T03:32:39.23",
+        "ParentCustomerId": 420887142,
+        "CustomerCode": null,
+        "CustomFieldValues": [
+          {
+            "id": 372,
+            "name": "1"
+          },
+          {
+            "id": 373,
+            "name": "208"
+          },
+          {
+            "id": 374,
+            "name": "-1"
+          },
+          {
+            "id": 377,
+            "name": "12"
+          },
+          {
+            "id": 375,
+            "name": "3"
+          },
+          {
+            "id": 376,
+            "name": null
+          },
+          {
+            "id": 378,
+            "name": "1"
+          },
+          {
+            "id": 379,
+            "name": "2"
+          }
+        ]
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Address": null,
+          "CellPhone": "5162880466",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 420887142,
+          "DateOfBirth": null,
+          "Email": "hugoisrraelcisnerosalvarez8@gmail.com",
+          "FirstName": "Hugo",
+          "LastName": "Cisneros",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "5162880466",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-09-13T03:32:37.59",
+          "ModifiedDate": "2026-09-13T03:32:38.527",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5162880466",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 420887143,
+          "DateOfBirth": "2025-02-04T00:00:00",
+          "Email": "hugoisrraelcisnerosalvarez8@gmail.com",
+          "FirstName": "Milo",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-09-13T03:32:38.947",
+          "ModifiedDate": "2026-09-13T03:32:39.23",
+          "ParentCustomerId": 420887142,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "208"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "12"
+            },
+            {
+              "id": 375,
+              "name": "3"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
+        }
+      ],
+      "pages": 1,
+      "version": 774441401
+    }
+  }
+}
