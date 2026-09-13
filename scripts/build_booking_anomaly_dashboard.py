@@ -675,6 +675,10 @@ var ANOMALIES = {ANOMALIES_JS};
 var PROFILES = {PROFILES_JS};
 var STORE_KEY = {STORE_KEY_JS};
 
+var BA_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var BA_SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var BA_SHD = {{'apikey':BA_SK,'Authorization':'Bearer '+BA_SK,'Content-Type':'application/json'}};
+
 var _tab = 'all';
 var _days = 60;
 var _groomer = '';
@@ -737,21 +741,54 @@ function flagBadge(f, details) {{
   return '';
 }}
 
-// ── localStorage helpers ────────────────────────────────────────────────────
-function getAcked() {{
-  try {{ return JSON.parse(localStorage.getItem('wg_acked_' + STORE_KEY) || '{{}}'); }}
-  catch(e) {{ return {{}}; }}
+// ── Acknowledgment persistence (Supabase, not localStorage) ─────────────────
+// A browser's localStorage is per-device and often per-browser-profile — an
+// associate acknowledging on one computer (or in a private window, or on a
+// browser set to clear data on close) sees it reset for anyone else, or for
+// themselves the next day on a different device. Storing acks in Supabase
+// instead makes them a shared, durable fact everyone sees the same way.
+var ackedByDogKey = {{}};  // dog_key -> saved row
+function isAcked(cid) {{ return !!ackedByDogKey[cid]; }}
+function loadAcks() {{
+  return fetch(BA_SB + '/booking_anomaly_acks?store=eq.' + encodeURIComponent(STORE_KEY), {{headers: BA_SHD}})
+    .then(function(r) {{ return r.json(); }})
+    .then(function(rows) {{
+      ackedByDogKey = {{}};
+      (Array.isArray(rows) ? rows : []).forEach(function(r) {{ ackedByDogKey[r.dog_key] = r; }});
+      render();
+    }})
+    .catch(function() {{}});
 }}
-function isAcked(cid) {{ return !!getAcked()[cid]; }}
 function ack(cid) {{
-  var a = getAcked(); a[cid] = {{at: new Date().toISOString()}};
-  localStorage.setItem('wg_acked_' + STORE_KEY, JSON.stringify(a));
-  render();
+  var a = ANOMALIES.find(function(x) {{ return (x.dog_key || x.cid) === cid; }});
+  var body = {{
+    store: STORE_KEY,
+    dog_key: cid,
+    pet_name: a ? (a.pet_name || '') : '',
+    owner_name: a ? (a.customer_name || '') : ''
+  }};
+  fetch(BA_SB + '/booking_anomaly_acks?on_conflict=store,dog_key', {{
+    method: 'POST',
+    headers: Object.assign({{}}, BA_SHD, {{'Prefer': 'resolution=merge-duplicates,return=representation'}}),
+    body: JSON.stringify(body)
+  }}).then(function(r) {{
+    if (!r.ok) throw new Error('save failed');
+    return r.json();
+  }}).then(function(res) {{
+    var saved = Array.isArray(res) ? res[0] : res;
+    if (saved && saved.dog_key) {{ ackedByDogKey[cid] = saved; render(); }}
+    else {{ alert('Could not save acknowledgment — try again.'); }}
+  }}).catch(function() {{ alert('Could not save acknowledgment — try again.'); }});
 }}
 function unack(cid) {{
-  var a = getAcked(); delete a[cid];
-  localStorage.setItem('wg_acked_' + STORE_KEY, JSON.stringify(a));
-  render();
+  fetch(BA_SB + '/booking_anomaly_acks?store=eq.' + encodeURIComponent(STORE_KEY) + '&dog_key=eq.' + encodeURIComponent(cid), {{
+    method: 'DELETE',
+    headers: BA_SHD
+  }}).then(function(r) {{
+    if (!r.ok) throw new Error('delete failed');
+    delete ackedByDogKey[cid];
+    render();
+  }}).catch(function() {{ alert('Could not undo acknowledgment — try again.'); }});
 }}
 
 // ── Filter helpers ──────────────────────────────────────────────────────────
@@ -955,6 +992,7 @@ document.addEventListener('keydown', function(e) {{
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 render();
+loadAcks();
 </script>
 
 </body>
