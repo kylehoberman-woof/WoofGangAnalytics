@@ -44,9 +44,8 @@
   "glen-cove": {
     "display_name": "Glen Cove",
     "abbreviation": "GC",
-    "store_number": null,
-    "location_id": null,
-    "_pending": "store_number and location_id come from FranPOS once the location is set up there. Once known: fill these in, add FRANPOS_TOKEN_GC as a GitHub Actions secret, add 'glen-cove' to config.py's STORES dict (location_id + token + data_dir/output_dir), and add 'glen-cove' to update.yml's matrix.",
+    "store_number": 266,
+    "location_id": 207058,
     "franpos_token_env": "FRANPOS_TOKEN_GC",
     "franpos_token_fallback_env": "FRANPOS_TOKEN",
     "address": "195 Forest Avenue, Suite B, Glen Cove, NY 11542",

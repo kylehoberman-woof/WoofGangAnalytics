@@ -17,12 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        store: [port-washington, hicksville]
+        store: [port-washington, hicksville, glen-cove]
       fail-fast: false
     env:
       FRANPOS_TOKEN: ${{ secrets.FRANPOS_TOKEN }}
       FRANPOS_TOKEN_PW: ${{ secrets.FRANPOS_TOKEN }}
       FRANPOS_TOKEN_HV: ${{ secrets.FRANPOS_TOKEN_HV }}
+      FRANPOS_TOKEN_GC: ${{ secrets.FRANPOS_TOKEN_GC }}
     steps:
       - uses: actions/checkout@v4
         with:
