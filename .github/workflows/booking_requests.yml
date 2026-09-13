@@ -25,5 +25,8 @@ jobs:
           python-version: "3.11"
       - run: pip install requests
 
+      - name: TEMP DEBUG - dump waitlist body
+        run: python3 scripts/debug_dump_waitlist_body.py
+
       - name: Fetch new online booking request leads
         run: python3 scripts/fetch_booking_requests.py
