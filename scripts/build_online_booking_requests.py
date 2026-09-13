@@ -78,6 +78,7 @@ tr:hover td{{background:#fef9fb}}
 .phone-link:hover{{text-decoration:underline}}
 .stale-flag{{color:#c62828;font-weight:700;font-size:0.75rem}}
 .existing-flag{{color:#1565c0;font-size:0.73rem;font-weight:600}}
+.notes-flag{{color:#777;font-size:0.73rem;font-style:italic;cursor:help}}
 
 .action-btns{{display:flex;gap:6px;flex-wrap:wrap}}
 .action-btn{{border:none;padding:6px 11px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;color:white;white-space:nowrap}}
@@ -187,6 +188,14 @@ function existingFlag(r){{
   return '<br><span class="existing-flag">&#128205; Already a customer at ' + esc(stores.join(', ')) + '</span>';
 }}
 
+var NOTES_TRUNCATE = 70;
+function notesFlag(r){{
+  if(!r.notes) return '';
+  var text = r.notes.replace(/\\s+/g, ' ').trim();
+  var short = text.length > NOTES_TRUNCATE ? text.slice(0, NOTES_TRUNCATE) + '\\u2026' : text;
+  return '<br><span class="notes-flag" title="' + esc(text) + '">&#128221; ' + esc(short) + '</span>';
+}}
+
 function fmtRequested(iso){{
   if(!iso) return '&mdash;';
   var d = new Date(iso);
@@ -243,7 +252,7 @@ function makeRow(r, section){{
     '<td>' + fmtRequested(r.requested_at) + staleFlag + '</td>' +
     '<td>' + esc(r.customer_name || '&mdash;') + existingFlag(r) + '</td>' +
     '<td>' + (r.customer_phone ? '<a class="phone-link" href="tel:'+esc(r.customer_phone)+'">'+esc(r.customer_phone)+'</a>' : '&mdash;') + '</td>' +
-    '<td>' + esc(r.customer_email || '&mdash;') + '</td>' +
+    '<td>' + esc(r.customer_email || '&mdash;') + notesFlag(r) + '</td>' +
     '<td><span class="store-badge">' + esc(storeLabel(r.store)) + '</span></td>' +
     lastCol +
     '</tr>';

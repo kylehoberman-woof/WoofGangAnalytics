@@ -1,11 +1,20 @@
 """Fetch online booking-request leads from the shared Gmail inbox that store
-mailboxes auto-forward "New Appointment Information Request" emails into.
+mailboxes auto-forward lead-capture emails into.
 
 Each store's Outlook mailbox (hicksvilleny@, glencoveny@, portwashingtonny@
 @woofgangbakery.com) has a forwarding rule pointed at
 woofganglongislandops@gmail.com. The forwarded email arrives with that
 store's own address as its sender — that's the only signal used to route a
 lead to its store, no parsing of forwarded headers required.
+
+Two email formats are recognized so far (see LEAD_TYPES below), matched by
+subject line, each with its own parser since their body layouts differ:
+  - "New Appointment Information Request" — an ad-click landing-page lead
+  - "A Pet Parent Has Joined Your Waitlist" — Glen Cove's pre-opening
+    waitlist signup form (has pet/question free text, no explicit
+    timestamp field of its own)
+Add a new (subject_substring, parser_fn) entry to LEAD_TYPES for any
+additional format that shows up.
 
 Runs hourly via GitHub Actions during business hours. Writes straight to the
 online_booking_requests Supabase table — no local JSON, no git commit.
@@ -104,21 +113,100 @@ def get_plaintext(msg):
 
 
 def parse_field(text, label):
+    """Single-line field: 'Label: value' up to the next newline."""
     m = re.search(rf"{re.escape(label)}:\s*(.+)", text)
     return m.group(1).strip() if m else ""
 
 
-def parse_requested_at(raw):
-    # "2026-08-29 7:34 AM"
-    for fmt in ("%Y-%m-%d %I:%M %p", "%Y-%m-%d %H:%M"):
+def parse_sectioned_fields(text, labels, stop_marker=None):
+    """Multi-line-safe field extraction: 'Label: value...' where value can
+    span several paragraphs, bounded by wherever the NEXT known label (or
+    stop_marker) starts rather than the next newline. Needed for the
+    waitlist form's free-text "Tell Us About Your Furbaby!" answer, which
+    routinely spans multiple paragraphs before the next label appears.
+    """
+    marks = []
+    for label in labels:
+        m = re.search(re.escape(label) + r":?\s*", text)
+        if m:
+            marks.append((m.start(), m.end(), label))
+    if stop_marker:
+        m = re.search(re.escape(stop_marker), text)
+        if m:
+            marks.append((m.start(), m.start(), "__STOP__"))
+    marks.sort(key=lambda x: x[0])
+
+    result = {}
+    for i, (_, end, label) in enumerate(marks):
+        if label == "__STOP__":
+            continue
+        next_start = marks[i + 1][0] if i + 1 < len(marks) else len(text)
+        result[label] = text[end:next_start].strip()
+    return result
+
+
+def parse_datetime_loose(raw):
+    for fmt in ("%Y-%m-%d %I:%M %p", "%Y-%m-%d %H:%M", "%B %d, %Y at %I:%M %p"):
         try:
-            # Airtable's "Time of Request" is in the store's local time (ET);
-            # treat naive and let Supabase store it as given rather than
-            # guessing a UTC offset that shifts with DST.
+            # Airtable/Outlook timestamps here are the store's local time
+            # (ET); treat naive and let Supabase store it as given rather
+            # than guessing a UTC offset that shifts with DST.
             return datetime.strptime(raw, fmt).isoformat()
         except ValueError:
             continue
     return None
+
+
+def parse_appointment_request(body):
+    """'New Appointment Information Request' — an ad-click landing-page lead,
+    single-line fields, includes its own explicit request timestamp."""
+    customer_phone = re.sub(r"\D", "", parse_field(body, "Customer Phone Number"))
+    return {
+        "customer_name": parse_field(body, "Customer Name"),
+        "customer_email": parse_field(body, "Customer Email"),
+        "customer_phone": customer_phone,
+        "requested_at": parse_datetime_loose(parse_field(body, "Time of Request")),
+        "notes": None,
+    }
+
+
+def parse_waitlist_signup(body):
+    """'A Pet Parent Has Joined Your Waitlist' — Glen Cove's pre-opening
+    waitlist form. No explicit timestamp field; falls back to the quoted
+    'Date:' line from Kyle's forward (present whether it's a manual forward
+    or, per testing, an Outlook auto-forward rule too)."""
+    fields = parse_sectioned_fields(
+        body,
+        ["Name", "Email", "Phone", "Tell Us About Your Furbaby!", "Any Questions for Us?"],
+        stop_marker="Note, if any sections are blank",
+    )
+    customer_phone = re.sub(r"\D", "", fields.get("Phone", ""))
+
+    date_match = re.search(r"Date:\s*\w+,\s*(\w+ \d+, \d+ at \d+:\d+ [AP]M)", body)
+    requested_at = parse_datetime_loose(date_match.group(1)) if date_match else None
+
+    notes_parts = []
+    furbaby = fields.get("Tell Us About Your Furbaby!", "").strip()
+    if furbaby:
+        notes_parts.append(f"Pet: {furbaby}")
+    question = fields.get("Any Questions for Us?", "").strip()
+    if question:
+        notes_parts.append(f"Q: {question}")
+
+    return {
+        "customer_name": fields.get("Name", ""),
+        "customer_email": fields.get("Email", ""),
+        "customer_phone": customer_phone,
+        "requested_at": requested_at,
+        "notes": " | ".join(notes_parts) or None,
+    }
+
+
+# Subject substring (lowercased) -> parser. Checked in order; first match wins.
+LEAD_TYPES = [
+    ("appointment information request", parse_appointment_request),
+    ("joined your waitlist", parse_waitlist_signup),
+]
 
 
 def existing_message_ids():
@@ -172,15 +260,16 @@ def main():
             continue
 
         subject = decode_str(msg.get("Subject", ""))
-        if "appointment information request" not in subject.lower():
+        subject_lower = subject.lower()
+        parser = next((fn for key, fn in LEAD_TYPES if key in subject_lower), None)
+        if parser is None:
             skipped_other_subject += 1
             continue
 
         body = get_plaintext(msg)
-        customer_name = parse_field(body, "Customer Name")
-        customer_email = parse_field(body, "Customer Email")
-        customer_phone = re.sub(r"\D", "", parse_field(body, "Customer Phone Number"))
-        requested_at = parse_requested_at(parse_field(body, "Time of Request"))
+        lead = parser(body)
+        customer_name = lead["customer_name"]
+        customer_phone = lead["customer_phone"]
 
         if not customer_name and not customer_phone:
             print(f"  Skipping {gmail_message_id}: couldn't parse customer info from body")
@@ -191,11 +280,12 @@ def main():
         row = {
             "store": store,
             "customer_name": customer_name,
-            "customer_email": customer_email,
+            "customer_email": lead["customer_email"],
             "customer_phone": customer_phone,
-            "requested_at": requested_at,
+            "requested_at": lead["requested_at"],
             "gmail_message_id": gmail_message_id,
             "existing_at": existing_at or None,
+            "notes": lead["notes"],
         }
         r = requests.post(
             f"{SUPABASE_URL}/online_booking_requests?on_conflict=gmail_message_id",
