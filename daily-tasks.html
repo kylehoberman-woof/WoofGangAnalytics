@@ -197,7 +197,7 @@ function render(){
 }
 
 function renderSection(shift){
-  var shiftTasks = tasks.filter(function(t){ return t.shift === shift.key; });
+  var shiftTasks = tasks.filter(function(t){ return t.shift === shift.key && (!t.store || t.store === currentStore); });
   var checkable = shiftTasks.filter(function(t){ return !t.is_info; });
   var doneCount = checkable.filter(function(t){ return completionFor(t.id); }).length;
   var pct = checkable.length ? Math.round(100 * doneCount / checkable.length) : 0;
@@ -220,6 +220,10 @@ function renderSection(shift){
     '</div>';
 }
 
+function storeTag(t){
+  return (editMode && t.store) ? ' <span style="font-size:0.7rem;color:#C4276E;font-weight:700">(' + esc(STORES[t.store] || t.store) + ' only)</span>' : '';
+}
+
 function renderTaskRow(t){
   var c = completionFor(t.id);
   var checkedClass = c ? ' checked' : '';
@@ -235,7 +239,7 @@ function renderTaskRow(t){
     : '';
   return '<div class="task-row">' +
     '<div class="task-check' + checkedClass + '" onclick="toggleTask(\'' + t.id + '\')">' + (c ? '&#10003;' : '') + '</div>' +
-    '<div class="task-body"><div class="task-title' + titleClass + '">' + esc(t.title) + '</div>' + meta + '</div>' +
+    '<div class="task-body"><div class="task-title' + titleClass + '">' + esc(t.title) + storeTag(t) + '</div>' + meta + '</div>' +
     editBtns +
     '</div>';
 }
@@ -254,8 +258,12 @@ function renderInfoRow(t){
 
 function renderAddForm(shiftKey){
   var id = 'add-' + shiftKey;
+  var storeOpts = '<option value="">All Stores</option>' + Object.keys(STORES).map(function(k){
+    return '<option value="' + k + '">' + STORES[k] + ' only</option>';
+  }).join('');
   return '<div class="add-task-form' + (editMode ? ' open' : '') + '" id="' + id + '">' +
     '<div class="fg"><label>New task</label><input type="text" id="' + id + '-title" placeholder="Task title"></div>' +
+    '<div class="fg"><label>Applies to</label><select id="' + id + '-store">' + storeOpts + '</select></div>' +
     '<div class="fg checkbox-fg"><input type="checkbox" id="' + id + '-info"><label style="text-transform:none;font-weight:600">Info only (no checkbox)</label></div>' +
     '<button class="btn-primary" onclick="addTask(\'' + shiftKey + '\',\'' + id + '\')">Add</button>' +
     '</div>';
@@ -303,6 +311,7 @@ function toggleEditMode(){
 function addTask(shiftKey, formId){
   var titleEl = document.getElementById(formId + '-title');
   var infoEl = document.getElementById(formId + '-info');
+  var storeEl = document.getElementById(formId + '-store');
   var title = titleEl.value.trim();
   if (!title){ showToast('Enter a task title', 'error'); return; }
   var maxSort = tasks.filter(function(t){ return t.shift === shiftKey; })
@@ -310,7 +319,7 @@ function addTask(shiftKey, formId){
   sbFetch('/rest/v1/daily_tasks', {
     method: 'POST',
     headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
-    body: JSON.stringify({ shift: shiftKey, title: title, is_info: !!infoEl.checked, sort_order: maxSort + 1 })
+    body: JSON.stringify({ shift: shiftKey, title: title, is_info: !!infoEl.checked, sort_order: maxSort + 1, store: storeEl.value || null })
   })
     .then(function(r){ return r.json(); })
     .then(function(res){
