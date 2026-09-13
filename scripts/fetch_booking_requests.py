@@ -16,13 +16,18 @@ Usage:
 
 import email
 import imaplib
+import json
 import os
 import re
 import sys
 from datetime import datetime, timedelta, timezone
 from email.header import decode_header
+from pathlib import Path
 
 import requests
+
+sys.path.insert(0, str(Path(__file__).parent))
+from config import STORE_REGISTRY, PROJ_ROOT
 
 IMAP_HOST = "imap.gmail.com"
 GMAIL_USER = os.environ.get("BOOKING_REQUESTS_GMAIL_USER", "woofganglongislandops@gmail.com")
@@ -45,6 +50,31 @@ STORE_BY_SENDER = {
 }
 
 LOOKBACK_DAYS = 3  # generous buffer for an hourly job; dedup is by message-id anyway
+
+
+def build_phone_index():
+    """phone (digits only) -> set of store keys already carrying that number.
+
+    Lets a lead get flagged as "already a customer at <store>" — including a
+    different store than the one they just inquired about, e.g. an existing
+    Port Washington customer asking about the new Glen Cove location. That's
+    useful context, not a problem: it just means the same household is
+    covered by more than one store's data. Reads whatever customer_phones.json
+    files already exist in the repo (a pre-launch store like Glen Cove won't
+    have one yet — skipped, not an error, until FranPOS is connected there).
+    """
+    index = {}
+    for store_key in STORE_REGISTRY:
+        phones_file = PROJ_ROOT / store_key / "data" / "customer_phones.json"
+        if not phones_file.exists():
+            continue
+        with open(phones_file) as f:
+            phones = json.load(f)
+        for rec in phones.values():
+            phone = re.sub(r"\D", "", rec.get("phone") or "")
+            if phone:
+                index.setdefault(phone, set()).add(store_key)
+    return index
 
 
 def decode_str(s):
@@ -102,6 +132,9 @@ def existing_message_ids():
 
 
 def main():
+    phone_index = build_phone_index()
+    print(f"Cross-store phone index: {len(phone_index)} known numbers")
+
     imap = imaplib.IMAP4_SSL(IMAP_HOST)
     imap.login(GMAIL_USER, GMAIL_APP_PASSWORD)
     imap.select("INBOX")
@@ -153,6 +186,8 @@ def main():
             print(f"  Skipping {gmail_message_id}: couldn't parse customer info from body")
             continue
 
+        existing_at = ",".join(sorted(phone_index.get(customer_phone, ())))
+
         row = {
             "store": store,
             "customer_name": customer_name,
@@ -160,6 +195,7 @@ def main():
             "customer_phone": customer_phone,
             "requested_at": requested_at,
             "gmail_message_id": gmail_message_id,
+            "existing_at": existing_at or None,
         }
         r = requests.post(
             f"{SUPABASE_URL}/online_booking_requests?on_conflict=gmail_message_id",
@@ -169,7 +205,8 @@ def main():
         )
         if r.ok:
             new_count += 1
-            print(f"  + [{store}] {customer_name} ({customer_phone})")
+            tag = f" [existing customer: {existing_at}]" if existing_at else ""
+            print(f"  + [{store}] {customer_name} ({customer_phone}){tag}")
         else:
             print(f"  ERROR saving {gmail_message_id}: {r.status_code} {r.text}")
 

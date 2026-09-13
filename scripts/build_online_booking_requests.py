@@ -77,12 +77,22 @@ tr:hover td{{background:#fef9fb}}
 .phone-link{{color:#C4276E;text-decoration:none;font-weight:600}}
 .phone-link:hover{{text-decoration:underline}}
 .stale-flag{{color:#c62828;font-weight:700;font-size:0.75rem}}
+.existing-flag{{color:#1565c0;font-size:0.73rem;font-weight:600}}
 
-.ack-btn,.unack-btn{{border:none;padding:7px 14px;border-radius:6px;font-size:0.78rem;font-weight:600;cursor:pointer;font-family:inherit}}
-.ack-btn{{background:#C4276E;color:white}}
-.ack-btn:hover{{background:#a91f5c}}
-.unack-btn{{background:#eee;color:#555}}
+.action-btns{{display:flex;gap:6px;flex-wrap:wrap}}
+.action-btn{{border:none;padding:6px 11px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;color:white;white-space:nowrap}}
+.action-btn.voicemail{{background:#d97706}}
+.action-btn.voicemail:hover{{background:#b8630a}}
+.action-btn.booked{{background:#16a34a}}
+.action-btn.booked:hover{{background:#128038}}
+.action-btn.not-interested{{background:#dc2626}}
+.action-btn.not-interested:hover{{background:#b91c1c}}
+.unack-btn{{border:none;padding:6px 11px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;background:#eee;color:#555}}
 .unack-btn:hover{{background:#ddd}}
+.outcome-badge{{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;white-space:nowrap;color:white;margin-right:6px}}
+.outcome-badge.voicemail{{background:#d97706}}
+.outcome-badge.booked{{background:#16a34a}}
+.outcome-badge.not-interested{{background:#dc2626}}
 
 .reviewed-toggle{{cursor:pointer;user-select:none}}
 .reviewed-inner{{display:none;margin-top:14px}}
@@ -113,6 +123,7 @@ tr:hover td{{background:#fef9fb}}
 
   <div class="kpi-grid">
     <div class="kpi"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-label">Needs Reach Out</div></div>
+    <div class="kpi"><div class="kpi-val" id="kpi-followup">0</div><div class="kpi-label">Needs Follow-up</div></div>
     <div class="kpi"><div class="kpi-val" id="kpi-today">0</div><div class="kpi-label">Requested Today</div></div>
     <div class="kpi"><div class="kpi-val" id="kpi-stale">0</div><div class="kpi-label">Waiting 24h+</div></div>
   </div>
@@ -128,12 +139,22 @@ tr:hover td{{background:#fef9fb}}
   </div>
 
   <div class="card">
+    <div class="stitle">&#128222; Needs Follow-up (<span id="followup-count">0</span>)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Requested</th><th>Customer</th><th>Phone</th><th>Email</th><th>Store</th><th></th></tr></thead>
+        <tbody id="followup-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="stitle reviewed-toggle" onclick="toggleReviewed()">
-      <span id="reviewed-arrow">&#9656;</span> &#x2705; Contacted (<span id="reviewed-count">0</span>)
+      <span id="reviewed-arrow">&#9656;</span> &#x2705; Resolved (<span id="reviewed-count">0</span>)
     </div>
     <div class="reviewed-inner tbl-wrap" id="reviewed-inner">
       <table>
-        <thead><tr><th>Requested</th><th>Customer</th><th>Phone</th><th>Email</th><th>Store</th><th></th></tr></thead>
+        <thead><tr><th>Requested</th><th>Customer</th><th>Phone</th><th>Email</th><th>Store</th><th>Outcome</th><th></th></tr></thead>
         <tbody id="reviewed-tbody"></tbody>
       </table>
     </div>
@@ -159,6 +180,13 @@ function storeLabel(key){{
   return t ? t.label : key;
 }}
 
+function existingFlag(r){{
+  if(!r.existing_at) return '';
+  var stores = r.existing_at.split(',').filter(Boolean).map(storeLabel);
+  if(!stores.length) return '';
+  return '<br><span class="existing-flag">&#128205; Already a customer at ' + esc(stores.join(', ')) + '</span>';
+}}
+
 function fmtRequested(iso){{
   if(!iso) return '&mdash;';
   var d = new Date(iso);
@@ -181,40 +209,73 @@ function renderTabs(){{
 }}
 function setStore(key){{ _storeFilter = key; renderTabs(); render(); }}
 
-function makeRow(r, isContacted){{
-  var actionBtn = isContacted
-    ? '<button class="unack-btn" onclick="unmark(\\''+r.id+'\\')">&#8617; Undo</button>'
-    : '<button class="ack-btn" onclick="markContacted(\\''+r.id+'\\')">&#10003; Mark Contacted</button>';
+var OUTCOME_LABELS = {{
+  left_voicemail: '&#128222; Left Voicemail',
+  booked: '&#9989; Booked',
+  not_interested: '&#10007; Not Interested'
+}};
+var OUTCOME_CLASSES = {{
+  left_voicemail: 'voicemail',
+  booked: 'booked',
+  not_interested: 'not-interested'
+}};
+
+function actionBtnsHtml(id){{
+  return '<div class="action-btns">' +
+    '<button class="action-btn voicemail" onclick="setOutcome(\\''+id+'\\',\\'left_voicemail\\')">&#128222; Left Voicemail</button>' +
+    '<button class="action-btn booked" onclick="setOutcome(\\''+id+'\\',\\'booked\\')">&#9989; Booked</button>' +
+    '<button class="action-btn not-interested" onclick="setOutcome(\\''+id+'\\',\\'not_interested\\')">&#10007; Not Interested</button>' +
+    '</div>';
+}}
+
+function makeRow(r, section){{
   var hrs = hoursSince(r.requested_at);
-  var staleFlag = (!isContacted && hrs !== null && hrs >= 24) ? ' <span class="stale-flag">&#9888; ' + Math.floor(hrs/24) + 'd</span>' : '';
+  var staleFlag = (section === 'active' && hrs !== null && hrs >= 24) ? ' <span class="stale-flag">&#9888; ' + Math.floor(hrs/24) + 'd</span>' : '';
+  var lastCol;
+  if(section === 'resolved'){{
+    var cls = OUTCOME_CLASSES[r.outcome] || '';
+    lastCol = '<td><span class="outcome-badge ' + cls + '">' + (OUTCOME_LABELS[r.outcome] || esc(r.outcome)) + '</span></td>' +
+      '<td><button class="unack-btn" onclick="clearOutcome(\\''+r.id+'\\')">&#8617; Undo</button></td>';
+  }} else {{
+    lastCol = '<td>' + actionBtnsHtml(r.id) + '</td>';
+  }}
   return '<tr>' +
     '<td>' + fmtRequested(r.requested_at) + staleFlag + '</td>' +
-    '<td>' + esc(r.customer_name || '&mdash;') + '</td>' +
+    '<td>' + esc(r.customer_name || '&mdash;') + existingFlag(r) + '</td>' +
     '<td>' + (r.customer_phone ? '<a class="phone-link" href="tel:'+esc(r.customer_phone)+'">'+esc(r.customer_phone)+'</a>' : '&mdash;') + '</td>' +
     '<td>' + esc(r.customer_email || '&mdash;') + '</td>' +
     '<td><span class="store-badge">' + esc(storeLabel(r.store)) + '</span></td>' +
-    '<td>' + actionBtn + '</td>' +
+    lastCol +
     '</tr>';
 }}
 
 function render(){{
   var filtered = _storeFilter === 'all' ? ROWS : ROWS.filter(function(r){{ return r.store === _storeFilter; }});
-  var active = filtered.filter(function(r){{ return !r.contacted; }})
+  var active = filtered.filter(function(r){{ return !r.outcome; }})
     .sort(function(a,b){{ return (a.requested_at||'').localeCompare(b.requested_at||''); }});
-  var contacted = filtered.filter(function(r){{ return r.contacted; }})
+  var followup = filtered.filter(function(r){{ return r.outcome === 'left_voicemail'; }})
+    .sort(function(a,b){{ return (a.requested_at||'').localeCompare(b.requested_at||''); }});
+  var resolved = filtered.filter(function(r){{ return r.outcome === 'booked' || r.outcome === 'not_interested'; }})
     .sort(function(a,b){{ return (b.requested_at||'').localeCompare(a.requested_at||''); }});
 
   var activeTbody = document.getElementById('active-tbody');
   activeTbody.innerHTML = active.length
-    ? active.map(function(r){{ return makeRow(r, false); }}).join('')
+    ? active.map(function(r){{ return makeRow(r, 'active'); }}).join('')
     : '<tr class="empty-row"><td colspan="6">Nothing waiting &mdash; you\\'re all caught up.</td></tr>';
   document.getElementById('active-count').textContent = active.length;
 
+  var followupTbody = document.getElementById('followup-tbody');
+  followupTbody.innerHTML = followup.length
+    ? followup.map(function(r){{ return makeRow(r, 'followup'); }}).join('')
+    : '<tr class="empty-row"><td colspan="6">No one waiting on a callback.</td></tr>';
+  document.getElementById('followup-count').textContent = followup.length;
+
   var reviewedTbody = document.getElementById('reviewed-tbody');
-  reviewedTbody.innerHTML = contacted.map(function(r){{ return makeRow(r, true); }}).join('');
-  document.getElementById('reviewed-count').textContent = contacted.length;
+  reviewedTbody.innerHTML = resolved.map(function(r){{ return makeRow(r, 'resolved'); }}).join('');
+  document.getElementById('reviewed-count').textContent = resolved.length;
 
   document.getElementById('kpi-total').textContent = active.length;
+  document.getElementById('kpi-followup').textContent = followup.length;
   var todayStr = new Date().toISOString().slice(0,10);
   document.getElementById('kpi-today').textContent = filtered.filter(function(r){{ return (r.requested_at||'').slice(0,10) === todayStr; }}).length;
   document.getElementById('kpi-stale').textContent = active.filter(function(r){{ var h = hoursSince(r.requested_at); return h !== null && h >= 24; }}).length;
@@ -233,11 +294,11 @@ function showError(msg){{
   el.style.display = 'block';
 }}
 
-function markContacted(id){{
+function setOutcome(id, outcome){{
   fetch(OBR_SB + '/online_booking_requests?id=eq.' + encodeURIComponent(id), {{
     method: 'PATCH',
     headers: Object.assign({{}}, OBR_SHD, {{'Prefer': 'return=representation'}}),
-    body: JSON.stringify({{contacted: true, contacted_at: new Date().toISOString()}})
+    body: JSON.stringify({{outcome: outcome, outcome_at: new Date().toISOString()}})
   }}).then(function(r){{
     if(!r.ok) throw new Error('save failed');
     return r.json();
@@ -245,16 +306,16 @@ function markContacted(id){{
     var saved = Array.isArray(res) ? res[0] : res;
     if(!saved) throw new Error('no row returned');
     var row = ROWS.find(function(r){{ return r.id === id; }});
-    if(row){{ row.contacted = true; row.contacted_at = saved.contacted_at; }}
+    if(row){{ row.outcome = saved.outcome; row.outcome_at = saved.outcome_at; }}
     render();
   }}).catch(function(){{ alert('Could not save — try again.'); }});
 }}
 
-function unmark(id){{
+function clearOutcome(id){{
   fetch(OBR_SB + '/online_booking_requests?id=eq.' + encodeURIComponent(id), {{
     method: 'PATCH',
     headers: Object.assign({{}}, OBR_SHD, {{'Prefer': 'return=representation'}}),
-    body: JSON.stringify({{contacted: false, contacted_at: null}})
+    body: JSON.stringify({{outcome: null, outcome_at: null}})
   }}).then(function(r){{
     if(!r.ok) throw new Error('save failed');
     return r.json();
@@ -262,7 +323,7 @@ function unmark(id){{
     var saved = Array.isArray(res) ? res[0] : res;
     if(!saved) throw new Error('no row returned');
     var row = ROWS.find(function(r){{ return r.id === id; }});
-    if(row){{ row.contacted = false; row.contacted_at = null; }}
+    if(row){{ row.outcome = null; row.outcome_at = null; }}
     render();
   }}).catch(function(){{ alert('Could not undo — try again.'); }});
 }}
