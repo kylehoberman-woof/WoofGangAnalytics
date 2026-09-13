@@ -77,7 +77,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 /* Colors for topic numbers */
 .c1{background:#C4276E}.c2{background:#6B3520}.c3{background:#1B6B6B}.c4{background:#E65100}
 .c5{background:#1565C0}.c6{background:#7B1FA2}.c7{background:#2E7D32}.c8{background:#C62828}
-.c9{background:#00838F}.c10{background:#37474F}
+.c9{background:#00838F}.c10{background:#37474F}.c11{background:#F9A825}
 
 @media(max-width:700px){
   .header{padding:20px 16px 16px}
@@ -154,6 +154,27 @@ var TOPICS=[
   '<p>Always be kind and helpful. Find solutions and pivot to more positive responses:</p>'+
   '<ul><li>Instead of "No" or "You are wrong" — say: "I\'m very sorry about how you feel. Here is what we can do____."</li>'+
   '<li>Instead of "I do not have any availability on this date" — say: "I\'m sorry, I don\'t have that specific date; how about this (date)?"</li></ul>'
+ }]
+},
+{id:11,title:'Your Role as a Sales Associate',color:'c11',
+ outcome:'Understand what it means to be a Woof Gang sales associate — the first face customers see, and the person who ties the whole in-store experience together.',
+ notes:'You set the tone for every visit. Greet warmly, stay attentive, and make sure every customer — whether they\'re there to shop, book, or drop off for grooming — feels taken care of from the moment they walk in.',
+ hub:[],
+ refs:[{title:'Your Role as a Sales Associate',content:
+  '<h4>You Are the First Impression</h4>'+
+  '<p>You are usually the very first person a customer sees and talks to — before they ever meet a groomer, before they even look at a product. That first moment sets the tone for their entire visit. A warm greeting, a genuine smile, and your full attention tell a customer they\'re in the right place.</p>'+
+  '<h4>Embody the Woof Gang Way</h4>'+
+  '<p>Being warm and friendly isn\'t just politeness — it\'s the job. Every interaction is a chance to live out our mission: every pet deserves a happy, healthy life of quality while looking good. That starts with how you treat the humans on the other end of the leash.</p>'+
+  '<h4>You Help With Everything</h4>'+
+  '<p>Customers come in for a lot of different reasons, and you\'re the one who helps with all of it:</p>'+
+  '<ul><li><strong>Bookings:</strong> Scheduling, rescheduling, and answering questions about grooming services and pricing.</li>'+
+  '<li><strong>Retail:</strong> Helping customers find the right food, treats, and products for their pet — and recommending add-ons or spa upgrades when it makes sense.</li>'+
+  '<li><strong>Check-in / Check-out:</strong> Making drop-off and pick-up smooth, and making sure the right notes get passed along.</li>'+
+  '<li><strong>Questions:</strong> If you don\'t know the answer, find someone who does — never leave a customer guessing.</li></ul>'+
+  '<h4>Listen First</h4>'+
+  '<p>Every dog and every owner is different. Listen closely to what a customer tells you about their pet — a nervous dog, a skin issue, a specific cut they love — and actually hear it, not just check a box.</p>'+
+  '<h4>Liaise With Groomers</h4>'+
+  '<p>You\'re the bridge between the customer and the groomer. Pass along anything a customer tells you that a groomer needs to know — behavior notes, health concerns, style requests — clearly and before the appointment starts, not after. Good communication here is what makes a great groom happen.</p>'
  }]
 },
 {id:3,title:'Grooming Services Overview',color:'c3',
@@ -392,7 +413,7 @@ function resetProgress(){
 
 function renderTopics(){
   var checked=getChecked();
-  var html=TOPICS.map(function(t){
+  var html=TOPICS.map(function(t,idx){
     var isDone=checked.indexOf(t.id)>=0;
     var openTopics=[];
     document.querySelectorAll('.topic.open').forEach(function(el){openTopics.push(+el.dataset.topic);});
@@ -400,7 +421,7 @@ function renderTopics(){
 
     var h='<div class="topic'+(isDone?' completed':'')+(isOpen?' open':'')+'" data-topic="'+t.id+'">';
     h+='<div class="topic-header" onclick="toggleTopic('+t.id+')">';
-    h+='<div class="topic-num '+t.color+'">'+t.id+'</div>';
+    h+='<div class="topic-num '+t.color+'">'+(idx+1)+'</div>';
     h+='<div class="topic-title">'+t.title+'</div>';
     h+='<div class="topic-check'+(isDone?' checked':'')+'" onclick="event.stopPropagation();toggleCheck('+t.id+')"></div>';
     h+='<div class="topic-arrow">&#9654;</div>';
