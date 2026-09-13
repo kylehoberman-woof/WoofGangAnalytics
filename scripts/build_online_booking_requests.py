@@ -78,6 +78,7 @@ tr:hover td{{background:#fef9fb}}
 .phone-link:hover{{text-decoration:underline}}
 .stale-flag{{color:#c62828;font-weight:700;font-size:0.75rem}}
 .existing-flag{{color:#1565c0;font-size:0.73rem;font-weight:600}}
+.upcoming-flag{{color:#16a34a;font-size:0.73rem;font-weight:700}}
 .notes-flag{{color:#777;font-size:0.73rem;font-style:italic;cursor:help}}
 
 .action-btns{{display:flex;gap:6px;flex-wrap:wrap}}
@@ -188,6 +189,22 @@ function existingFlag(r){{
   return '<br><span class="existing-flag">&#128205; Already a customer at ' + esc(stores.join(', ')) + '</span>';
 }}
 
+function fmtShortDate(iso){{
+  var d = new Date(iso + 'T00:00:00');
+  if(isNaN(d)) return esc(iso);
+  return d.toLocaleDateString('en-US', {{month:'short', day:'numeric'}});
+}}
+
+function upcomingFlag(r){{
+  if(!r.upcoming_at) return '';
+  var parts = r.upcoming_at.split(',').filter(Boolean).map(function(p){{
+    var bits = p.split(':');
+    return storeLabel(bits[0]) + ' on ' + fmtShortDate(bits.slice(1).join(':'));
+  }});
+  if(!parts.length) return '';
+  return '<br><span class="upcoming-flag">&#9989; Already booked \\u2014 ' + esc(parts.join(', ')) + '</span>';
+}}
+
 var NOTES_TRUNCATE = 70;
 function notesFlag(r){{
   if(!r.notes) return '';
@@ -250,7 +267,7 @@ function makeRow(r, section){{
   }}
   return '<tr>' +
     '<td>' + fmtRequested(r.requested_at) + staleFlag + '</td>' +
-    '<td>' + esc(r.customer_name || '&mdash;') + existingFlag(r) + '</td>' +
+    '<td>' + esc(r.customer_name || '&mdash;') + upcomingFlag(r) + existingFlag(r) + '</td>' +
     '<td>' + (r.customer_phone ? '<a class="phone-link" href="tel:'+esc(r.customer_phone)+'">'+esc(r.customer_phone)+'</a>' : '&mdash;') + '</td>' +
     '<td>' + esc(r.customer_email || '&mdash;') + notesFlag(r) + '</td>' +
     '<td><span class="store-badge">' + esc(storeLabel(r.store)) + '</span></td>' +

@@ -37,6 +37,7 @@ import requests
 
 sys.path.insert(0, str(Path(__file__).parent))
 from config import STORE_REGISTRY, PROJ_ROOT
+from lapse_calls_lib import is_real_appointment
 
 IMAP_HOST = "imap.gmail.com"
 GMAIL_USER = os.environ.get("BOOKING_REQUESTS_GMAIL_USER", "woofganglongislandops@gmail.com")
@@ -83,6 +84,41 @@ def build_phone_index():
             phone = re.sub(r"\D", "", rec.get("phone") or "")
             if phone:
                 index.setdefault(phone, set()).add(store_key)
+    return index
+
+
+def build_upcoming_appointment_index():
+    """phone (digits only) -> {store_key: earliest future appointment date}.
+
+    Different question from build_phone_index()'s "have we ever seen this
+    person": this checks pet_visits.json for a real, not-yet-happened visit
+    — i.e. they already have something on the books, so a call is about
+    confirming/welcoming rather than convincing them to book at all. Reuses
+    is_real_appointment() from lapse_calls_lib so a booking counts here the
+    same way it does everywhere else in the portal (real visit, not a note).
+    """
+    today_iso = datetime.now().date().isoformat()
+    index = {}
+    for store_key in STORE_REGISTRY:
+        visits_file = PROJ_ROOT / store_key / "data" / "pet_visits.json"
+        if not visits_file.exists():
+            continue
+        with open(visits_file) as f:
+            pet_records = json.load(f)
+        for rec in pet_records:
+            phone = re.sub(r"\D", "", rec.get("owner_phone") or "")
+            if not phone:
+                continue
+            future_dates = [
+                v["date"] for v in rec.get("visits", [])
+                if v.get("date", "") > today_iso and is_real_appointment(v)
+            ]
+            if not future_dates:
+                continue
+            earliest = min(future_dates)
+            store_index = index.setdefault(phone, {})
+            if store_key not in store_index or earliest < store_index[store_key]:
+                store_index[store_key] = earliest
     return index
 
 
@@ -224,6 +260,8 @@ def existing_message_ids():
 def main():
     phone_index = build_phone_index()
     print(f"Cross-store phone index: {len(phone_index)} known numbers")
+    upcoming_index = build_upcoming_appointment_index()
+    print(f"Upcoming-appointment index: {len(upcoming_index)} phone numbers with something booked")
 
     imap = imaplib.IMAP4_SSL(IMAP_HOST)
     imap.login(GMAIL_USER, GMAIL_APP_PASSWORD)
@@ -278,6 +316,8 @@ def main():
             continue
 
         existing_at = ",".join(sorted(phone_index.get(customer_phone, ())))
+        upcoming = upcoming_index.get(customer_phone, {})
+        upcoming_at = ",".join(f"{s}:{d}" for s, d in sorted(upcoming.items()))
 
         row = {
             "store": store,
@@ -287,6 +327,7 @@ def main():
             "requested_at": lead["requested_at"],
             "gmail_message_id": gmail_message_id,
             "existing_at": existing_at or None,
+            "upcoming_at": upcoming_at or None,
             "notes": lead["notes"],
         }
         r = requests.post(
@@ -298,6 +339,7 @@ def main():
         if r.ok:
             new_count += 1
             tag = f" [existing customer: {existing_at}]" if existing_at else ""
+            tag += f" [already booked: {upcoming_at}]" if upcoming_at else ""
             print(f"  + [{store}] {customer_name} ({customer_phone}){tag}")
         else:
             print(f"  ERROR saving {gmail_message_id}: {r.status_code} {r.text}")
