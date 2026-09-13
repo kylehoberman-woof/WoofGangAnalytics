@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>if(sessionStorage.getItem('wg_portal_auth')!=='1')window.location.href='index.html';</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — Daily Store Tasks</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:28px 32px 22px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.header h1{font-size:1.6rem;font-weight:800;letter-spacing:-0.02em}
+.header p{font-size:0.85rem;opacity:0.85;margin-top:4px}
+
+.toolbar{background:white;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid #eee;justify-content:center}
+.tb-field{display:flex;align-items:center;gap:8px}
+.tb-field label{font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em}
+.tb-field select,.tb-field input{padding:7px 12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.86rem;color:#1a1a2e;background:white}
+.tb-field select:focus,.tb-field input:focus{outline:none;border-color:#C4276E}
+.name-pill{background:#FDF0F5;color:#C4276E;padding:7px 14px;border-radius:20px;font-size:0.85rem;font-weight:700}
+
+.main{max-width:720px;margin:0 auto;padding:28px 20px 60px}
+
+.section{background:white;border-radius:16px;padding:24px 22px;margin-bottom:22px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.section-title{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:8px}
+.section-progress{font-size:0.8rem;font-weight:700;color:#888}
+.section-progress.done{color:#2E7D32}
+.progress-track{height:6px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:18px}
+.progress-fill{height:100%;background:#2E7D32;transition:width 0.3s}
+
+.task-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f4f4f4}
+.task-row:last-child{border-bottom:none}
+.task-check{width:24px;height:24px;flex-shrink:0;border:2px solid #ccc;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;color:white;transition:all 0.15s;background:white;margin-top:1px}
+.task-check:hover{border-color:#C4276E}
+.task-check.checked{background:#2E7D32;border-color:#2E7D32}
+.task-body{flex:1}
+.task-title{font-size:0.94rem;font-weight:600;color:#1a1a2e}
+.task-title.checked-title{color:#999;text-decoration:line-through}
+.task-meta{font-size:0.74rem;color:#2E7D32;margin-top:2px}
+.task-info{font-size:0.86rem;color:#888;font-style:italic;display:flex;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid #f4f4f4}
+.task-info:last-child{border-bottom:none}
+.edit-btns{display:flex;gap:6px;flex-shrink:0}
+.icon-btn{background:none;border:none;cursor:pointer;font-size:0.9rem;color:#aaa;padding:4px}
+.icon-btn:hover{color:#C4276E}
+
+.edit-toggle{text-align:center;margin-bottom:20px}
+.edit-toggle button{background:#1a1a2e;color:white;border:none;padding:9px 20px;border-radius:20px;font-family:inherit;font-size:0.82rem;font-weight:700;cursor:pointer}
+.edit-toggle button:hover{opacity:0.85}
+.edit-toggle button.active{background:#C4276E}
+
+.add-task-form{display:none;background:#f9f9f9;border-radius:10px;padding:16px;margin-bottom:18px;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.add-task-form.open{display:flex}
+.add-task-form .fg{display:flex;flex-direction:column;gap:5px}
+.add-task-form label{font-size:0.7rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em}
+.add-task-form select,.add-task-form input[type=text]{padding:8px 10px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.85rem}
+.add-task-form input[type=text]{min-width:220px;flex:1}
+.checkbox-fg{display:flex;align-items:center;gap:6px;flex-direction:row!important}
+.btn-primary{padding:9px 18px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer}
+.btn-primary:hover{background:#a31f5b}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 22px;border-radius:10px;font-size:0.86rem;font-weight:600;z-index:999;transition:opacity 0.3s}
+.toast.error{background:#C62828}
+.toast.hidden{opacity:0;pointer-events:none}
+.empty{text-align:center;color:#aaa;padding:20px;font-size:0.88rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-link" id="portal-back" href="index.html">&larr; Owner Portal</a>
+  <h1>&#128203; Daily Store Tasks</h1>
+  <p>Open, operate, and close — one checklist per store, per day</p>
+</div>
+
+<div class="toolbar">
+  <div class="tb-field" id="store-field"></div>
+  <div class="tb-field" id="name-field"></div>
+  <div class="tb-field" id="date-field" style="display:none">
+    <label>Date</label>
+    <input type="date" id="date-input" onchange="setDate(this.value)">
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="edit-toggle" id="edit-toggle-wrap" style="display:none">
+    <button id="edit-toggle-btn" onclick="toggleEditMode()">&#9998; Edit Task List</button>
+  </div>
+
+  <div id="sections"></div>
+
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+/* ── Config ───────────────────────────────────── */
+var SB_URL = 'https://bqzinttbjeeaybywhhet.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SB_HDR = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+function sbFetch(path, opts) { return fetch(SB_URL + path, Object.assign({ headers: SB_HDR }, opts)); }
+
+var SHIFTS = [
+  {key: 'opening', label: 'Store Opening', icon: '&#9728;&#65039;'},
+  {key: 'operate', label: 'Throughout the Day', icon: '&#128260;'},
+  {key: 'closing', label: 'Closing', icon: '&#127749;'}
+];
+var STORES = {'port-washington':'Port Washington', 'hicksville':'Hicksville', 'glen-cove':'Glen Cove'};
+var STAFF_NAMES = ['Kyle', 'Cindy'];
+
+var portalLevel = sessionStorage.getItem('wg_portal_level') || 'owner';
+var canEdit = (portalLevel === 'owner' || portalLevel === 'manager');
+var currentStore = sessionStorage.getItem('wg_portal_store') || localStorage.getItem('wg_daily_store') || 'port-washington';
+var currentName = sessionStorage.getItem('wg_portal_name') || localStorage.getItem('wg_daily_name') || STAFF_NAMES[0];
+var currentDate = todayStr();
+var editMode = false;
+
+var tasks = [];
+var completions = []; // for currentStore + currentDate
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtTime(iso){ var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); }
+
+function showToast(msg, type){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.classList.add('hidden'); }, 2600);
+}
+
+/* ── Toolbar ──────────────────────────────────── */
+function renderToolbar(){
+  var storeField = document.getElementById('store-field');
+  if (portalLevel === 'store'){
+    storeField.innerHTML = '<label>Store</label><span class="name-pill">' + esc(STORES[currentStore] || currentStore) + '</span>';
+  } else {
+    var opts = Object.keys(STORES).map(function(k){
+      return '<option value="' + k + '"' + (k===currentStore?' selected':'') + '>' + STORES[k] + '</option>';
+    }).join('');
+    storeField.innerHTML = '<label>Store</label><select onchange="setStore(this.value)">' + opts + '</select>';
+  }
+
+  var nameField = document.getElementById('name-field');
+  if (portalLevel === 'store'){
+    nameField.innerHTML = '<label>Logged in as</label><span class="name-pill">' + esc(currentName) + '</span>';
+  } else {
+    var nopts = STAFF_NAMES.map(function(n){
+      return '<option value="' + n + '"' + (n===currentName?' selected':'') + '>' + n + '</option>';
+    }).join('');
+    nameField.innerHTML = '<label>Logged in as</label><select onchange="setName(this.value)">' + nopts + '</select>';
+  }
+
+  if (canEdit){
+    document.getElementById('date-field').style.display = '';
+    document.getElementById('date-input').value = currentDate;
+    document.getElementById('edit-toggle-wrap').style.display = '';
+  }
+}
+
+function setStore(v){ currentStore = v; localStorage.setItem('wg_daily_store', v); loadCompletions(); }
+function setName(v){ currentName = v; localStorage.setItem('wg_daily_name', v); }
+function setDate(v){ currentDate = v || todayStr(); loadCompletions(); }
+
+/* ── Load ─────────────────────────────────────── */
+function loadTasks(){
+  sbFetch('/rest/v1/daily_tasks?is_active=eq.true&order=shift,sort_order,id')
+    .then(function(r){
+      if (!r.ok) return r.text().then(function(t){ throw new Error(t); });
+      return r.json();
+    })
+    .then(function(data){ tasks = data; loadCompletions(); })
+    .catch(function(err){ console.error(err); showToast('Could not load tasks — refresh to retry.', 'error'); });
+}
+
+function loadCompletions(){
+  sbFetch('/rest/v1/daily_task_completions?store=eq.' + encodeURIComponent(currentStore) + '&task_date=eq.' + currentDate)
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(data){ completions = data; render(); })
+    .catch(function(){ completions = []; render(); });
+}
+
+function completionFor(taskId){
+  return completions.find(function(c){ return c.task_id === taskId; });
+}
+
+/* ── Render ───────────────────────────────────── */
+function render(){
+  renderToolbar();
+  var wrap = document.getElementById('sections');
+  wrap.innerHTML = SHIFTS.map(renderSection).join('');
+}
+
+function renderSection(shift){
+  var shiftTasks = tasks.filter(function(t){ return t.shift === shift.key; });
+  var checkable = shiftTasks.filter(function(t){ return !t.is_info; });
+  var doneCount = checkable.filter(function(t){ return completionFor(t.id); }).length;
+  var pct = checkable.length ? Math.round(100 * doneCount / checkable.length) : 0;
+  var progressClass = (checkable.length && doneCount === checkable.length) ? 'done' : '';
+
+  var rows = shiftTasks.length
+    ? shiftTasks.map(function(t){ return t.is_info ? renderInfoRow(t) : renderTaskRow(t); }).join('')
+    : '<div class="empty">No tasks yet' + (canEdit ? ' — add one below.' : '.') + '</div>';
+
+  var addForm = canEdit ? renderAddForm(shift.key) : '';
+
+  return '<div class="section">' +
+    '<div class="section-head">' +
+      '<div class="section-title">' + shift.icon + ' ' + esc(shift.label) + '</div>' +
+      (checkable.length ? '<div class="section-progress ' + progressClass + '">' + doneCount + '/' + checkable.length + '</div>' : '') +
+    '</div>' +
+    (checkable.length ? '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' : '') +
+    rows +
+    addForm +
+    '</div>';
+}
+
+function renderTaskRow(t){
+  var c = completionFor(t.id);
+  var checkedClass = c ? ' checked' : '';
+  var titleClass = c ? ' checked-title' : '';
+  var meta = c ? '<div class="task-meta">&#10003; ' + esc(c.completed_by || '') + ' &middot; ' + fmtTime(c.completed_at) + '</div>' : '';
+  var editBtns = editMode
+    ? '<div class="edit-btns">' +
+        '<button class="icon-btn" onclick="moveTask(\'' + t.id + '\',-1)" title="Move up">&#8593;</button>' +
+        '<button class="icon-btn" onclick="moveTask(\'' + t.id + '\',1)" title="Move down">&#8595;</button>' +
+        '<button class="icon-btn" onclick="editTask(\'' + t.id + '\')" title="Edit">&#9998;</button>' +
+        '<button class="icon-btn" onclick="deleteTask(\'' + t.id + '\')" title="Delete">&#128465;</button>' +
+      '</div>'
+    : '';
+  return '<div class="task-row">' +
+    '<div class="task-check' + checkedClass + '" onclick="toggleTask(\'' + t.id + '\')">' + (c ? '&#10003;' : '') + '</div>' +
+    '<div class="task-body"><div class="task-title' + titleClass + '">' + esc(t.title) + '</div>' + meta + '</div>' +
+    editBtns +
+    '</div>';
+}
+
+function renderInfoRow(t){
+  var editBtns = editMode
+    ? '<div class="edit-btns">' +
+        '<button class="icon-btn" onclick="moveTask(\'' + t.id + '\',-1)" title="Move up">&#8593;</button>' +
+        '<button class="icon-btn" onclick="moveTask(\'' + t.id + '\',1)" title="Move down">&#8595;</button>' +
+        '<button class="icon-btn" onclick="editTask(\'' + t.id + '\')" title="Edit">&#9998;</button>' +
+        '<button class="icon-btn" onclick="deleteTask(\'' + t.id + '\')" title="Delete">&#128465;</button>' +
+      '</div>'
+    : '';
+  return '<div class="task-info">&#8505;&#65039; ' + esc(t.title) + (editMode ? editBtns : '') + '</div>';
+}
+
+function renderAddForm(shiftKey){
+  var id = 'add-' + shiftKey;
+  return '<div class="add-task-form' + (editMode ? ' open' : '') + '" id="' + id + '">' +
+    '<div class="fg"><label>New task</label><input type="text" id="' + id + '-title" placeholder="Task title"></div>' +
+    '<div class="fg checkbox-fg"><input type="checkbox" id="' + id + '-info"><label style="text-transform:none;font-weight:600">Info only (no checkbox)</label></div>' +
+    '<button class="btn-primary" onclick="addTask(\'' + shiftKey + '\',\'' + id + '\')">Add</button>' +
+    '</div>';
+}
+
+/* ── Complete / undo ──────────────────────────── */
+function toggleTask(taskId){
+  var existing = completionFor(taskId);
+  if (existing){
+    sbFetch('/rest/v1/daily_task_completions?id=eq.' + existing.id, { method: 'DELETE' })
+      .then(function(r){
+        if (!r.ok) throw new Error('remove failed');
+        completions = completions.filter(function(c){ return c.id !== existing.id; });
+        render();
+      })
+      .catch(function(){ showToast('Could not undo — try again.', 'error'); });
+  } else {
+    sbFetch('/rest/v1/daily_task_completions', {
+      method: 'POST',
+      headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+      body: JSON.stringify({ task_id: taskId, store: currentStore, task_date: currentDate, completed_by: currentName })
+    })
+      .then(function(r){
+        if (!r.ok) return r.json().catch(function(){return null;}).then(function(err){ throw new Error((err && err.message) || 'save failed'); });
+        return r.json();
+      })
+      .then(function(res){
+        var saved = Array.isArray(res) ? res[0] : res;
+        if (!saved) throw new Error('no row returned');
+        completions.push(saved);
+        render();
+      })
+      .catch(function(err){ showToast('Could not save: ' + err.message, 'error'); });
+  }
+}
+
+/* ── Edit mode (owner/manager only) ──────────────── */
+function toggleEditMode(){
+  editMode = !editMode;
+  document.getElementById('edit-toggle-btn').classList.toggle('active', editMode);
+  document.getElementById('edit-toggle-btn').textContent = editMode ? '✓ Done Editing' : '✎ Edit Task List';
+  render();
+}
+
+function addTask(shiftKey, formId){
+  var titleEl = document.getElementById(formId + '-title');
+  var infoEl = document.getElementById(formId + '-info');
+  var title = titleEl.value.trim();
+  if (!title){ showToast('Enter a task title', 'error'); return; }
+  var maxSort = tasks.filter(function(t){ return t.shift === shiftKey; })
+    .reduce(function(m,t){ return Math.max(m, t.sort_order || 0); }, 0);
+  sbFetch('/rest/v1/daily_tasks', {
+    method: 'POST',
+    headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+    body: JSON.stringify({ shift: shiftKey, title: title, is_info: !!infoEl.checked, sort_order: maxSort + 1 })
+  })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      var saved = Array.isArray(res) ? res[0] : res;
+      if (saved){ tasks.push(saved); render(); showToast('Task added'); }
+    })
+    .catch(function(){ showToast('Could not add task', 'error'); });
+}
+
+function editTask(taskId){
+  var t = tasks.find(function(x){ return x.id === taskId; });
+  if (!t) return;
+  var newTitle = prompt('Edit task:', t.title);
+  if (newTitle === null) return;
+  newTitle = newTitle.trim();
+  if (!newTitle) return;
+  sbFetch('/rest/v1/daily_tasks?id=eq.' + taskId, {
+    method: 'PATCH',
+    headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+    body: JSON.stringify({ title: newTitle })
+  })
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      var saved = Array.isArray(res) ? res[0] : res;
+      if (saved){ t.title = saved.title; render(); }
+    })
+    .catch(function(){ showToast('Could not save edit', 'error'); });
+}
+
+function deleteTask(taskId){
+  if (!confirm('Remove this task from the list? (Completion history is kept.)')) return;
+  sbFetch('/rest/v1/daily_tasks?id=eq.' + taskId, {
+    method: 'PATCH',
+    headers: SB_HDR,
+    body: JSON.stringify({ is_active: false })
+  })
+    .then(function(r){
+      if (!r.ok) throw new Error('delete failed');
+      tasks = tasks.filter(function(t){ return t.id !== taskId; });
+      render();
+      showToast('Task removed');
+    })
+    .catch(function(){ showToast('Could not remove task', 'error'); });
+}
+
+function moveTask(taskId, dir){
+  var t = tasks.find(function(x){ return x.id === taskId; });
+  if (!t) return;
+  var siblings = tasks.filter(function(x){ return x.shift === t.shift; }).sort(function(a,b){ return (a.sort_order||0) - (b.sort_order||0); });
+  var idx = siblings.findIndex(function(x){ return x.id === taskId; });
+  var swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= siblings.length) return;
+  var other = siblings[swapIdx];
+  var aOrder = t.sort_order, bOrder = other.sort_order;
+  t.sort_order = bOrder; other.sort_order = aOrder;
+  render();
+  Promise.all([
+    sbFetch('/rest/v1/daily_tasks?id=eq.' + t.id, { method: 'PATCH', headers: SB_HDR, body: JSON.stringify({ sort_order: t.sort_order }) }),
+    sbFetch('/rest/v1/daily_tasks?id=eq.' + other.id, { method: 'PATCH', headers: SB_HDR, body: JSON.stringify({ sort_order: other.sort_order }) })
+  ]).catch(function(){ showToast('Could not save order — refresh to retry.', 'error'); });
+}
+
+/* ── Init ─────────────────────────────────────── */
+(function(){
+  var lvl = sessionStorage.getItem('wg_portal_level');
+  var back = document.getElementById('portal-back');
+  if (lvl === 'manager'){ back.href = 'manager.html'; back.innerHTML = '&larr; Manager Portal'; }
+  else if (lvl === 'store'){ back.href = 'store.html'; back.innerHTML = '&larr; Store Portal'; }
+})();
+
+loadTasks();
+</script>
+</body>
+</html>

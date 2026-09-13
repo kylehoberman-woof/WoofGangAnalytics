@@ -144,6 +144,18 @@
       </div>
 
       <div class="card">
+        <div class="card-icon">&#128203;</div>
+        <div class="card-title">Daily Store Tasks</div>
+        <div class="card-desc">Open, operate, and close — step-by-step tasks for each shift. Check off as you go; resets fresh every day.</div>
+        <div class="card-tags">
+          <span class="tag">Opening</span>
+          <span class="tag">Closing</span>
+          <span class="tag">Daily</span>
+        </div>
+        <a class="card-btn" href="daily-tasks.html">Open Daily Store Tasks</a>
+      </div>
+
+      <div class="card">
         <div class="card-icon">&#128197;</div>
         <div class="card-title">Staff Schedule</div>
         <div class="card-desc">Weekly and monthly shift scheduling for both stores. Manage the employee roster, set recurring default schedules, copy last week, and track hours per person.</div>
@@ -224,21 +236,22 @@
 <script src="portal-auth.js"></script>
 <script>
 var PIN_HASHES = {
-  'fb1548cece225c928b67452754417cd305864043278e526189d57b8e0977d71d': 'port-washington', // Casey (4958)
-  'eb7015b56be919a2c96c3fcb7e4ddd08fc17c1ccf17fd86dd060409ad58e0cb9': 'hicksville',      // Hailey (6046)
-  '905daf4b6cccc72219061385971997edb3f6d57cd9494967da9cd04acd350f83': 'port-washington', // Trinity (6815)
-  '8d99af9470d4a657fffebc88104b660ffa8a3968ea860cf1f4df8705132951c1': 'hicksville'       // Kayla (2551)
+  'fb1548cece225c928b67452754417cd305864043278e526189d57b8e0977d71d': {store: 'port-washington', name: 'Casey'},
+  'eb7015b56be919a2c96c3fcb7e4ddd08fc17c1ccf17fd86dd060409ad58e0cb9': {store: 'hicksville',      name: 'Hailey'},
+  '905daf4b6cccc72219061385971997edb3f6d57cd9494967da9cd04acd350f83': {store: 'port-washington', name: 'Trinity'},
+  '8d99af9470d4a657fffebc88104b660ffa8a3968ea860cf1f4df8705132951c1': {store: 'hicksville',      name: 'Kayla'}
 };
 
 async function checkPin(pin) {
   var hash = await sha256(pin);
-  var store = PIN_HASHES[hash];
-  if (store) {
+  var match = PIN_HASHES[hash];
+  if (match) {
     sessionStorage.setItem('wg_portal_auth', '1');
     sessionStorage.setItem('wg_portal_level', 'store');
-    sessionStorage.setItem('wg_portal_store', store);
-    document.getElementById('store-select').value = store;
-    switchStore(store);
+    sessionStorage.setItem('wg_portal_store', match.store);
+    sessionStorage.setItem('wg_portal_name', match.name);
+    document.getElementById('store-select').value = match.store;
+    switchStore(match.store);
     unlockPortal();
   } else { showPinError(); }
 }
