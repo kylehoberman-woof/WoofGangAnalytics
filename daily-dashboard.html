@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>var __lvl=sessionStorage.getItem('wg_portal_level');if(sessionStorage.getItem('wg_portal_auth')!=='1'||(__lvl!=='owner'&&__lvl!=='manager'))window.location.href='index.html';</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Dashboard — Woof Gang</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e;padding-bottom:60px}
+
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:36px 32px 30px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.greeting{font-size:2rem;font-weight:800;letter-spacing:-0.02em;line-height:1.1}
+.date-line{font-size:0.95rem;opacity:0.9;margin-top:8px;font-weight:500}
+
+.main{max-width:1100px;margin:24px auto 0;padding:0 20px;display:flex;flex-direction:column;gap:20px}
+
+.section{background:white;border-radius:16px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.section.store-section{border-left:5px solid #C4276E}
+.section.store-section.hv{border-left-color:#1B6B6B}
+.perf-block{background:#FBFBFC;border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.perf-block:last-child{margin-bottom:0}
+.perf-block-hdr{font-size:0.72rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px}
+.section.store-section.hv .perf-block{background:#F3F9F8}
+.section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #FDF0F5}
+.section-icon{font-size:1.5rem}
+.section-title{font-size:1.15rem;font-weight:800;letter-spacing:-0.01em}
+.section-sub{font-size:0.78rem;color:#999;margin-left:auto;font-weight:600}
+
+/* Stores side by side */
+.stores-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:700px){.stores-grid{grid-template-columns:1fr}}
+.store-block{background:#FDF0F5;border-radius:12px;padding:16px 18px;border-left:4px solid #C4276E}
+.store-block.hv{border-left-color:#1B6B6B;background:#E8F5F3}
+.store-name{font-size:0.75rem;font-weight:800;color:#C4276E;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.store-block.hv .store-name{color:#1B6B6B}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kpi{background:white;padding:10px 12px;border-radius:8px;display:flex;flex-direction:column;gap:2px}
+.kpi-label{font-size:0.68rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.kpi-value{font-size:1.25rem;font-weight:800;color:#1a1a2e}
+.kpi-trend{font-size:0.72rem;font-weight:700;margin-top:2px}
+.trend-up{color:#2E7D32}
+.trend-down{color:#e53935}
+.trend-flat{color:#888}
+
+/* Checklist */
+.checklist-today{display:flex;flex-direction:column;gap:8px}
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:#FDF0F5;cursor:pointer;transition:all 0.15s}
+.task-row:hover{background:#fae1ec}
+.task-row.done{opacity:0.55;background:#f5f5f5}
+.task-row.done .task-title{text-decoration:line-through;color:#888}
+.task-check{width:22px;height:22px;border:2px solid #C4276E;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:white}
+.task-row.done .task-check{background:#C4276E;color:white}
+.task-row.done .task-check::after{content:'✓';font-size:0.95rem;font-weight:800}
+.task-title{font-size:0.92rem;font-weight:600;flex:1}
+.empty-msg{padding:16px;color:#999;font-style:italic;text-align:center;font-size:0.9rem}
+
+/* Schedule */
+.shifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.shifts-grid{grid-template-columns:1fr}}
+.shift-column{background:#FDF0F5;border-radius:12px;padding:14px 16px;border-left:4px solid #C4276E}
+.shift-column.hv{border-left-color:#1B6B6B;background:#E8F5F3}
+.shift-column h3{font-size:0.78rem;font-weight:800;color:#C4276E;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.shift-column.hv h3{color:#1B6B6B}
+.shift-role-group{margin-bottom:10px}
+.shift-role-label{font-size:0.7rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.shift-item{background:white;padding:7px 10px;border-radius:6px;margin-bottom:4px;font-size:0.86rem;display:flex;justify-content:space-between;gap:8px}
+.shift-emp{font-weight:700;color:#1a1a2e}
+.shift-time{color:#666;font-weight:500;font-size:0.82rem}
+.off-pill{background:#FFF8E1;border-left:3px solid #F9A825;padding:6px 10px;border-radius:6px;margin-bottom:4px;font-size:0.82rem;color:#6D4C41}
+.off-pill strong{color:#4E342E}
+
+/* Low Stock */
+.stock-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.stock-grid{grid-template-columns:1fr}}
+.stock-column{background:#fff8f0;border-radius:12px;padding:14px 16px;border-left:4px solid #FB8C00}
+.stock-column h3{font-size:0.78rem;font-weight:800;color:#E65100;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px}
+.stock-item{background:white;padding:8px 10px;border-radius:6px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:0.82rem}
+.stock-name{font-weight:600;color:#1a1a2e;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stock-meta{display:flex;gap:8px;flex-shrink:0;align-items:center}
+.status-chip{font-size:0.64rem;font-weight:800;padding:2px 6px;border-radius:8px;text-transform:uppercase;letter-spacing:0.04em}
+.status-out{background:#ffcdd2;color:#c62828}
+.status-critical{background:#ffe0b2;color:#e65100}
+.status-order{background:#ffe0b2;color:#e65100}
+.status-low{background:#fff9c4;color:#f57f17}
+.stock-qty{font-weight:700;color:#666;font-size:0.82rem}
+.stock-more{font-size:0.78rem;color:#888;text-align:center;margin-top:6px;font-style:italic}
+
+/* Quick links */
+.quick-links{display:flex;flex-wrap:wrap;gap:10px}
+.ql-btn{padding:10px 18px;background:white;border:2px solid #C4276E;border-radius:10px;color:#C4276E;font-family:inherit;font-size:0.85rem;font-weight:700;text-decoration:none;transition:all 0.15s}
+.ql-btn:hover{background:#C4276E;color:white}
+
+.loading{padding:40px;text-align:center;color:#888}
+
+/* Executive Summary */
+.exec-summary{background:linear-gradient(135deg,#fff,#FDF0F5);border-left:5px solid #C4276E}
+.summary-body p{font-size:0.98rem;line-height:1.65;color:#2a2a3e;margin-bottom:14px;font-weight:500}
+.summary-body p:last-child{margin-bottom:0}
+.summary-body p:first-child::first-letter{font-size:1.6rem;font-weight:800;color:#C4276E}
+.exec-summary-empty{background:#fafafa;border-left:5px solid #ddd}
+.exec-summary-empty .empty-msg{padding:20px;font-size:0.9rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-link" id="portal-back" href="index.html">&larr; Owner Portal</a>
+  <div class="greeting" id="greeting">Good Morning, Kyle</div>
+  <div class="date-line" id="date-line">—</div>
+</div>
+
+<div class="main" id="main">
+  <div class="loading">Loading your morning briefing…</div>
+</div>
+
+<script>
+// Portal back link
+(function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.innerHTML='\u2190 Manager Portal';}else if(l==='store'){a.href='store.html';a.innerHTML='\u2190 Store Portal';}})();
+
+var SB = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var HD = {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
+function sbGet(p){return fetch(SB+p,{headers:HD}).then(function(r){return r.json();});}
+function sbPost(t,b){return fetch(SB+'/'+t,{method:'POST',headers:HD,body:JSON.stringify(b)}).then(function(r){return r.json();});}
+function sbDelete(t,f){return fetch(SB+'/'+t+'?'+f,{method:'DELETE',headers:HD});}
+
+var DAY_NAMES=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+var DAY_LABELS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function todayKey(){return DAY_NAMES[new Date().getDay()];}
+function mondayISO(d){d=d||new Date();var day=d.getDay();var diff=day===0?-6:1-day;var m=new Date(d);m.setDate(d.getDate()+diff);m.setHours(0,0,0,0);return m.toISOString().slice(0,10);}
+function todayISO(){return new Date().toISOString().slice(0,10);}
+
+function fc(v){if(v==null)return '-';return '$'+Math.round(v).toLocaleString('en-US');}
+function fcFull(v){if(v==null)return '-';return '$'+parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function trendPct(cur,prev){if(!prev||prev===0)return null;return ((cur-prev)/prev)*100;}
+function trendBadge(cur,prev,label){label=label||'vs last wk';var p=trendPct(cur,prev);if(p==null)return '';var cls=p>=1?'trend-up':p<=-1?'trend-down':'trend-flat';var arrow=p>=1?'&#9650;':p<=-1?'&#9660;':'&middot;';return '<div class="kpi-trend '+cls+'">'+arrow+' '+Math.abs(Math.round(p))+'% '+label+'</div>';}
+
+function fmtTime(t){
+  if(!t)return '';
+  var p=t.split(':'),h=parseInt(p[0],10),m=p[1]||'00';
+  var ampm=h>=12?'pm':'am';
+  h=h%12||12;
+  return h+(m==='00'?'':':'+m)+ampm;
+}
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function renderGreeting(){
+  var hour = new Date().getHours();
+  var greet = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+  var lvl = sessionStorage.getItem('wg_portal_level');
+  var name = lvl === 'manager' ? 'Cindy' : 'Kyle';
+  document.getElementById('greeting').textContent = greet + ', ' + name;
+  var d = new Date();
+  var opts = {weekday:'long', month:'long', day:'numeric', year:'numeric'};
+  document.getElementById('date-line').textContent = d.toLocaleDateString('en-US', opts);
+}
+
+function render(briefing, tasks, completions, shifts, employees, timeOff, hiringRoles, hiringCandidates){
+  var tk = todayKey();
+  var todayLabel = DAY_LABELS[new Date().getDay()];
+  var yesterdayLabel = DAY_LABELS[(new Date().getDay()+6)%7];
+
+  var html = '';
+
+  // ── EXECUTIVE SUMMARY (Claude-generated memo) ──
+  if (briefing.summary_text) {
+    html += '<div class="section exec-summary">';
+    html += '<div class="section-hdr"><div class="section-icon">&#128188;</div><div class="section-title">Executive Summary</div><div class="section-sub">Daily memo</div></div>';
+    html += '<div class="summary-body">';
+    briefing.summary_text.split(/\n\n+/).forEach(function(para){
+      if (para.trim()) html += '<p>'+esc(para.trim())+'</p>';
+    });
+    html += '</div></div>';
+  } else {
+    html += '<div class="section exec-summary-empty">';
+    html += '<div class="section-hdr"><div class="section-icon">&#128188;</div><div class="section-title">Executive Summary</div></div>';
+    html += '<div class="empty-msg">Your daily briefing memo will appear here after the next nightly build (requires ANTHROPIC_API_KEY GitHub secret).</div>';
+    html += '</div>';
+  }
+
+  // ── OPERATIONS — OPEN ROLES & CANDIDATES ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128101;</div><div class="section-title">Operations</div><div class="section-sub">Open roles &amp; candidates</div></div>';
+  var openRoles = (hiringRoles||[]).filter(function(r){ return r.status === 'open'; });
+  if (openRoles.length === 0) {
+    html += '<div class="empty-msg">No open roles right now.</div>';
+  } else {
+    var locs = [];
+    openRoles.forEach(function(r){ if (locs.indexOf(r.location) === -1) locs.push(r.location); });
+    html += '<div class="stock-grid">';
+    locs.forEach(function(loc){
+      var roles = openRoles.filter(function(r){ return r.location === loc; });
+      html += '<div class="stock-column"><h3>'+esc(loc)+'</h3>';
+      roles.forEach(function(r){
+        var candCount = (hiringCandidates||[]).filter(function(c){ return c.role_id === r.id; }).length;
+        html += '<div class="stock-item">';
+        html += '<div class="stock-name" title="'+esc(r.position)+'">'+esc(r.position)+'</div>';
+        html += '<div class="stock-meta">';
+        html += '<span class="stock-qty">'+r.openings+' opening'+(r.openings===1?'':'s')+'</span>';
+        html += '<span class="status-chip status-low">'+candCount+' candidate'+(candCount===1?'':'s')+'</span>';
+        html += '</div></div>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  var newCandidates = (hiringCandidates||[]).filter(function(c){ return c.status === 'new'; });
+  html += '<div style="margin-top:12px;font-size:0.85rem;color:#555">';
+  if (newCandidates.length) {
+    html += '&#128075; <strong>'+newCandidates.length+'</strong> candidate'+(newCandidates.length===1?'':'s')+' not yet contacted &mdash; ';
+  }
+  html += '<a href="hiring-portal.html">Open Hiring Portal &rarr;</a></div>';
+  html += '</div>';
+
+  // ── PER-STORE PERFORMANCE (PW then HV) ──
+  ['port-washington','hicksville'].forEach(function(storeKey){
+    var s = briefing.stores[storeKey]; if (!s) return;
+    var y = s.yesterday || {}, prev = s.last_week_same_day || {};
+    var w = s.wtd || {}, pw = s.prev_wtd || {};
+    var m = s.mtd || {}, pm = s.prev_mtd || {};
+    var cls = storeKey === 'hicksville' ? ' hv' : '';
+    var icon = storeKey === 'hicksville' ? '&#127981;' : '&#127970;';
+
+    html += '<div class="section store-section'+cls+'">';
+    html += '<div class="section-hdr"><div class="section-icon">'+icon+'</div><div class="section-title">'+s.label+'</div><div class="section-sub">Store performance</div></div>';
+
+    // Yesterday block
+    html += '<div class="perf-block">';
+    html += '<div class="perf-block-hdr">Yesterday &middot; '+yesterdayLabel+', '+briefing.yesterday+'</div>';
+    html += '<div class="kpi-grid">';
+    html += '<div class="kpi"><div class="kpi-label">Total Sales</div><div class="kpi-value">'+fc(y.total_rev)+'</div>'+trendBadge(y.total_rev,prev.total_rev,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooming Sales</div><div class="kpi-value">'+fc(y.groom_rev)+'</div>'+trendBadge(y.groom_rev,prev.groom_rev,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Retail Sales</div><div class="kpi-value">'+fc(y.retail_rev)+'</div>'+trendBadge(y.retail_rev,prev.retail_rev,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Transactions</div><div class="kpi-value">'+(y.transactions||0)+'</div>'+trendBadge(y.transactions,prev.transactions,'vs same day last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooms / Baths</div><div class="kpi-value">'+(y.grooms||0)+' / '+(y.baths||0)+'</div></div>';
+    html += '<div class="kpi"><div class="kpi-label">Avg Ticket</div><div class="kpi-value">'+fc(y.avg_ticket)+'</div></div>';
+    html += '</div></div>';
+
+    // Week over week
+    html += '<div class="perf-block">';
+    html += '<div class="perf-block-hdr">Week-over-Week &middot; Mon &rarr; yesterday vs same days last week</div>';
+    html += '<div class="kpi-grid">';
+    html += '<div class="kpi"><div class="kpi-label">Total Sales</div><div class="kpi-value">'+fc(w.total_rev)+'</div>'+trendBadge(w.total_rev,pw.total_rev,'vs last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Grooming Sales</div><div class="kpi-value">'+fc(w.groom_rev)+'</div>'+trendBadge(w.groom_rev,pw.groom_rev,'vs last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Retail Sales</div><div class="kpi-value">'+fc(w.retail_rev)+'</div>'+trendBadge(w.retail_rev,pw.retail_rev,'vs last wk')+'</div>';
+    html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+(w.appointments||0)+'</div>'+trendBadge(w.appointments,pw.appointments,'vs last wk')+'</div>';
+    html += '</div></div>';
+
+    // Month over month (only if data present)
+    if (s.mtd && s.prev_mtd) {
+      html += '<div class="perf-block">';
+      html += '<div class="perf-block-hdr">Month-over-Month &middot; '+esc(s.mtd_label||'this month')+' vs '+esc(s.prev_mtd_label||'last month')+'</div>';
+      html += '<div class="kpi-grid">';
+      html += '<div class="kpi"><div class="kpi-label">Total Sales</div><div class="kpi-value">'+fc(m.total_rev)+'</div>'+trendBadge(m.total_rev,pm.total_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Grooming Sales</div><div class="kpi-value">'+fc(m.groom_rev)+'</div>'+trendBadge(m.groom_rev,pm.groom_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Retail Sales</div><div class="kpi-value">'+fc(m.retail_rev)+'</div>'+trendBadge(m.retail_rev,pm.retail_rev,'vs last mo')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+(m.appointments||0)+'</div>'+trendBadge(m.appointments,pm.appointments,'vs last mo')+'</div>';
+      html += '</div></div>';
+    }
+
+    html += '</div>';  // /section
+  });
+
+  // ── YEAR-TO-DATE ──
+  var hasYtd = ['port-washington','hicksville'].some(function(k){return briefing.stores[k] && briefing.stores[k].ytd;});
+  if (hasYtd) {
+    html += '<div class="section">';
+    var ytdLabel = (briefing.stores['port-washington']||{}).ytd_label || 'YTD';
+    var prevYtdLabel = (briefing.stores['port-washington']||{}).prev_ytd_label || 'YTD last year';
+    html += '<div class="section-hdr"><div class="section-icon">&#128200;</div><div class="section-title">Year-to-Date</div><div class="section-sub">'+esc(ytdLabel)+' &nbsp;vs&nbsp; '+esc(prevYtdLabel)+'</div></div>';
+    html += '<div class="stores-grid">';
+    ['port-washington','hicksville'].forEach(function(storeKey){
+      var s = briefing.stores[storeKey]; if (!s || !s.ytd) return;
+      var yy = s.ytd, py = s.prev_ytd;
+      var cls = storeKey === 'hicksville' ? ' hv' : '';
+      html += '<div class="store-block'+cls+'">';
+      html += '<div class="store-name">'+s.label+'</div>';
+      html += '<div class="kpi-grid">';
+      html += '<div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-value">'+fc(yy.total_rev)+'</div>'+trendBadge(yy.total_rev,py.total_rev,'vs last yr')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Appointments</div><div class="kpi-value">'+yy.appointments+'</div>'+trendBadge(yy.appointments,py.appointments,'vs last yr')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Groom Rev</div><div class="kpi-value">'+fc(yy.groom_rev)+'</div>'+trendBadge(yy.groom_rev,py.groom_rev,'vs last yr')+'</div>';
+      html += '<div class="kpi"><div class="kpi-label">Retail Rev</div><div class="kpi-value">'+fc(yy.retail_rev)+'</div>'+trendBadge(yy.retail_rev,py.retail_rev,'vs last yr')+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div></div>';
+  }
+
+  // ── LAPSE CALLS — CUSTOMERS NEEDING OUTREACH ──
+  var hasLapse = ['port-washington','hicksville'].some(function(k){ return briefing.stores[k] && briefing.stores[k].lapse_pool; });
+  if (hasLapse) {
+    html += '<div class="section">';
+    html += '<div class="section-hdr"><div class="section-icon">&#128222;</div><div class="section-title">Lapse Calls</div><div class="section-sub">Customers overdue for a visit</div></div>';
+    html += '<div class="stores-grid">';
+    var lapseUrls = {'port-washington':'port-washington/WoofGang_PortWashington_LapseCalls.html','hicksville':'hicksville/WoofGang_Hicksville_LapseCalls.html'};
+    ['port-washington','hicksville'].forEach(function(storeKey){
+      var s = briefing.stores[storeKey]; if (!s || !s.lapse_pool) return;
+      var lp = s.lapse_pool;
+      var cls = storeKey === 'hicksville' ? ' hv' : '';
+      html += '<div class="store-block'+cls+'">';
+      html += '<div class="store-name">'+s.label+'</div>';
+      html += '<div class="kpi-grid">';
+      html += '<div class="kpi"><div class="kpi-label">Drifting (60-89d)</div><div class="kpi-value">'+((lp.drifting&&lp.drifting.count)||0)+'</div></div>';
+      html += '<div class="kpi"><div class="kpi-label">Lapsed (90-179d)</div><div class="kpi-value">'+((lp.lapsed&&lp.lapsed.count)||0)+'</div></div>';
+      html += '<div class="kpi"><div class="kpi-label">Dormant (180-365d)</div><div class="kpi-value">'+((lp.dormant&&lp.dormant.count)||0)+'</div></div>';
+      html += '<div class="kpi"><div class="kpi-label">Revenue at Stake</div><div class="kpi-value">'+fc(lp.total_annual_value)+'</div></div>';
+      html += '</div>';
+      html += '<div style="margin-top:10px;font-size:0.8rem"><a href="'+lapseUrls[storeKey]+'">Open Lapse Calls &rarr;</a></div>';
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  // ── TODAY'S CHECKLIST (weekly for today + monthly + open ad-hoc) ──
+  var todayDom = new Date().getDate();
+  var weeklyToday = tasks.filter(function(t){return (t.frequency||'weekly')==='weekly' && t.day_of_week === tk;});
+  var monthlyTasks = tasks.filter(function(t){
+    if (t.frequency !== 'monthly') return false;
+    // Include if no specific day-of-month, or if today is the scheduled day, or if overdue (dom passed) & not done
+    if (!t.day_of_month) return true;
+    if (t.day_of_month <= todayDom) return true;
+    return false;
+  });
+  var adhocOpen = tasks.filter(function(t){
+    if (t.frequency !== 'adhoc') return false;
+    return !completionFor(t, completions);
+  });
+
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#9989;</div><div class="section-title">Today\'s Checklist</div><div class="section-sub">'+todayLabel+'</div></div>';
+
+  var totalSections = weeklyToday.length + monthlyTasks.length + adhocOpen.length;
+  if (totalSections === 0) {
+    html += '<div class="empty-msg">No tasks scheduled &mdash; enjoy the day.</div>';
+  } else {
+    if (weeklyToday.length) {
+      html += '<div style="font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin:6px 0 4px">Weekly &middot; '+todayLabel+'</div>';
+      html += '<div class="checklist-today">';
+      weeklyToday.forEach(function(t){ html += taskRowHtml(t, completions); });
+      html += '</div>';
+    }
+    if (monthlyTasks.length) {
+      html += '<div style="font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin:12px 0 4px">Monthly &middot; this month</div>';
+      html += '<div class="checklist-today">';
+      monthlyTasks.forEach(function(t){ html += taskRowHtml(t, completions); });
+      html += '</div>';
+    }
+    if (adhocOpen.length) {
+      html += '<div style="font-size:0.72rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin:12px 0 4px">Ad-hoc &middot; open</div>';
+      html += '<div class="checklist-today">';
+      adhocOpen.forEach(function(t){ html += taskRowHtml(t, completions); });
+      html += '</div>';
+    }
+  }
+  html += '</div>';
+
+  // ── WHO'S WORKING TODAY ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128104;&#8205;&#128187;</div><div class="section-title">Who\'s Working Today</div><div class="section-sub">'+todayLabel+'</div></div>';
+  html += '<div class="shifts-grid">';
+  ['port-washington','hicksville'].forEach(function(storeKey){
+    var storeLabel = storeKey === 'hicksville' ? 'Hicksville' : 'Port Washington';
+    var cls = storeKey === 'hicksville' ? ' hv' : '';
+    html += '<div class="shift-column'+cls+'"><h3>'+storeLabel+'</h3>';
+
+    // Time-off pills for this store
+    var offs = timeOff.filter(function(o){return o.store_key === storeKey;});
+    offs.forEach(function(o){
+      html += '<div class="off-pill">&#127957; <strong>'+esc(o.employee_name)+'</strong> &mdash; '+esc(o.type||'off')+'</div>';
+    });
+
+    // Group shifts by role
+    var storeShifts = shifts.filter(function(s){return s.store === storeKey;}).sort(function(a,b){return (a.start_time||'').localeCompare(b.start_time||'');});
+    var byRole = {retail: [], manager: [], groomer: [], bather: [], other: []};
+    storeShifts.forEach(function(sh){
+      var emp = employees.find(function(e){return e.id === sh.emp_id;});
+      if (!emp) return;
+      var role = emp.role || 'other';
+      if (!byRole[role]) byRole[role] = [];
+      byRole[role].push({emp: emp, shift: sh});
+    });
+
+    var roleLabels = {manager:'Manager', retail:'Retail', groomer:'Groomers', bather:'Bathers', other:'Other'};
+    ['manager','retail','groomer','bather','other'].forEach(function(role){
+      var list = byRole[role];
+      if (!list || list.length === 0) return;
+      html += '<div class="shift-role-group">';
+      html += '<div class="shift-role-label">'+roleLabels[role]+'</div>';
+      list.forEach(function(x){
+        var t = fmtTime(x.shift.start_time.slice(0,5)) + (x.shift.end_time ? ' – ' + fmtTime(x.shift.end_time.slice(0,5)) : '');
+        html += '<div class="shift-item"><span class="shift-emp">'+esc(x.emp.name)+'</span><span class="shift-time">'+t+'</span></div>';
+      });
+      html += '</div>';
+    });
+
+    if (storeShifts.length === 0 && offs.length === 0) {
+      html += '<div class="empty-msg">No shifts scheduled</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  // ── STORE SUPPLIES NEEDED ──
+  var hasSupplies = ['port-washington','hicksville'].some(function(k){
+    return briefing.stores[k] && (briefing.stores[k].supplies_needed||[]).length > 0;
+  });
+  if (hasSupplies) {
+    html += '<div class="section">';
+    html += '<div class="section-hdr"><div class="section-icon">&#129529;</div><div class="section-title">Store Supplies Needed</div><div class="section-sub">Cleaning, grooming, packaging</div></div>';
+    html += '<div class="stock-grid">';
+    ['port-washington','hicksville'].forEach(function(storeKey){
+      var s = briefing.stores[storeKey]; if (!s) return;
+      var sup = (s.supplies_needed || []);
+      html += '<div class="stock-column"><h3>'+s.label+'</h3>';
+      if (sup.length === 0) {
+        html += '<div class="empty-msg">All supplies stocked</div>';
+      } else {
+        sup.slice(0,10).forEach(function(a){
+          var qtyTxt = (a.current_quantity||0) + (a.unit ? ' '+a.unit : '') + ' left';
+          var statusLabel = a.status === 'out' ? 'out' : a.status === 'order' ? 'order' : 'low';
+          html += '<div class="stock-item">';
+          html += '<div class="stock-name" title="'+esc(a.item_name)+'">'+esc(a.item_name)+'</div>';
+          html += '<div class="stock-meta">';
+          html += '<span class="stock-qty">'+qtyTxt+'</span>';
+          html += '<span class="status-chip status-'+a.status+'">'+statusLabel+'</span>';
+          html += '</div></div>';
+        });
+        if (sup.length > 10) {
+          html += '<div class="stock-more">+ '+(sup.length-10)+' more — see <a href="supplies.html">Store Supplies</a></div>';
+        }
+      }
+      html += '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  // ── LOW STOCK ALERTS ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128230;</div><div class="section-title">Low Stock Alerts</div><div class="section-sub">Top reorder priorities</div></div>';
+  html += '<div class="stock-grid">';
+  ['port-washington','hicksville'].forEach(function(storeKey){
+    var s = briefing.stores[storeKey]; if (!s) return;
+    var alerts = (s.low_stock || []);
+    html += '<div class="stock-column"><h3>'+s.label+'</h3>';
+    if (alerts.length === 0) {
+      html += '<div class="empty-msg">All stock levels OK</div>';
+    } else {
+      alerts.slice(0,10).forEach(function(a){
+        html += '<div class="stock-item">';
+        html += '<div class="stock-name" title="'+esc(a.name)+'">'+esc(a.name)+'</div>';
+        html += '<div class="stock-meta">';
+        html += '<span class="stock-qty">'+a.stock+' left</span>';
+        html += '<span class="status-chip status-'+a.status+'">'+a.status+'</span>';
+        html += '</div></div>';
+      });
+      if (alerts.length > 10) {
+        html += '<div class="stock-more">+ '+(alerts.length-10)+' more — see Inventory Dashboard</div>';
+      }
+    }
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  // ── QUICK LINKS ──
+  html += '<div class="section">';
+  html += '<div class="section-hdr"><div class="section-icon">&#128279;</div><div class="section-title">Quick Links</div></div>';
+  html += '<div class="quick-links">';
+  html += '<a class="ql-btn" href="port-washington/WoofGang_PortWashington_Commission_Dashboard.html">Commission Dashboard</a>';
+  html += '<a class="ql-btn" href="port-washington/WoofGang_PortWashington_Inventory_Dashboard.html">Inventory Dashboard</a>';
+  html += '<a class="ql-btn" href="schedule.html">Full Schedule</a>';
+  html += '<a class="ql-btn" href="checklist.html">Full Checklist</a>';
+  html += '<a class="ql-btn" href="https://scanner.hoberman.io" target="_blank">Receiving Tool</a>';
+  html += '</div></div>';
+
+  document.getElementById('main').innerHTML = html;
+}
+
+// Find the most relevant completion for a task based on its frequency:
+//   weekly  → completion whose week_start = this Monday
+//   monthly → completion whose week_start = first of this month
+//   adhoc   → any completion ever (most recent)
+function completionFor(task, completions){
+  var list = (completions._by_task_id || {})[task.id] || [];
+  if (!list.length) return null;
+  var freq = task.frequency || 'weekly';
+  var mon   = mondayISO();
+  var mon1  = month1ISO();
+  for (var i = 0; i < list.length; i++) {
+    var c = list[i];
+    if (freq === 'weekly'  && c.week_start === mon)  return c;
+    if (freq === 'monthly' && c.week_start === mon1) return c;
+    if (freq === 'adhoc')                            return c;
+  }
+  return null;
+}
+
+function taskRowHtml(t, completions){
+  var done = !!completionFor(t, completions);
+  var role = t.assigned_role || 'owner';
+  var roleLabel = role === 'owner' ? 'Owner' : role === 'manager' ? 'Manager' : 'Store';
+  var roleColor = role === 'owner' ? '#C4276E' : role === 'manager' ? '#1B6B6B' : '#b8880a';
+  return '<div class="task-row'+(done?' done':'')+'" onclick="toggleTask('+t.id+')">' +
+    '<div class="task-check"></div>' +
+    '<div class="task-title">'+esc(t.title)+'</div>' +
+    '<span style="font-size:0.62rem;font-weight:800;padding:2px 7px;border-radius:8px;text-transform:uppercase;letter-spacing:0.04em;background:rgba(0,0,0,0.04);color:'+roleColor+'">'+roleLabel+'</span>' +
+  '</div>';
+}
+
+function month1ISO(){
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01';
+}
+
+// Task toggle (frequency-aware)
+var currentState = null;
+function toggleTask(taskId){
+  if (!currentState) return;
+  var task = currentState.tasks.find(function(t){return t.id === taskId;});
+  if (!task) return;
+  var existing = completionFor(task, currentState.completions);
+  if (existing) {
+    sbDelete('checklist_completions', 'id=eq.'+existing.id).then(function(){
+      var list = currentState.completions._by_task_id[taskId] || [];
+      currentState.completions._by_task_id[taskId] = list.filter(function(c){return c.id !== existing.id;});
+      render(currentState.briefing, currentState.tasks, currentState.completions, currentState.shifts, currentState.employees, currentState.timeOff, currentState.hiringRoles, currentState.hiringCandidates);
+    });
+  } else {
+    var key;
+    if (task.frequency === 'weekly')       key = mondayISO();
+    else if (task.frequency === 'monthly') key = month1ISO();
+    else                                   key = todayISO(); // adhoc
+    sbPost('checklist_completions', {task_id: taskId, week_start: key}).then(function(res){
+      var row = Array.isArray(res) && res.length ? res[0] : {id: 'pending', task_id: taskId, week_start: key};
+      currentState.completions._by_task_id[taskId] = (currentState.completions._by_task_id[taskId]||[]).concat([row]);
+      render(currentState.briefing, currentState.tasks, currentState.completions, currentState.shifts, currentState.employees, currentState.timeOff, currentState.hiringRoles, currentState.hiringCandidates);
+    });
+  }
+}
+
+function load(){
+  renderGreeting();
+  var today = todayISO();
+  var m1 = month1ISO();
+  Promise.all([
+    fetch('data/morning_briefing.json?t='+Date.now()).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    sbGet('/checklist_tasks?is_active=eq.true&select=*&order=frequency,sort_order,id'),
+    // All completions from 1st of this month forward (covers weekly + monthly)
+    sbGet('/checklist_completions?week_start=gte.'+m1+'&select=id,task_id,week_start,completed_at'),
+    // Plus ALL completions for adhoc tasks (they have no periodic reset)
+    sbGet('/checklist_completions?select=id,task_id,week_start,completed_at&order=completed_at.desc'),
+    sbGet('/schedule_shifts?shift_date=eq.'+today+'&select=*'),
+    sbGet('/schedule_employees?is_active=eq.true&select=id,name,full_name,role,store,color'),
+    sbGet('/time_off?start_date=lte.'+today+'&end_date=gte.'+today+'&status=neq.Rejected&select=employee_name,type,status,store_key'),
+    sbGet('/hiring_roles?select=*'),
+    sbGet('/hiring_candidates?select=*')
+  ]).then(function(res){
+    var briefing = res[0];
+    if (!briefing) {
+      document.getElementById('main').innerHTML = '<div class="section"><div class="empty-msg">Morning briefing data not available yet. Trigger the nightly build from GitHub Actions to generate it.</div></div>';
+      return;
+    }
+    var tasks = Array.isArray(res[1]) ? res[1] : [];
+    var recentComps = Array.isArray(res[2]) ? res[2] : [];
+    var allComps    = Array.isArray(res[3]) ? res[3] : [];
+    // Merge dedup by id, then index by task_id
+    var byId = {};
+    recentComps.forEach(function(c){ byId[c.id] = c; });
+    allComps.forEach(function(c){ byId[c.id] = c; });
+    var byTask = {};
+    Object.keys(byId).forEach(function(k){
+      var c = byId[k];
+      (byTask[c.task_id] = byTask[c.task_id] || []).push(c);
+    });
+    // Sort each task's list newest → oldest by completed_at
+    Object.keys(byTask).forEach(function(tid){
+      byTask[tid].sort(function(a,b){return (b.completed_at||'').localeCompare(a.completed_at||'');});
+    });
+    var completions = {_by_task_id: byTask};
+    var shifts = Array.isArray(res[4]) ? res[4] : [];
+    var employees = Array.isArray(res[5]) ? res[5] : [];
+    var timeOff = Array.isArray(res[6]) ? res[6] : [];
+    var hiringRoles = Array.isArray(res[7]) ? res[7] : [];
+    var hiringCandidates = Array.isArray(res[8]) ? res[8] : [];
+
+    currentState = {briefing: briefing, tasks: tasks, completions: completions, shifts: shifts, employees: employees, timeOff: timeOff, hiringRoles: hiringRoles, hiringCandidates: hiringCandidates};
+    render(briefing, tasks, completions, shifts, employees, timeOff, hiringRoles, hiringCandidates);
+  }).catch(function(e){
+    console.error(e);
+    document.getElementById('main').innerHTML = '<div class="section"><div class="empty-msg">Failed to load briefing: '+e.message+'</div></div>';
+  });
+}
+
+load();
+</script>
+
+</body>
+</html>
