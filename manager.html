@@ -82,6 +82,18 @@
       </div>
 
       <div class="card">
+        <div class="card-icon">&#x1F4DE;</div>
+        <div class="card-title">Online Booking Requests</div>
+        <div class="card-desc">New leads from online ads, forwarded from each store's mailbox. Call before they go cold — mark contacted once you've reached out.</div>
+        <div class="card-tags">
+          <span class="tag">Leads</span>
+          <span class="tag">New Stores</span>
+          <span class="tag">Outreach</span>
+        </div>
+        <a class="card-btn" id="link-obr" href="port-washington/WoofGang_OnlineBookingRequests.html">Open Online Booking Requests</a>
+      </div>
+
+      <div class="card">
         <div class="card-icon">&#x26A0;&#xFE0F;</div>
         <div class="card-title">Booking Anomalies</div>
         <div class="card-desc">Flags customers whose recent groom differs from their history — wrong breed type (General vs Poodle-Doodle), wrong size, or unexpected service change. Review and acknowledge.</div>
@@ -322,6 +334,7 @@ var STORES = {
     exec: 'WoofGang_PortWashington_NY_AllYears_Dashboard.html',
     inv: 'WoofGang_PortWashington_Inventory_Dashboard.html',
     cross: 'WoofGang_CrossStore_Comparison.html',
+    obr: 'WoofGang_OnlineBookingRequests.html',
     anomaly: 'WoofGang_PortWashington_BookingAnomalies.html',
     retail: 'WoofGang_PortWashington_Retail_Dashboard.html',
     lapse: 'WoofGang_PortWashington_LapseCalls.html'
@@ -332,6 +345,7 @@ var STORES = {
     exec: 'WoofGang_Hicksville_NY_AllYears_Dashboard.html',
     inv: 'WoofGang_Hicksville_Inventory_Dashboard.html',
     cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
+    obr: '../port-washington/WoofGang_OnlineBookingRequests.html',
     anomaly: 'WoofGang_Hicksville_BookingAnomalies.html',
     retail: 'WoofGang_Hicksville_Retail_Dashboard.html',
     lapse: 'WoofGang_Hicksville_LapseCalls.html'
@@ -344,6 +358,7 @@ var STORES = {
     exec: 'WoofGang_GlenCove_NY_AllYears_Dashboard.html',
     inv: 'WoofGang_GlenCove_Inventory_Dashboard.html',
     cross: '../port-washington/WoofGang_CrossStore_Comparison.html',
+    obr: '../port-washington/WoofGang_OnlineBookingRequests.html',
     anomaly: 'WoofGang_GlenCove_BookingAnomalies.html',
     retail: 'WoofGang_GlenCove_Retail_Dashboard.html',
     lapse: 'WoofGang_GlenCove_LapseCalls.html'
@@ -356,6 +371,7 @@ function switchStore(key) {
   document.getElementById('link-exec').href = s.base + s.exec;
   document.getElementById('link-inv').href = s.base + s.inv;
   document.getElementById('link-cross').href = s.base + s.cross;
+  document.getElementById('link-obr').href = s.base + s.obr;
   document.getElementById('link-anomaly').href = s.base + s.anomaly;
   document.getElementById('link-retail').href = s.base + s.retail;
   document.getElementById('link-lapse').href = s.base + s.lapse;
