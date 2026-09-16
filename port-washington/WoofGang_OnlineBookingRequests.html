@@ -59,18 +59,35 @@ tr:hover td{background:#fef9fb}
 .action-btn.booked:hover{background:#128038}
 .action-btn.not-interested{background:#dc2626}
 .action-btn.not-interested:hover{background:#b91c1c}
+.action-btn.contacted{background:#2563eb}
+.action-btn.contacted:hover{background:#1d4ed8}
 .unack-btn{border:none;padding:6px 11px;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;font-family:inherit;background:#eee;color:#555}
 .unack-btn:hover{background:#ddd}
 .outcome-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;white-space:nowrap;color:white;margin-right:6px}
 .outcome-badge.voicemail{background:#d97706}
 .outcome-badge.booked{background:#16a34a}
 .outcome-badge.not-interested{background:#dc2626}
+.outcome-badge.contacted{background:#2563eb}
+.outcome-note{display:block;color:#777;font-size:0.73rem;font-style:italic;margin-top:4px;max-width:260px;white-space:normal}
 
 .reviewed-toggle{cursor:pointer;user-select:none}
 .reviewed-inner{display:none;margin-top:14px}
 .reviewed-inner.open{display:block}
 
 .err-banner{background:#fce4ec;color:#c62828;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;display:none}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:white;border-radius:14px;padding:24px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+.modal-box h3{font-size:1.05rem;margin-bottom:6px}
+.modal-box .modal-sub{color:#888;font-size:0.82rem;margin-bottom:14px}
+.modal-box textarea{width:100%;min-height:90px;border:1px solid #ddd;border-radius:8px;padding:10px;font-family:inherit;font-size:0.88rem;resize:vertical}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.modal-btn{border:none;padding:9px 18px;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;font-family:inherit}
+.modal-btn.cancel{background:#eee;color:#555}
+.modal-btn.cancel:hover{background:#ddd}
+.modal-btn.save{background:#C4276E;color:white}
+.modal-btn.save:hover{background:#a81f5c}
 </style>
 </head>
 <body>
@@ -82,7 +99,7 @@ tr:hover td{background:#fef9fb}
 </div>
 
 <div class="header">
-  <div class="header-timestamp">Page built September 13, 2026 at 11:12 AM ET<br>List refreshes live on open</div>
+  <div class="header-timestamp">Page built September 16, 2026 at 02:22 PM ET<br>List refreshes live on open</div>
   <h1>&#x1F4DE; Online Booking Requests</h1>
   <div class="subtitle">New leads from online ads &mdash; call before they go cold</div>
   <div class="brand-tag">WOOF GANG BAKERY &amp; GROOMING</div>
@@ -129,6 +146,18 @@ tr:hover td{background:#fef9fb}
         <thead><tr><th>Requested</th><th>Customer</th><th>Phone</th><th>Email</th><th>Store</th><th>Outcome</th><th></th></tr></thead>
         <tbody id="reviewed-tbody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="outcome-modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Add a note</h3>
+    <div class="modal-sub" id="modal-sub">Optional — anything the next person should know.</div>
+    <textarea id="modal-note" placeholder="e.g. Said she'll call back after checking her calendar..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeOutcomeModal()">Cancel</button>
+      <button class="modal-btn save" onclick="saveOutcomeModal()">Save</button>
     </div>
   </div>
 </div>
@@ -207,21 +236,29 @@ function setStore(key){ _storeFilter = key; renderTabs(); render(); }
 
 var OUTCOME_LABELS = {
   left_voicemail: '&#128222; Left Voicemail',
+  contacted: '&#128172; Contacted Customer',
   booked: '&#9989; Booked',
   not_interested: '&#10007; Not Interested'
 };
 var OUTCOME_CLASSES = {
   left_voicemail: 'voicemail',
+  contacted: 'contacted',
   booked: 'booked',
   not_interested: 'not-interested'
 };
 
 function actionBtnsHtml(id){
   return '<div class="action-btns">' +
-    '<button class="action-btn voicemail" onclick="setOutcome(\''+id+'\',\'left_voicemail\')">&#128222; Left Voicemail</button>' +
-    '<button class="action-btn booked" onclick="setOutcome(\''+id+'\',\'booked\')">&#9989; Booked</button>' +
-    '<button class="action-btn not-interested" onclick="setOutcome(\''+id+'\',\'not_interested\')">&#10007; Not Interested</button>' +
+    '<button class="action-btn voicemail" onclick="openOutcomeModal(\''+id+'\',\'left_voicemail\')">&#128222; Left Voicemail</button>' +
+    '<button class="action-btn contacted" onclick="openOutcomeModal(\''+id+'\',\'contacted\')">&#128172; Contacted Customer</button>' +
+    '<button class="action-btn booked" onclick="openOutcomeModal(\''+id+'\',\'booked\')">&#9989; Booked</button>' +
+    '<button class="action-btn not-interested" onclick="openOutcomeModal(\''+id+'\',\'not_interested\')">&#10007; Not Interested</button>' +
     '</div>';
+}
+
+function outcomeNoteHtml(r){
+  if(!r.outcome_note) return '';
+  return '<span class="outcome-note">&#128221; ' + esc(r.outcome_note) + '</span>';
 }
 
 function makeRow(r, section){
@@ -230,7 +267,7 @@ function makeRow(r, section){
   var lastCol;
   if(section === 'resolved'){
     var cls = OUTCOME_CLASSES[r.outcome] || '';
-    lastCol = '<td><span class="outcome-badge ' + cls + '">' + (OUTCOME_LABELS[r.outcome] || esc(r.outcome)) + '</span></td>' +
+    lastCol = '<td><span class="outcome-badge ' + cls + '">' + (OUTCOME_LABELS[r.outcome] || esc(r.outcome)) + '</span>' + outcomeNoteHtml(r) + '</td>' +
       '<td><button class="unack-btn" onclick="clearOutcome(\''+r.id+'\')">&#8617; Undo</button></td>';
   } else {
     lastCol = '<td>' + actionBtnsHtml(r.id) + '</td>';
@@ -251,7 +288,7 @@ function render(){
     .sort(function(a,b){ return (a.requested_at||'').localeCompare(b.requested_at||''); });
   var followup = filtered.filter(function(r){ return r.outcome === 'left_voicemail'; })
     .sort(function(a,b){ return (a.requested_at||'').localeCompare(b.requested_at||''); });
-  var resolved = filtered.filter(function(r){ return r.outcome === 'booked' || r.outcome === 'not_interested'; })
+  var resolved = filtered.filter(function(r){ return r.outcome === 'booked' || r.outcome === 'not_interested' || r.outcome === 'contacted'; })
     .sort(function(a,b){ return (b.requested_at||'').localeCompare(a.requested_at||''); });
 
   var activeTbody = document.getElementById('active-tbody');
@@ -290,11 +327,12 @@ function showError(msg){
   el.style.display = 'block';
 }
 
-function setOutcome(id, outcome){
+function setOutcome(id, outcome, note){
+  var body = {outcome: outcome, outcome_at: new Date().toISOString(), outcome_note: note || null};
   fetch(OBR_SB + '/online_booking_requests?id=eq.' + encodeURIComponent(id), {
     method: 'PATCH',
     headers: Object.assign({}, OBR_SHD, {'Prefer': 'return=representation'}),
-    body: JSON.stringify({outcome: outcome, outcome_at: new Date().toISOString()})
+    body: JSON.stringify(body)
   }).then(function(r){
     if(!r.ok) throw new Error('save failed');
     return r.json();
@@ -302,7 +340,7 @@ function setOutcome(id, outcome){
     var saved = Array.isArray(res) ? res[0] : res;
     if(!saved) throw new Error('no row returned');
     var row = ROWS.find(function(r){ return r.id === id; });
-    if(row){ row.outcome = saved.outcome; row.outcome_at = saved.outcome_at; }
+    if(row){ row.outcome = saved.outcome; row.outcome_at = saved.outcome_at; row.outcome_note = saved.outcome_note; }
     render();
   }).catch(function(){ alert('Could not save — try again.'); });
 }
@@ -311,7 +349,7 @@ function clearOutcome(id){
   fetch(OBR_SB + '/online_booking_requests?id=eq.' + encodeURIComponent(id), {
     method: 'PATCH',
     headers: Object.assign({}, OBR_SHD, {'Prefer': 'return=representation'}),
-    body: JSON.stringify({outcome: null, outcome_at: null})
+    body: JSON.stringify({outcome: null, outcome_at: null, outcome_note: null})
   }).then(function(r){
     if(!r.ok) throw new Error('save failed');
     return r.json();
@@ -319,9 +357,29 @@ function clearOutcome(id){
     var saved = Array.isArray(res) ? res[0] : res;
     if(!saved) throw new Error('no row returned');
     var row = ROWS.find(function(r){ return r.id === id; });
-    if(row){ row.outcome = null; row.outcome_at = null; }
+    if(row){ row.outcome = null; row.outcome_at = null; row.outcome_note = null; }
     render();
   }).catch(function(){ alert('Could not undo — try again.'); });
+}
+
+var _pendingOutcome = null;
+function openOutcomeModal(id, outcome){
+  _pendingOutcome = {id: id, outcome: outcome};
+  document.getElementById('modal-title').textContent = 'Mark as: ' + (OUTCOME_LABELS[outcome] || outcome).replace(/&#\d+;\s*/, '');
+  document.getElementById('modal-sub').textContent = 'Optional note — anything the next person should know.';
+  document.getElementById('modal-note').value = '';
+  document.getElementById('outcome-modal').classList.add('open');
+  document.getElementById('modal-note').focus();
+}
+function closeOutcomeModal(){
+  _pendingOutcome = null;
+  document.getElementById('outcome-modal').classList.remove('open');
+}
+function saveOutcomeModal(){
+  if(!_pendingOutcome) return;
+  var note = document.getElementById('modal-note').value.trim();
+  setOutcome(_pendingOutcome.id, _pendingOutcome.outcome, note);
+  closeOutcomeModal();
 }
 
 function loadRows(){
