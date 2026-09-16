@@ -64,6 +64,27 @@ IGNORED_SERVICE_SWAPS = {
 # to compare an appointment against, so those are deliberately excluded.
 FULL_DAY_OFF_TYPES = {"vacation", "pto", "sick", "personal"}
 
+# Business hours by store and day of week (0=Mon..6=Sun) — kept in sync with
+# the STORE_HOURS table in schedule.html. Used only to flag appointments
+# booked outside business hours (almost always an AM/PM mix-up, e.g. 11 PM
+# instead of 11 AM); a store with no entry here (not open yet) is silently
+# skipped rather than crashing.
+STORE_HOURS = {
+    "port-washington": {
+        0: {"open": "08:30", "close": "19:00"}, 1: {"open": "08:30", "close": "19:00"},
+        2: {"open": "08:30", "close": "19:00"}, 3: {"open": "08:30", "close": "19:00"},
+        4: {"open": "08:30", "close": "19:00"},
+        5: {"open": "09:00", "close": "19:00"},
+        6: {"open": "10:00", "close": "18:00"},
+    },
+    "hicksville": {
+        0: {"open": "09:00", "close": "18:00"}, 1: {"open": "09:00", "close": "18:00"},
+        2: {"open": "09:00", "close": "18:00"}, 3: {"open": "09:00", "close": "18:00"},
+        4: {"open": "09:00", "close": "18:00"}, 5: {"open": "09:00", "close": "18:00"},
+        6: {"open": "10:00", "close": "17:00"},
+    },
+}
+
 
 def _norm_staff_name(s):
     return re.sub(r"[.\s]+", " ", (s or "")).strip().lower()
@@ -233,6 +254,32 @@ for (owner_name, pet_name), g in dog_groups.items():
             flags.append("groomer_off")
             flag_details["groomer_off"] = dict(off, groomer=last_groomer)
 
+    # 0c. Appointment booked outside business hours — almost always an
+    # AM/PM data-entry mistake (11:00 PM instead of 11:00 AM) rather than a
+    # real after-hours booking. Checked on every dog regardless of history
+    # depth, same as close_together/groomer_off above. Only fires for a
+    # real service (not a checkout-only row) and only for stores with hours
+    # defined in STORE_HOURS.
+    hours_today = None
+    if last_visit.get("date") and _store_name in STORE_HOURS:
+        hours_today = STORE_HOURS[_store_name].get(date.fromisoformat(last_visit["date"]).weekday())
+    if hours_today and last_visit.get("datetime") and SERVICE_KEYWORD_RE.search(last_visit.get("service") or ""):
+        try:
+            appt_time = datetime.fromisoformat(last_visit["datetime"]).time()
+        except ValueError:
+            appt_time = None
+        if appt_time:
+            open_time = datetime.strptime(hours_today["open"], "%H:%M").time()
+            close_time = datetime.strptime(hours_today["close"], "%H:%M").time()
+            if appt_time < open_time or appt_time >= close_time:
+                flags.append("outside_hours")
+                flag_details["outside_hours"] = {
+                    "time": appt_time.strftime("%I:%M %p").lstrip("0"),
+                    "day": date.fromisoformat(last_visit["date"]).strftime("%A"),
+                    "store_open": datetime.strptime(hours_today["open"], "%H:%M").strftime("%I:%M %p").lstrip("0"),
+                    "store_close": datetime.strptime(hours_today["close"], "%H:%M").strftime("%I:%M %p").lstrip("0"),
+                }
+
     if len(visits) >= MIN_VISITS:
         # 1. Breed group change: General ↔ Poodle-Doodle
         if modal_breed and last_breed and last_breed != modal_breed:
@@ -339,15 +386,17 @@ for (owner_name, pet_name), g in dog_groups.items():
 
 
 def _flag_severity(flags):
-    if "groomer_off" in flags:
+    if "outside_hours" in flags:
         return 0
-    if "close_together" in flags:
+    if "groomer_off" in flags:
         return 1
-    if "breed_change" in flags:
+    if "close_together" in flags:
         return 2
-    if "size_change" in flags:
+    if "breed_change" in flags:
         return 3
-    return 4
+    if "size_change" in flags:
+        return 4
+    return 5
 
 
 # Upcoming bookings sort first regardless of date — fixable-before-it-
@@ -363,13 +412,14 @@ n_service = sum(1 for a in anomalies if "service_change" in a["flags"])
 n_price = sum(1 for a in anomalies if "price_anomaly" in a["flags"])
 n_close = sum(1 for a in anomalies if "close_together" in a["flags"])
 n_groomer_off = sum(1 for a in anomalies if "groomer_off" in a["flags"])
+n_outside_hours = sum(1 for a in anomalies if "outside_hours" in a["flags"])
 n_future = sum(1 for a in anomalies if a["is_future"])
 n_total = len(anomalies)
 
 # Collect all groomers for filter dropdown
 all_groomers = sorted(set(a["last_groomer"] for a in anomalies if a["last_groomer"] and a["last_groomer"] != "Unknown"))
 
-print(f"  {n_total} anomalies found: {n_breed} breed, {n_size} size, {n_service} service, {n_close} close-together, {n_groomer_off} groomer-off")
+print(f"  {n_total} anomalies found: {n_breed} breed, {n_size} size, {n_service} service, {n_close} close-together, {n_groomer_off} groomer-off, {n_outside_hours} outside-hours")
 
 # Serialize for JS
 import json as _json
@@ -431,6 +481,8 @@ body{{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background
 .kpi.blue{{border-top:3px solid #1565c0}}
 .kpi.purple{{border-top:3px solid #6a1b9a}}
 .kpi.teal{{border-top:3px solid #00796b}}
+.kpi.navy{{border-top:3px solid #1a237e}}
+.kpi.navy .kpi-val{{color:#1a237e}}
 .kpi.blue .kpi-val{{color:#1565c0}}
 .kpi.purple .kpi-val{{color:#6a1b9a}}
 .kpi.teal .kpi-val{{color:#00796b}}
@@ -474,6 +526,7 @@ thead th{{position:sticky;top:0;background:#f8f7f4;z-index:5}}
 .badge.orange{{background:#fff3e0;color:#bf360c}}
 .badge.purple{{background:#f3e5f5;color:#6a1b9a}}
 .badge.teal{{background:#e0f2f1;color:#00796b}}
+.badge.navy{{background:#e8eaf6;color:#1a237e}}
 
 /* ── CID link ── */
 .cid-link{{color:#C4276E;text-decoration:none;font-weight:600;font-family:monospace;font-size:0.9rem}}
@@ -546,6 +599,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   <button class="tab" onclick="setTab('price_anomaly',this)">&#x1F4B2; Price Anomalies ({n_price})</button>
   <button class="tab" onclick="setTab('close_together',this)">&#x1F7E3; Booked Too Close Together ({n_close})</button>
   <button class="tab" onclick="setTab('groomer_off',this)">&#x1F334; Groomer Not Working ({n_groomer_off})</button>
+  <button class="tab" onclick="setTab('outside_hours',this)">&#x1F319; Outside Business Hours ({n_outside_hours})</button>
 </div>
 
 <div class="page">
@@ -558,6 +612,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
   💲 <strong>Price</strong> = last price deviated &gt;30% from this dog's own average for same service+size &nbsp;|&nbsp;
   🟣 <strong>Booked Too Close Together</strong> = two real appointments within 10 days of each other — usually an accidental double-booking. Checked on every dog with 2+ visits, no pattern history required. FranPOS doesn't expose cancellation status on this data, so a flagged pair can sometimes be a rescheduled booking rather than a real double-booking — a quick glance and Acknowledge is fine if so.
   🌴 <strong>Groomer Not Working</strong> = the appointment's assigned groomer has approved Vacation/PTO/Sick/Personal time off covering that date. Cross-checked against Supabase time_off; partial-day types (Leaving Early, Late Arrival) are excluded since we can't compare against a specific cutoff time.
+  &#x1F319; <strong>Outside Business Hours</strong> = the appointment time falls before opening or at/after closing for that store and day of week — almost always an AM/PM mix-up (e.g. 11:00 PM instead of 11:00 AM) rather than a real after-hours booking.
   &#x1F52E; <strong>Upcoming Bookings</strong> = the flagged visit hasn't happened yet — a future appointment already on the books doesn't match this dog's pattern, so it's still fixable before the customer shows up. Those sort to the top and are highlighted blue everywhere.
   Click any row to see full visit history. Acknowledge resolved items to hide them.
 </div>
@@ -565,6 +620,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
 <div class="kpi-grid">
   <div class="kpi blue"><div class="kpi-val" id="kpi-future">{n_future}</div><div class="kpi-label">&#x1F52E; Upcoming Bookings</div></div>
   <div class="kpi teal"><div class="kpi-val" id="kpi-groomer-off">{n_groomer_off}</div><div class="kpi-label">&#x1F334; Groomer Not Working</div></div>
+  <div class="kpi navy"><div class="kpi-val" id="kpi-outside-hours">{n_outside_hours}</div><div class="kpi-label">&#x1F319; Outside Business Hours</div></div>
   <div class="kpi purple"><div class="kpi-val" id="kpi-close">{n_close}</div><div class="kpi-label">&#x1F7E3; Booked Too Close Together</div></div>
   <div class="kpi red"><div class="kpi-val" id="kpi-breed">{n_breed}</div><div class="kpi-label">&#x1F534; Breed Changes</div></div>
   <div class="kpi yellow"><div class="kpi-val" id="kpi-size">{n_size}</div><div class="kpi-label">&#x1F7E1; Size Changes</div></div>
@@ -738,6 +794,10 @@ function flagBadge(f, details) {{
     var d = details.groomer_off;
     return '<span class="badge teal">&#x1F334; ' + (d ? d.groomer + ' off (' + d.off_type + ', ' + d.off_start + (d.off_end !== d.off_start ? '→' + d.off_end : '') + ')' : 'Groomer off') + '</span>';
   }}
+  if (f === 'outside_hours') {{
+    var d = details.outside_hours;
+    return '<span class="badge navy">&#x1F319; ' + (d ? d.day + ' ' + d.time + ' (store hours ' + d.store_open + '–' + d.store_close + ')' : 'Outside business hours') + '</span>';
+  }}
   return '';
 }}
 
@@ -796,7 +856,7 @@ function setTab(tab, el) {{
   _tab = tab;
   document.querySelectorAll('.tab').forEach(function(t) {{ t.classList.remove('active'); }});
   if (el) el.classList.add('active');
-  var labels = {{all:'All Anomalies',upcoming:'&#x1F52E; Upcoming Bookings',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes',close_together:'&#x1F7E3; Booked Too Close Together',groomer_off:'&#x1F334; Groomer Not Working'}};
+  var labels = {{all:'All Anomalies',upcoming:'&#x1F52E; Upcoming Bookings',breed_change:'&#x1F534; Breed Changes',size_change:'&#x1F7E1; Size Changes',service_change:'&#x1F7E0; Service Changes',close_together:'&#x1F7E3; Booked Too Close Together',groomer_off:'&#x1F334; Groomer Not Working',outside_hours:'&#x1F319; Outside Business Hours'}};
   document.getElementById('table-title').innerHTML = labels[tab] || 'Anomalies';
   render();
 }}
@@ -934,6 +994,7 @@ function render() {{
   document.getElementById('kpi-price').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('price_anomaly') !== -1; }}).length;
   document.getElementById('kpi-close').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('close_together') !== -1; }}).length;
   document.getElementById('kpi-groomer-off').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('groomer_off') !== -1; }}).length;
+  document.getElementById('kpi-outside-hours').textContent = countAll.filter(function(a) {{ return a.flags.indexOf('outside_hours') !== -1; }}).length;
 }}
 
 // ── Modal ────────────────────────────────────────────────────────────────────
@@ -1003,4 +1064,4 @@ loadAcks();
 out_file = OUTPUT_DIR / f"WoofGang_{_fn_display}_BookingAnomalies.html"
 out_file.write_text(html, encoding="utf-8")
 print(f"  Written to: {out_file}")
-print(f"Done! {n_total} anomalies: {n_breed} breed, {n_size} size, {n_service} service, {n_price} price, {n_close} close-together, {n_groomer_off} groomer-off")
+print(f"Done! {n_total} anomalies: {n_breed} breed, {n_size} size, {n_service} service, {n_price} price, {n_close} close-together, {n_groomer_off} groomer-off, {n_outside_hours} outside-hours")
