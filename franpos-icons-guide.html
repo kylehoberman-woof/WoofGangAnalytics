@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>if(sessionStorage.getItem('wg_portal_auth')!=='1')window.location.href='index.html';</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — FranPOS Icons &amp; Color Coding</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:28px 32px 22px;text-align:center;color:white;position:relative}
+.header h1{font-size:1.5rem;font-weight:800;letter-spacing:-0.02em}
+.header p{font-size:0.85rem;opacity:0.85;margin-top:2px}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.main{max-width:900px;width:100%;margin:0 auto;padding:28px 24px 60px}
+.sheet{background:white;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);padding:16px;margin-bottom:24px}
+.sheet img{width:100%;height:auto;border-radius:8px;display:block}
+.sheet-label{font-size:0.78rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-link" id="portal-back" href="onboarding.html">&larr; Onboarding</a>
+  <h1>FranPOS Icons &amp; Color Coding</h1>
+  <p>Reference sheet — appointment status colors and POS icons</p>
+</div>
+
+<div class="main">
+  <div class="sheet">
+    <div class="sheet-label">Page 1 — Color Coding</div>
+    <img src="assets/franpos-icons-color-coding.png" alt="FranPOS appointment status color coding: pink, blue, yellow, green, gray">
+  </div>
+  <div class="sheet">
+    <div class="sheet-label">Page 2 — Icon Glossary</div>
+    <img src="assets/franpos-icons-glossary.png" alt="FranPOS appointment and client icon glossary">
+  </div>
+</div>
+
+<script>
+!function(){
+  var l = sessionStorage.getItem('wg_portal_level'), a = document.getElementById('portal-back');
+  if (l === 'manager') { a.href = 'manager.html'; a.textContent = '← Manager Portal'; }
+  else if (l === 'store') { a.href = 'store.html'; a.textContent = '← Store Portal'; }
+}();
+</script>
+
+</body>
+</html>

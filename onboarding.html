@@ -69,6 +69,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .ref-content .script .role{font-weight:700;color:#C4276E}
 .ref-content .script .cust{font-weight:700;color:#6B3520}
 .ref-content .pro-tip{background:#FDF0F5;border-left:3px solid #E8006A;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:0.82rem;line-height:1.6}
+.ref-content a{color:#C4276E;font-weight:700;text-decoration:underline}
+.ref-content a:hover{color:#E8006A}
 
 /* Bottom actions */
 .actions{text-align:center;padding:16px 0}
@@ -223,7 +225,11 @@ function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,
    known-safe tag/attribute allowlist via the browser's own HTML parser
    (DOMParser never executes scripts), so a typo or copy-paste mistake
    can't inject something unexpected into every trainee's screen. */
-var ALLOWED_TAGS = {h4:[], p:[], ul:[], li:[], strong:[], em:[], br:[], div:['class'], span:['class']};
+var ALLOWED_TAGS = {h4:[], p:[], ul:[], li:[], strong:[], em:[], br:[], div:['class'], span:['class'], a:['href']};
+/* Only relative links or http(s) URLs are kept — blocks javascript:/data: etc. */
+function isSafeHref(href){
+  return /^(https?:\/\/|\.?\/|[a-zA-Z0-9_-]+(\.html)?(\?|#|$))/.test(href || '');
+}
 function sanitizeHtml(html){
   var doc = new DOMParser().parseFromString('<div>' + html + '</div>', 'text/html');
   var root = doc.body.firstChild;
@@ -238,6 +244,11 @@ function sanitizeHtml(html){
         Array.prototype.slice.call(child.attributes).forEach(function(attr){
           if (allowedAttrs.indexOf(attr.name) === -1) child.removeAttribute(attr.name);
         });
+        if (tag === 'a') {
+          if (!isSafeHref(child.getAttribute('href'))) child.removeAttribute('href');
+          child.setAttribute('target', '_blank');
+          child.setAttribute('rel', 'noopener noreferrer');
+        }
         clean(child);
       } else if (child.nodeType !== 3) {
         toRemove.push(child);

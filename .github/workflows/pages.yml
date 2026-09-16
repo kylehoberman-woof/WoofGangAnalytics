@@ -36,9 +36,9 @@ jobs:
              master-schedule.html march-madness.html morning.html \
              my-schedule.html onboarding.html retail-staffing.html \
              supplies.html bonus-tracker.html hiring-portal.html \
-             daily-tasks.html daily-dashboard.html \
+             daily-tasks.html daily-dashboard.html franpos-icons-guide.html \
              portal-auth.js portal.css CNAME _site/
-          cp -r data port-washington hicksville glen-cove _site/
+          cp -r data port-washington hicksville glen-cove assets _site/
 
       - uses: actions/upload-pages-artifact@v3
         with:
