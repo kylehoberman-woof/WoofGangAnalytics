@@ -155,10 +155,12 @@ tr:hover td { background:#fef9f5; }
 .lc-range-count { font-size:12px; color:var(--muted); margin-left:auto; }
 .lc-name-btn { background:none; border:none; padding:0; margin:0; font:inherit; font-weight:700; color:var(--pink); cursor:pointer; text-decoration:underline; text-align:left; }
 .lc-name-btn:hover { opacity:.75; }
-.lc-action-cell { min-width:160px; }
+.lc-action-cell { min-width:220px; }
 .lc-log-btn { background:var(--brown); color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:11px; cursor:pointer; }
 .lc-log-btn:hover { opacity:.85; }
-.lc-action-badge { font-size:11px; color:var(--muted); margin-top:5px; max-width:180px; font-weight:600; }
+.lc-action-badge { font-size:11px; color:var(--muted); margin-top:5px; max-width:260px; font-weight:600; }
+.lc-badge-note { display:inline-block; font-weight:400; font-style:italic; color:var(--text); cursor:help; }
+.lc-badge-converted { display:inline-block; font-weight:700; color:#16a34a; }
 .lc-complaint-flag { font-size:11px; color:#dc2626; font-weight:700; margin-top:4px; }
 .lc-row.lc-hidden { display:none; }
 @media(max-width:600px) { th,td { padding:8px 6px; font-size:12px; } }
@@ -318,15 +320,47 @@ function bucketFor(cid){
   return 'resolved';
 }
 
+var BOOKED_WITHIN_DAYS = 14;
+
+// Did a real appointment land within N days after the call — checked
+// against this dog's own appointment history (already loaded client-side
+// in PET_HISTORY), independent of whatever outcome was manually logged.
+// A person can forget to click "Booked"; the actual POS data doesn't.
+function bookingAfterCall(cid, callDateStr, days){
+  var hist = PET_HISTORY[cid];
+  if(!hist || !hist.appointments || !callDateStr) return null;
+  var callDate = new Date(callDateStr + 'T00:00:00');
+  if(isNaN(callDate)) return null;
+  var cutoff = new Date(callDate.getTime() + days * 86400000);
+  var best = null;
+  hist.appointments.forEach(function(a){
+    if(!a.date) return;
+    var d = new Date(a.date + 'T00:00:00');
+    if(isNaN(d) || d <= callDate || d > cutoff) return;
+    if(!best || d < new Date(best.date + 'T00:00:00')) best = a;
+  });
+  return best;
+}
+
 function actionBadgeHtml(cid){
   if(dncByCid[cid]) return '<span style="color:#1f2937">🚫 Do Not Contact</span>';
   var action = currentAction(cid);
   if(!action) return 'Not yet contacted';
   var log = callLogByCid[cid];
-  var lastDate = log[0].call_date;
+  var lastEntry = log[0];
+  var lastDate = lastEntry.call_date;
   var label = ACTION_LABELS[action] || action;
   var color = ACTION_COLORS[action] || '#6b7280';
-  return '<span style="color:' + color + '">' + lcEsc(label) + '</span><br><span style="font-weight:400;color:var(--muted)">' + lcEsc(lastDate) + '</span>';
+  var html = '<span style="color:' + color + '">' + lcEsc(label) + '</span><br><span style="font-weight:400;color:var(--muted)">' + lcEsc(lastDate) + '</span>';
+  if(lastEntry.notes){
+    html += '<br><span class="lc-badge-note" title="' + lcEsc(lastEntry.notes) + '">📝 ' + lcEsc(lastEntry.notes.length > 60 ? lastEntry.notes.slice(0,60) + '…' : lastEntry.notes) + '</span>';
+  }
+  var conv = bookingAfterCall(cid, lastDate, BOOKED_WITHIN_DAYS);
+  if(conv){
+    var gapDays = Math.round((new Date(conv.date + 'T00:00:00') - new Date(lastDate + 'T00:00:00')) / 86400000);
+    html += '<br><span class="lc-badge-converted">✅ Booked ' + gapDays + 'd later (' + lcEsc(conv.date) + ')</span>';
+  }
+  return html;
 }
 
 function applyBuckets(){
@@ -853,6 +887,7 @@ th.n, td.n { text-align:right; }
 .lc-progress-entry-owner { font-weight:400; color:var(--muted); }
 .lc-progress-entry-action { font-weight:600; min-width:170px; }
 .lc-progress-entry-notes { color:var(--muted); flex:1; }
+.lc-progress-entry-converted { font-weight:700; color:#16a34a; }
 .lc-progress-empty { color:#9ca3af; text-align:center; padding:24px; }
 @media(max-width:600px) { th,td { padding:8px 6px; font-size:12px; } }
 """
@@ -860,6 +895,26 @@ th.n, td.n { text-align:right; }
 PROGRESS_JS = """
 var LC_STORE = "__STORE__";
 var CID_OWNER = __CID_OWNER__;
+var PET_HISTORY = __PET_HISTORY__;
+var BOOKED_WITHIN_DAYS = 14;
+
+// Same check as the main Lapse Calls page — did a real appointment land
+// within N days after this call, per the dog's own appointment history.
+function bookingAfterCall(cid, callDateStr, days){
+  var hist = PET_HISTORY[cid];
+  if(!hist || !hist.appointments || !callDateStr) return null;
+  var callDate = new Date(callDateStr + 'T00:00:00');
+  if(isNaN(callDate)) return null;
+  var cutoff = new Date(callDate.getTime() + days * 86400000);
+  var best = null;
+  hist.appointments.forEach(function(a){
+    if(!a.date) return;
+    var d = new Date(a.date + 'T00:00:00');
+    if(isNaN(d) || d <= callDate || d > cutoff) return;
+    if(!best || d < new Date(best.date + 'T00:00:00')) best = a;
+  });
+  return best;
+}
 var LC_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
 var LC_SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
 var LC_SHD = {'apikey':LC_SK,'Authorization':'Bearer '+LC_SK,'Content-Type':'application/json'};
@@ -913,10 +968,17 @@ function renderDayProgress(rows){
       var label = ACTION_LABELS[e.action] || e.action;
       var color = ACTION_COLORS[e.action] || '#6b7280';
       var owner = CID_OWNER[e.pet_cid] || '';
+      var conv = bookingAfterCall(e.pet_cid, e.call_date, BOOKED_WITHIN_DAYS);
+      var convHtml = '';
+      if(conv){
+        var gapDays = Math.round((new Date(conv.date + 'T00:00:00') - new Date(e.call_date + 'T00:00:00')) / 86400000);
+        convHtml = '<span class="lc-progress-entry-converted">✅ Booked ' + gapDays + 'd later</span>';
+      }
       return '<div class="lc-progress-entry">'
         + '<span class="lc-progress-entry-dog">' + lcEsc(e.pet_name || '') + (owner ? ' <span class="lc-progress-entry-owner">(' + lcEsc(owner) + ')</span>' : '') + '</span>'
         + '<span class="lc-progress-entry-action" style="color:' + color + '">' + lcEsc(label) + '</span>'
         + (e.notes ? '<span class="lc-progress-entry-notes">' + lcEsc(e.notes) + '</span>' : '')
+        + convHtml
         + '</div>';
     }).join('');
     return '<tr class="lc-progress-row" id="' + rowId + '-toggle" onclick="toggleDayDetail(\\'' + rowId + '\\')">'
@@ -939,7 +1001,7 @@ function toggleDayDetail(rowId){
 }
 
 loadDayProgress();
-""".replace("__STORE__", store_name).replace("__CID_OWNER__", CID_OWNER_JSON)
+""".replace("__STORE__", store_name).replace("__CID_OWNER__", CID_OWNER_JSON).replace("__PET_HISTORY__", PET_HISTORY_JSON)
 
 progress_html = f"""<!DOCTYPE html>
 <html lang="en">
