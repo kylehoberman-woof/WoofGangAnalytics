@@ -823,7 +823,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 8,
+    "nested_data_count": 10,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -1074,6 +1074,29 @@
         },
         {
           "Address": null,
+          "CellPhone": "5165219433",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 420409554,
+          "DateOfBirth": null,
+          "Email": "patryanlampl@gmail.com",
+          "FirstName": "Pat",
+          "LastName": "Lampl",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "5165219433",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-05-11T16:26:05",
+          "ModifiedDate": "2026-09-18T06:47:26",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
           "CellPhone": "5166628187",
           "City": null,
           "CompanyId": 203698,
@@ -1233,10 +1256,66 @@
               "name": "3"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5165219433",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 420926339,
+          "DateOfBirth": "2025-12-30T00:00:00",
+          "Email": "patryanlampl@gmail.com",
+          "FirstName": "Prune",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-09-18T06:47:26.267",
+          "ModifiedDate": "2026-09-18T06:47:26.36",
+          "ParentCustomerId": 420409554,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "249"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "11"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 782010737
+      "version": 782172056
     }
   }
 }
