@@ -97,6 +97,28 @@ tr.cand-row:hover td{background:#fef7fa}
 .status-btn{padding:7px 14px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;background:white;color:#666;transition:all 0.2s}
 .status-btn:hover{border-color:#C4276E;color:#C4276E}
 .status-btn.active{background:#C4276E;color:white;border-color:#C4276E}
+/* Setup checklist */
+.setup-section{margin-top:16px;background:#f5fbf6;border:2px solid #c8e6c9;border-radius:10px;padding:14px 16px}
+.setup-section h3{color:#2E7D32}
+.setup-item{display:flex;align-items:flex-start;gap:10px;padding:6px 0}
+.setup-item input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:#2E7D32;cursor:pointer;flex-shrink:0}
+.setup-item label{font-size:0.86rem;color:#1a1a2e;cursor:pointer;line-height:1.4}
+.setup-item .setup-note{color:#999;font-size:0.76rem;font-weight:400}
+.setup-item .setup-done-meta{display:block;color:#2E7D32;font-size:0.74rem;font-weight:600;margin-top:1px}
+.setup-progress-chip{font-size:0.7rem;font-weight:700;color:#2E7D32;background:#e8f5e9;border-radius:8px;padding:2px 7px;margin-left:6px;white-space:nowrap}
+.provision-block{margin-top:14px;padding-top:14px;border-top:1px dashed #a5d6a7}
+.provision-block.hidden{display:none}
+.provision-title{font-weight:800;color:#2E7D32;font-size:0.88rem;margin-bottom:10px}
+.provision-block .form-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.provision-block select,.provision-block input{width:100%;padding:7px 9px;border:2px solid #ddd;border-radius:7px;font-family:inherit;font-size:0.82rem}
+.provision-actions{display:flex;align-items:center;gap:10px;margin-top:8px}
+.btn-small{background:#2E7D32;color:white;border:none;padding:7px 14px;border-radius:8px;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer}
+.btn-small:hover{background:#256b28}
+.btn-small:disabled{background:#bbb;cursor:default}
+.provision-status{font-size:0.78rem;font-weight:600;color:#2E7D32}
+.provision-status.error{color:#c62828}
+.pin-reveal{background:#fff8e1;border:2px solid #F9A825;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:0.9rem;color:#7a5c00}
+.pin-reveal b{font-size:1.3rem;letter-spacing:0.15em;color:#1a1a2e}
 .log-entry{background:#fafbfc;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:0.82rem}
 .log-entry-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}
 .log-entry-date{font-weight:700;color:#1a1a2e}
@@ -185,6 +207,7 @@ CREATE POLICY "Allow all" ON hiring_contact_log FOR ALL USING (true) WITH CHECK 
     <div class="sc" onclick="setStatusFilter('new')"><div class="sc-val" id="stat-new">–</div><div class="sc-label">Not Yet Contacted</div></div>
     <div class="sc" onclick="setStatusFilter('in_progress')"><div class="sc-val" id="stat-progress">–</div><div class="sc-label">In Progress</div></div>
     <div class="sc" onclick="setStatusFilter('hired')"><div class="sc-val" id="stat-hired">–</div><div class="sc-label">Hired</div></div>
+    <div class="sc" onclick="setStatusFilter('hired')"><div class="sc-val" id="stat-not-ready">–</div><div class="sc-label">&#9989; Not Fully Set Up</div></div>
     <div class="sc" onclick="setStatusFilter('')"><div class="sc-val" id="stat-total">–</div><div class="sc-label">All Candidates</div></div>
   </div>
 
@@ -272,6 +295,48 @@ CREATE POLICY "Allow all" ON hiring_contact_log FOR ALL USING (true) WITH CHECK 
 
     <div class="status-row" id="modal-status-row"></div>
 
+    <div class="modal-section setup-section hidden" id="setup-section">
+      <h3>&#9989; Onboarding Setup — Ready to Start?</h3>
+      <div id="setup-checklist"></div>
+
+      <div class="provision-block hidden" id="provision-block">
+        <div class="provision-title">&#127881; Fully Set Up — Provision Access</div>
+        <div class="form-grid">
+          <div class="fg"><label>Role</label>
+            <select id="prov-role">
+              <option value="retail">Retail / Sales Associate</option>
+              <option value="groomer">Groomer</option>
+              <option value="bather">Bather</option>
+              <option value="manager">Manager</option>
+            </select>
+          </div>
+          <div class="fg"><label>Pay Type</label>
+            <select id="prov-pay-type">
+              <option value="commission">Commission</option>
+              <option value="hourly">Hourly</option>
+              <option value="salary">Salary</option>
+            </select>
+          </div>
+          <div class="fg"><label>Store</label>
+            <select id="prov-store">
+              <option value="port-washington">Port Washington</option>
+              <option value="hicksville">Hicksville</option>
+              <option value="glen-cove">Glen Cove</option>
+            </select>
+          </div>
+          <div class="fg"><label>Hire Date</label><input type="date" id="prov-hire-date"></div>
+        </div>
+        <div class="provision-actions">
+          <button class="btn-small" id="prov-schedule-btn" onclick="provisionSchedule()">+ Add to Schedule &amp; Commission Dashboard</button>
+          <span class="provision-status" id="prov-schedule-status"></span>
+        </div>
+        <div class="provision-actions">
+          <button class="btn-small" id="prov-pin-btn" onclick="provisionPin()">+ Generate Store Portal PIN</button>
+          <span class="provision-status" id="prov-pin-status"></span>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-section">
       <h3>Contact History</h3>
       <div id="modal-log-history"></div>
@@ -302,6 +367,7 @@ CREATE POLICY "Allow all" ON hiring_contact_log FOR ALL USING (true) WITH CHECK 
 
 <div class="toast hidden" id="toast"></div>
 
+<script src="portal-auth.js"></script>
 <script>
 /* ── Config ───────────────────────────────────── */
 var SB_URL  = 'https://bqzinttbjeeaybywhhet.supabase.co';
@@ -323,6 +389,14 @@ var selectedMethod = null;
 var METHOD_LABELS = { called:'📞 Called', emailed:'📧 Emailed', texted:'💬 Texted', interviewed:'🤝 Interviewed', walk_in:'🚶 Walk-in', other:'📝 Other' };
 var STATUS_LABELS = { new:'Not Yet Contacted', in_progress:'In Progress', hired:'Hired', not_moving_forward:'Not Moving Forward' };
 var ROLE_STATUS_LABELS = { open:'Open', filled:'Filled', closed:'Closed' };
+var SETUP_TASKS = [
+  { key: 'gusto_invite', label: 'Gusto Payroll Invite' },
+  { key: 'pos_access',   label: 'Store POS Access' },
+  { key: 'alarm_code',   label: 'Alarm Code', note: 'Port Washington only' },
+  { key: 'key',          label: 'Store Key' },
+  { key: 'schedule',     label: 'Added to Schedule' }
+];
+var setupByCandidate = {};
 
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
@@ -395,6 +469,35 @@ function loadLogs() {
       renderList();
     })
     .catch(function(){});
+}
+
+function loadSetupChecklist() {
+  sbFetch('/rest/v1/hiring_setup_checklist?select=*')
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(rows){
+      setupByCandidate = {};
+      (Array.isArray(rows) ? rows : []).forEach(function(row){
+        if(!setupByCandidate[row.candidate_id]) setupByCandidate[row.candidate_id] = {};
+        setupByCandidate[row.candidate_id][row.task] = row;
+      });
+      renderList();
+      renderStats();
+      if (currentCandidateId) renderSetupChecklist(currentCandidateId);
+    })
+    .catch(function(){});
+}
+
+function setupProgress(cid) {
+  var done = setupByCandidate[cid] || {};
+  var n = SETUP_TASKS.filter(function(t){ return done[t.key]; }).length;
+  return { done: n, total: SETUP_TASKS.length };
+}
+
+function hiredProgressChip(c) {
+  if (c.status !== 'hired') return '';
+  var p = setupProgress(c.id);
+  var color = p.done === p.total ? '' : ' style="background:#fff8e1;color:#B8880A"';
+  return '<span class="setup-progress-chip"' + color + '>' + p.done + '/' + p.total + ' ready</span>';
 }
 
 /* ── Roles ────────────────────────────────────── */
@@ -546,6 +649,11 @@ function renderStats() {
   document.getElementById('stat-progress').textContent = counts.in_progress;
   document.getElementById('stat-hired').textContent = counts.hired;
   document.getElementById('stat-total').textContent = candidates.length;
+  var notReady = candidates.filter(function(c){
+    return c.status === 'hired' && setupProgress(c.id).done < SETUP_TASKS.length;
+  }).length;
+  var notReadyEl = document.getElementById('stat-not-ready');
+  if (notReadyEl) notReadyEl.textContent = notReady;
 }
 
 function renderList() {
@@ -578,7 +686,7 @@ function renderList() {
       + '<td><div class="cand-name">' + esc(c.name) + '</div>' + (c.phone ? '<div class="cand-sub">' + esc(c.phone) + '</div>' : '') + '</td>'
       + '<td>' + esc(candidateRoleLabel(c)) + '</td>'
       + '<td>' + esc(c.source || '—') + '</td>'
-      + '<td><span class="badge b-' + c.status + '">' + (STATUS_LABELS[c.status] || c.status) + '</span></td>'
+      + '<td><span class="badge b-' + c.status + '">' + (STATUS_LABELS[c.status] || c.status) + '</span>' + hiredProgressChip(c) + '</td>'
       + '<td class="last-contact">' + lastHtml + '</td>'
       + '</tr>';
   }).join('');
@@ -643,6 +751,7 @@ function openModal(id) {
   }).join('');
 
   renderLogHistory(id);
+  renderSetupChecklist(id);
 
   document.querySelectorAll('.method-btn').forEach(function(b){ b.classList.remove('selected'); });
   document.getElementById('log-date').value = todayStr();
@@ -671,6 +780,171 @@ function renderLogHistory(id) {
           + '</div>';
       }).join('')
     : '<div class="log-empty">No contact logged yet</div>';
+}
+
+function renderSetupChecklist(id) {
+  var c = findCandidate(id);
+  var section = document.getElementById('setup-section');
+  if (!c || c.status !== 'hired') {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+  var done = setupByCandidate[id] || {};
+  document.getElementById('setup-checklist').innerHTML = SETUP_TASKS.map(function(t){
+    var row = done[t.key];
+    var doneMeta = row
+      ? '<span class="setup-done-meta">✓ ' + esc(row.completed_by || 'done') + ' &middot; ' + esc((row.completed_at || '').slice(0,10)) + '</span>'
+      : '';
+    return '<div class="setup-item">'
+      + '<input type="checkbox" id="setup-' + t.key + '"' + (row ? ' checked' : '') + ' onchange="toggleSetupTask(\'' + id + '\',\'' + t.key + '\')">'
+      + '<label for="setup-' + t.key + '">' + esc(t.label)
+      + (t.note ? ' <span class="setup-note">(' + esc(t.note) + ')</span>' : '')
+      + doneMeta
+      + '</label>'
+      + '</div>';
+  }).join('');
+
+  var p = setupProgress(id);
+  var provisionBlock = document.getElementById('provision-block');
+  if (p.done === p.total) {
+    provisionBlock.classList.remove('hidden');
+    var dateInput = document.getElementById('prov-hire-date');
+    if (!dateInput.value) dateInput.value = todayStr();
+  } else {
+    provisionBlock.classList.add('hidden');
+  }
+}
+
+function toggleSetupTask(cid, task) {
+  var existing = (setupByCandidate[cid] || {})[task];
+  var checkbox = document.getElementById('setup-' + task);
+  if (existing) {
+    sbFetch('/rest/v1/hiring_setup_checklist?id=eq.' + existing.id, { method: 'DELETE' })
+      .then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        delete setupByCandidate[cid][task];
+        renderSetupChecklist(cid);
+        renderList();
+        renderStats();
+      })
+      .catch(function(err){
+        if (checkbox) checkbox.checked = true;
+        showToast('Error: ' + err.message, 'error');
+      });
+  } else {
+    var completedBy = prompt('Your name (for the record):', sessionStorage.getItem('wg_setup_by') || '');
+    if (completedBy === null) { if (checkbox) checkbox.checked = false; return; }
+    sessionStorage.setItem('wg_setup_by', completedBy);
+    sbFetch('/rest/v1/hiring_setup_checklist', {
+      method: 'POST',
+      headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+      body: JSON.stringify({ candidate_id: cid, task: task, completed_by: completedBy })
+    }).then(function(r){
+      if (!r.ok) return r.json().catch(function(){return null;}).then(function(err){ throw new Error((err && err.message) || ('HTTP '+r.status)); });
+      return r.json();
+    }).then(function(res){
+      var saved = Array.isArray(res) ? res[0] : res;
+      if (!setupByCandidate[cid]) setupByCandidate[cid] = {};
+      setupByCandidate[cid][task] = saved;
+      renderSetupChecklist(cid);
+      renderList();
+      renderStats();
+    }).catch(function(err){
+      if (checkbox) checkbox.checked = false;
+      showToast('Error: ' + err.message, 'error');
+    });
+  }
+}
+
+var ROLE_COLORS = { groomer: '#FFAB91', bather: '#90CAF9', retail: '#A5D6A7', manager: '#CE93D8' };
+
+function provisionSchedule() {
+  var cid = currentCandidateId;
+  var c = findCandidate(cid);
+  if (!c) return;
+  var btn = document.getElementById('prov-schedule-btn');
+  var status = document.getElementById('prov-schedule-status');
+  var role = document.getElementById('prov-role').value;
+  var payType = document.getElementById('prov-pay-type').value;
+  var store = document.getElementById('prov-store').value;
+  var hireDate = document.getElementById('prov-hire-date').value || todayStr();
+
+  btn.disabled = true; status.className = 'provision-status'; status.textContent = 'Checking for duplicates…';
+
+  sbFetch('/rest/v1/schedule_employees?name=eq.' + encodeURIComponent(c.name) + '&store=eq.' + encodeURIComponent(store) + '&select=id')
+    .then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(existing){
+      if (Array.isArray(existing) && existing.length) {
+        status.className = 'provision-status error';
+        status.textContent = c.name + ' is already on the schedule for this store.';
+        btn.disabled = false;
+        return null;
+      }
+      status.textContent = 'Saving…';
+      var body = {
+        name: c.name, full_name: c.name, role: role, store: store,
+        pay_type: payType, hourly_rate: null, hire_date: hireDate,
+        is_active: true, is_full_time: true, color: ROLE_COLORS[role] || '#B0BEC5'
+      };
+      return sbFetch('/rest/v1/schedule_employees', {
+        method: 'POST',
+        headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+        body: JSON.stringify(body)
+      }).then(function(r){
+        if (!r.ok) return r.json().catch(function(){return null;}).then(function(err){ throw new Error((err && err.message) || ('HTTP '+r.status)); });
+        return r.json();
+      });
+    })
+    .then(function(res){
+      if (!res) return;
+      status.className = 'provision-status';
+      status.textContent = '✓ Added to schedule — set their weekly hours in the Schedule tool.';
+      btn.disabled = true;
+      btn.textContent = '✓ Added to Schedule';
+    })
+    .catch(function(err){
+      status.className = 'provision-status error';
+      status.textContent = 'Error: ' + err.message;
+      btn.disabled = false;
+    });
+}
+
+function randomPin() {
+  var n = Math.floor(Math.random() * 10000);
+  return String(n).padStart(4, '0');
+}
+
+function provisionPin() {
+  var cid = currentCandidateId;
+  var c = findCandidate(cid);
+  if (!c) return;
+  var btn = document.getElementById('prov-pin-btn');
+  var status = document.getElementById('prov-pin-status');
+  var store = document.getElementById('prov-store').value;
+
+  btn.disabled = true; status.className = 'provision-status'; status.textContent = 'Generating…';
+
+  var pin = randomPin();
+  sha256(pin).then(function(hash){
+    return sbFetch('/rest/v1/store_pins', {
+      method: 'POST',
+      headers: Object.assign({}, SB_HDR, {'Prefer':'return=representation'}),
+      body: JSON.stringify({ pin_hash: hash, store: store, name: c.name, is_active: true })
+    }).then(function(r){
+      if (!r.ok) return r.json().catch(function(){return null;}).then(function(err){ throw new Error((err && err.message) || ('HTTP '+r.status)); });
+      return r.json();
+    }).then(function(){
+      status.className = 'provision-status';
+      status.innerHTML = '<div class="pin-reveal">PIN for ' + esc(c.name) + ': <b>' + pin + '</b><br>Write this down now — it will not be shown again.</div>';
+      btn.disabled = true;
+      btn.textContent = '✓ PIN Generated';
+    });
+  }).catch(function(err){
+    status.className = 'provision-status error';
+    status.textContent = 'Error: ' + err.message;
+    btn.disabled = false;
+  });
 }
 
 function selectMethod(m) {
@@ -729,6 +1003,7 @@ function setCandidateStatus(status, silent) {
   document.querySelectorAll('.status-btn').forEach(function(b){
     b.classList.toggle('active', b.textContent === STATUS_LABELS[status]);
   });
+  renderSetupChecklist(cid);
   renderList(); renderStats();
   sbFetch('/rest/v1/hiring_candidates?id=eq.' + cid, {
     method: 'PATCH',
@@ -748,6 +1023,7 @@ function setCandidateStatus(status, silent) {
 loadRoles();
 loadCandidates();
 loadLogs();
+loadSetupChecklist();
 </script>
 </body>
 </html>

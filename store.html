@@ -235,14 +235,32 @@
 
 <script src="portal-auth.js"></script>
 <script>
-var PIN_HASHES = {
-  'fb1548cece225c928b67452754417cd305864043278e526189d57b8e0977d71d': {store: 'port-washington', name: 'Casey'},
-  'eb7015b56be919a2c96c3fcb7e4ddd08fc17c1ccf17fd86dd060409ad58e0cb9': {store: 'hicksville',      name: 'Hailey'},
-  '905daf4b6cccc72219061385971997edb3f6d57cd9494967da9cd04acd350f83': {store: 'port-washington', name: 'Trinity'},
-  '8d99af9470d4a657fffebc88104b660ffa8a3968ea860cf1f4df8705132951c1': {store: 'hicksville',      name: 'Kayla'}
-};
+// PINs live in Supabase (store_pins table), not hardcoded here, so a new
+// hire's store portal access can be provisioned from the Hiring Portal
+// without editing/deploying this file.
+var SB_URL = 'https://bqzinttbjeeaybywhhet.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SB_HDR = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+var PIN_HASHES = {};
+// Kicked off immediately so it's usually already resolved by the time
+// someone finishes typing a 4-digit PIN; checkPin() awaits it directly
+// rather than gating input-listener setup on the fetch (which would risk
+// wiping keystrokes typed during the network round-trip).
+var pinHashesReady = fetch(SB_URL + '/rest/v1/store_pins?is_active=eq.true&select=pin_hash,store,name', { headers: SB_HDR })
+  .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  .then(function(rows){
+    (Array.isArray(rows) ? rows : []).forEach(function(row){
+      PIN_HASHES[row.pin_hash] = { store: row.store, name: row.name };
+    });
+  });
 
 async function checkPin(pin) {
+  try {
+    await pinHashesReady;
+  } catch (e) {
+    showPinError('Could not verify — check your connection and refresh');
+    return;
+  }
   var hash = await sha256(pin);
   var match = PIN_HASHES[hash];
   if (match) {
