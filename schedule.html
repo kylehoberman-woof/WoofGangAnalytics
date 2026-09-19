@@ -691,7 +691,7 @@ function endLoad(){_loadCount=Math.max(0,_loadCount-1);if(_loadCount===0){var b=
    EMPLOYEE DATA
 ════════════════════════════════════════ */
 function fetchEmployees(){
-  return sbGet('/schedule_employees?order=name').then(function(rows){
+  return sbGet('/schedule_employees?is_active=eq.true&order=name').then(function(rows){
     employees=Array.isArray(rows)?rows:[];
     return employees;
   });
