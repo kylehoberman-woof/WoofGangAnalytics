@@ -66,6 +66,10 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .store-badge{display:inline-block;font-size:0.6rem;font-weight:800;padding:1px 5px;border-radius:4px;letter-spacing:0.05em;vertical-align:middle;margin-left:5px;color:white}
 .store-badge.pw{background:#C4276E}
 .store-badge.hv{background:#1565C0}
+.store-badge.gc{background:#6A1B9A}
+.b-pw{background:#FDF0F5;color:#C4276E}
+.b-hv{background:#e0f2f1;color:#1B6B6B}
+.b-gc{background:#f3e5f5;color:#6A1B9A}
 .shift-emp{font-size:0.88rem;font-weight:700;color:#1a1a2e}
 .shift-role{font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;margin:1px 0 3px}
 .shift-time{font-size:0.75rem;color:#999;font-weight:500}
@@ -82,6 +86,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .day-store-label{font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;padding:0 4px 2px}
 .day-store-label.pw{color:#C4276E}
 .day-store-label.hv{color:#1565C0}
+.day-store-label.gc{color:#6A1B9A}
 
 /* Month view */
 .month-controls{display:flex;align-items:center;gap:10px;padding:14px 20px;flex-wrap:wrap}
@@ -145,7 +150,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .btn-m-save:disabled{background:#ccc;cursor:not-allowed}
 
 /* Recurring */
-.rec-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5}
+.rec-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f5}
 .rec-day{font-size:0.82rem;font-weight:700;width:36px;color:#555}
 .rec-toggle{width:36px;height:20px;border-radius:10px;background:#ddd;position:relative;cursor:pointer;border:none;flex-shrink:0;transition:background 0.2s}
 .rec-toggle.on{background:#C4276E}
@@ -166,6 +171,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .cov-store-label{font-size:0.68rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px}
 .cov-store-label.pw{color:#C4276E}
 .cov-store-label.hv{color:#1565C0}
+.cov-store-label.gc{color:#6A1B9A}
 .cov-status{display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:auto}
 .cov-status.ok{background:#E8F5E9;color:#2E7D32}
 .cov-status.warn{background:#FFF8E1;color:#F57F17}
@@ -187,6 +193,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .rec-store-btn{padding:3px 9px;border:2px solid #eee;border-radius:6px;font-size:0.7rem;font-weight:800;cursor:pointer;background:white;color:#aaa;transition:all 0.15s}
 .rec-store-btn.active{border-color:#C4276E;background:#C4276E;color:white}
 .rec-store-btn[data-store="hicksville"].active{border-color:#1565C0;background:#1565C0}
+.rec-store-btn[data-store="glen-cove"].active{border-color:#6A1B9A;background:#6A1B9A}
+.store-check-btn[data-store="glen-cove"].active{border-color:#6A1B9A;color:#6A1B9A;background:#f3e5f5}
 .btn-rec-split{padding:3px 9px;border:2px solid #1565C0;border-radius:6px;font-size:0.7rem;font-weight:800;cursor:pointer;background:white;color:#1565C0;margin-left:4px;transition:all 0.15s}
 .btn-rec-split:hover{background:#1565C0;color:white}
 .rec-split-row{display:flex;align-items:center;gap:6px;margin-top:6px;margin-left:32px;padding:6px 8px;background:#EEF2FF;border-radius:8px;flex-wrap:wrap}
@@ -240,10 +248,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 </div>
 
 <div class="topbar">
-  <div class="store-toggle">
-    <button id="btn-pw"   onclick="setStore('port-washington')">Port Washington</button>
-    <button id="btn-hv"   onclick="setStore('hicksville')">Hicksville</button>
-    <button id="btn-both" onclick="setStore('all')">Both Stores</button>
+  <div class="store-toggle" id="store-toggle-btns">
+    <button id="btn-both" onclick="setStore('all')">All Stores</button>
   </div>
   <div class="tab-bar">
     <button class="tab-btn active" id="tab-week"      onclick="setTab('week')">Week</button>
@@ -348,10 +354,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
       <div class="fg"><label>Employee *</label><select id="sm-emp" onchange="onSmEmpChange()"></select></div>
       <div class="fg hidden" id="sm-store-row">
         <label>Store</label>
-        <div class="rec-store-sel" style="margin:0">
-          <button type="button" class="rec-store-btn active" data-store="port-washington" onclick="setShiftStore('port-washington')">Port Washington</button>
-          <button type="button" class="rec-store-btn" data-store="hicksville" onclick="setShiftStore('hicksville')">Hicksville</button>
-        </div>
+        <div class="rec-store-sel" style="margin:0" id="sm-store-btns"></div>
       </div>
       <div class="row2">
         <div class="fg"><label>Start Time</label><select id="sm-start" class="time-select"></select></div>
@@ -419,10 +422,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         </div>
         <div class="fg">
           <label>Works At</label>
-          <div class="store-check-row">
-            <button type="button" class="store-check-btn" id="em-store-pw" onclick="toggleStoreBtn('pw')">Port Washington</button>
-            <button type="button" class="store-check-btn" id="em-store-hv" onclick="toggleStoreBtn('hv')">Hicksville</button>
-          </div>
+          <div class="store-check-row" id="em-store-btns"></div>
         </div>
       </div>
       <div class="row2" id="em-pay-row">
@@ -516,6 +516,28 @@ var COLORS=['#C4276E','#1565C0','#7B1FA2','#6B3520','#E65100','#AD1457','#00838F
 var ROLES={groomer:'Groomer',bather:'Bather',retail:'Retail',manager:'Manager',other:'Other'};
 var DAY_KEYS=['mon','tue','wed','thu','fri','sat','sun'];
 var DAY_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+/* ════════════════════════════════════════
+   STORES — single source of truth. Add a new store here (plus its
+   STORE_HOURS entry below) and every view — toggle, week grid,
+   coverage, roster, retail hours, employee/shift modals — picks it
+   up automatically; nothing else should hardcode a store key.
+════════════════════════════════════════ */
+var STORES=[
+  {key:'port-washington',label:'Port Washington',abbr:'PW',cls:'pw'},
+  {key:'hicksville',      label:'Hicksville',      abbr:'HV',cls:'hv'},
+  {key:'glen-cove',       label:'Glen Cove',       abbr:'GC',cls:'gc'}
+];
+var STORE_BY_KEY={}; STORES.forEach(function(s){STORE_BY_KEY[s.key]=s;});
+var STORE_KEYS=STORES.map(function(s){return s.key;});
+function storeLabel(key){return (STORE_BY_KEY[key]||{}).label||key;}
+function storeAbbr(key){return (STORE_BY_KEY[key]||{}).abbr||key;}
+function storeCls(key){return (STORE_BY_KEY[key]||{}).cls||'';}
+function storeInFilter(){return 'store=in.('+STORE_KEYS.join(',')+')';}
+function storeBadgeHtml(key){return '<span class="store-badge '+storeCls(key)+'">'+storeAbbr(key)+'</span>';}
+// Any store other than the one currently being viewed — used for
+// cross-store ("works at multiple locations") shift display.
+function otherStoreKeys(key){return STORE_KEYS.filter(function(k){return k!==key;});}
 var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 /* Bi-weekly anchor — Monday Feb 23, 2026 = Week A. Aligns with PW pay period anchor. */
@@ -588,7 +610,7 @@ function unmarkClosed(storeKey,iso){
 }
 function toggleClosure(storeKey,iso){
   if(isClosed(storeKey,iso)){
-    var label=storeKey==='port-washington'?'Port Washington':'Hicksville';
+    var label=storeLabel(storeKey);
     if(!confirm('Reopen '+label+' on '+iso+'?')) return;
     startLoad();
     unmarkClosed(storeKey,iso).then(function(){endLoad();repaintWeek();renderMonth&&renderMonth();showToast('Reopened');})
@@ -710,7 +732,7 @@ function fetchShifts(startISO, endISO){
   var cur=new Date(startISO+'T12:00:00'), end=new Date(endISO+'T12:00:00');
   while(cur<=end){shifts[toISO(cur)]=[];cur=addDays(cur,1);}
 
-  var storeQ=currentStore==='all'?'store=in.(port-washington,hicksville)':'store=eq.'+encodeURIComponent(currentStore);
+  var storeQ=currentStore==='all'?storeInFilter():'store=eq.'+encodeURIComponent(currentStore);
   return sbGet('/schedule_shifts?'+storeQ+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&select=*&order=start_time')
     .then(function(rows){
       (Array.isArray(rows)?rows:[]).forEach(function(s){
@@ -726,11 +748,11 @@ function fetchOtherStoreShifts(startISO, endISO){
   if(currentStore==='all') return Promise.resolve(); // both stores already fetched
   var crossEmps=employees.filter(function(e){return e.store==='both';});
   if(!crossEmps.length) return Promise.resolve();
-  var otherStore=currentStore==='port-washington'?'hicksville':'port-washington';
+  var otherStoreFilter='store=in.('+otherStoreKeys(currentStore).join(',')+')';
   var cur=new Date(startISO+'T12:00:00'), end=new Date(endISO+'T12:00:00');
   while(cur<=end){otherShifts[toISO(cur)]=[];cur=addDays(cur,1);}
   var ids=crossEmps.map(function(e){return e.id;}).join(',');
-  return sbGet('/schedule_shifts?store=eq.'+encodeURIComponent(otherStore)+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&emp_id=in.('+ids+')&select=*&order=start_time')
+  return sbGet('/schedule_shifts?'+otherStoreFilter+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&emp_id=in.('+ids+')&select=*&order=start_time')
     .then(function(rows){
       (Array.isArray(rows)?rows:[]).forEach(function(s){
         var d=s.shift_date;
@@ -743,7 +765,7 @@ function fetchOtherStoreShifts(startISO, endISO){
 function fetchTimeOff(startISO, endISO){
   var cur=new Date(startISO+'T12:00:00'), end=new Date(endISO+'T12:00:00');
   while(cur<=end){timeOff[toISO(cur)]=[];cur=addDays(cur,1);}
-  var toStoreQ=currentStore==='all'?'store_key=in.(port-washington,hicksville)':'store_key=eq.'+encodeURIComponent(currentStore);
+  var toStoreQ=currentStore==='all'?'store_key=in.('+STORE_KEYS.join(',')+')':'store_key=eq.'+encodeURIComponent(currentStore);
   return sbGet('/time_off?'+toStoreQ
     +'&start_date=lte.'+endISO+'&end_date=gte.'+startISO
     +'&status=neq.Rejected&select=employee_name,type,status,start_date,end_date,store_key')
@@ -766,8 +788,10 @@ function fetchTimeOff(startISO, endISO){
 function setStore(key){
   currentStore=key;
   localStorage.setItem('wg_sched_store',key);
-  document.getElementById('btn-pw').className=key==='port-washington'?'active':'';
-  document.getElementById('btn-hv').className=key==='hicksville'?'active':'';
+  STORES.forEach(function(s){
+    var btn=document.getElementById('btn-'+s.abbr.toLowerCase());
+    if(btn) btn.className=key===s.key?'active':'';
+  });
   document.getElementById('btn-both').className=key==='all'?'active':'';
   shifts={}; otherShifts={}; timeOff={};
   startLoad();
@@ -856,12 +880,8 @@ function _paintWeek(ws,we,today){
 
   // Grid — output in row order so CSS grid aligns sections across days
   var isAllStores=currentStore==='all';
-  var STORE_SECTIONS=[
-    {key:'port-washington',label:'Port Washington',cls:'pw'},
-    {key:'hicksville',label:'Hicksville',cls:'hv'}
-  ];
-  var sectionsToShow=isAllStores?STORE_SECTIONS:STORE_SECTIONS.filter(function(st){return st.key===currentStore;});
-  var otherStoreKey=currentStore==='port-washington'?'hicksville':'port-washington';
+  var sectionsToShow=isAllStores?STORES:STORES.filter(function(st){return st.key===currentStore;});
+  var otherKeys=otherStoreKeys(currentStore);
 
   // Pre-compute day data
   var dayData=[];
@@ -878,7 +898,7 @@ function _paintWeek(ws,we,today){
       return true;
     }).sort(function(a,b){return sStart(a).localeCompare(sStart(b));});
     var crossShifts=[];
-    if(!isAllStores && st.key===otherStoreKey){
+    if(!isAllStores && otherKeys.indexOf(st.key)!==-1){
       crossShifts=roleFilter?day.allOther.filter(function(s){var e=empById(sEmpId(s));return e&&matchesRole(e.role);}):day.allOther;
     }
 
@@ -912,8 +932,8 @@ function _paintWeek(ws,we,today){
     });
     crossShifts.forEach(function(s){
       var e=empById(sEmpId(s))||{name:'Unknown',color:'#aaa',role:'other'};
-      var badgeLbl=s.store==='port-washington'?'PW':'HV';
-      var badgeCls=s.store==='port-washington'?'pw':'hv';
+      var badgeLbl=storeAbbr(s.store);
+      var badgeCls=storeCls(s.store);
       h+='<div class="shift-card other-store" style="border-left-color:'+e.color+'" title="'+esc(e.name)+' is at '+badgeLbl+' this shift">';
       h+='<div class="shift-emp">'+esc(e.name)+'<span class="store-badge '+badgeCls+'">'+badgeLbl+'</span></div>';
       h+='<div class="shift-role" style="color:'+e.color+'">'+esc(ROLES[e.role]||e.role)+'</div>';
@@ -1149,7 +1169,7 @@ function renderCoverage(){
 function fetchShiftsAllStores(startISO, endISO){
   var cur=new Date(startISO+'T12:00:00'), end=new Date(endISO+'T12:00:00');
   while(cur<=end){shifts[toISO(cur)]=[];cur=addDays(cur,1);}
-  return sbGet('/schedule_shifts?store=in.(port-washington,hicksville)&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&select=*&order=start_time')
+  return sbGet('/schedule_shifts?'+storeInFilter()+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&select=*&order=start_time')
     .then(function(rows){
       (Array.isArray(rows)?rows:[]).forEach(function(s){
         var d=s.shift_date; shifts[d]=shifts[d]||[]; shifts[d].push(s);
@@ -1166,6 +1186,13 @@ var STORE_HOURS={
     6:{open:'10:00',close:'18:00'}
   },
   'hicksville':{
+    0:{open:'09:00',close:'18:00'},1:{open:'09:00',close:'18:00'},2:{open:'09:00',close:'18:00'},
+    3:{open:'09:00',close:'18:00'},4:{open:'09:00',close:'18:00'},5:{open:'09:00',close:'18:00'},
+    6:{open:'10:00',close:'17:00'}
+  },
+  // PLACEHOLDER: Glen Cove opens 2026-09-24 — hours not yet confirmed with Kyle.
+  // Defaulted to Hicksville's hours until real hours are provided.
+  'glen-cove':{
     0:{open:'09:00',close:'18:00'},1:{open:'09:00',close:'18:00'},2:{open:'09:00',close:'18:00'},
     3:{open:'09:00',close:'18:00'},4:{open:'09:00',close:'18:00'},5:{open:'09:00',close:'18:00'},
     6:{open:'10:00',close:'17:00'}
@@ -1196,7 +1223,6 @@ function findUncoveredHours(storeKey,dayIdx,storeShifts){
 }
 
 function _paintCoverage(ws){
-  var STORES=[{key:'port-washington',label:'Port Washington',cls:'pw'},{key:'hicksville',label:'Hicksville',cls:'hv'}];
   var noStaffDays=[], uncoveredGaps=[], ptoConflicts=[];
 
   // Build per-day per-store data
@@ -1374,14 +1400,14 @@ function renderRetail(){
   var totAvg = rows.reduce(function(s,r){return s + r.avgPerWeek;}, 0);
   var totWeekly = rows.reduce(function(s,r){return s + r.weeklyCost;}, 0);
   var totMonthly = rows.reduce(function(s,r){return s + r.monthlyCost;}, 0);
-  var storeLabel = currentStore==='all'?'All Stores':currentStore==='port-washington'?'Port Washington':'Hicksville';
+  var storeLabelText = currentStore==='all'?'All Stores':storeLabel(currentStore);
 
   var html = '';
   html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">';
   html += '<div style="background:#FDF0F5;border-left:4px solid #C4276E;border-radius:8px;padding:12px 16px;flex:1;min-width:180px">' +
     '<div style="font-size:0.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.04em">Total Retail Hours / Week</div>' +
     '<div style="font-size:1.6rem;font-weight:800;color:#C4276E;margin-top:2px">'+totAvg.toFixed(1)+' hrs</div>' +
-    '<div style="font-size:0.72rem;color:#888">'+storeLabel+' &middot; '+rows.length+' employee'+(rows.length===1?'':'s')+'</div></div>';
+    '<div style="font-size:0.72rem;color:#888">'+storeLabelText+' &middot; '+rows.length+' employee'+(rows.length===1?'':'s')+'</div></div>';
   if (totWeekly > 0) {
     html += '<div style="background:#e8f5e9;border-left:4px solid #2E7D32;border-radius:8px;padding:12px 16px;flex:1;min-width:180px">' +
       '<div style="font-size:0.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.04em">Weekly Labor Cost</div>' +
@@ -1415,9 +1441,8 @@ function renderRetail(){
 
   rows.forEach(function(r){
     var e = r.emp;
-    var storeBadge = e.store==='port-washington' ? '<span style="background:#FDF0F5;color:#C4276E;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.04em">PW</span>' :
-                     e.store==='hicksville'      ? '<span style="background:#e0f2f1;color:#1B6B6B;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.04em">HV</span>' :
-                                                    '<span style="background:#efebe9;color:#6B3520;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.04em">BOTH</span>';
+    var storeBadge = STORE_BY_KEY[e.store] ? '<span class="b-'+storeCls(e.store)+'" style="padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.04em">'+storeAbbr(e.store)+'</span>' :
+                                              '<span style="background:#efebe9;color:#6B3520;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:800;letter-spacing:0.04em">MULTI</span>';
     var biBadge = r.biweekly ? ' <span style="background:#FDF0F5;color:#C4276E;padding:1px 6px;border-radius:6px;font-size:0.62rem;font-weight:800">BI-WEEKLY</span>' : '';
     html += '<tr style="border-top:1px solid #f4f4f4">' +
       '<td style="padding:11px 12px"><div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:24px;background:'+(e.color||'#ccc')+';border-radius:3px"></div><div><div style="font-weight:700">'+esc(e.name)+biBadge+'</div>'+(e.full_name && e.full_name!==e.name ? '<div style="font-size:0.7rem;color:#aaa">FranPOS: '+esc(e.full_name)+'</div>':'')+'</div></div></td>' +
@@ -1439,7 +1464,7 @@ function renderRetail(){
 function renderRoster(){
   var emps=storeEmployees();
   if(!showInactive) emps=emps.filter(function(e){return e.is_active!==false;});
-  document.getElementById('roster-store-label').textContent=currentStore==='all'?'All Stores':currentStore==='port-washington'?'Port Washington':'Hicksville';
+  document.getElementById('roster-store-label').textContent=currentStore==='all'?'All Stores':storeLabel(currentStore);
 
   if(!emps.length){
     document.getElementById('emp-list').innerHTML='<div style="color:#aaa;font-size:0.88rem;padding:20px 0">No employees yet — click + Add Employee.</div>';
@@ -1470,7 +1495,7 @@ function renderRoster(){
       '<div class="emp-avatar" style="background:'+e.color+'">'+esc(e.name.charAt(0))+'</div>'+
       '<div class="emp-info"><div class="emp-name">'+esc(e.name)+(inactive?' <span style="font-size:0.7rem;color:#aaa;font-weight:500">(inactive)</span>':'')+'</div>'+
       '<div class="emp-meta">'+esc(ROLES[e.role]||e.role)+(payInfo?' &nbsp;·&nbsp; '+esc(payInfo):'')+' &nbsp;·&nbsp; '+hrs.toFixed(1)+'h this week'+
-      (e.store==='both'?' &nbsp;·&nbsp; <strong>Both stores</strong>':'')+'</div>'+
+      (e.store==='both'?' &nbsp;·&nbsp; <strong>Multiple stores</strong>':'')+'</div>'+
       (e.full_name?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">FranPOS: '+esc(e.full_name)+'</div>':'')+
       '</div>'+
       '<div class="emp-card-actions">'+
@@ -1487,7 +1512,7 @@ function renderRoster(){
 var addShiftStore=null;
 function openAddShift(iso,store){
   editShiftId=null;editShiftDate=null;addShiftDate=iso;addShiftStore=store||currentStore;
-  var storeName=addShiftStore==='port-washington'?'PW':'HV';
+  var storeName=storeAbbr(addShiftStore);
   document.getElementById('shift-modal-title').textContent='Add Shift — '+storeName+' — '+fmtShort(new Date(iso+'T12:00:00'));
   populateEmpSelect(null,addShiftStore);
   document.getElementById('sm-start').value='09:00';
@@ -1502,7 +1527,7 @@ function openEditShift(iso,id){
   var s=(shifts[iso]||[]).find(function(x){return x.id===id;});
   if(!s) return;
   editShiftId=id;editShiftDate=iso;addShiftDate=null;addShiftStore=s.store||currentStore;
-  var storeName=addShiftStore==='port-washington'?'PW':'HV';
+  var storeName=storeAbbr(addShiftStore);
   document.getElementById('shift-modal-title').textContent='Edit Shift — '+storeName;
   populateEmpSelect(sEmpId(s),addShiftStore);
   document.getElementById('sm-start').value=sStart(s);
@@ -1524,9 +1549,31 @@ function populateEmpSelect(selId,forStore){
   });
 }
 function closeShiftModal(){document.getElementById('shift-overlay').classList.add('hidden');editShiftId=editShiftDate=addShiftDate=null;addShiftStore=null;}
+function renderEmStoreBtns(){
+  document.getElementById('em-store-btns').innerHTML=STORES.map(function(s){
+    var abbrKey=s.abbr.toLowerCase();
+    return '<button type="button" class="store-check-btn" id="em-store-'+abbrKey+'" data-store="'+s.key+'" onclick="toggleStoreBtn(\''+abbrKey+'\')">'+s.label+'</button>';
+  }).join('');
+}
+function renderStoreToggleBtns(){
+  var container=document.getElementById('store-toggle-btns');
+  var bothBtn=document.getElementById('btn-both');
+  STORES.forEach(function(s){
+    var btn=document.createElement('button');
+    btn.id='btn-'+s.abbr.toLowerCase();
+    btn.textContent=s.label;
+    btn.onclick=function(){setStore(s.key);};
+    container.insertBefore(btn,bothBtn);
+  });
+}
+function renderSmStoreBtns(){
+  document.getElementById('sm-store-btns').innerHTML=STORES.map(function(s){
+    return '<button type="button" class="rec-store-btn" data-store="'+s.key+'" onclick="setShiftStore(\''+s.key+'\')">'+s.abbr+'</button>';
+  }).join('');
+}
 function setShiftStore(store){document.querySelectorAll('#sm-store-row .rec-store-btn').forEach(function(b){b.classList.toggle('active',b.dataset.store===store);});}
-function getShiftStore(){var a=document.querySelector('#sm-store-row .rec-store-btn.active');return a?a.dataset.store:'port-washington';}
-function onSmEmpChange(){var emp=empById(document.getElementById('sm-emp').value);var isBoth=emp&&emp.store==='both';document.getElementById('sm-store-row').classList.toggle('hidden',!isBoth);if(isBoth)setShiftStore(addShiftStore||currentStore||'port-washington');}
+function getShiftStore(){var a=document.querySelector('#sm-store-row .rec-store-btn.active');return a?a.dataset.store:STORE_KEYS[0];}
+function onSmEmpChange(){var emp=empById(document.getElementById('sm-emp').value);var isBoth=emp&&emp.store==='both';document.getElementById('sm-store-row').classList.toggle('hidden',!isBoth);if(isBoth)setShiftStore(addShiftStore||currentStore||STORE_KEYS[0]);}
 function saveShift(){
   var empId=document.getElementById('sm-emp').value;
   if(!empId){showToast('Select an employee','error');return;}
@@ -1534,7 +1581,7 @@ function saveShift(){
   var btn=document.getElementById('sm-save'); btn.disabled=true; btn.textContent='Saving…';
   var _stRow=document.getElementById('sm-store-row');
   var shiftStore=(!_stRow.classList.contains('hidden'))?getShiftStore():(addShiftStore||currentStore);
-  if(!shiftStore||shiftStore==='all') shiftStore='port-washington';
+  if(!shiftStore||shiftStore==='all') shiftStore=STORE_KEYS[0];
   // Prevent same employee being scheduled twice on the same day IN THE SAME STORE.
   // Cross-store split shifts (e.g. Cindy 9-12 HV, 2-7 PW) are allowed.
   var existingSame=(shifts[date]||[]).filter(function(s){return s.store===shiftStore;});
@@ -1543,13 +1590,12 @@ function saveShift(){
   if(dup){
     btn.disabled=false; btn.textContent='Save Shift';
     var emp=empById(empId);
-    var storeLabel=shiftStore==='port-washington'?'Port Washington':'Hicksville';
-    showToast((emp?emp.name:'This employee')+' is already scheduled at '+storeLabel+' on this day','error');
+    showToast((emp?emp.name:'This employee')+' is already scheduled at '+storeLabel(shiftStore)+' on this day','error');
     return;
   }
   // Warn (but don't block) if scheduling on a day marked closed
   if(isClosed(shiftStore,date)){
-    var storeLbl=shiftStore==='port-washington'?'Port Washington':'Hicksville';
+    var storeLbl=storeLabel(shiftStore);
     var reason=getClosureReason(shiftStore,date);
     if(!confirm(storeLbl+' is marked closed on '+date+' ('+reason+'). Save shift anyway?')){
       btn.disabled=false; btn.textContent='Save Shift';
@@ -1603,22 +1649,25 @@ function quickDelShift(id,iso){
 function toggleStoreBtn(key){
   var btn=document.getElementById('em-store-'+key);
   var isActive=btn.classList.contains('active');
-  // Must always have at least one store selected
-  var other=key==='pw'?'hv':'pw';
-  var otherActive=document.getElementById('em-store-'+other).classList.contains('active');
-  if(isActive && !otherActive) return; // can't deselect the only one
+  if(isActive){
+    var activeCount=STORES.filter(function(s){
+      return document.getElementById('em-store-'+s.abbr.toLowerCase()).classList.contains('active');
+    }).length;
+    if(activeCount<=1) return; // must always have at least one store selected
+  }
   btn.classList.toggle('active',!isActive);
 }
 function getStoreValue(){
-  var pw=document.getElementById('em-store-pw').classList.contains('active');
-  var hv=document.getElementById('em-store-hv').classList.contains('active');
-  if(pw && hv) return 'both';
-  if(hv) return 'hicksville';
-  return 'port-washington';
+  var active=STORES.filter(function(s){
+    return document.getElementById('em-store-'+s.abbr.toLowerCase()).classList.contains('active');
+  });
+  if(active.length>1) return 'both';
+  return active.length ? active[0].key : STORE_KEYS[0];
 }
 function setStoreButtons(val){
-  document.getElementById('em-store-pw').classList.toggle('active', val==='port-washington'||val==='both');
-  document.getElementById('em-store-hv').classList.toggle('active', val==='hicksville'||val==='both');
+  STORES.forEach(function(s){
+    document.getElementById('em-store-'+s.abbr.toLowerCase()).classList.toggle('active', val===s.key||val==='both');
+  });
 }
 function onRoleChange(){
   var role=document.getElementById('em-role').value;
@@ -1715,15 +1764,16 @@ function openRecModal(id){
     var r=rec[key];
     var entries=r?(Array.isArray(r)?r:[r]):[];
     var on=entries.length>0;
-    var e0=entries[0]||{start:'09:00',end:'17:00',store:'port-washington'};
+    var e0=entries[0]||{start:'09:00',end:'17:00',store:STORE_KEYS[0]};
     var e1=entries[1]||null;
-    var st=e0.start, en=e0.end, dayStore=e0.store||'port-washington', dayWeeks=e0.weeks||'all';
+    var st=e0.start, en=e0.end, dayStore=e0.store||STORE_KEYS[0], dayWeeks=e0.weeks||'all';
     var hasSplit=!!e1;
     var storeEl='';
     if(isBoth){
       storeEl='<div class="rec-store-sel" id="rss-'+key+'"'+(on?'':' style="display:none"')+'>'+
-        '<button type="button" class="rec-store-btn'+(dayStore==='port-washington'?' active':'')+'" data-store="port-washington" onclick="setRecStore(\''+key+'\',\'port-washington\')">PW</button>'+
-        '<button type="button" class="rec-store-btn'+(dayStore==='hicksville'?' active':'')+'" data-store="hicksville" onclick="setRecStore(\''+key+'\',\'hicksville\')">HV</button>'+
+        STORES.map(function(s){
+          return '<button type="button" class="rec-store-btn'+(dayStore===s.key?' active':'')+'" data-store="'+s.key+'" onclick="setRecStore(\''+key+'\',\''+s.key+'\')">'+s.abbr+'</button>';
+        }).join('')+
         '</div>';
     }
     var weeksSelectCls='rec-weeks-sel'+(dayWeeks!=='all'?' biweekly':'');
@@ -1734,11 +1784,12 @@ function openRecModal(id){
       '</select>';
     var splitBtnEl='', splitRowEl='';
     if(isBoth){
-      var st2=(e1&&e1.start)||'13:00', en2=(e1&&e1.end)||'17:00', ds2=(e1&&e1.store)||'hicksville';
+      var st2=(e1&&e1.start)||'13:00', en2=(e1&&e1.end)||'17:00', ds2=(e1&&e1.store)||(otherStoreKeys(dayStore)[0]||STORE_KEYS[0]);
       splitBtnEl='<button type="button" class="btn-rec-split" id="rsb-'+key+'" onclick="addSplit(\''+key+'\')"'+(on&&!hasSplit?'':' style="display:none"')+'>÷ Split</button>';
       var storeEl2='<div class="rec-store-sel" id="rss2-'+key+'">'+
-        '<button type="button" class="rec-store-btn'+(ds2==='port-washington'?' active':'')+'" data-store="port-washington" onclick="setRecStore2(\''+key+'\',\'port-washington\')">PW</button>'+
-        '<button type="button" class="rec-store-btn'+(ds2==='hicksville'?' active':'')+'" data-store="hicksville" onclick="setRecStore2(\''+key+'\',\'hicksville\')">HV</button>'+
+        STORES.map(function(s){
+          return '<button type="button" class="rec-store-btn'+(ds2===s.key?' active':'')+'" data-store="'+s.key+'" onclick="setRecStore2(\''+key+'\',\''+s.key+'\')">'+s.abbr+'</button>';
+        }).join('')+
         '</div>';
       splitRowEl='<div class="rec-split-row" id="rsp-'+key+'"'+(hasSplit?'':' style="display:none"')+'>'+
         '<span style="font-size:0.75rem;font-weight:800;color:#888;padding:0 2px">+</span>'+
@@ -1775,10 +1826,10 @@ function getRecStore(key){
   var sel=document.getElementById('rss-'+key);
   if(!sel) return null;
   var active=sel.querySelector('.rec-store-btn.active');
-  return active?active.dataset.store:'port-washington';
+  return active?active.dataset.store:STORE_KEYS[0];
 }
 function setRecStore2(key,store){document.getElementById('rss2-'+key).querySelectorAll('.rec-store-btn').forEach(function(b){b.classList.toggle('active',b.dataset.store===store);});}
-function getRecStore2(key){var sel=document.getElementById('rss2-'+key);if(!sel)return'hicksville';var a=sel.querySelector('.rec-store-btn.active');return a?a.dataset.store:'hicksville';}
+function getRecStore2(key){var sel=document.getElementById('rss2-'+key);if(!sel)return STORE_KEYS[1]||STORE_KEYS[0];var a=sel.querySelector('.rec-store-btn.active');return a?a.dataset.store:(STORE_KEYS[1]||STORE_KEYS[0]);}
 function addSplit(key){document.getElementById('rsp-'+key).style.display='flex';document.getElementById('rsb-'+key).style.display='none';}
 function removeSplit(key){document.getElementById('rsp-'+key).style.display='none';document.getElementById('rsb-'+key).style.display='';}
 function toggleRecDay(key, isBoth){
@@ -1922,7 +1973,7 @@ function previewFwd(){
         if(recEntry){
           var entries=Array.isArray(recEntry)?recEntry:[recEntry];
           entries.forEach(function(entry){
-            var shiftStore=entry.store||(emp.store==='both'?'port-washington':emp.store)||currentStore;
+            var shiftStore=entry.store||(emp.store==='both'?STORE_KEYS[0]:emp.store)||currentStore;
             var ek=iso+'|'+shiftStore;
             if(ptoSet[iso]){
               skippedPto[iso]=ptoSet[iso];
@@ -1997,6 +2048,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeShiftM
 /* ════════════════════════════════════════
    INIT
 ════════════════════════════════════════ */
+renderStoreToggleBtns();
+renderEmStoreBtns();
 // Store portal: lock to assigned store and hide financial tab
 if (portalLevel === 'store') {
   var _ps = sessionStorage.getItem('wg_portal_store');
@@ -2005,18 +2058,21 @@ if (portalLevel === 'store') {
     localStorage.setItem('wg_sched_store', _ps);
   }
   document.getElementById('tab-retail').style.display = 'none';
-  if (currentStore === 'port-washington') {
-    document.getElementById('btn-hv').style.display   = 'none';
-    document.getElementById('btn-both').style.display = 'none';
-  } else {
-    document.getElementById('btn-pw').style.display   = 'none';
-    document.getElementById('btn-both').style.display = 'none';
-  }
+  STORES.forEach(function(s){
+    if (s.key !== currentStore) {
+      var btn=document.getElementById('btn-'+s.abbr.toLowerCase());
+      if(btn) btn.style.display = 'none';
+    }
+  });
+  document.getElementById('btn-both').style.display = 'none';
 }
 
-document.getElementById('btn-pw').className=currentStore==='port-washington'?'active':'';
-document.getElementById('btn-hv').className=currentStore==='hicksville'?'active':'';
+STORES.forEach(function(s){
+  var btn=document.getElementById('btn-'+s.abbr.toLowerCase());
+  if(btn) btn.className=currentStore===s.key?'active':'';
+});
 document.getElementById('btn-both').className=currentStore==='all'?'active':'';
+renderSmStoreBtns();
 startLoad();
 Promise.all([fetchEmployees(),fetchClosures()]).then(function(){
   endLoad();
