@@ -778,7 +778,7 @@ function endLoad(){_loadCount=Math.max(0,_loadCount-1);if(_loadCount===0){var b=
    EMPLOYEE DATA
 ════════════════════════════════════════ */
 function fetchEmployees(){
-  return sbGet('/schedule_employees?is_active=eq.true&order=name').then(function(rows){
+  return sbGet('/schedule_employees?order=name').then(function(rows){
     employees=Array.isArray(rows)?rows:[];
     return employees;
   });
@@ -1093,7 +1093,7 @@ function fillRecurring(overwrite){
   var posts=[], deletes=[];
   var skippedBiweekly=0;
 
-  storeEmployees().forEach(function(e){
+  storeEmployees().filter(function(e){return e.is_active!==false;}).forEach(function(e){
     var rec=e.recurring||{};
     DAY_KEYS.forEach(function(key,i){
       var r=rec[key];
@@ -1609,6 +1609,7 @@ function populateEmpSelect(selId,forStore){
   sel.innerHTML='<option value="">— Select employee —</option>';
   var store=forStore||currentStore;
   var emps=(store==='all')?employees:employees.filter(function(e){return e.store===store||e.store==='both';});
+  emps=emps.filter(function(e){return e.is_active!==false;});
   emps.forEach(function(e){
     sel.innerHTML+='<option value="'+e.id+'"'+(e.id===selId?' selected':'')+'>'+esc(e.name)+' ('+esc(ROLES[e.role]||e.role)+')</option>';
   });
