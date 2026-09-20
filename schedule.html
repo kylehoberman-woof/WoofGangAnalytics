@@ -235,6 +235,27 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .btn-closure:hover{border-color:#6B3520;color:#6B3520;background:#faf6f4}
 .btn-reopen{background:#6B3520;color:white;border:none;font-size:0.62rem;font-weight:700;padding:4px 8px;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em}
 .btn-reopen:hover{background:#5A2C1A}
+
+/* Employee setup checklist + PIN provisioning */
+.emp-setup-section{margin-top:16px;background:#f5fbf6;border:2px solid #c8e6c9;border-radius:10px;padding:14px 16px}
+.emp-setup-section h3{font-size:0.75rem;font-weight:700;color:#2E7D32;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px}
+.emp-setup-item{display:flex;align-items:flex-start;gap:10px;padding:6px 0}
+.emp-setup-item input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:#2E7D32;cursor:pointer;flex-shrink:0}
+.emp-setup-item label{font-size:0.86rem;color:#1a1a2e;cursor:pointer;line-height:1.4}
+.emp-setup-item .emp-setup-note{color:#999;font-size:0.76rem;font-weight:400}
+.emp-setup-item .emp-setup-done-meta{display:block;color:#2E7D32;font-size:0.74rem;font-weight:600;margin-top:1px}
+.emp-pin-block{margin-top:14px;padding-top:14px;border-top:1px dashed #a5d6a7}
+.emp-pin-title{font-weight:800;color:#2E7D32;font-size:0.88rem;margin-bottom:10px}
+.emp-pin-status{font-size:0.82rem;color:#555;margin-bottom:10px;line-height:1.5}
+.emp-pin-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.emp-pin-actions select{padding:7px 9px;border:2px solid #ddd;border-radius:7px;font-family:inherit;font-size:0.82rem}
+.btn-emp-pin{background:#2E7D32;color:white;border:none;padding:7px 14px;border-radius:8px;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer}
+.btn-emp-pin:hover{background:#256b28}
+.btn-emp-pin:disabled{background:#bbb;cursor:default}
+.emp-pin-reveal{background:#fff8e1;border:2px solid #F9A825;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:0.9rem;color:#7a5c00}
+.emp-pin-reveal b{font-size:1.3rem;letter-spacing:0.15em;color:#1a1a2e}
+.emp-setup-notice{background:#FFF3E0;border:2px solid #FFB74D;border-radius:8px;padding:10px 14px;font-size:0.78rem;color:#7a5200;line-height:1.5}
+.emp-setup-notice pre{background:white;border-radius:6px;padding:8px;margin-top:6px;font-size:0.68rem;overflow-x:auto;white-space:pre}
 </style>
 </head>
 <body>
@@ -463,6 +484,36 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
         </label>
       </div>
     </div>
+
+    <div class="emp-setup-section hidden" id="emp-setup-section">
+      <div class="emp-setup-notice hidden" id="emp-setup-notice">
+        <strong>&#9888; One-time Supabase setup required.</strong> Run this SQL in your
+        <a href="https://supabase.com/dashboard" target="_blank" style="color:#C4276E">Supabase dashboard</a>
+        &rarr; SQL Editor, then reopen this employee:
+        <pre>CREATE TABLE employee_setup_checklist (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  employee_id uuid NOT NULL,
+  task text NOT NULL,
+  completed_by text,
+  completed_at timestamptz DEFAULT now()
+);
+ALTER TABLE employee_setup_checklist DISABLE ROW LEVEL SECURITY;</pre>
+      </div>
+      <div id="emp-setup-body">
+        <h3>&#9989; Setup Checklist</h3>
+        <div id="emp-setup-checklist"></div>
+        <div class="emp-pin-block">
+          <div class="emp-pin-title">&#128274; Store Portal Access</div>
+          <div class="emp-pin-status" id="emp-pin-status">Checking…</div>
+          <div class="emp-pin-actions">
+            <select id="emp-pin-store"></select>
+            <button type="button" class="btn-emp-pin" id="emp-pin-btn" onclick="generateEmployeePin()">Generate PIN</button>
+          </div>
+          <div id="emp-pin-reveal"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-actions" style="margin-top:20px">
       <button class="btn-m-delete hidden" id="em-delete" onclick="deleteEmployee()">Remove</button>
       <button class="btn-m-cancel" onclick="closeEmpModal()">Cancel</button>
@@ -486,6 +537,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 
 <div class="toast hidden" id="toast"></div>
 
+<script src="portal-auth.js"></script>
 <script>
 /* ════════════════════════════════════════
    SUPABASE
@@ -514,6 +566,19 @@ function sbDelete(table,filter){
 ════════════════════════════════════════ */
 var COLORS=['#C4276E','#1565C0','#7B1FA2','#6B3520','#E65100','#AD1457','#00838F','#2E7D32','#1B6B6B','#37474F'];
 var ROLES={groomer:'Groomer',bather:'Bather',retail:'Retail',manager:'Manager',other:'Other'};
+// Mirrors hiring-portal.html's SETUP_TASKS so the same onboarding checklist
+// is visible/editable from both tools. Rows are kept in a separate table
+// (employee_setup_checklist, keyed by schedule_employees.id) rather than
+// reusing hiring_setup_checklist (keyed by hiring-portal candidate_id) since
+// not every roster employee has a hiring-portal candidate record.
+var SETUP_TASKS=[
+  {key:'gusto_invite', label:'Gusto Payroll Invite'},
+  {key:'pos_access',   label:'Store POS Access'},
+  {key:'alarm_code',   label:'Alarm Code', note:'Port Washington only'},
+  {key:'key',          label:'Store Key'},
+  {key:'schedule',     label:'Added to Schedule'}
+];
+var empSetupDone={};
 var DAY_KEYS=['mon','tue','wed','thu','fri','sat','sun'];
 var DAY_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
@@ -1701,10 +1766,113 @@ function openEmpModal(id){
   document.getElementById('em-delete').classList.toggle('hidden',!id);
   document.getElementById('em-pay-row').style.display=portalLevel==='store'?'none':'';
   document.getElementById('em-guar-group').style.display=portalLevel==='store'?'none':'';
+  document.getElementById('emp-setup-section').classList.toggle('hidden',!id);
+  if(id) loadEmpSetup(id);
   document.getElementById('emp-overlay').classList.remove('hidden');
   setTimeout(function(){document.getElementById('em-name').focus();},50);
 }
 function closeEmpModal(){document.getElementById('emp-overlay').classList.add('hidden');editEmpId=null;}
+
+/* ════════════════════════════════════════
+   SETUP CHECKLIST + STORE PORTAL PIN
+════════════════════════════════════════ */
+function isMissingTableError(row){
+  return row && !Array.isArray(row) && row.message &&
+    (row.message.indexOf('does not exist')!==-1 || row.message.indexOf('Could not find the table')!==-1 || row.code==='PGRST205');
+}
+function loadEmpSetup(empId){
+  document.getElementById('emp-setup-notice').classList.add('hidden');
+  document.getElementById('emp-setup-body').classList.remove('hidden');
+  sbGet('/employee_setup_checklist?employee_id=eq.'+empId+'&select=*').then(function(rows){
+    if(isMissingTableError(rows)){
+      document.getElementById('emp-setup-notice').classList.remove('hidden');
+      document.getElementById('emp-setup-body').classList.add('hidden');
+      return;
+    }
+    empSetupDone={};
+    (Array.isArray(rows)?rows:[]).forEach(function(r){empSetupDone[r.task]=r;});
+    renderEmpSetupChecklist(empId);
+    loadPinStatus(empId);
+  });
+}
+function renderEmpSetupChecklist(empId){
+  document.getElementById('emp-setup-checklist').innerHTML=SETUP_TASKS.map(function(t){
+    var row=empSetupDone[t.key];
+    var doneMeta=row
+      ?'<span class="emp-setup-done-meta">✓ '+esc(row.completed_by||'done')+' &middot; '+esc((row.completed_at||'').slice(0,10))+'</span>'
+      :'';
+    return '<div class="emp-setup-item">'
+      +'<input type="checkbox" id="emp-setup-'+t.key+'"'+(row?' checked':'')+' onchange="toggleEmpSetupTask(\''+empId+'\',\''+t.key+'\')">'
+      +'<label for="emp-setup-'+t.key+'">'+esc(t.label)
+      +(t.note?' <span class="emp-setup-note">('+esc(t.note)+')</span>':'')
+      +doneMeta
+      +'</label></div>';
+  }).join('');
+}
+function toggleEmpSetupTask(empId,task){
+  var existing=empSetupDone[task];
+  var checkbox=document.getElementById('emp-setup-'+task);
+  if(existing){
+    sbDelete('employee_setup_checklist','id=eq.'+existing.id).then(function(){
+      delete empSetupDone[task];
+      renderEmpSetupChecklist(empId);
+    }).catch(function(){if(checkbox)checkbox.checked=true;showToast('Failed to update checklist','error');});
+  } else {
+    var completedBy=prompt('Your name (for the record):', sessionStorage.getItem('wg_setup_by')||'');
+    if(completedBy===null){if(checkbox)checkbox.checked=false;return;}
+    sessionStorage.setItem('wg_setup_by',completedBy);
+    sbPost('employee_setup_checklist',{employee_id:empId,task:task,completed_by:completedBy}).then(function(res){
+      var saved=Array.isArray(res)?res[0]:res;
+      empSetupDone[task]=saved;
+      renderEmpSetupChecklist(empId);
+    }).catch(function(){if(checkbox)checkbox.checked=false;showToast('Failed to update checklist','error');});
+  }
+}
+function loadPinStatus(empId){
+  var e=empById(empId);
+  var storeSel=document.getElementById('emp-pin-store');
+  var empStores=e.store==='both'?STORE_KEYS:[e.store];
+  storeSel.innerHTML=STORES.map(function(s){return '<option value="'+s.key+'">'+s.label+'</option>';}).join('');
+  storeSel.value=empStores[0];
+  sbGet('/store_pins?name=eq.'+encodeURIComponent(e.name)+'&is_active=eq.true&select=id,store,created_at').then(function(rows){
+    if(isMissingTableError(rows)) return; // store_pins already required elsewhere; ignore here
+    renderPinStatus(Array.isArray(rows)?rows:[]);
+  });
+}
+function renderPinStatus(activePins){
+  var status=document.getElementById('emp-pin-status');
+  if(!activePins.length){
+    status.textContent='No store portal PIN set yet.';
+  } else {
+    status.innerHTML=activePins.map(function(p){
+      return '&#10003; PIN active for <strong>'+storeLabel(p.store)+'</strong> (set '+esc((p.created_at||'').slice(0,10))+')';
+    }).join('<br>');
+  }
+  document.getElementById('emp-pin-btn').textContent=activePins.length?'Generate New PIN':'Generate PIN';
+}
+function randomPin(){return String(Math.floor(Math.random()*10000)).padStart(4,'0');}
+function generateEmployeePin(){
+  if(!editEmpId) return;
+  var empId=editEmpId, e=empById(empId);
+  var store=document.getElementById('emp-pin-store').value;
+  var btn=document.getElementById('emp-pin-btn');
+  btn.disabled=true; btn.textContent='Generating…';
+  sbGet('/store_pins?name=eq.'+encodeURIComponent(e.name)+'&store=eq.'+encodeURIComponent(store)+'&is_active=eq.true&select=id').then(function(existing){
+    var deactivate = (Array.isArray(existing) && existing.length)
+      ? sbPatch('store_pins','id=eq.'+existing[0].id,{is_active:false})
+      : Promise.resolve();
+    return deactivate;
+  }).then(function(){
+    var pin=randomPin();
+    return sha256(pin).then(function(hash){
+      return sbPost('store_pins',{pin_hash:hash,store:store,name:e.name,is_active:true}).then(function(){
+        document.getElementById('emp-pin-reveal').innerHTML='<div class="emp-pin-reveal">PIN for '+esc(e.name)+' ('+storeLabel(store)+'): <b>'+pin+'</b><br>Write this down now — it will not be shown again.</div>';
+        loadPinStatus(empId);
+        btn.disabled=false;
+      });
+    });
+  }).catch(function(){btn.disabled=false;btn.textContent='Generate PIN';showToast('Failed to generate PIN','error');});
+}
 function renderColorPicker(){
   document.getElementById('em-colors').innerHTML=COLORS.map(function(c){
     return '<div class="color-swatch'+(c===selectedColor?' selected':'')+'" style="background:'+c+'" onclick="pickColor(\''+c+'\')"></div>';
