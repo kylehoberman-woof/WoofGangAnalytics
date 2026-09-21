@@ -249,6 +249,8 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .emp-pin-status{font-size:0.82rem;color:#555;margin-bottom:10px;line-height:1.5}
 .emp-pin-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .emp-pin-actions select{padding:7px 9px;border:2px solid #ddd;border-radius:7px;font-family:inherit;font-size:0.82rem}
+.emp-pin-actions input{padding:7px 9px;border:2px solid #ddd;border-radius:7px;font-family:inherit;font-size:0.82rem}
+.emp-pin-hint{font-size:0.74rem;color:#999;margin:6px 0 0}
 .btn-emp-pin{background:#2E7D32;color:white;border:none;padding:7px 14px;border-radius:8px;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer}
 .btn-emp-pin:hover{background:#256b28}
 .btn-emp-pin:disabled{background:#bbb;cursor:default}
@@ -507,8 +509,10 @@ ALTER TABLE employee_setup_checklist DISABLE ROW LEVEL SECURITY;</pre>
           <div class="emp-pin-status" id="emp-pin-status">Checking…</div>
           <div class="emp-pin-actions">
             <select id="emp-pin-store"></select>
-            <button type="button" class="btn-emp-pin" id="emp-pin-btn" onclick="generateEmployeePin()">Generate PIN</button>
+            <input type="text" id="emp-pin-manual" placeholder="Match their FranPOS PIN" maxlength="4" inputmode="numeric" pattern="[0-9]*" style="width:150px">
+            <button type="button" class="btn-emp-pin" id="emp-pin-btn" onclick="generateEmployeePin()">Set PIN</button>
           </div>
+          <p class="emp-pin-hint">Leave blank to auto-generate a random PIN instead, or type their existing FranPOS PIN here so it's the same for both.</p>
           <div id="emp-pin-reveal"></div>
         </div>
       </div>
@@ -1784,6 +1788,8 @@ function isMissingTableError(row){
 function loadEmpSetup(empId){
   document.getElementById('emp-setup-notice').classList.add('hidden');
   document.getElementById('emp-setup-body').classList.remove('hidden');
+  document.getElementById('emp-pin-manual').value='';
+  document.getElementById('emp-pin-reveal').innerHTML='';
   sbGet('/employee_setup_checklist?employee_id=eq.'+empId+'&select=*').then(function(rows){
     if(isMissingTableError(rows)){
       document.getElementById('emp-setup-notice').classList.remove('hidden');
@@ -1849,30 +1855,42 @@ function renderPinStatus(activePins){
       return '&#10003; PIN active for <strong>'+storeLabel(p.store)+'</strong> (set '+esc((p.created_at||'').slice(0,10))+')';
     }).join('<br>');
   }
-  document.getElementById('emp-pin-btn').textContent=activePins.length?'Generate New PIN':'Generate PIN';
+  document.getElementById('emp-pin-btn').textContent=activePins.length?'Set New PIN':'Set PIN';
 }
 function randomPin(){return String(Math.floor(Math.random()*10000)).padStart(4,'0');}
 function generateEmployeePin(){
   if(!editEmpId) return;
   var empId=editEmpId, e=empById(empId);
   var store=document.getElementById('emp-pin-store').value;
+  var manualInput=document.getElementById('emp-pin-manual');
+  var manual=manualInput.value.trim();
+  if(manual && !/^\d{4}$/.test(manual)){
+    showToast('PIN must be exactly 4 digits','error');
+    return;
+  }
+  var isManual=!!manual;
+  var pin=isManual?manual:randomPin();
   var btn=document.getElementById('emp-pin-btn');
-  btn.disabled=true; btn.textContent='Generating…';
+  var origLabel=btn.textContent;
+  btn.disabled=true; btn.textContent=isManual?'Saving…':'Generating…';
   sbGet('/store_pins?name=eq.'+encodeURIComponent(e.name)+'&store=eq.'+encodeURIComponent(store)+'&is_active=eq.true&select=id').then(function(existing){
     var deactivate = (Array.isArray(existing) && existing.length)
       ? sbPatch('store_pins','id=eq.'+existing[0].id,{is_active:false})
       : Promise.resolve();
     return deactivate;
   }).then(function(){
-    var pin=randomPin();
     return sha256(pin).then(function(hash){
       return sbPost('store_pins',{pin_hash:hash,store:store,name:e.name,is_active:true}).then(function(){
-        document.getElementById('emp-pin-reveal').innerHTML='<div class="emp-pin-reveal">PIN for '+esc(e.name)+' ('+storeLabel(store)+'): <b>'+pin+'</b><br>Write this down now — it will not be shown again.</div>';
+        var msg=isManual
+          ? 'PIN for '+esc(e.name)+' ('+storeLabel(store)+') set to <b>'+pin+'</b> — matches their FranPOS PIN.'
+          : 'PIN for '+esc(e.name)+' ('+storeLabel(store)+'): <b>'+pin+'</b><br>Write this down now — it will not be shown again.';
+        document.getElementById('emp-pin-reveal').innerHTML='<div class="emp-pin-reveal">'+msg+'</div>';
+        manualInput.value='';
         loadPinStatus(empId);
         btn.disabled=false;
       });
     });
-  }).catch(function(){btn.disabled=false;btn.textContent='Generate PIN';showToast('Failed to generate PIN','error');});
+  }).catch(function(){btn.disabled=false;btn.textContent=origLabel;showToast('Failed to save PIN','error');});
 }
 function renderColorPicker(){
   document.getElementById('em-colors').innerHTML=COLORS.map(function(c){
