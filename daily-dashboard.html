@@ -21,10 +21,12 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .section{background:white;border-radius:16px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
 .section.store-section{border-left:5px solid #C4276E}
 .section.store-section.hv{border-left-color:#1B6B6B}
+.section.store-section.gc{border-left-color:#6A1B9A}
 .perf-block{background:#FBFBFC;border-radius:10px;padding:12px 14px;margin-bottom:10px}
 .perf-block:last-child{margin-bottom:0}
 .perf-block-hdr{font-size:0.72rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px}
 .section.store-section.hv .perf-block{background:#F3F9F8}
+.section.store-section.gc .perf-block{background:#f8f2fa}
 .section-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #FDF0F5}
 .section-icon{font-size:1.5rem}
 .section-title{font-size:1.15rem;font-weight:800;letter-spacing:-0.01em}
@@ -218,13 +220,13 @@ function render(briefing, tasks, completions, shifts, employees, timeOff, hiring
   html += '</div>';
 
   // ── PER-STORE PERFORMANCE (PW then HV) ──
-  ['port-washington','hicksville'].forEach(function(storeKey){
+  ['port-washington','hicksville','glen-cove'].forEach(function(storeKey){
     var s = briefing.stores[storeKey]; if (!s) return;
     var y = s.yesterday || {}, prev = s.last_week_same_day || {};
     var w = s.wtd || {}, pw = s.prev_wtd || {};
     var m = s.mtd || {}, pm = s.prev_mtd || {};
-    var cls = storeKey === 'hicksville' ? ' hv' : '';
-    var icon = storeKey === 'hicksville' ? '&#127981;' : '&#127970;';
+    var cls = storeKey === 'hicksville' ? ' hv' : storeKey === 'glen-cove' ? ' gc' : '';
+    var icon = storeKey === 'hicksville' ? '&#127981;' : storeKey === 'glen-cove' ? '&#127980;' : '&#127970;';
 
     html += '<div class="section store-section'+cls+'">';
     html += '<div class="section-hdr"><div class="section-icon">'+icon+'</div><div class="section-title">'+s.label+'</div><div class="section-sub">Store performance</div></div>';
@@ -267,17 +269,17 @@ function render(briefing, tasks, completions, shifts, employees, timeOff, hiring
   });
 
   // ── YEAR-TO-DATE ──
-  var hasYtd = ['port-washington','hicksville'].some(function(k){return briefing.stores[k] && briefing.stores[k].ytd;});
+  var hasYtd = ['port-washington','hicksville','glen-cove'].some(function(k){return briefing.stores[k] && briefing.stores[k].ytd;});
   if (hasYtd) {
     html += '<div class="section">';
     var ytdLabel = (briefing.stores['port-washington']||{}).ytd_label || 'YTD';
     var prevYtdLabel = (briefing.stores['port-washington']||{}).prev_ytd_label || 'YTD last year';
     html += '<div class="section-hdr"><div class="section-icon">&#128200;</div><div class="section-title">Year-to-Date</div><div class="section-sub">'+esc(ytdLabel)+' &nbsp;vs&nbsp; '+esc(prevYtdLabel)+'</div></div>';
     html += '<div class="stores-grid">';
-    ['port-washington','hicksville'].forEach(function(storeKey){
+    ['port-washington','hicksville','glen-cove'].forEach(function(storeKey){
       var s = briefing.stores[storeKey]; if (!s || !s.ytd) return;
       var yy = s.ytd, py = s.prev_ytd;
-      var cls = storeKey === 'hicksville' ? ' hv' : '';
+      var cls = storeKey === 'hicksville' ? ' hv' : storeKey === 'glen-cove' ? ' gc' : '';
       html += '<div class="store-block'+cls+'">';
       html += '<div class="store-name">'+s.label+'</div>';
       html += '<div class="kpi-grid">';
@@ -291,16 +293,16 @@ function render(briefing, tasks, completions, shifts, employees, timeOff, hiring
   }
 
   // ── LAPSE CALLS — CUSTOMERS NEEDING OUTREACH ──
-  var hasLapse = ['port-washington','hicksville'].some(function(k){ return briefing.stores[k] && briefing.stores[k].lapse_pool; });
+  var hasLapse = ['port-washington','hicksville','glen-cove'].some(function(k){ return briefing.stores[k] && briefing.stores[k].lapse_pool; });
   if (hasLapse) {
     html += '<div class="section">';
     html += '<div class="section-hdr"><div class="section-icon">&#128222;</div><div class="section-title">Lapse Calls</div><div class="section-sub">Customers overdue for a visit</div></div>';
     html += '<div class="stores-grid">';
-    var lapseUrls = {'port-washington':'port-washington/WoofGang_PortWashington_LapseCalls.html','hicksville':'hicksville/WoofGang_Hicksville_LapseCalls.html'};
-    ['port-washington','hicksville'].forEach(function(storeKey){
+    var lapseUrls = {'port-washington':'port-washington/WoofGang_PortWashington_LapseCalls.html','hicksville':'hicksville/WoofGang_Hicksville_LapseCalls.html','glen-cove':'glen-cove/WoofGang_GlenCove_LapseCalls.html'};
+    ['port-washington','hicksville','glen-cove'].forEach(function(storeKey){
       var s = briefing.stores[storeKey]; if (!s || !s.lapse_pool) return;
       var lp = s.lapse_pool;
-      var cls = storeKey === 'hicksville' ? ' hv' : '';
+      var cls = storeKey === 'hicksville' ? ' hv' : storeKey === 'glen-cove' ? ' gc' : '';
       html += '<div class="store-block'+cls+'">';
       html += '<div class="store-name">'+s.label+'</div>';
       html += '<div class="kpi-grid">';
@@ -362,9 +364,9 @@ function render(briefing, tasks, completions, shifts, employees, timeOff, hiring
   html += '<div class="section">';
   html += '<div class="section-hdr"><div class="section-icon">&#128104;&#8205;&#128187;</div><div class="section-title">Who\'s Working Today</div><div class="section-sub">'+todayLabel+'</div></div>';
   html += '<div class="shifts-grid">';
-  ['port-washington','hicksville'].forEach(function(storeKey){
-    var storeLabel = storeKey === 'hicksville' ? 'Hicksville' : 'Port Washington';
-    var cls = storeKey === 'hicksville' ? ' hv' : '';
+  ['port-washington','hicksville','glen-cove'].forEach(function(storeKey){
+    var storeLabel = storeKey === 'hicksville' ? 'Hicksville' : storeKey === 'glen-cove' ? 'Glen Cove' : 'Port Washington';
+    var cls = storeKey === 'hicksville' ? ' hv' : storeKey === 'glen-cove' ? ' gc' : '';
     html += '<div class="shift-column'+cls+'"><h3>'+storeLabel+'</h3>';
 
     // Time-off pills for this store
@@ -405,14 +407,14 @@ function render(briefing, tasks, completions, shifts, employees, timeOff, hiring
   html += '</div></div>';
 
   // ── STORE SUPPLIES NEEDED ──
-  var hasSupplies = ['port-washington','hicksville'].some(function(k){
+  var hasSupplies = ['port-washington','hicksville','glen-cove'].some(function(k){
     return briefing.stores[k] && (briefing.stores[k].supplies_needed||[]).length > 0;
   });
   if (hasSupplies) {
     html += '<div class="section">';
     html += '<div class="section-hdr"><div class="section-icon">&#129529;</div><div class="section-title">Store Supplies Needed</div><div class="section-sub">Cleaning, grooming, packaging</div></div>';
     html += '<div class="stock-grid">';
-    ['port-washington','hicksville'].forEach(function(storeKey){
+    ['port-washington','hicksville','glen-cove'].forEach(function(storeKey){
       var s = briefing.stores[storeKey]; if (!s) return;
       var sup = (s.supplies_needed || []);
       html += '<div class="stock-column"><h3>'+s.label+'</h3>';
@@ -442,7 +444,7 @@ function render(briefing, tasks, completions, shifts, employees, timeOff, hiring
   html += '<div class="section">';
   html += '<div class="section-hdr"><div class="section-icon">&#128230;</div><div class="section-title">Low Stock Alerts</div><div class="section-sub">Top reorder priorities</div></div>';
   html += '<div class="stock-grid">';
-  ['port-washington','hicksville'].forEach(function(storeKey){
+  ['port-washington','hicksville','glen-cove'].forEach(function(storeKey){
     var s = briefing.stores[storeKey]; if (!s) return;
     var alerts = (s.low_stock || []);
     html += '<div class="stock-column"><h3>'+s.label+'</h3>';

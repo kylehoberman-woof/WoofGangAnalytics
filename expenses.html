@@ -42,7 +42,7 @@ tr:last-child td{border-bottom:none}
 .cat-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
 .cat-owner{background:#FDF0F5;color:#C4276E}.cat-operating{background:#e0f2f1;color:#1B6B6B}
 .store-badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:0.62rem;font-weight:800;color:white;letter-spacing:0.04em}
-.store-pw{background:#C4276E}.store-hv{background:#1565C0}
+.store-pw{background:#C4276E}.store-hv{background:#1565C0}.store-gc{background:#6A1B9A}
 .recurring-badge{font-size:0.68rem;color:#999}
 .edit-btn{background:none;border:none;cursor:pointer;font-size:0.85rem;padding:4px 8px;border-radius:4px;color:#C4276E;transition:background 0.15s}
 .edit-btn:hover{background:#FDF0F5}
@@ -142,6 +142,7 @@ tr:last-child td{border-bottom:none}
   <div class="store-toggle">
     <button onclick="setStore('port-washington')" id="btn-pw">Port Washington</button>
     <button onclick="setStore('hicksville')" id="btn-hv">Hicksville</button>
+    <button onclick="setStore('glen-cove')" id="btn-gc">Glen Cove</button>
     <button onclick="setStore('all')" id="btn-all">All</button>
   </div>
   <div class="filter-bar" style="border:none;padding:0">
@@ -185,6 +186,7 @@ tr:last-child td{border-bottom:none}
         <select id="recon-store">
           <option value="port-washington">Port Washington</option>
           <option value="hicksville">Hicksville</option>
+          <option value="glen-cove">Glen Cove</option>
         </select>
       </div>
       <div class="rf">
@@ -294,6 +296,7 @@ function setStore(k){
   currentStore=k;
   document.getElementById('btn-pw').className=k==='port-washington'?'active':'';
   document.getElementById('btn-hv').className=k==='hicksville'?'active':'';
+  document.getElementById('btn-gc').className=k==='glen-cove'?'active':'';
   document.getElementById('btn-all').className=k==='all'?'active':'';
   load();
 }
@@ -363,8 +366,8 @@ function render(){
   tbody.innerHTML=filtered.map(function(e){
     var catCls=e.category==='owner'?'cat-owner':'cat-operating';
     var catLabel=e.category==='owner'?'Owner':'Operating';
-    var storeCls=e.store==='port-washington'?'store-pw':'store-hv';
-    var storeLabel=e.store==='port-washington'?'PW':'HV';
+    var storeCls=e.store==='port-washington'?'store-pw':e.store==='hicksville'?'store-hv':'store-gc';
+    var storeLabel=e.store==='port-washington'?'PW':e.store==='hicksville'?'HV':'GC';
     var typeLabel=e.is_recurring?'<span class="recurring-badge">Monthly</span>':'<span class="recurring-badge">One-time'+(e.one_time_date?' ('+e.one_time_date+')':'')+'</span>';
     var monthly=getMonthlyAmount(e);
     var annual=getAnnualEstimate(e);

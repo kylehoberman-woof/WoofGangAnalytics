@@ -32,9 +32,11 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .shift-item{background:#f0faf5;border-left:3px solid #2E7D32;border-radius:6px;padding:4px 6px;margin-bottom:3px;font-size:0.72rem}
 .shift-item.pw{border-left-color:#C4276E;background:#fdf0f5}
 .shift-item.hv{border-left-color:#1565C0;background:#e8f0fe}
+.shift-item.gc{border-left-color:#6A1B9A;background:#f3e5f5}
 .shift-store{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:1px}
 .shift-store.pw{color:#C4276E}
 .shift-store.hv{color:#1565C0}
+.shift-store.gc{color:#6A1B9A}
 .shift-time{font-weight:600;color:#333}
 .no-shift{font-size:0.68rem;color:#ccc;font-style:italic}
 .time-off-item{background:#FFF8E1;border-left:3px solid #F9A825;border-radius:6px;padding:4px 6px;margin-bottom:3px;font-size:0.72rem;font-weight:600;color:#6D4C41}
@@ -128,7 +130,8 @@ function init(){
     }
     employee=rows[0];
     document.getElementById('emp-title').textContent=employee.name+"'s Schedule";
-    var storeName=employee.store==='port-washington'?'Port Washington':employee.store==='hicksville'?'Hicksville':'Both Stores';
+    var STORE_NAMES={'port-washington':'Port Washington','hicksville':'Hicksville','glen-cove':'Glen Cove'};
+    var storeName=STORE_NAMES[employee.store]||'Multiple Stores';
     var role=employee.role||'';
     var ROLES={groomer:'Groomer',bather:'Bather',retail:'Retail',manager:'Manager',other:'Staff'};
     document.getElementById('emp-subtitle').textContent=(ROLES[role]||role)+' — '+storeName;
@@ -152,7 +155,7 @@ function loadMonth(){
   document.getElementById('month-label').textContent=first.toLocaleDateString('en-US',{month:'long',year:'numeric'});
 
   // Fetch shifts and time off in parallel
-  var storeQ=employee.store==='both'?'store=in.(port-washington,hicksville)':'store=eq.'+encodeURIComponent(employee.store);
+  var storeQ=employee.store==='both'?'store=in.(port-washington,hicksville,glen-cove)':'store=eq.'+encodeURIComponent(employee.store);
   Promise.all([
     sbGet('/schedule_shifts?emp_id=eq.'+employee.id+'&shift_date=gte.'+startISO+'&shift_date=lte.'+endISO+'&select=*&order=shift_date,start_time'),
     sbGet('/time_off?employee_name=eq.'+encodeURIComponent(employee.full_name||employee.name)+'&start_date=lte.'+endISO+'&end_date=gte.'+startISO+'&status=eq.approved&select=*')
@@ -253,9 +256,10 @@ function renderCalendar(first,last){
       }
 
       dayShifts.forEach(function(s){
-        var cls=s.store==='port-washington'?'pw':'hv';
+        var cls=s.store==='port-washington'?'pw':s.store==='hicksville'?'hv':'gc';
+        var abbr=s.store==='port-washington'?'PW':s.store==='hicksville'?'HV':'GC';
         html+='<div class="shift-item '+cls+'">';
-        if(employee.store==='both') html+='<div class="shift-store '+cls+'">'+(s.store==='port-washington'?'PW':'HV')+'</div>';
+        if(employee.store==='both') html+='<div class="shift-store '+cls+'">'+abbr+'</div>';
         html+='<div class="shift-time">'+fmtTime(sStart(s))+(sEnd(s)?' – '+fmtTime(sEnd(s)):'')+'</div>';
         html+='</div>';
       });

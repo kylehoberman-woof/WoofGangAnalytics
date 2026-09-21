@@ -121,6 +121,7 @@ tr.data-row:hover td{background:#fafafa;cursor:pointer}
   <div class="store-toggle">
     <button id="btn-pw" onclick="setStore('port-washington')">Port Washington</button>
     <button id="btn-hv" onclick="setStore('hicksville')">Hicksville</button>
+    <button id="btn-gc" onclick="setStore('glen-cove')">Glen Cove</button>
   </div>
   <button class="add-btn" onclick="openModal()">+ Log Complaint</button>
 </div>
@@ -242,6 +243,7 @@ function setStore(k){
   localStorage.setItem('wg_sched_store',k);
   document.getElementById('btn-pw').className=k==='port-washington'?'active':'';
   document.getElementById('btn-hv').className=k==='hicksville'?'active':'';
+  document.getElementById('btn-gc').className=k==='glen-cove'?'active':'';
   load();
 }
 
@@ -414,6 +416,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()
 
 document.getElementById('btn-pw').className=currentStore==='port-washington'?'active':'';
 document.getElementById('btn-hv').className=currentStore==='hicksville'?'active':'';
+document.getElementById('btn-gc').className=currentStore==='glen-cove'?'active':'';
 load();
 </script>
 </body>
