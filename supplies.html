@@ -62,7 +62,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
 .item-badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
 .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.69rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
 .b-cat{background:#f0f0f0;color:#555}
-.b-pw{background:#FDF0F5;color:#C4276E}.b-hv{background:#e0f2f1;color:#1B6B6B}.b-both{background:#efebe9;color:#6B3520}
+.b-pw{background:#FDF0F5;color:#C4276E}.b-hv{background:#e0f2f1;color:#1B6B6B}.b-gc{background:#f3e5f5;color:#6A1B9A}.b-both{background:#efebe9;color:#6B3520}
 .qty-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .qty-big{font-size:1.8rem;font-weight:800;color:#1a1a2e;line-height:1}
 .qty-unit{font-size:0.8rem;color:#888;font-weight:500;align-self:flex-end;padding-bottom:3px}
@@ -151,6 +151,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
             <option value="">— Select Store —</option>
             <option value="port-washington">Port Washington</option>
             <option value="hicksville">Hicksville</option>
+            <option value="glen-cove">Glen Cove</option>
           </select>
         </div>
         <div class="fg">
@@ -178,6 +179,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
           <option value="">All Stores</option>
           <option value="port-washington">Port Washington</option>
           <option value="hicksville">Hicksville</option>
+          <option value="glen-cove">Glen Cove</option>
         </select>
         <select class="filter-sel" id="filter-cat" onchange="renderItems()">
           <option value="">All Categories</option>
@@ -297,6 +299,7 @@ function statusChip(s) {
 function storeBadge(s) {
   if (s === 'port-washington') return '<span class="badge b-pw">PW</span>';
   if (s === 'hicksville')      return '<span class="badge b-hv">HV</span>';
+  if (s === 'glen-cove')       return '<span class="badge b-gc">GC</span>';
   return '';
 }
 function fmtDate(d) {
