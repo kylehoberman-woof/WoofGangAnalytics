@@ -35,9 +35,6 @@ store_fn = get_store_fn(store_name)
 store_tag = get_store_tag(store_name, STORE_REGISTRY)
 
 _other_keys = get_other_stores(store_name)
-_other_store = get_store_display(_other_keys[0]) if _other_keys else ""
-_other_fn = get_store_fn(_other_keys[0]) if _other_keys else ""
-_switch_url = f"../{_other_keys[0]}/WoofGang_{_other_fn}_LapseCalls.html" if _other_keys else ""
 
 pet_visits_file = data_dir / "pet_visits.json"
 all_data_file = data_dir / "all_data.json"
@@ -76,6 +73,14 @@ n_at_risk = sum(1 for d in lapsed_dogs if d["status"] == "At Risk")
 def esc(s):
     return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
+
+# One switch link per other store (not just the first) — with 3+ stores,
+# a single link can't represent all of them.
+_switch_links_calls = "".join(
+    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_LapseCalls.html" class="lc-store-switch">'
+    f'&#x21C4; {esc(get_store_display(k))}</a>'
+    for k in _other_keys
+)
 
 rows = []
 for d in lapsed_dogs:
@@ -736,7 +741,7 @@ html = f"""<!DOCTYPE html>
   <h1>📞 Lapse Calls — {store_label}</h1>
   <nav>
     <a id="portal-back" href="../index.html">&larr; Home</a>{PORTAL_BACK_JS}
-    <a href="{esc(_switch_url)}" class="lc-store-switch">&#x21C4; {esc(_other_store)}</a>
+    {_switch_links_calls}
     <a href="WoofGang_{store_fn}_PetDashboard.html">Pet Dashboard</a>
     <a href="WoofGang_{store_fn}_LapseProgress.html">📊 Progress</a>
   </nav>
@@ -852,7 +857,11 @@ print(f"Lapse Calls widget written → {out_html}")
 # associates working the outreach list; owners check it on its own.
 
 out_progress_html = data_dir.parent / f"WoofGang_{store_fn}_LapseProgress.html"
-_progress_switch_url = f"../{_other_keys[0]}/WoofGang_{_other_fn}_LapseProgress.html" if _other_keys else ""
+_switch_links_progress = "".join(
+    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_LapseProgress.html" class="lc-store-switch">'
+    f'&#x21C4; {esc(get_store_display(k))}</a>'
+    for k in _other_keys
+)
 CID_OWNER_JSON = json.dumps(cid_owner_map).replace("</", "<\\/")
 
 PROGRESS_CSS = """
@@ -1016,7 +1025,7 @@ progress_html = f"""<!DOCTYPE html>
   <h1>📊 Lapse Calls Progress — {store_label}</h1>
   <nav>
     <a id="portal-back" href="../index.html">&larr; Home</a>{PORTAL_BACK_JS}
-    <a href="{esc(_progress_switch_url)}" class="lc-store-switch">&#x21C4; {esc(_other_store)}</a>
+    {_switch_links_progress}
     <a href="WoofGang_{store_fn}_LapseCalls.html">Lapse Calls</a>
   </nav>
 </header>
