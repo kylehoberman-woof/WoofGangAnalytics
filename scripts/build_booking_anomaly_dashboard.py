@@ -33,10 +33,14 @@ _store_display = get_store_display(_store_name)
 _fn_display = get_store_fn(_store_name)
 _home_url = "../index.html"
 _other_keys = get_other_stores(_store_name)
-_other_store = get_store_display(_other_keys[0]) if _other_keys else ""
-_other_dir = f"../{_other_keys[0]}" if _other_keys else ".."
-_other_fn = get_store_fn(_other_keys[0]) if _other_keys else ""
-_switch_url = f"{_other_dir}/WoofGang_{_other_fn}_BookingAnomalies.html" if _other_keys else ""
+# One switch link per other store (not just the first) — with 3+ stores,
+# a single link can't represent all of them.
+_switch_links = " ".join(
+    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_BookingAnomalies.html" '
+    f'style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">'
+    f'&#x21C4; {esc(get_store_display(k))}</a>'
+    for k in _other_keys
+)
 
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
@@ -578,7 +582,7 @@ tr.anomaly-row td:first-child::before{{content:"⚠️ ";font-style:normal}}
 <body>
 
 <div class="header">
-  <div class="header-timestamp">Updated {esc(NOW_STR)}<br><a href="{esc(_switch_url)}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; {esc(_other_store)}</a></div>
+  <div class="header-timestamp">Updated {esc(NOW_STR)}<br>{_switch_links}</div>
   <h1>Woof Gang {esc(_store_display)}</h1>
   <div class="subtitle">Booking Anomaly Detector</div>
   <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>

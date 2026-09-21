@@ -29,11 +29,14 @@ _store = get_store(_store_name)
 _store_display = get_store_display(_store_name)
 _home_url = "../index.html"
 _other_keys = get_other_stores(_store_name)
-# Backward-compat single-other-store variables (first other store)
-_other_store = get_store_display(_other_keys[0]) if _other_keys else ""
-_other_dir = f"../{_other_keys[0]}" if _other_keys else ".."
-_other_fn = get_store_fn(_other_keys[0]) if _other_keys else ""
-_switch_url = f"{_other_dir}/WoofGang_{_other_fn}_Commission_Dashboard.html" if _other_keys else ""
+# One switch link per other store (not just the first) — with 3+ stores,
+# a single link can't represent all of them.
+_switch_links = " ".join(
+    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_Commission_Dashboard.html" '
+    f'style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">'
+    f'&#x21C4; {get_store_display(k)}</a>'
+    for k in _other_keys
+)
 MONTHLY_RENT = STORE_RENT.get(_store_name, _DEFAULT_RENT)
 
 # Load employee maps/rates from Supabase (falls back to config.py if not yet populated)
@@ -801,7 +804,7 @@ tr:hover td{{background:#fafaf8!important}}
 </head>
 <body>
 <div class="header">
-    <div class="header-timestamp">Updated {now_et}<br><a href="{_switch_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; {_other_store}</a></div>
+    <div class="header-timestamp">Updated {now_et}<br>{_switch_links}</div>
     <h1>Woof Gang {_store_display}</h1>
     <div class="subtitle">Groomer Commission Dashboard</div>
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>

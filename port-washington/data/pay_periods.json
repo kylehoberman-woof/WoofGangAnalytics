@@ -790,7 +790,7 @@
       },
       "_royalty_rate": 0.06999999999999999,
       "_monthly_rent": 7724.0,
-      "_cc_fees": 577.13,
+      "_cc_fees": 601.11,
       "_manager_salary": 1288.46,
       "_manager_old_days": 0,
       "_manager_new_days": 5,
@@ -904,11 +904,13 @@
       },
       "_retail_pay": {
         "Casey": 861.42,
-        "Trinity": 103.53
+        "Trinity": 103.53,
+        "Iliana": 75.43
       },
       "_retail_hours": {
         "Casey": 41.02,
-        "Trinity": 4.93
+        "Trinity": 4.93,
+        "Iliana": 3.97
       },
       "_retail_daily": {
         "Casey": [
@@ -946,11 +948,18 @@
             "date": "2026-09-15",
             "hours": 4.93
           }
+        ],
+        "Iliana": [
+          {
+            "date": "2026-09-19",
+            "hours": 3.97
+          }
         ]
       },
       "_retail_rates": {
         "Casey": 21.0,
-        "Trinity": 21.0
+        "Trinity": 21.0,
+        "Iliana": 19.0
       }
     },
     "pp_2": {
@@ -1190,21 +1199,21 @@
         "rev": 590.0,
         "disc": 0,
         "comm": 295.0,
-        "paid": 295.0,
+        "paid": 490.0,
         "tips": 33.0,
-        "total": 328.0,
+        "total": 523.0,
         "working_days": 2,
-        "guar_days": 0,
+        "guar_days": 1,
         "daily": [
           {
             "date": "2026-09-08",
             "rev": 10.0,
             "disc": 0,
             "comm": 5.0,
-            "paid": 5.0,
+            "paid": 200.0,
             "tips": 2.0,
-            "total": 7.0,
-            "guar_applied": false
+            "total": 202.0,
+            "guar_applied": true
           },
           {
             "date": "2026-09-09",
@@ -2255,22 +2264,14 @@
         }
       },
       "_retail_pay": {
-        "Hailey": 206.43,
         "Trinity": 385.56,
         "Casey": 307.86
       },
       "_retail_hours": {
-        "Hailey": 9.83,
         "Trinity": 18.36,
         "Casey": 14.66
       },
       "_retail_daily": {
-        "Hailey": [
-          {
-            "date": "2026-08-31",
-            "hours": 9.83
-          }
-        ],
         "Trinity": [
           {
             "date": "2026-09-01",
@@ -2305,7 +2306,6 @@
         ]
       },
       "_retail_rates": {
-        "Hailey": 21.0,
         "Trinity": 21.0,
         "Casey": 21.0
       }
@@ -2938,13 +2938,11 @@
       },
       "_retail_pay": {
         "Casey": 389.76,
-        "Trinity": 309.33,
-        "Hailey": 158.97
+        "Trinity": 309.33
       },
       "_retail_hours": {
         "Casey": 18.56,
-        "Trinity": 14.73,
-        "Hailey": 7.57
+        "Trinity": 14.73
       },
       "_retail_daily": {
         "Casey": [
@@ -2974,18 +2972,11 @@
             "date": "2026-08-28",
             "hours": 4.95
           }
-        ],
-        "Hailey": [
-          {
-            "date": "2026-08-30",
-            "hours": 7.57
-          }
         ]
       },
       "_retail_rates": {
         "Casey": 21.0,
-        "Trinity": 21.0,
-        "Hailey": 21.0
+        "Trinity": 21.0
       }
     },
     "pp_5": {

@@ -25,8 +25,6 @@ _st   = get_store(_sn)
 _disp = get_store_display(_sn)
 _fn   = get_store_fn(_sn)
 _other_keys = get_other_stores(_sn)
-_ofn  = get_store_fn(_other_keys[0]) if _other_keys else ""
-_odir = f"../{_other_keys[0]}" if _other_keys else ".."
 DATA_DIR   = _st.data_dir
 OUTPUT_DIR = _st.output_dir
 
@@ -386,8 +384,14 @@ brand_rows_html  = build_brand_rows()
 insight_cards_html = build_insight_cards()
 
 # ── Portal back / switch links ────────────────────────────────────────────────
-_switch_url  = f"{_odir}/WoofGang_{_ofn}_Retail_Dashboard.html" if _other_keys else ""
-_switch_name = get_store_display(_other_keys[0]) if _other_keys else ""
+# One switch link per other store (not just the first) — with 3+ stores,
+# a single link can't represent all of them.
+_switch_links = " ".join(
+    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_Retail_Dashboard.html" '
+    f'style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.78rem">'
+    f'&#x21C4; {get_store_display(k)}</a>'
+    for k in _other_keys
+)
 _home_url    = "../index.html"
 
 # ── CSS ───────────────────────────────────────────────────────────────────────
@@ -495,7 +499,7 @@ html = f"""<!DOCTYPE html>
 <body>
 
 <div class="header">
-  <div class="header-timestamp">Updated {now_str} &nbsp;|&nbsp; <a href="{_switch_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.78rem">&#x21C4; {_switch_name}</a></div>
+  <div class="header-timestamp">Updated {now_str} &nbsp;|&nbsp; {_switch_links}</div>
   <a id="portal-back" href="{_home_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.83rem;font-weight:600;display:inline-block;margin-bottom:8px;">&larr; Home</a>
   {PORTAL_BACK_JS}
   <h1>Woof Gang {_disp}</h1>
