@@ -268,8 +268,12 @@ async function checkPin(pin) {
     sessionStorage.setItem('wg_portal_level', 'store');
     sessionStorage.setItem('wg_portal_store', match.store);
     sessionStorage.setItem('wg_portal_name', match.name);
-    document.getElementById('store-select').value = match.store;
-    switchStore(match.store);
+    // 'both' means this PIN logs in at every store — the store-select
+    // dropdown already lets anyone switch freely once inside, so just
+    // land on a real default store rather than a key STORES doesn't have.
+    var landingStore = STORES[match.store] ? match.store : 'port-washington';
+    document.getElementById('store-select').value = landingStore;
+    switchStore(landingStore);
     unlockPortal();
   } else { showPinError(); }
 }
@@ -277,10 +281,9 @@ async function checkPin(pin) {
 function initAuth() {
   if (sessionStorage.getItem('wg_portal_auth') === '1' && sessionStorage.getItem('wg_portal_level') === 'store') {
     var ds = sessionStorage.getItem('wg_portal_store');
-    if (ds && STORES[ds]) {
-      document.getElementById('store-select').value = ds;
-      switchStore(ds);
-    }
+    var landingStore = (ds && STORES[ds]) ? ds : 'port-washington';
+    document.getElementById('store-select').value = landingStore;
+    switchStore(landingStore);
     unlockPortal(); return;
   }
   showLoginGate();

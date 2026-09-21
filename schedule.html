@@ -1835,12 +1835,16 @@ function toggleEmpSetupTask(empId,task){
     }).catch(function(){if(checkbox)checkbox.checked=false;showToast('Failed to update checklist','error');});
   }
 }
+// A PIN's store is normally one of STORE_KEYS, but can also be 'both'
+// meaning it logs in at every store — same sentinel already used for
+// schedule_employees.store, reused here rather than inventing a new one.
+function pinStoreLabel(key){return key==='both'?'All Stores':storeLabel(key);}
 function loadPinStatus(empId){
   var e=empById(empId);
   var storeSel=document.getElementById('emp-pin-store');
-  var empStores=e.store==='both'?STORE_KEYS:[e.store];
-  storeSel.innerHTML=STORES.map(function(s){return '<option value="'+s.key+'">'+s.label+'</option>';}).join('');
-  storeSel.value=empStores[0];
+  storeSel.innerHTML=STORES.map(function(s){return '<option value="'+s.key+'">'+s.label+'</option>';}).join('')
+    +'<option value="both">All Stores</option>';
+  storeSel.value=e.store==='both'?'both':e.store;
   sbGet('/store_pins?name=eq.'+encodeURIComponent(e.name)+'&is_active=eq.true&select=id,store,created_at').then(function(rows){
     if(isMissingTableError(rows)) return; // store_pins already required elsewhere; ignore here
     renderPinStatus(Array.isArray(rows)?rows:[]);
@@ -1852,7 +1856,7 @@ function renderPinStatus(activePins){
     status.textContent='No store portal PIN set yet.';
   } else {
     status.innerHTML=activePins.map(function(p){
-      return '&#10003; PIN active for <strong>'+storeLabel(p.store)+'</strong> (set '+esc((p.created_at||'').slice(0,10))+')';
+      return '&#10003; PIN active for <strong>'+pinStoreLabel(p.store)+'</strong> (set '+esc((p.created_at||'').slice(0,10))+')';
     }).join('<br>');
   }
   document.getElementById('emp-pin-btn').textContent=activePins.length?'Set New PIN':'Set PIN';
@@ -1873,17 +1877,20 @@ function generateEmployeePin(){
   var btn=document.getElementById('emp-pin-btn');
   var origLabel=btn.textContent;
   btn.disabled=true; btn.textContent=isManual?'Saving…':'Generating…';
-  sbGet('/store_pins?name=eq.'+encodeURIComponent(e.name)+'&store=eq.'+encodeURIComponent(store)+'&is_active=eq.true&select=id').then(function(existing){
-    var deactivate = (Array.isArray(existing) && existing.length)
-      ? sbPatch('store_pins','id=eq.'+existing[0].id,{is_active:false})
-      : Promise.resolve();
-    return deactivate;
+  // An 'All Stores' PIN supersedes every other active PIN this person has
+  // (no point leaving a stale PW-only one around once one PIN covers
+  // everything); a single-store PIN only replaces that same store's.
+  var dedupeFilter='name=eq.'+encodeURIComponent(e.name)+'&is_active=eq.true&select=id'
+    +(store==='both'?'':'&store=eq.'+encodeURIComponent(store));
+  sbGet('/store_pins?'+dedupeFilter).then(function(existing){
+    var rows=Array.isArray(existing)?existing:[];
+    return Promise.all(rows.map(function(row){return sbPatch('store_pins','id=eq.'+row.id,{is_active:false});}));
   }).then(function(){
     return sha256(pin).then(function(hash){
       return sbPost('store_pins',{pin_hash:hash,store:store,name:e.name,is_active:true}).then(function(){
         var msg=isManual
-          ? 'PIN for '+esc(e.name)+' ('+storeLabel(store)+') set to <b>'+pin+'</b> — matches their FranPOS PIN.'
-          : 'PIN for '+esc(e.name)+' ('+storeLabel(store)+'): <b>'+pin+'</b><br>Write this down now — it will not be shown again.';
+          ? 'PIN for '+esc(e.name)+' ('+pinStoreLabel(store)+') set to <b>'+pin+'</b> — matches their FranPOS PIN.'
+          : 'PIN for '+esc(e.name)+' ('+pinStoreLabel(store)+'): <b>'+pin+'</b><br>Write this down now — it will not be shown again.';
         document.getElementById('emp-pin-reveal').innerHTML='<div class="emp-pin-reveal">'+msg+'</div>';
         manualInput.value='';
         loadPinStatus(empId);
@@ -2237,21 +2244,24 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeShiftM
 ════════════════════════════════════════ */
 renderStoreToggleBtns();
 renderEmStoreBtns();
-// Store portal: lock to assigned store and hide financial tab
+// Store portal: lock to assigned store and hide financial tab.
+// A PIN provisioned for 'both' grants access to every store (e.g. a
+// manager who covers multiple locations) — leave the full store
+// toggle visible for that case instead of locking to one.
 if (portalLevel === 'store') {
   var _ps = sessionStorage.getItem('wg_portal_store');
-  if (_ps) {
+  document.getElementById('tab-retail').style.display = 'none';
+  if (_ps && _ps !== 'both') {
     currentStore = _ps;
     localStorage.setItem('wg_sched_store', _ps);
+    STORES.forEach(function(s){
+      if (s.key !== currentStore) {
+        var btn=document.getElementById('btn-'+s.abbr.toLowerCase());
+        if(btn) btn.style.display = 'none';
+      }
+    });
+    document.getElementById('btn-both').style.display = 'none';
   }
-  document.getElementById('tab-retail').style.display = 'none';
-  STORES.forEach(function(s){
-    if (s.key !== currentStore) {
-      var btn=document.getElementById('btn-'+s.abbr.toLowerCase());
-      if(btn) btn.style.display = 'none';
-    }
-  });
-  document.getElementById('btn-both').style.display = 'none';
 }
 
 STORES.forEach(function(s){

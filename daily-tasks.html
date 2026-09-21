@@ -114,7 +114,14 @@ var STAFF_NAMES = ['Kyle', 'Cindy'];
 
 var portalLevel = sessionStorage.getItem('wg_portal_level') || 'owner';
 var canEdit = (portalLevel === 'owner' || portalLevel === 'manager');
-var currentStore = sessionStorage.getItem('wg_portal_store') || localStorage.getItem('wg_daily_store') || 'port-washington';
+// A PIN provisioned for 'both' logs in at every store — same sentinel
+// used elsewhere for a multi-store employee/PIN. currentStore still has
+// to be a real store key (it's used directly in data queries below), so
+// that case just picks a real default and shows the full store picker
+// instead of the single-store pill.
+var _portalStore = sessionStorage.getItem('wg_portal_store');
+var isMultiStorePortal = _portalStore === 'both';
+var currentStore = (_portalStore && !isMultiStorePortal ? _portalStore : null) || localStorage.getItem('wg_daily_store') || 'port-washington';
 var currentName = sessionStorage.getItem('wg_portal_name') || localStorage.getItem('wg_daily_name') || STAFF_NAMES[0];
 var currentDate = todayStr();
 var editMode = false;
@@ -137,7 +144,7 @@ function showToast(msg, type){
 /* ── Toolbar ──────────────────────────────────── */
 function renderToolbar(){
   var storeField = document.getElementById('store-field');
-  if (portalLevel === 'store'){
+  if (portalLevel === 'store' && !isMultiStorePortal){
     storeField.innerHTML = '<label>Store</label><span class="name-pill">' + esc(STORES[currentStore] || currentStore) + '</span>';
   } else {
     var opts = Object.keys(STORES).map(function(k){
