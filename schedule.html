@@ -432,9 +432,15 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
           <input type="text" id="em-fullname" placeholder="e.g. Christine Brower">
         </div>
       </div>
-      <div class="fg">
-        <label>Phone</label>
-        <input type="tel" id="em-phone" placeholder="e.g. 516-555-0123">
+      <div class="row2">
+        <div class="fg">
+          <label>Phone</label>
+          <input type="tel" id="em-phone" placeholder="e.g. 516-555-0123">
+        </div>
+        <div class="fg">
+          <label>Email</label>
+          <input type="email" id="em-email" placeholder="e.g. name@example.com">
+        </div>
       </div>
       <div class="row2">
         <div class="fg">
@@ -1571,6 +1577,7 @@ function renderRoster(){
       (e.store==='both'?' &nbsp;·&nbsp; <strong>Multiple stores</strong>':'')+'</div>'+
       (e.full_name?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">FranPOS: '+esc(e.full_name)+'</div>':'')+
       (e.phone?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">&#128222; '+esc(e.phone)+'</div>':'')+
+      (e.email?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">&#9993; '+esc(e.email)+'</div>':'')+
       '</div>'+
       '<div class="emp-card-actions">'+
       '<button class="btn-emp-action recurring" onclick="openRecModal(\''+e.id+'\')">⟳ Default Schedule</button>'+
@@ -1763,6 +1770,7 @@ function openEmpModal(id){
   document.getElementById('em-name').value=e?e.name:'';
   document.getElementById('em-fullname').value=e?(e.full_name||''):'';
   document.getElementById('em-phone').value=e?(e.phone||''):'';
+  document.getElementById('em-email').value=e?(e.email||''):'';
   document.getElementById('em-role').value=e?(e.role||'retail'):'retail';
   setStoreButtons(e?(e.store||currentStore):currentStore);
   document.getElementById('em-paytype').value=e?(e.pay_type||'hourly'):'hourly';
@@ -1921,6 +1929,7 @@ function saveEmployee(){
     name:name,
     full_name:document.getElementById('em-fullname').value.trim()||null,
     phone:document.getElementById('em-phone').value.trim()||null,
+    email:document.getElementById('em-email').value.trim()||null,
     role:document.getElementById('em-role').value,
     store:getStoreValue(),
     color:selectedColor,
