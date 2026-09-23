@@ -657,8 +657,12 @@ from zoneinfo import ZoneInfo
 et_tz = ZoneInfo("America/New_York")
 now_et = datetime.now(et_tz).strftime("%B %d, %Y at %I:%M %p ET")
 
-# Sue panel - built outside f-string to avoid backslash issues
-_sue_tab_btn = '<button class="tab" onclick="showTab(\'sue\',this)">Sue</button>' if _store_name == "port-washington" else ''
+# Sue panel - built outside f-string to avoid backslash issues.
+# Sue is no longer active — her tab is archived (hidden behind the
+# "Archived" toggle in the tab bar) rather than removed, since her
+# historical tips/purchases data still needs to be reachable.
+_sue_tab_btn = '<button class="tab tab-archived" onclick="showTab(\'sue\',this)">Sue</button>' if _store_name == "port-washington" else ''
+_archive_toggle_btn = '<button class="archive-toggle-btn" id="archive-toggle-btn" onclick="toggleArchivedTabs()">Archived</button>' if _store_name == "port-washington" else ''
 _sue_panel = '''<!-- Sue M -->
 <div class="panel" id="panel-sue">
   <div class="kpi-grid" id="sue-kpis"></div>
@@ -724,6 +728,10 @@ body{{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background
 .tab-bar{{background:white;border-bottom:2px solid #eee;padding:0 32px;display:flex;gap:4px;position:sticky;top:57px;z-index:99;align-items:center}}
 .tab{{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;font-family:inherit;margin-bottom:-2px;white-space:nowrap}}
 .tab:hover{{color:#C4276E}}.tab.active{{color:#C4276E;border-bottom-color:#C4276E}}
+.tab-archived{{display:none}}
+.archive-toggle-btn{{padding:6px 12px;border:1px solid #ddd;border-radius:20px;background:white;color:#999;font-size:0.76rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;margin-left:4px}}
+.archive-toggle-btn:hover{{border-color:#C4276E;color:#C4276E}}
+.archive-toggle-btn.on{{border-color:#C4276E;color:#C4276E;background:#FDF0F5}}
 .pp-select{{margin-left:auto;margin-right:8px;padding:7px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.84rem;font-family:inherit;outline:none;cursor:pointer;display:none}}
 .pp-select:focus{{border-color:#C4276E}}
 .page{{max-width:1300px;margin:0 auto;padding:28px 24px}}
@@ -820,6 +828,7 @@ tr:hover td{{background:#fafaf8!important}}
   <button class="tab" onclick="showTab('exec',this)">&#128200; Executive</button>
   {_sue_tab_btn}
   {_carol_tab_btn}
+  {_archive_toggle_btn}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
@@ -988,6 +997,14 @@ function showTab(id, btn) {{
   if (id === 'exec') renderExec();
   if (id === 'sue') renderSue();
   if (id === 'carol') renderCarol();
+}}
+
+function toggleArchivedTabs() {{
+  var btn = document.getElementById('archive-toggle-btn');
+  var show = btn.classList.toggle('on');
+  // Class rule is display:none, so showing needs an explicit inline
+  // override — clearing the inline style would just fall back to it.
+  document.querySelectorAll('.tab-archived').forEach(t => {{ t.style.display = show ? 'inline-block' : 'none'; }});
 }}
 
 function toggleDetail(id, btn) {{
