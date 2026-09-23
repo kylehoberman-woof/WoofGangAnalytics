@@ -657,6 +657,13 @@ from zoneinfo import ZoneInfo
 et_tz = ZoneInfo("America/New_York")
 now_et = datetime.now(et_tz).strftime("%B %d, %Y at %I:%M %p ET")
 
+# Kyle pays these three off-books (not synced to a Gusto run he can check
+# against), so he needs his own record of which pay periods he's actually
+# handed money for — separate from the computed commission/tip totals
+# above, which only say what's owed, not what's been paid out.
+_PAY_CONFIRM_NAMES = ["Joyce P", "Marie D.", "Angela R"] if _store_name == "port-washington" else []
+_pay_confirm_names_json = _json.dumps(_PAY_CONFIRM_NAMES)
+
 # Sue panel - built outside f-string to avoid backslash issues.
 # Sue is no longer active — her tab is archived (hidden behind the
 # "Archived" toggle in the tab bar) rather than removed, since her
@@ -883,6 +890,10 @@ tr:hover td{{background:#fafaf8!important}}
 <!-- ── Pay Period ── -->
 <div class="panel" id="panel-pp">
   <div id="pp-kpis" class="kpi-grid"></div>
+  <div class="card" id="pp-confirm-card" style="display:none">
+    <div class="stitle">Payment Confirmation</div>
+    <div id="pp-confirm-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
   <div class="card">
     <div class="stitle" id="pp-title">Pay Period Summary</div>
     <div class="tbl-wrap"><table>{TABLE_HEADER}<tbody id="pp-tbody"></tbody></table></div>
@@ -980,6 +991,8 @@ var GUARANTEES = {guarantees_json};
 var BATHER_RATE_MAP = {bather_rate_map_json};
 var SUE_WEEKLY = {sue_weekly_json};
 var PP_DATES = {pp_dates_json};
+var PAY_CONFIRM_NAMES = {_pay_confirm_names_json};
+var _payConfirmCache = {{}}; // period_start -> {{name -> row}}
 var GUSTO_PAYROLL_CONFIG = {gusto_payroll_config_json};
 var PAYROLL_TAX_RATE = {PAYROLL_TAX_RATE};
 
@@ -1005,6 +1018,67 @@ function toggleArchivedTabs() {{
   // Class rule is display:none, so showing needs an explicit inline
   // override — clearing the inline style would just fall back to it.
   document.querySelectorAll('.tab-archived').forEach(t => {{ t.style.display = show ? 'inline-block' : 'none'; }});
+}}
+
+// Off-books staff (see PAY_CONFIRM_NAMES) don't run through a payroll
+// system with its own paid/unpaid status, so this is Kyle's own record
+// of which pay periods he's actually handed money for — keyed by the
+// period's real start date, not its pp_N id (that id is positional and
+// shifts every time a new period rolls in, so it can't be a stable key).
+function renderPayConfirm(ppDates) {{
+  var card = document.getElementById('pp-confirm-card');
+  var list = document.getElementById('pp-confirm-list');
+  if (!ppDates || !PAY_CONFIRM_NAMES.length) {{ card.style.display = 'none'; return; }}
+  card.style.display = '';
+  var periodStart = ppDates.start;
+  list.innerHTML = PAY_CONFIRM_NAMES.map(function(name) {{
+    return '<label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;cursor:pointer">'
+      + '<input type="checkbox" disabled data-name="' + name + '" style="width:16px;height:16px">'
+      + name + '<span class="pc-meta" style="font-size:0.76rem;color:#999"></span></label>';
+  }}).join('');
+
+  fetch(_sbUrl + '/rest/v1/pay_period_confirmations?store_key=eq.' + encodeURIComponent(_storeKey)
+    + '&period_start=eq.' + periodStart + '&select=employee_name,paid,confirmed_by,confirmed_at', {{headers: _sbHeaders}})
+    .then(function(r) {{ return r.ok ? r.json() : []; }})
+    .then(function(rows) {{
+      var byName = {{}};
+      (Array.isArray(rows) ? rows : []).forEach(function(row) {{ byName[row.employee_name] = row; }});
+      list.querySelectorAll('input[type=checkbox]').forEach(function(cb) {{
+        var row = byName[cb.dataset.name];
+        cb.checked = !!(row && row.paid);
+        cb.disabled = false;
+        var meta = cb.parentElement.querySelector('.pc-meta');
+        meta.textContent = (row && row.paid && row.confirmed_at) ? ('paid ' + row.confirmed_at.slice(0,10)) : '';
+        cb.onchange = function() {{ setPayConfirm(name_for(cb), periodStart, cb.checked, cb, meta); }};
+      }});
+    }})
+    .catch(function() {{ list.querySelectorAll('input[type=checkbox]').forEach(function(cb) {{ cb.disabled = false; }}); }});
+
+  function name_for(cb) {{ return cb.dataset.name; }}
+}}
+
+function setPayConfirm(employeeName, periodStart, paid, cb, meta) {{
+  cb.disabled = true;
+  var hdrs = Object.assign({{}}, _sbHeaders, {{'Prefer': 'return=minimal,resolution=merge-duplicates'}});
+  fetch(_sbUrl + '/rest/v1/pay_period_confirmations', {{
+    method: 'POST', headers: hdrs,
+    body: JSON.stringify({{
+      employee_name: employeeName,
+      store_key: _storeKey,
+      period_start: periodStart,
+      paid: paid,
+      confirmed_by: null,
+      confirmed_at: new Date().toISOString()
+    }})
+  }}).then(function(r) {{
+    cb.disabled = false;
+    if (r.ok || r.status === 201 || r.status === 204) {{
+      meta.textContent = paid ? ('paid ' + new Date().toISOString().slice(0,10)) : '';
+    }} else {{
+      cb.checked = !paid;
+      r.text().then(function(t) {{ alert('Save failed: ' + t); }});
+    }}
+  }}).catch(function() {{ cb.disabled = false; cb.checked = !paid; alert('Save failed'); }});
 }}
 
 function toggleDetail(id, btn) {{
@@ -1299,6 +1373,7 @@ function renderPayPeriod(ppId) {{
   var totRoyalties = totRev * (data._royalty_rate || 0.07);
   var DAILY_RENT = (data._monthly_rent || {MONTHLY_RENT}) * 12 / 365;
   var ppDates = PP_DATES[ppId];
+  renderPayConfirm(ppDates);
   var PP_LENGTH = ppDates ? Math.round((new Date(ppDates.end) - new Date(ppDates.start)) / 86400000) + 1
                           : {PAY_PERIOD_CONFIG.get(_store_name, PAY_PERIOD_CONFIG["port-washington"])["length_days"]};
   var totRent = DAILY_RENT * PP_LENGTH;
