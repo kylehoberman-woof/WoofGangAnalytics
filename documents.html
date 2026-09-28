@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>if(sessionStorage.getItem('wg_portal_auth')!=='1')window.location.href='index.html';</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — Documents</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh;color:#1a1a2e}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:36px 32px 32px;text-align:center;color:white;position:relative}
+.back-link{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.85);text-decoration:none;font-size:0.82rem;font-weight:700;background:rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px;transition:background 0.2s}
+.back-link:hover{background:rgba(255,255,255,0.28)}
+.header h1{font-size:1.8rem;font-weight:800;margin-bottom:4px;letter-spacing:-0.02em}
+.header p{font-size:0.9rem;opacity:0.85}
+.main{max-width:1200px;margin:0 auto;padding:32px 24px 60px}
+
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;background:white;border-radius:12px;padding:14px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filter-sel{padding:7px 11px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.82rem;color:#1a1a2e;cursor:pointer;background:white}
+.filter-sel:focus{outline:none;border-color:#C4276E}
+.btn-add{padding:9px 18px;background:#2E7D32;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer;transition:background 0.2s}
+.btn-add:hover{background:#1b5e20}
+
+.entity-section{background:white;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:22px;overflow:hidden}
+.entity-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:2px solid #f5f5f5}
+.entity-title{font-size:1.05rem;font-weight:800;color:#6B3520;display:flex;align-items:center;gap:10px}
+.entity-badge{font-size:0.68rem;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.04em}
+.b-pw{background:#e3f2fd;color:#1565C0}
+.b-hv{background:#fff3e0;color:#E65100}
+.b-gc{background:#f3e5f5;color:#6A1B9A}
+.b-company{background:#eceff1;color:#37474F}
+.entity-progress{font-size:0.78rem;font-weight:700;color:#999}
+.entity-progress.complete{color:#2E7D32}
+
+.cat-row{display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid #f5f5f5}
+.cat-row:last-child{border-bottom:none}
+.cat-label{width:180px;flex-shrink:0;font-size:0.85rem;font-weight:700;color:#1a1a2e}
+.cat-status{flex:1;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.cat-present{display:flex;align-items:center;gap:10px;min-width:0}
+.cat-check{color:#2E7D32;font-size:1rem;flex-shrink:0}
+.cat-doc-info{min-width:0}
+.doc-title{font-size:0.86rem;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta{font-size:0.74rem;color:#999}
+.cat-missing{display:flex;align-items:center;gap:8px;color:#c62828}
+.missing-chip{font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:6px;background:#fdeaea;color:#c62828;text-transform:uppercase;letter-spacing:0.03em}
+.doc-actions{display:flex;gap:6px;flex-shrink:0}
+.btn-view{padding:6px 12px;background:#C4276E;color:white;border:none;border-radius:6px;font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn-view:hover{background:#a31f5b}
+.btn-del{padding:6px 10px;background:white;color:#c62828;border:2px solid #f0c4c4;border-radius:6px;font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer}
+.btn-del:hover{background:#fff5f5}
+.btn-fill{padding:6px 12px;background:white;color:#C4276E;border:2px solid #C4276E;border-radius:6px;font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn-fill:hover{background:#fdf0f5}
+
+.extra-docs{padding:10px 20px 14px;background:#fafafa}
+.extra-docs-label{font-size:0.68rem;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:6px}
+.extra-doc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;font-size:0.82rem}
+
+.empty-state{text-align:center;padding:60px 20px;color:#999}
+.empty-state div:first-child{font-size:2.5rem;margin-bottom:10px}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
+.overlay.hidden{display:none}
+.modal{background:white;border-radius:16px;padding:28px;max-width:440px;width:100%;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:1.2rem;font-weight:800;color:#1a1a2e;margin-bottom:18px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fg label{font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.04em}
+.fg input,.fg select,.fg textarea{padding:9px 11px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.9rem;color:#1a1a2e;background:white}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#C4276E}
+.modal-actions{display:flex;gap:10px;margin-top:18px}
+.btn-primary{flex:1;padding:11px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer}
+.btn-primary:hover{background:#a31f5b}
+.btn-primary:disabled{background:#ccc;cursor:not-allowed}
+.btn-secondary{padding:11px 18px;background:white;color:#666;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer}
+.upload-hint{font-size:0.78rem;color:#999;margin-top:4px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:12px 24px;border-radius:8px;font-size:0.88rem;font-weight:600;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,0.2)}
+.toast.hidden{display:none}
+.toast.err{background:#c62828}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back-link" id="portal-back" href="index.html">&larr; Owner Portal</a>
+  <h1>Documents</h1>
+  <p>Leases, LLC / entity paperwork, architecture drawings &amp; more — organized by store</p>
+</div>
+
+<div class="main">
+  <div class="toolbar">
+    <div class="filters">
+      <span style="font-size:0.82rem;color:#888">Every store below always shows all 6 document types — filled in if uploaded, flagged Missing if not.</span>
+    </div>
+    <button class="btn-add" onclick="openUpload()">+ Upload Document</button>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<div class="overlay hidden" id="upload-overlay">
+  <div class="modal">
+    <h2>Upload Document</h2>
+    <div class="fg">
+      <label>Title</label>
+      <input type="text" id="u-title" placeholder="e.g. Port Washington Lease (Executed)">
+    </div>
+    <div class="fg">
+      <label>Entity</label>
+      <select id="u-entity">
+        <option value="company">Company-wide / LLC</option>
+        <option value="port-washington">Port Washington</option>
+        <option value="hicksville">Hicksville</option>
+        <option value="glen-cove">Glen Cove</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Category</label>
+      <select id="u-cat">
+        <option value="Sales Tax Certificate">Sales Tax Certificate</option>
+        <option value="EIN">EIN</option>
+        <option value="Op Agreement">Op Agreement</option>
+        <option value="Lease">Lease</option>
+        <option value="Architecture Drawings">Architecture Drawings</option>
+        <option value="Construction Contracts">Construction Contracts</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Notes (optional)</label>
+      <textarea id="u-notes" rows="2" placeholder="Any context worth flagging"></textarea>
+    </div>
+    <div class="fg">
+      <label>File</label>
+      <input type="file" id="u-file">
+      <div class="upload-hint">PDF, image, or any file type. No size limit enforced here, but keep it reasonable.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeUpload()">Cancel</button>
+      <button class="btn-primary" id="u-submit" onclick="submitUpload()">Upload</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<script>
+!function(){var l=sessionStorage.getItem('wg_portal_level'),a=document.getElementById('portal-back');if(l==='manager'){a.href='manager.html';a.textContent='← Manager Portal';}else if(l==='store'){a.href='store.html';a.textContent='← Store Portal';}else{a.textContent='← Owner Portal';}}();
+
+var SB_REF = 'bqzinttbjeeaybywhhet';
+var SB  = 'https://'+SB_REF+'.supabase.co/rest/v1';
+var STORAGE = 'https://'+SB_REF+'.supabase.co/storage/v1';
+var BUCKET = 'documents';
+var SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SHD = {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
+
+function sbGet(path){ return fetch(SB+path,{headers:SHD}).then(function(r){return r.json();}); }
+function sbPost(table,body){ return fetch(SB+'/'+table,{method:'POST',headers:SHD,body:JSON.stringify(body)}).then(function(r){return r.json();}); }
+function sbDelete(table,filter){ return fetch(SB+'/'+table+'?'+filter,{method:'DELETE',headers:SHD}); }
+
+var ENTITIES = [
+  {key:'company', label:'Company-wide / LLC', abbr:'LLC', badge:'b-company'},
+  {key:'port-washington', label:'Port Washington', abbr:'PW', badge:'b-pw'},
+  {key:'hicksville', label:'Hicksville', abbr:'HV', badge:'b-hv'},
+  {key:'glen-cove', label:'Glen Cove', abbr:'GC', badge:'b-gc'}
+];
+
+var CATEGORIES = ['Sales Tax Certificate','EIN','Op Agreement','Lease','Architecture Drawings','Construction Contracts'];
+
+var docs = [];
+
+function loadDocs(){
+  return sbGet('/store_documents?order=uploaded_at.desc').then(function(rows){
+    docs = Array.isArray(rows) ? rows : [];
+    render();
+  }).catch(function(){
+    document.getElementById('content').innerHTML = '<div class="empty-state"><div>&#9888;&#65039;</div><div>Could not load documents. Has the <code>store_documents</code> table been created yet?</div></div>';
+  });
+}
+
+function docUrl(d){ return STORAGE + '/object/public/' + BUCKET + '/' + d.storage_path; }
+function docDate(d){ return d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : ''; }
+
+function render(){
+  var content = document.getElementById('content');
+  var html = '';
+
+  ENTITIES.forEach(function(e){
+    var entityDocs = docs.filter(function(d){ return d.store === e.key; });
+    // most recent doc per tracked category
+    var byCategory = {};
+    entityDocs.forEach(function(d){
+      if (!byCategory[d.category] || new Date(d.uploaded_at) > new Date(byCategory[d.category].uploaded_at)) {
+        byCategory[d.category] = d;
+      }
+    });
+    var haveCount = CATEGORIES.filter(function(c){ return byCategory[c]; }).length;
+
+    html += '<div class="entity-section">';
+    html += '<div class="entity-header"><div class="entity-title">' + e.label + ' <span class="entity-badge ' + e.badge + '">' + e.abbr + '</span></div>'
+      + '<div class="entity-progress' + (haveCount===CATEGORIES.length ? ' complete' : '') + '">' + haveCount + ' / ' + CATEGORIES.length + '</div></div>';
+
+    CATEGORIES.forEach(function(cat){
+      var d = byCategory[cat];
+      html += '<div class="cat-row"><div class="cat-label">' + escapeHtml(cat) + '</div><div class="cat-status">';
+      if (d) {
+        html += '<div class="cat-present"><span class="cat-check">&#10003;</span><div class="cat-doc-info">'
+          + '<div class="doc-title">' + escapeHtml(d.title) + '</div>'
+          + '<div class="doc-meta">' + escapeHtml(d.filename || '') + (docDate(d) ? ' &middot; ' + docDate(d) : '') + '</div>'
+          + '</div></div>'
+          + '<div class="doc-actions"><a class="btn-view" href="' + docUrl(d) + '" target="_blank" rel="noopener">View</a>'
+          + '<button class="btn-del" onclick="deleteDoc(' + d.id + ',\'' + d.storage_path.replace(/'/g,"\\'") + '\')">Delete</button></div>';
+      } else {
+        html += '<div class="cat-missing"><span class="missing-chip">Missing</span></div>'
+          + '<button class="btn-fill" onclick="openUpload(\'' + e.key + '\',\'' + cat.replace(/'/g,"\\'") + '\')">+ Upload</button>';
+      }
+      html += '</div></div>';
+    });
+
+    // Anything uploaded for this entity outside the 6 tracked categories (e.g. "Other", or an older duplicate in a tracked category)
+    var extras = entityDocs.filter(function(d){
+      if (CATEGORIES.indexOf(d.category) === -1) return true;
+      return byCategory[d.category].id !== d.id;
+    });
+    if (extras.length) {
+      html += '<div class="extra-docs"><div class="extra-docs-label">Other files for this entity</div>';
+      extras.forEach(function(d){
+        html += '<div class="extra-doc-row"><span>' + escapeHtml(d.title) + ' <span class="doc-meta">(' + escapeHtml(d.category) + ')</span></span>'
+          + '<div class="doc-actions"><a class="btn-view" href="' + docUrl(d) + '" target="_blank" rel="noopener">View</a>'
+          + '<button class="btn-del" onclick="deleteDoc(' + d.id + ',\'' + d.storage_path.replace(/'/g,"\\'") + '\')">Delete</button></div></div>';
+      });
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  content.innerHTML = html;
+}
+
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+
+function openUpload(presetEntity, presetCat){
+  document.getElementById('u-title').value = '';
+  document.getElementById('u-notes').value = '';
+  document.getElementById('u-file').value = '';
+  document.getElementById('u-entity').value = presetEntity || 'company';
+  document.getElementById('u-cat').value = presetCat || 'Sales Tax Certificate';
+  document.getElementById('upload-overlay').classList.remove('hidden');
+}
+function closeUpload(){
+  document.getElementById('upload-overlay').classList.add('hidden');
+}
+
+function submitUpload(){
+  var title = document.getElementById('u-title').value.trim();
+  var entity = document.getElementById('u-entity').value;
+  var category = document.getElementById('u-cat').value;
+  var notes = document.getElementById('u-notes').value.trim();
+  var fileInput = document.getElementById('u-file');
+  var file = fileInput.files[0];
+
+  if (!title){ showToast('Please enter a title', true); return; }
+  if (!file){ showToast('Please choose a file', true); return; }
+
+  var btn = document.getElementById('u-submit');
+  btn.disabled = true; btn.textContent = 'Uploading...';
+
+  var safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  var storagePath = entity + '/' + Date.now() + '-' + safeName;
+
+  fetch(STORAGE + '/object/' + BUCKET + '/' + storagePath, {
+    method: 'POST',
+    headers: {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type': file.type || 'application/octet-stream'},
+    body: file
+  }).then(function(r){
+    if (!r.ok) throw new Error('Storage upload failed (' + r.status + ') — has the "documents" bucket been created?');
+    return sbPost('store_documents', {
+      store: entity, category: category, title: title,
+      filename: file.name, storage_path: storagePath, notes: notes || null
+    });
+  }).then(function(){
+    btn.disabled = false; btn.textContent = 'Upload';
+    closeUpload();
+    showToast('Document uploaded');
+    loadDocs();
+  }).catch(function(err){
+    btn.disabled = false; btn.textContent = 'Upload';
+    showToast(err.message || 'Upload failed', true);
+  });
+}
+
+function deleteDoc(id, storagePath){
+  if (!confirm('Delete this document? This cannot be undone.')) return;
+  fetch(STORAGE + '/object/' + BUCKET, {
+    method: 'DELETE',
+    headers: {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json'},
+    body: JSON.stringify({prefixes: [storagePath]})
+  }).then(function(){
+    return sbDelete('store_documents', 'id=eq.' + id);
+  }).then(function(){
+    showToast('Document deleted');
+    loadDocs();
+  }).catch(function(){
+    showToast('Delete failed', true);
+  });
+}
+
+function showToast(msg, isErr){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isErr ? ' err' : '');
+  setTimeout(function(){ t.className = 'toast hidden'; }, 3000);
+}
+
+loadDocs();
+</script>
+</body>
+</html>
