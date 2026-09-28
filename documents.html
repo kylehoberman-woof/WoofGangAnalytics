@@ -116,7 +116,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
     <div class="fg">
       <label>Entity</label>
       <select id="u-entity">
-        <option value="company">Company-wide / LLC</option>
+        <option value="company">Franchise / Shared (not store-specific)</option>
         <option value="port-washington">Port Washington</option>
         <option value="hicksville">Hicksville</option>
         <option value="glen-cove">Glen Cove</option>
@@ -168,7 +168,7 @@ function sbPost(table,body){ return fetch(SB+'/'+table,{method:'POST',headers:SH
 function sbDelete(table,filter){ return fetch(SB+'/'+table+'?'+filter,{method:'DELETE',headers:SHD}); }
 
 var ENTITIES = [
-  {key:'company', label:'Company-wide / LLC', abbr:'LLC', badge:'b-company'},
+  {key:'company', label:'Franchise / Shared', abbr:'ALL', badge:'b-company'},
   {key:'port-washington', label:'Port Washington', abbr:'PW', badge:'b-pw'},
   {key:'hicksville', label:'Hicksville', abbr:'HV', badge:'b-hv'},
   {key:'glen-cove', label:'Glen Cove', abbr:'GC', badge:'b-gc'}
