@@ -24,15 +24,26 @@
         "daily": []
       },
       "Carol W": {
-        "rev": 0,
+        "rev": 480.0,
         "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "comm": 240.0,
+        "paid": 240.0,
+        "tips": 22.0,
+        "total": 262.0,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-09-29",
+            "rev": 480.0,
+            "disc": 0,
+            "comm": 240.0,
+            "paid": 240.0,
+            "tips": 22.0,
+            "total": 262.0,
+            "guar_applied": false
+          }
+        ]
       },
       "Debra N": {
         "rev": 0,
@@ -46,13 +57,13 @@
         "daily": []
       },
       "Julia B": {
-        "rev": 350.0,
+        "rev": 1065.0,
         "disc": 0,
-        "comm": 175.0,
-        "paid": 175.0,
-        "tips": 29.0,
-        "total": 204.0,
-        "working_days": 1,
+        "comm": 532.5,
+        "paid": 532.5,
+        "tips": 100.0,
+        "total": 632.5,
+        "working_days": 3,
         "guar_days": 0,
         "daily": [
           {
@@ -63,6 +74,26 @@
             "paid": 175.0,
             "tips": 29.0,
             "total": 204.0,
+            "guar_applied": false
+          },
+          {
+            "date": "2026-09-28",
+            "rev": 305.0,
+            "disc": 0,
+            "comm": 152.5,
+            "paid": 152.5,
+            "tips": 40.0,
+            "total": 192.5,
+            "guar_applied": false
+          },
+          {
+            "date": "2026-09-29",
+            "rev": 410.0,
+            "disc": 0,
+            "comm": 205.0,
+            "paid": 205.0,
+            "tips": 31.0,
+            "total": 236.0,
             "guar_applied": false
           }
         ]
@@ -79,13 +110,13 @@
         "daily": []
       },
       "Maria V": {
-        "rev": 305.0,
+        "rev": 520.0,
         "disc": 0,
-        "comm": 152.5,
-        "paid": 152.5,
-        "tips": 32.25,
-        "total": 184.75,
-        "working_days": 1,
+        "comm": 260.0,
+        "paid": 260.0,
+        "tips": 47.25,
+        "total": 307.25,
+        "working_days": 2,
         "guar_days": 0,
         "daily": [
           {
@@ -96,6 +127,16 @@
             "paid": 152.5,
             "tips": 32.25,
             "total": 184.75,
+            "guar_applied": false
+          },
+          {
+            "date": "2026-09-29",
+            "rev": 215.0,
+            "disc": 0,
+            "comm": 107.5,
+            "paid": 107.5,
+            "tips": 15.0,
+            "total": 122.5,
             "guar_applied": false
           }
         ]
@@ -146,7 +187,7 @@
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 6056.07,
-      "_cc_fees": 31.48,
+      "_cc_fees": 35.58,
       "_manager_salary": 0,
       "_manager_old_days": 0,
       "_manager_new_days": 0,
@@ -159,10 +200,12 @@
       "_bather_tips": {},
       "_bather_tips_daily": {},
       "_retail_pay": {
-        "Kayla": 197.98
+        "Kayla": 448.59,
+        "Hailey": 107.1
       },
       "_retail_hours": {
-        "Kayla": 10.42
+        "Kayla": 23.61,
+        "Hailey": 5.1
       },
       "_retail_daily": {
         "Kayla": [
@@ -173,11 +216,26 @@
           {
             "date": "2026-09-27",
             "hours": 7.15
+          },
+          {
+            "date": "2026-09-28",
+            "hours": 9.17
+          },
+          {
+            "date": "2026-09-29",
+            "hours": 4.02
+          }
+        ],
+        "Hailey": [
+          {
+            "date": "2026-09-29",
+            "hours": 5.1
           }
         ]
       },
       "_retail_rates": {
-        "Kayla": 19.0
+        "Kayla": 19.0,
+        "Hailey": 21.0
       }
     },
     "pp_1": {
