@@ -539,7 +539,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 12,
+    "nested_data_count": 14,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -867,6 +867,29 @@
               "name": "True"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5166432341",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420596555,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Sara",
+          "LastName": "Hymowitz",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "5166432341",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-07-19T19:49:01",
+          "ModifiedDate": "2026-10-01T01:24:14.753",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
         },
         {
           "Address": null,
@@ -1224,10 +1247,66 @@
               "name": "3"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5166432341",
+          "City": null,
+          "CompanyId": 205993,
+          "CustomerId": 420990704,
+          "DateOfBirth": "2019-12-15T00:00:00",
+          "Email": "",
+          "FirstName": "Poppy",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-01T01:24:15.113",
+          "ModifiedDate": "2026-10-01T01:24:15.237",
+          "ParentCustomerId": 420596555,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "-1"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "50"
+            },
+            {
+              "id": 375,
+              "name": null
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "3"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 805234327
+      "version": 805505171
     }
   }
 }
