@@ -320,6 +320,15 @@ def extract_all_data(store):
         cached["categories"] = cats
         print(f"  {len(cats)} categories")
 
+        # Gap detection — same safety net as the full-extraction path. Without this,
+        # any date whose order_items came back incomplete during a past incremental
+        # run is silently kept broken forever once it ages past the incremental
+        # window, since nothing else ever re-checks it. Scans the whole history
+        # each run (cheap — it's just a dict count), only re-fetches actual gaps.
+        _store_key = next((k for k, v in STORES.items() if v.location_id == location_id), None)
+        _store_closures = fetch_closures(_store_key) if (fetch_closures and _store_key) else None
+        _gap_detection(cached, store.start_date, location_id, token, _store_closures)
+
         with open(cache_file, "w") as f:
             json.dump(cached, f)
         print("Incremental cache saved.")
