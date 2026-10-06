@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Woof Gang Glen Cove — Financial Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f4f0;color:#1a1a2e}
+.topbar{background:#C4276E;padding:18px 32px;color:white;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3);display:flex;justify-content:space-between;align-items:center}
+.topbar-title{font-size:1.1rem;font-weight:700}
+.topbar-sub{color:rgba(255,255,255,0.75);font-size:0.82rem;margin-top:2px}
+.topbar-time{font-size:0.78rem;opacity:0.8}
+.tabs{background:white;border-bottom:2px solid #eee;position:sticky;top:56px;z-index:99;display:flex;padding:0 24px;flex-wrap:wrap}
+.tab{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;font-family:inherit;white-space:nowrap}
+.tab.active{color:#C4276E;border-bottom-color:#C4276E}
+.page{max-width:1400px;margin:0 auto;padding:28px 24px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:white;border-radius:12px;padding:16px;text-align:center;border-top:3px solid #C4276E;box-shadow:0 1px 4px rgba(0,0,0,0.05)}
+.kpi-val{font-size:1.5rem;font-weight:700}
+.kpi-label{font-size:0.73rem;color:#999;margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.card{background:white;border-radius:14px;padding:22px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.stitle{font-size:1.05rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.stitle::before{content:'';display:inline-block;width:4px;height:18px;background:#C4276E;border-radius:2px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.82rem}
+th{text-align:right;padding:8px 10px;color:#888;font-weight:600;border-bottom:2px solid #eee;white-space:nowrap}
+th:first-child{text-align:left}
+td.n{text-align:right;padding:8px 10px;font-family:'DM Mono',monospace;font-size:0.8rem}
+tr:hover td{background:#fdf0f5}
+thead th{position:sticky;top:0;background:#f8f7f4;z-index:5}
+.panel{display:none}.panel.active{display:block}
+.home-link{color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.82rem;font-weight:600}
+.home-link:hover{color:white}
+/* Comparison styles */
+.cmp-controls{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.cmp-controls select{padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.84rem}
+.cmp-controls label{font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase}
+.quick-btns{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.quick-btn{padding:6px 14px;border:1.5px solid #C4276E;border-radius:20px;background:transparent;color:#C4276E;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit}
+.quick-btn:hover{background:#C4276E;color:white}
+.exp-filter{padding:5px 14px;border:2px solid #ddd;border-radius:20px;background:white;font-family:inherit;font-size:0.78rem;font-weight:700;cursor:pointer;color:#888;transition:all 0.15s}
+.exp-filter.active{border-color:#C4276E;color:#C4276E;background:#FDF0F5}
+.cmp-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f0ede8}
+.cmp-label{width:140px;font-size:0.82rem;font-weight:600;color:#555;flex-shrink:0}
+.cmp-vals{display:flex;flex:1;align-items:center;gap:8px}
+.cmp-a,.cmp-b{flex:1;text-align:center;font-family:'DM Mono',monospace;font-size:0.95rem;font-weight:600}
+.cmp-delta{flex:1;text-align:center;font-size:0.82rem;font-weight:700;border-radius:8px;padding:4px 8px}
+.cmp-delta.pos{color:#2E7D32;background:#e8f5e9}.cmp-delta.neg{color:#e53935;background:#fce4ec}
+.cmp-hdr{display:flex;align-items:center;padding:8px 0;border-bottom:2px solid #eee;margin-bottom:4px}
+.cmp-hdr span{flex:1;text-align:center;font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase}
+.cmp-hdr span:first-child{width:140px;flex:none}
+/* Header */
+.header{background:linear-gradient(135deg,#1B6B6B 0%,#6B3520 100%);color:white;padding:40px 0 30px;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(196,39,110,0.15) 0%,transparent 50%)}
+.header h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px}
+.header .subtitle{font-size:1rem;font-weight:400;opacity:0.9;position:relative}
+.header .brand-tag{display:inline-block;background:#C4276E;color:white;padding:4px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:12px;position:relative}
+.header-timestamp{position:absolute;top:12px;right:20px;font-size:0.78rem;opacity:0.85;font-weight:400;z-index:1}
+/* Insights */
+.insight-grid{display:flex;flex-direction:column;gap:8px}
+</style>
+</head><body>
+
+<div class="header">
+    <div class="header-timestamp">Updated October 6, 2026 at 10:38 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Financial_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a> <a href="../hicksville/WoofGang_Hicksville_Financial_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
+    <h1>Woof Gang Glen Cove</h1>
+    <div class="subtitle">Financial Dashboard</div>
+    <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
+</div>
+
+<div class="topbar">
+  <a id="portal-back" href="../index.html" class="home-link">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('ytd',this)">2026 YTD</button>
+  <button class="tab" onclick="showTab('monthly',this)">Monthly Detail</button>
+  <button class="tab" onclick="showTab('compare',this)">Monthly Compare</button>
+  <button class="tab" onclick="showTab('expenses',this);loadExpenses()">Expenses</button>
+</div>
+
+<div class="page">
+
+<!-- ── YTD ── -->
+<div class="panel active" id="panel-ytd">
+  <div class="kpi-grid">
+    <div class="kpi" style="border-color:#C4276E"><div class="kpi-val" style="color:#C4276E">$0.00</div><div class="kpi-label">Grooming Revenue</div></div>
+    <div class="kpi" style="border-color:#1B6B6B"><div class="kpi-val" style="color:#1B6B6B">$0.06</div><div class="kpi-label">Retail Revenue</div></div>
+    <div class="kpi" style="border-color:#1a1a2e"><div class="kpi-val" style="color:#1a1a2e">$0.06</div><div class="kpi-label">Total Revenue</div></div>
+    <div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-$0.00</div><div class="kpi-label">Grooming Discounts</div></div>
+    <div class="kpi" style="border-color:#e65100"><div class="kpi-val" style="color:#e65100">$0.03</div><div class="kpi-label">Retail COGS</div></div>
+    <div class="kpi" style="border-color:#1565C0"><div class="kpi-val" style="color:#1565C0">$0.00</div><div class="kpi-label">Groomer Commission</div></div>
+    <div class="kpi" style="border-color:#2E7D32"><div class="kpi-val" style="color:#2E7D32">$0.03</div><div class="kpi-label">Gross Profit</div><div style="font-size:0.78rem;color:#2E7D32;margin-top:3px;font-weight:600">50.0%</div></div>
+    <div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">$0.00</div><div class="kpi-label">Manager Salary</div></div>
+    <div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">$0.00</div><div class="kpi-label">Bather Pay</div></div>
+    <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">$0.00</div><div class="kpi-label">Retail Staff Pay</div></div>
+    <div class="kpi" style="border-color:#8E24AA"><div class="kpi-val" style="color:#8E24AA">$0.00</div><div class="kpi-label">Payroll Tax</div></div>
+    <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">$0.00</div><div class="kpi-label">Royalties + Marketing</div></div>
+    <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">$9,000.00</div><div class="kpi-label">Rent</div></div>
+    <div class="kpi" style="border-color:#E65100"><div class="kpi-val" style="color:#E65100">$0.00</div><div class="kpi-label">Owner Expenses</div></div>
+    <div class="kpi" style="border-color:#1565C0"><div class="kpi-val" style="color:#1565C0">$0.00</div><div class="kpi-label">Operating Costs</div></div>
+    <div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-$9,000.57</div><div class="kpi-label">Net Margin</div><div style="font-size:0.78rem;color:#e53935;margin-top:3px;font-weight:600">-15000950.0%</div></div>
+    <div class="kpi" style="border-color:#F57C00"><div class="kpi-val" style="color:#F57C00">$0.00</div><div class="kpi-label">Tips Collected</div></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Key Ratios</div>
+    <div class="kpi-grid">
+      <div class="kpi" style="border-color:#1565C0"><div class="kpi-val" style="color:#1565C0">0.0%</div><div class="kpi-label">Commission %</div><div style="font-size:0.78rem;color:#1565C0;margin-top:3px;font-weight:600">of grooming rev</div></div>
+      <div class="kpi" style="border-color:#1B6B6B"><div class="kpi-val" style="color:#1B6B6B">50.0%</div><div class="kpi-label">Retail Margin %</div><div style="font-size:0.78rem;color:#1B6B6B;margin-top:3px;font-weight:600">after COGS</div></div>
+      <div class="kpi" style="border-color:#7B1FA2"><div class="kpi-val" style="color:#7B1FA2">0.0%</div><div class="kpi-label">Labor Cost %</div><div style="font-size:0.78rem;color:#7B1FA2;margin-top:3px;font-weight:600">of total rev</div></div>
+      <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">15000000.0%</div><div class="kpi-label">Rent % of Rev</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px;font-weight:600">fixed cost</div></div>
+      <div class="kpi" style="border-color:#C4276E"><div class="kpi-val" style="color:#C4276E">$0.06</div><div class="kpi-label">Rev per Day</div><div style="font-size:0.78rem;color:#C4276E;margin-top:3px;font-weight:600">1 days open</div></div>
+      <div class="kpi" style="border-color:#2E7D32"><div class="kpi-val" style="color:#2E7D32">50.0%</div><div class="kpi-label">Gross Margin %</div><div style="font-size:0.78rem;color:#2E7D32;margin-top:3px;font-weight:600">before OpEx</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Trends &amp; Insights</div>
+    <div class="insight-grid">
+      <div style="color:#999;font-size:0.88rem">Not enough data for trend analysis yet.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Cost Breakdown</div>
+    <div style="max-width:500px;margin:0 auto"><canvas id="chart-costs"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">P&amp;L Waterfall</div>
+    <div style="max-width:800px;margin:0 auto"><canvas id="chart-waterfall" height="300"></canvas></div>
+  </div>
+</div>
+
+<!-- ── Monthly Detail ── -->
+<div class="panel" id="panel-monthly">
+  <div class="card">
+    <div class="stitle">Monthly Snapshot</div>
+    <div style="margin-bottom:16px">
+      <label style="font-size:0.73rem;color:#999;font-weight:600;text-transform:uppercase">Select Month</label><br>
+      <select id="month-detail-sel" onchange="updateMonthDetail()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.84rem;margin-top:4px">
+        <option value="0">Sep 2026</option>
+<option value="1"selected>Oct 2026</option>
+      </select>
+    </div>
+    <div class="kpi-grid" id="month-detail-kpis"></div>
+    <div class="stitle" style="margin-top:8px">Key Ratios</div>
+    <div class="kpi-grid" id="month-detail-ratios"></div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Monthly P&amp;L</div>
+    <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th style="text-align:left">Month</th>
+        <th>Groom Rev</th><th>Retail Rev</th><th>Total Rev</th>
+        <th>Discounts</th><th>Retail COGS</th><th>Commission</th><th>Gross Profit</th>
+        <th>Manager</th><th>Bather</th><th>Retail Staff</th><th>Payroll Tax</th><th>Royalties</th><th>Rent</th>
+        <th>Owner Exp</th><th>Oper. Costs</th><th>CC Fees</th>
+        <th>Net Margin</th>
+      </tr></thead>
+      <tbody><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Sep 2026</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n" style="font-weight:600">$0.00</td>
+      <td class="n" style="color:#e53935">-$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n" style="font-weight:600">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$4,500.00</td>
+      <td class="n" style="color:#E65100">$0.00</td>
+      <td class="n" style="color:#1565C0">$0.00</td>
+      <td class="n" style="color:#7B1FA2">$0.00</td>
+      <td class="n" style="font-weight:700;color:#e53935">-$4,500.00<br><span style="font-size:0.72rem;font-weight:400">0%</span></td>
+    </tr><tr style="border-bottom:1px solid #f0ede8">
+      <td style="font-weight:600;padding:8px 10px">Oct 2026</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.06</td>
+      <td class="n" style="font-weight:600">$0.06</td>
+      <td class="n" style="color:#e53935">-$0.00</td>
+      <td class="n">$0.03</td>
+      <td class="n">$0.00</td>
+      <td class="n" style="font-weight:600">$0.03</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$0.00</td>
+      <td class="n">$4,500.00</td>
+      <td class="n" style="color:#E65100">$0.00</td>
+      <td class="n" style="color:#1565C0">$0.00</td>
+      <td class="n" style="color:#7B1FA2">$0.60</td>
+      <td class="n" style="font-weight:700;color:#e53935">-$4,500.57<br><span style="font-size:0.72rem;font-weight:400">-7500950.0%</span></td>
+    </tr></tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Revenue vs Net Margin by Month</div>
+    <canvas id="chart-monthly" height="280"></canvas>
+  </div>
+</div>
+
+<!-- ── Monthly Compare ── -->
+<div class="panel" id="panel-compare">
+  <div class="card">
+    <div class="stitle">Month-to-Month P&amp;L Comparison</div>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="qcPrev()">vs Last Month</button>
+      <button class="quick-btn" onclick="qcYoY()">vs Same Month Last Year</button>
+    </div>
+    <div class="cmp-controls">
+      <div><label>Period A</label><br><select id="cmp-sel-a" onchange="updateCompare()"><option value="0">Sep 2026</option>
+<option value="1">Oct 2026</option></select></div>
+      <div style="font-weight:700;color:#999;padding-top:14px">vs</div>
+      <div><label>Period B</label><br><select id="cmp-sel-b" onchange="updateCompare()"><option value="0">Sep 2026</option>
+<option value="1"selected>Oct 2026</option></select></div>
+    </div>
+    <div class="cmp-hdr">
+      <span style="text-align:left">Metric</span>
+      <span id="cmp-hdr-a">Period A</span>
+      <span>Change</span>
+      <span id="cmp-hdr-b">Period B</span>
+    </div>
+    <div class="cmp-row" id="cmp-total_rev">
+      <div class="cmp-label">Total Revenue</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-total_rev-a"></div>
+        <div class="cmp-delta" id="cmp-total_rev-d"></div>
+        <div class="cmp-b" id="cmp-total_rev-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-groom_rev">
+      <div class="cmp-label">Grooming Revenue</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-groom_rev-a"></div>
+        <div class="cmp-delta" id="cmp-groom_rev-d"></div>
+        <div class="cmp-b" id="cmp-groom_rev-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-retail_rev">
+      <div class="cmp-label">Retail Revenue</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-retail_rev-a"></div>
+        <div class="cmp-delta" id="cmp-retail_rev-d"></div>
+        <div class="cmp-b" id="cmp-retail_rev-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-groom_disc">
+      <div class="cmp-label">Discounts</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-groom_disc-a"></div>
+        <div class="cmp-delta" id="cmp-groom_disc-d"></div>
+        <div class="cmp-b" id="cmp-groom_disc-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-retail_cogs">
+      <div class="cmp-label">Retail COGS</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-retail_cogs-a"></div>
+        <div class="cmp-delta" id="cmp-retail_cogs-d"></div>
+        <div class="cmp-b" id="cmp-retail_cogs-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-comm_paid">
+      <div class="cmp-label">Commission</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-comm_paid-a"></div>
+        <div class="cmp-delta" id="cmp-comm_paid-d"></div>
+        <div class="cmp-b" id="cmp-comm_paid-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-gross_profit">
+      <div class="cmp-label">Gross Profit</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-gross_profit-a"></div>
+        <div class="cmp-delta" id="cmp-gross_profit-d"></div>
+        <div class="cmp-b" id="cmp-gross_profit-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-mgr">
+      <div class="cmp-label">Manager</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-mgr-a"></div>
+        <div class="cmp-delta" id="cmp-mgr-d"></div>
+        <div class="cmp-b" id="cmp-mgr-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-bather_pay">
+      <div class="cmp-label">Bather Pay</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-bather_pay-a"></div>
+        <div class="cmp-delta" id="cmp-bather_pay-d"></div>
+        <div class="cmp-b" id="cmp-bather_pay-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-retail_pay">
+      <div class="cmp-label">Retail Staff</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-retail_pay-a"></div>
+        <div class="cmp-delta" id="cmp-retail_pay-d"></div>
+        <div class="cmp-b" id="cmp-retail_pay-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-payroll_tax">
+      <div class="cmp-label">Payroll Tax</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-payroll_tax-a"></div>
+        <div class="cmp-delta" id="cmp-payroll_tax-d"></div>
+        <div class="cmp-b" id="cmp-payroll_tax-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-royalties">
+      <div class="cmp-label">Royalties</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-royalties-a"></div>
+        <div class="cmp-delta" id="cmp-royalties-d"></div>
+        <div class="cmp-b" id="cmp-royalties-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-rent">
+      <div class="cmp-label">Rent</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-rent-a"></div>
+        <div class="cmp-delta" id="cmp-rent-d"></div>
+        <div class="cmp-b" id="cmp-rent-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-owner_exp">
+      <div class="cmp-label">Owner Expenses</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-owner_exp-a"></div>
+        <div class="cmp-delta" id="cmp-owner_exp-d"></div>
+        <div class="cmp-b" id="cmp-owner_exp-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-operating_exp">
+      <div class="cmp-label">Operating Costs</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-operating_exp-a"></div>
+        <div class="cmp-delta" id="cmp-operating_exp-d"></div>
+        <div class="cmp-b" id="cmp-operating_exp-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-cc_fees">
+      <div class="cmp-label">CC Processing Fees</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-cc_fees-a"></div>
+        <div class="cmp-delta" id="cmp-cc_fees-d"></div>
+        <div class="cmp-b" id="cmp-cc_fees-b"></div>
+      </div>
+    </div>
+<div class="cmp-row" id="cmp-net_margin">
+      <div class="cmp-label">Net Margin</div>
+      <div class="cmp-vals">
+        <div class="cmp-a" id="cmp-net_margin-a"></div>
+        <div class="cmp-delta" id="cmp-net_margin-d"></div>
+        <div class="cmp-b" id="cmp-net_margin-b"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <div class="stitle">Side-by-Side Comparison</div>
+    <canvas id="chart-compare" height="300"></canvas>
+  </div>
+</div>
+
+<!-- ── Expenses ── -->
+<div class="panel" id="panel-expenses">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="stitle" style="margin:0">Owner Expenses &amp; Operating Costs</div>
+      <button onclick="openExpModal()" style="padding:8px 18px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:700;cursor:pointer">+ Add Expense</button>
+    </div>
+    <div id="exp-summary" style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap"></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="exp-filter active" onclick="setExpFilter('all',this)">All</button>
+      <button class="exp-filter" onclick="setExpFilter('owner',this)">Owner</button>
+      <button class="exp-filter" onclick="setExpFilter('operating',this)">Operating</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%"><thead><tr>
+        <th>Name</th><th>Category</th><th>Subcategory</th><th>Store</th><th>Type</th><th class="n">Monthly</th><th class="n">Annual Est.</th><th></th>
+      </tr></thead><tbody id="exp-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div id="exp-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;padding:20px">
+  <div style="background:white;border-radius:14px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.15);padding:24px">
+    <h3 id="exp-modal-title" style="font-size:1.1rem;font-weight:800;margin-bottom:16px">Add Expense</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Name *</label><input id="exp-name" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem"></div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1"><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Category *</label><select id="exp-cat" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit"><option value="owner">Owner / Personal</option><option value="operating">Operating Cost</option></select></div>
+        <div style="flex:1"><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Subcategory</label><select id="exp-sub" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit"><option value="personal">Personal</option><option value="utilities">Utilities</option><option value="insurance">Insurance</option><option value="supplies">Supplies</option><option value="maintenance">Maintenance</option><option value="marketing">Marketing</option><option value="other">Other</option></select></div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <div style="flex:1"><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Monthly Amount *</label><input type="number" id="exp-amt" step="0.01" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem"></div>
+        <div style="flex:1"><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Type</label><select id="exp-recurring" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit"><option value="true">Monthly Recurring</option><option value="false">One-Time</option></select></div>
+      </div>
+      <div><label style="font-size:0.68rem;font-weight:700;text-transform:uppercase;color:#999;display:block;margin-bottom:4px">Notes</label><input id="exp-notes" style="width:100%;padding:8px 12px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem"></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button id="exp-del-btn" onclick="deleteExp()" style="display:none;margin-right:auto;padding:8px 16px;background:white;border:2px solid #ffcdd2;border-radius:8px;font-family:inherit;font-weight:600;cursor:pointer;color:#C62828">Delete</button>
+      <button onclick="closeExpModal()" style="padding:8px 20px;background:white;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-weight:600;cursor:pointer;color:#888">Cancel</button>
+      <button id="exp-save-btn" onclick="saveExp()" style="padding:8px 20px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-weight:700;cursor:pointer">Save</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div style="text-align:center;padding:24px;font-size:0.8rem;color:#999">
+  <strong style="color:#C4276E">Woof Gang Bakery &amp; Grooming</strong> — Glen Cove, NY &middot; Financial Dashboard
+</div>
+
+<script>
+var DATA = [{"label": "Sep 2026", "year": 2026, "groom_rev": 0, "retail_rev": 0, "total_rev": 0, "groom_disc": 0, "net_rev": 0, "retail_cogs": 0, "comm_paid": 0.0, "gross_profit": 0.0, "mgr": 0.0, "bather_pay": 0, "retail_pay": 0, "payroll_tax": 0.0, "royalties": 0.0, "rent": 4500.0, "owner_exp": 0.0, "operating_exp": 0.0, "cc_fees": 0.0, "cc_txn_count": 0, "cc_volume": 0.0, "total_opex": 4500.0, "net_margin": -4500.0, "net_margin_pct": 0, "tips": 0, "comm_pct": 0, "retail_margin_pct": 0, "labor_pct": 0, "rent_pct": 0, "gross_margin_pct": 0, "days_open": 0, "rev_per_day": 0}, {"label": "Oct 2026", "year": 2026, "groom_rev": 0, "retail_rev": 0.06, "total_rev": 0.06, "groom_disc": 0, "net_rev": 0.06, "retail_cogs": 0.03, "comm_paid": 0.0, "gross_profit": 0.03, "mgr": 0.0, "bather_pay": 0, "retail_pay": 0, "payroll_tax": 0.0, "royalties": 0.0, "rent": 4500.0, "owner_exp": 0.0, "operating_exp": 0.0, "cc_fees": 0.6, "cc_txn_count": 2, "cc_volume": 0.06, "total_opex": 4500.6, "net_margin": -4500.57, "net_margin_pct": -7500950.0, "tips": 0, "comm_pct": 0, "retail_margin_pct": 50.0, "labor_pct": 0.0, "rent_pct": 7500000.0, "gross_margin_pct": 50.0, "days_open": 1, "rev_per_day": 0.06}];
+
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'compare') updateCompare();
+  if (id === 'monthly') updateMonthDetail();
+}
+
+function fc(n) { return '$' + Math.round(n).toLocaleString(); }
+
+// ── Comparison logic ──
+var CMP_KEYS = [["total_rev", "Total Revenue", true], ["groom_rev", "Grooming Revenue", true], ["retail_rev", "Retail Revenue", true], ["groom_disc", "Discounts", false], ["retail_cogs", "Retail COGS", false], ["comm_paid", "Commission", false], ["gross_profit", "Gross Profit", true], ["mgr", "Manager", false], ["bather_pay", "Bather Pay", false], ["retail_pay", "Retail Staff", false], ["payroll_tax", "Payroll Tax", false], ["royalties", "Royalties", false], ["rent", "Rent", false], ["owner_exp", "Owner Expenses", false], ["operating_exp", "Operating Costs", false], ["cc_fees", "CC Processing Fees", false], ["net_margin", "Net Margin", true]];
+var cmpChartRef = null;
+
+function updateCompare() {
+  var iA = parseInt(document.getElementById('cmp-sel-a').value);
+  var iB = parseInt(document.getElementById('cmp-sel-b').value);
+  var a = DATA[iA], b = DATA[iB];
+  if (!a || !b) return;
+  document.getElementById('cmp-hdr-a').textContent = a.label;
+  document.getElementById('cmp-hdr-b').textContent = b.label;
+
+  CMP_KEYS.forEach(function(def) {
+    var key = def[0], upGood = def[2];
+    var vA = a[key] || 0, vB = b[key] || 0;
+    var delta = vB - vA;
+    var pct = vA !== 0 ? ((vB - vA) / Math.abs(vA) * 100) : 0;
+    document.getElementById('cmp-' + key + '-a').textContent = fc(vA);
+    document.getElementById('cmp-' + key + '-b').textContent = fc(vB);
+    var dEl = document.getElementById('cmp-' + key + '-d');
+    var sign = delta >= 0 ? '+' : '';
+    dEl.textContent = sign + fc(delta) + ' (' + sign + pct.toFixed(1) + '%)';
+    // For costs, down is good. For revenue/profit, up is good.
+    var isGood = upGood ? delta >= 0 : delta <= 0;
+    dEl.className = 'cmp-delta ' + (delta === 0 ? '' : isGood ? 'pos' : 'neg');
+  });
+
+  // Bar chart
+  if (cmpChartRef) cmpChartRef.destroy();
+  var chartKeys = ['total_rev','groom_rev','retail_rev','gross_profit','net_margin'];
+  var chartLabels = ['Total Rev','Groom Rev','Retail Rev','Gross Profit','Net Margin'];
+  cmpChartRef = new Chart(document.getElementById('chart-compare'), {
+    type: 'bar',
+    data: {
+      labels: chartLabels,
+      datasets: [
+        { label: a.label, data: chartKeys.map(function(k) { return a[k] || 0; }), backgroundColor: 'rgba(196,39,110,0.7)' },
+        { label: b.label, data: chartKeys.map(function(k) { return b[k] || 0; }), backgroundColor: 'rgba(27,107,107,0.7)' }
+      ]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { font: { family: "'DM Sans'" } } },
+        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + fc(ctx.raw); } } }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: { ticks: { callback: function(v) { return fc(v); } } }
+      }
+    }
+  });
+}
+
+function qcPrev() {
+  var sel = document.getElementById('cmp-sel-b');
+  var i = parseInt(sel.value);
+  if (i > 0) {
+    document.getElementById('cmp-sel-a').value = i - 1;
+    updateCompare();
+  }
+}
+
+function qcYoY() {
+  var sel = document.getElementById('cmp-sel-b');
+  var i = parseInt(sel.value);
+  var target = DATA[i].label.replace(/\d{4}/, function(y) { return parseInt(y) - 1; });
+  for (var j = 0; j < DATA.length; j++) {
+    if (DATA[j].label === target) {
+      document.getElementById('cmp-sel-a').value = j;
+      updateCompare();
+      return;
+    }
+  }
+}
+
+// Set default selection
+document.getElementById('cmp-sel-a').value = 0;
+
+// ── Monthly Detail KPIs ──
+function updateMonthDetail() {
+  var i = parseInt(document.getElementById('month-detail-sel').value);
+  var m = DATA[i];
+  if (!m) return;
+
+  function kpiHtml(label, val, color, sub) {
+    var subH = sub ? '<div style="font-size:0.78rem;color:'+color+';margin-top:3px;font-weight:600">'+sub+'</div>' : '';
+    return '<div class="kpi" style="border-color:'+color+'"><div class="kpi-val" style="color:'+color+'">'+val+'</div><div class="kpi-label">'+label+'</div>'+subH+'</div>';
+  }
+  function fp(n) { return n.toFixed(1) + '%'; }
+  var mc = m.net_margin >= 0 ? '#2E7D32' : '#e53935';
+
+  document.getElementById('month-detail-kpis').innerHTML =
+    kpiHtml('Grooming Revenue', fc(m.groom_rev), '#C4276E', '') +
+    kpiHtml('Retail Revenue', fc(m.retail_rev), '#1B6B6B', '') +
+    kpiHtml('Total Revenue', fc(m.total_rev), '#1a1a2e', '') +
+    kpiHtml('Retail COGS', fc(m.retail_cogs), '#e65100', '') +
+    kpiHtml('Commission', fc(m.comm_paid), '#1565C0', '') +
+    kpiHtml('Gross Profit', fc(m.gross_profit), '#2E7D32', fp(m.gross_margin_pct)) +
+    kpiHtml('Owner Expenses', fc(m.owner_exp||0), '#E65100', '') +
+    kpiHtml('Operating Costs', fc(m.operating_exp||0), '#1565C0', '') +
+    kpiHtml('CC Fees', fc(m.cc_fees||0), '#7B1FA2', m.cc_txn_count ? m.cc_txn_count+' txns' : '') +
+    kpiHtml('Total OpEx', fc(m.total_opex), '#7B1FA2', '') +
+    kpiHtml('Net Margin', fc(m.net_margin), mc, fp(m.net_margin_pct)) +
+    kpiHtml('Tips', fc(m.tips), '#F57C00', '');
+
+  document.getElementById('month-detail-ratios').innerHTML =
+    kpiHtml('Commission %', fp(m.comm_pct), '#1565C0', 'of groom rev') +
+    kpiHtml('Retail Margin %', fp(m.retail_margin_pct), '#1B6B6B', 'after COGS') +
+    kpiHtml('Labor Cost %', fp(m.labor_pct), '#7B1FA2', 'of total rev') +
+    kpiHtml('Rent % of Rev', fp(m.rent_pct), '#6D4C41', 'fixed cost') +
+    kpiHtml('Rev per Day', fc(m.rev_per_day), '#C4276E', (m.days_open || 0) + ' days') +
+    kpiHtml('Gross Margin %', fp(m.gross_margin_pct), '#2E7D32', 'before OpEx');
+}
+
+// Initialize monthly detail on load
+updateMonthDetail();
+
+// ── Cost breakdown donut ──
+var costData = [
+  0.0,
+  0.03,
+  0.0,
+  0,
+  0,
+  0.0,
+  9000.0,
+  0.0,
+  0.0,
+  0
+];
+new Chart(document.getElementById('chart-costs'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Groomer Commission','Retail COGS','Manager','Bather Pay','Retail Staff','Royalties','Rent','Owner Expenses','Operating Costs','Discounts'],
+    datasets: [{
+      data: costData,
+      backgroundColor: ['#1565C0','#e65100','#5C6BC0','#00796B','#6A1B9A','#AD1457','#6D4C41','#E65100','#0277BD','#e53935']
+    }]
+  },
+  options: {
+    plugins: {
+      legend: { position: 'right', labels: { font: { family: "'DM Sans'" } } },
+      tooltip: { callbacks: { label: function(ctx) { return ctx.label + ': ' + fc(ctx.raw); } } }
+    }
+  }
+});
+
+// ── P&L waterfall ──
+var wf = [
+  { label: 'Groom Rev', val: 0 },
+  { label: 'Retail Rev', val: 0.06 },
+  { label: 'Discounts', val: -0 },
+  { label: 'Retail COGS', val: -0.03 },
+  { label: 'Commission', val: -0.0 },
+  { label: 'Manager', val: -0.0 },
+  { label: 'Bather', val: -0 },
+  { label: 'Retail Staff', val: -0 },
+  { label: 'Royalties', val: -0.0 },
+  { label: 'Rent', val: -9000.0 },
+  { label: 'Owner Exp', val: -0.0 },
+  { label: 'Oper. Costs', val: -0.0 },
+  { label: 'CC Fees', val: -0.6 },
+];
+var running = 0;
+var wfBases = [], wfVals = [], wfColors = [];
+wf.forEach(function(w) {
+  if (w.val >= 0) {
+    wfBases.push(running);
+    wfVals.push(w.val);
+    wfColors.push('#2E7D32');
+    running += w.val;
+  } else {
+    running += w.val;
+    wfBases.push(running);
+    wfVals.push(Math.abs(w.val));
+    wfColors.push('#e53935');
+  }
+});
+wfBases.push(0);
+wfVals.push(running);
+wfColors.push(running >= 0 ? '#1B6B6B' : '#e53935');
+wf.push({ label: 'Net Margin' });
+
+new Chart(document.getElementById('chart-waterfall'), {
+  type: 'bar',
+  data: {
+    labels: wf.map(function(w) { return w.label; }),
+    datasets: [
+      { data: wfBases, backgroundColor: 'transparent', stack: 's' },
+      { data: wfVals, backgroundColor: wfColors, stack: 's' }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(ctx) {
+            if (ctx.datasetIndex === 0) return '';
+            var i = ctx.dataIndex;
+            var total = wfBases[i] + wfVals[i];
+            return ctx.label + ': ' + fc(wf[i] && wf[i].val !== undefined ? wf[i].val : total);
+          }
+        }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: "'DM Sans'", size: 11 } } },
+      y: { ticks: { callback: function(v) { return fc(v); }, font: { family: "'DM Mono'" } } }
+    }
+  }
+});
+
+// ── Monthly revenue vs margin chart ──
+var d2025 = DATA.filter(function(m) { return m.year >= 2025; });
+new Chart(document.getElementById('chart-monthly'), {
+  type: 'bar',
+  data: {
+    labels: d2025.map(function(m) { return m.label; }),
+    datasets: [
+      { label: 'Total Revenue', data: d2025.map(function(m) { return m.total_rev; }), backgroundColor: 'rgba(196,39,110,0.7)', order: 1 },
+      { label: 'Net Margin', data: d2025.map(function(m) { return m.net_margin; }), backgroundColor: d2025.map(function(m) { return m.net_margin >= 0 ? 'rgba(27,107,107,0.8)' : 'rgba(229,57,53,0.8)'; }), order: 0 }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { labels: { font: { family: "'DM Sans'" } } },
+      tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + fc(ctx.raw); } } }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { family: "'DM Sans'", size: 11 } } },
+      y: { ticks: { callback: function(v) { return fc(v); }, font: { family: "'DM Mono'" } } }
+    }
+  }
+});
+
+// ── Expenses Tab (Supabase-backed) ──
+var SB_URL='https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SB_HDR={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+var STORE_KEY='glen-cove';
+var expData=[],expFilter='all',expEditId=null;
+
+function sbExpGet(p){return fetch(SB_URL+p,{headers:SB_HDR}).then(function(r){return r.json();});}
+function sbExpPost(b){return fetch(SB_URL+'/operating_expenses',{method:'POST',headers:SB_HDR,body:JSON.stringify(b)}).then(function(r){return r.json();});}
+function sbExpPatch(id,b){return fetch(SB_URL+'/operating_expenses?id=eq.'+id,{method:'PATCH',headers:SB_HDR,body:JSON.stringify(b)}).then(function(r){return r.status===204?null:r.json();});}
+function sbExpDel(id){return fetch(SB_URL+'/operating_expenses?id=eq.'+id,{method:'DELETE',headers:SB_HDR});}
+
+function loadExpenses(){
+  sbExpGet('/operating_expenses?store=eq.'+STORE_KEY+'&order=category,name').then(function(rows){
+    expData=rows||[];renderExpenses();
+  });
+}
+
+function setExpFilter(f,btn){
+  expFilter=f;
+  document.querySelectorAll('.exp-filter').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  renderExpenses();
+}
+
+function renderExpenses(){
+  var filtered=expFilter==='all'?expData:expData.filter(function(e){return e.category===expFilter;});
+  var ownerTot=0,opTot=0;
+  expData.forEach(function(e){if(e.category==='owner')ownerTot+=+(e.amount||0);else opTot+=+(e.amount||0);});
+  document.getElementById('exp-summary').innerHTML=
+    '<div style="flex:1;min-width:150px;background:white;border-radius:10px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #E65100"><div style="font-size:1.3rem;font-weight:800;color:#E65100">'+fc(ownerTot)+'</div><div style="font-size:0.7rem;font-weight:700;color:#999;text-transform:uppercase">Owner / mo</div></div>'+
+    '<div style="flex:1;min-width:150px;background:white;border-radius:10px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #1565C0"><div style="font-size:1.3rem;font-weight:800;color:#1565C0">'+fc(opTot)+'</div><div style="font-size:0.7rem;font-weight:700;color:#999;text-transform:uppercase">Operating / mo</div></div>'+
+    '<div style="flex:1;min-width:150px;background:white;border-radius:10px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid #6B3520"><div style="font-size:1.3rem;font-weight:800;color:#6B3520">'+fc((ownerTot+opTot)*12)+'</div><div style="font-size:0.7rem;font-weight:700;color:#999;text-transform:uppercase">Annual Est.</div></div>';
+  var tbody=document.getElementById('exp-tbody');
+  if(!filtered.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#ccc;padding:40px">No expenses</td></tr>';return;}
+  tbody.innerHTML=filtered.map(function(e){
+    var catLbl=e.category==='owner'?'<span style="background:#FDF0F5;color:#C4276E;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700">Owner</span>':'<span style="background:#e0f2f1;color:#1B6B6B;padding:2px 8px;border-radius:12px;font-size:0.68rem;font-weight:700">Operating</span>';
+    var ann=e.is_recurring?(+(e.amount||0))*12:(+(e.amount||0));
+    return '<tr><td><strong>'+e.name+'</strong></td><td>'+catLbl+'</td><td>'+(e.subcategory||'')+'</td><td>'+(e.store==='port-washington'?'PW':'HV')+'</td><td style="font-size:0.78rem;color:#999">'+(e.is_recurring?'Monthly':'One-time')+'</td><td class="n">'+fc(+(e.amount||0))+'</td><td class="n">'+fc(ann)+'</td><td><button onclick="openExpModal('+e.id+')" style="background:none;border:none;color:#C4276E;cursor:pointer;font-size:0.85rem;padding:4px 8px">Edit</button></td></tr>';
+  }).join('');
+}
+
+function openExpModal(id){
+  expEditId=id||null;
+  document.getElementById('exp-modal-title').textContent=id?'Edit Expense':'Add Expense';
+  document.getElementById('exp-del-btn').style.display=id?'block':'none';
+  if(id){
+    var e=expData.find(function(x){return x.id===id;});
+    if(!e)return;
+    document.getElementById('exp-name').value=e.name;
+    document.getElementById('exp-cat').value=e.category;
+    document.getElementById('exp-sub').value=e.subcategory||'other';
+    document.getElementById('exp-amt').value=e.amount;
+    document.getElementById('exp-recurring').value=e.is_recurring?'true':'false';
+    document.getElementById('exp-notes').value=e.notes||'';
+  }else{
+    document.getElementById('exp-name').value='';
+    document.getElementById('exp-cat').value='owner';
+    document.getElementById('exp-sub').value='personal';
+    document.getElementById('exp-amt').value='';
+    document.getElementById('exp-recurring').value='true';
+    document.getElementById('exp-notes').value='';
+  }
+  document.getElementById('exp-overlay').style.display='flex';
+}
+function closeExpModal(){document.getElementById('exp-overlay').style.display='none';expEditId=null;}
+
+function saveExp(){
+  var name=document.getElementById('exp-name').value.trim();
+  var amt=parseFloat(document.getElementById('exp-amt').value);
+  if(!name||isNaN(amt))return;
+  var body={name:name,category:document.getElementById('exp-cat').value,subcategory:document.getElementById('exp-sub').value,store:STORE_KEY,amount:amt,is_recurring:document.getElementById('exp-recurring').value==='true',notes:document.getElementById('exp-notes').value.trim()||null};
+  var btn=document.getElementById('exp-save-btn');btn.disabled=true;btn.textContent='Saving...';
+  var p=expEditId?sbExpPatch(expEditId,body):sbExpPost(body);
+  p.then(function(){btn.disabled=false;btn.textContent='Save';closeExpModal();loadExpenses();}).catch(function(){btn.disabled=false;btn.textContent='Save';});
+}
+
+function deleteExp(){
+  if(!expEditId||!confirm('Delete this expense?'))return;
+  sbExpDel(expEditId).then(function(){closeExpModal();loadExpenses();});
+}
+</script>
+</body></html>

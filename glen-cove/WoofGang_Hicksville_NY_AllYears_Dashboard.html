@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang Hicksville</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #FDF0F5;
+    color: #333;
+    line-height: 1.6;
+}
+.header {
+    background: linear-gradient(135deg, #1B6B6B 0%, #6B3520 100%);
+    color: white;
+    padding: 40px 0 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(196,39,110,0.15) 0%, transparent 50%);
+}
+.header-timestamp {
+    position: absolute; top: 12px; right: 20px; font-size: 0.78rem;
+    opacity: 0.85; font-weight: 400; z-index: 1;
+}
+.header h1 {
+    font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;
+    position: relative; margin-bottom: 4px;
+}
+.header .subtitle { font-size: 1rem; font-weight: 400; opacity: 0.9; position: relative; }
+.header .brand-tag {
+    display: inline-block; background: #C4276E; color: white;
+    padding: 4px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase; margin-top: 12px; position: relative;
+}
+.container { max-width: 1440px; margin: 0 auto; padding: 30px 24px; }
+.kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px; margin-bottom: 28px;
+}
+.kpi-card {
+    background: white; border-radius: 12px; padding: 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 4px solid #1B6B6B;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+.kpi-card.accent { border-left-color: #C4276E; }
+.kpi-card.green { border-left-color: #2E7D32; }
+.kpi-card.brown { border-left-color: #6B3520; }
+.kpi-card.amber { border-left-color: #F9A825; }
+.kpi-label {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #888; margin-bottom: 4px;
+}
+.kpi-value {
+    font-size: 1.65rem; font-weight: 800; color: #1B6B6B; letter-spacing: -0.02em;
+}
+.kpi-card.accent .kpi-value { color: #C4276E; }
+.kpi-card.green .kpi-value { color: #2E7D32; }
+.kpi-card.brown .kpi-value { color: #6B3520; }
+.kpi-card.amber .kpi-value { color: #F9A825; }
+.kpi-sub { font-size: 0.78rem; color: #999; margin-top: 3px; }
+.section {
+    background: white; border-radius: 12px; padding: 26px;
+    margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.section h2 {
+    font-size: 1.2rem; font-weight: 700; color: #6B3520;
+    margin-bottom: 3px; display: flex; align-items: center; gap: 8px;
+}
+.section h2 .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #C4276E; display: inline-block;
+}
+.section .desc { font-size: 0.82rem; color: #888; margin-bottom: 18px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+thead th {
+    background: #1B6B6B; color: white; padding: 9px 11px;
+    text-align: left; font-weight: 600; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+}
+thead th:first-child { border-radius: 8px 0 0 0; }
+thead th:last-child { border-radius: 0 8px 0 0; }
+tbody tr { border-bottom: 1px solid #f0f0f0; }
+tbody tr:nth-child(even) { background: #FDF0F5; }
+tbody tr:hover { background: #fce4ec; }
+tbody td { padding: 8px 11px; white-space: nowrap; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.green { color: #2E7D32; font-weight: 600; }
+td.red { color: #C62828; font-weight: 600; }
+td.magenta { color: #C4276E; font-weight: 600; }
+.chart-container { position: relative; width: 100%; max-height: 380px; }
+.insight-box {
+    background: #FDF0F5; border-left: 4px solid #C4276E;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.insight-box strong { color: #C4276E; }
+.alert-box {
+    background: #FFF3E0; border-left: 4px solid #FF9800;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.alert-box strong { color: #E65100; }
+.opp-box {
+    background: #E8F5E9; border-left: 4px solid #2E7D32;
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin-top: 14px; font-size: 0.88rem;
+}
+.opp-box strong { color: #2E7D32; }
+.badge {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+}
+.badge-green { background: #C8E6C9; color: #2E7D32; }
+.badge-yellow { background: #FFF9C4; color: #F57F17; }
+.badge-red { background: #FFCDD2; color: #C62828; }
+.badge-teal { background: #B2DFDB; color: #00695C; }
+.footer { text-align: center; padding: 30px; color: #999; font-size: 0.75rem; }
+.footer span { color: #C4276E; }
+.heatmap-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+}
+.heatmap-cell {
+    text-align: center; padding: 10px 4px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 600;
+}
+.heatmap-label { font-size: 0.65rem; color: #888; margin-bottom: 2px; }
+.talking-point {
+    background: #FDF0F5; border-radius: 8px; padding: 12px 16px 12px 34px;
+    margin-bottom: 8px; font-size: 0.88rem; position: relative;
+}
+.talking-point::before { content: '\1F43E'; position: absolute; left: 10px; top: 12px; font-size: 0.95rem; }
+.objection { border-left: 3px solid #6B3520; padding: 10px 14px; margin-bottom: 10px; border-radius: 0 8px 8px 0; }
+.objection .q { font-weight: 700; color: #6B3520; margin-bottom: 3px; }
+.objection .a { font-size: 0.82rem; color: #555; font-style: italic; }
+.scenario-card {
+    background: white; border: 2px solid #e0e0e0; border-radius: 10px;
+    padding: 18px; text-align: center; transition: border-color 0.2s;
+}
+.scenario-card.recommended { border-color: #2E7D32; background: #f1f8e9; }
+.scenario-card h4 { font-size: 1.3rem; margin-bottom: 4px; }
+.scenario-card .metric { font-size: 0.8rem; color: #666; margin: 2px 0; }
+.scenario-card .metric strong { color: #333; }
+.progress-bar-bg {
+    background: #e0e0e0; border-radius: 6px; height: 10px; overflow: hidden; margin: 4px 0;
+}
+.progress-bar-fill { height: 100%; border-radius: 6px; }
+.monthly-controls {
+    display: flex; align-items: center; gap: 16px;
+    margin-top: 14px; flex-wrap: wrap;
+}
+.monthly-controls .control-group { display: flex; flex-direction: column; gap: 4px; }
+.monthly-controls label {
+    font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #888;
+}
+.monthly-controls select {
+    padding: 10px 16px; border: 2px solid #e0e0e0; border-radius: 8px;
+    font-size: 0.95rem; font-weight: 600; font-family: inherit;
+    background: white; cursor: pointer; min-width: 160px;
+    transition: border-color 0.2s;
+}
+.monthly-controls select:focus { border-color: #C4276E; outline: none; }
+.vs-label {
+    font-size: 0.85rem; font-weight: 700; color: #999;
+    padding-top: 18px;
+}
+.comparison-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px; margin-bottom: 22px;
+}
+.comparison-card .comparison-values {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px; gap: 8px;
+}
+.comparison-card .cmp-col { text-align: center; flex: 1; }
+.comparison-card .cmp-month-label {
+    font-size: 0.7rem; font-weight: 600; color: #999;
+    text-transform: uppercase; margin-bottom: 2px;
+}
+.comparison-card .cmp-delta { flex: 0 0 auto; padding: 0 8px; }
+.cmp-delta-val { font-size: 0.9rem; font-weight: 700; }
+.cmp-delta-pct { font-size: 0.75rem; color: #888; }
+.delta-positive .cmp-delta-val { color: #2E7D32; }
+.delta-positive .cmp-delta-pct { color: #2E7D32; }
+.delta-negative .cmp-delta-val { color: #C62828; }
+.delta-negative .cmp-delta-pct { color: #C62828; }
+
+.yr-tab-bar { background: white; padding: 0 32px; display: flex; gap: 4px; position: sticky; top: 45px; z-index: 99; border-bottom: 2px solid #eee; flex-wrap: wrap; align-items: center; }
+.yr-tab { padding: 14px 20px; border: none; background: transparent; color: #999; font-size: 0.88rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-family: inherit; margin-bottom: -2px; white-space: nowrap; }
+.yr-tab:hover { color: #C4276E; }
+.yr-tab.active { color: #C4276E; border-bottom-color: #C4276E; }
+.quick-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.quick-btn { padding: 6px 14px; border: 1.5px solid #C4276E; border-radius: 20px; background: transparent; color: #C4276E; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.quick-btn:hover { background: #C4276E; color: white; }
+.view-toggle { display: flex; gap: 0; margin: 16px 24px 0; }
+.view-toggle button { padding: 8px 20px; border: 2px solid #e0e0e0; background: white; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: inherit; color: #666; transition: all 0.2s; }
+.view-toggle button:first-child { border-radius: 8px 0 0 8px; }
+.view-toggle button:last-child { border-radius: 0 8px 8px 0; border-left: none; }
+.view-toggle button.active { background: #C4276E; color: white; border-color: #C4276E; }
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 22px; padding: 0 24px; }
+.detail-card { text-align: center; }
+.detail-card .kpi-value { font-size: 1.6rem; }
+.prorate-toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; padding-top: 18px; font-size: 0.82rem; font-weight: 600; color: #666; user-select: none; white-space: nowrap; }
+.prorate-toggle input { accent-color: #C4276E; width: 16px; height: 16px; cursor: pointer; }
+.prorate-toggle:hover span { color: #C4276E; }
+
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="header-timestamp">Updated October 06, 2026 at 06:38 AM ET<br><a href="../port-washington/WoofGang_PortWashington_NY_AllYears_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a></div>
+    
+    <h1>Woof Gang Hicksville</h1>
+    <div class="subtitle">Store Performance Analysis · Sales through 10/5/2026</div>
+    <div class="brand-tag">Woof Gang Bakery & Grooming</div>
+</div>
+<div class="container">
+<div style="background:#C4276E;padding:12px 32px;display:flex;align-items:center;position:sticky;top:0;z-index:101;box-shadow:0 2px 12px rgba(196,39,110,0.3)">
+  <a id="portal-back" href="../index.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
+</div>
+<div class="yr-tab-bar">
+  <button class="yr-tab active" onclick="showYear('2026')" id="tab-2026">2026 (YTD)</button>
+  <button class="yr-tab" onclick="showYear('monthly')" id="tab-monthly">Monthly</button>
+  <button class="yr-tab" onclick="showYear('weekly')" id="tab-weekly">Weekly</button>
+  <button class="yr-tab" onclick="showYear('daily')" id="tab-daily">Daily</button>
+</div>
+<div class="yr-panel" id="panel-2026" style="display:block">
+<div class="kpi-grid">
+<div class="kpi-card "><div class="kpi-label">2026 Net Sales (YTD)</div><div class="kpi-value">$0.06</div><div class="kpi-sub">1 months of data</div></div>
+<div class="kpi-card green"><div class="kpi-label">Full Year 2026 Forecast</div><div class="kpi-value">$2.01</div><div class="kpi-sub">+0% YoY growth × 2025 seasonality + run rate</div></div>
+<div class="kpi-card accent"><div class="kpi-label">Recent Run Rate (Annualized)</div><div class="kpi-value">$4.46</div><div class="kpi-sub">Last 1mo avg: $0.37 (partial mo. pro-rated)</div></div>
+<div class="kpi-card green"><div class="kpi-label">YoY Growth vs 2025</div><div class="kpi-value">+0.0%</div><div class="kpi-sub">Same-month comparison (0 months)</div></div>
+</div>
+<div class="kpi-grid">
+<div class="kpi-card accent"><div class="kpi-label">Grooming Revenue</div><div class="kpi-value">$0.00</div><div class="kpi-sub">0.0% of total</div></div>
+<div class="kpi-card "><div class="kpi-label">Groomer Commission (50%)</div><div class="kpi-value">$0.00</div><div class="kpi-sub">Paid to groomers</div></div>
+<div class="kpi-card "><div class="kpi-label">Store Net (Groom)</div><div class="kpi-value">$0.00</div><div class="kpi-sub">After 50% commission</div></div>
+<div class="kpi-card brown"><div class="kpi-label">Retail Revenue</div><div class="kpi-value">$0.06</div><div class="kpi-sub">100.0% of total</div></div>
+<div class="kpi-card green"><div class="kpi-label">Est. Gross Profit</div><div class="kpi-value">$0.03</div><div class="kpi-sub">51.5% margin (FDD standards)</div></div>
+<div class="kpi-card "><div class="kpi-label">Transactions</div><div class="kpi-value">2</div><div class="kpi-sub">Avg ticket: $0.03</div></div>
+<div class="kpi-card "><div class="kpi-label">Unique Customers</div><div class="kpi-value">1</div><div class="kpi-sub">Active in period</div></div>
+<div class="kpi-card "><div class="kpi-label">Tips Collected</div><div class="kpi-value">$0.00</div><div class="kpi-sub">Avg when tipped: $0.00</div></div>
+<div class="kpi-card amber"><div class="kpi-label">Discounts Given</div><div class="kpi-value">$0.00</div><div class="kpi-sub">0.0% of net sales</div></div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Revenue Trajectory & Forecast</h2>
+<p class="desc">Monthly actual vs trend line — 1 months of data</p>
+<div class="chart-container"><canvas id="trajectoryChart_2026" style="max-height:340px"></canvas></div>
+<div class="opp-box"><strong>YTD 2026: $0.06</strong> across 1 months. Full-year 2026 forecast: <strong>$2.01</strong> &mdash; +0% YoY growth applied to 2025 seasonal pattern (actual: $0.00), blended with run rate.</div>
+</div>
+<div class="grid-2">
+<div class="section"><h2><span class="dot"></span>Revenue Mix</h2><p class="desc">Grooming vs Retail vs Gift Cards</p><div class="chart-container"><canvas id="revMixChart_2026"></canvas></div></div>
+<div class="section"><h2><span class="dot"></span>Monthly Revenue (Stacked)</h2><p class="desc">Grooming and retail by month</p><div class="chart-container"><canvas id="monthlyChart_2026"></canvas></div></div>
+</div>
+<div class="grid-2">
+<div class="section">
+<h2><span class="dot"></span>Day-of-Week Revenue</h2>
+<p class="desc">Staffing optimization — where to allocate hours</p>
+<div class="heatmap-grid">
+<div class="heatmap-cell" style="background:rgb(196,39,110);color:white"><div class="heatmap-label">Mon</div>$0.06<br><span style="font-size:0.6rem">2 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(253,240,245);color:#333"><div class="heatmap-label">Tue</div>$0.00<br><span style="font-size:0.6rem">0 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(253,240,245);color:#333"><div class="heatmap-label">Wed</div>$0.00<br><span style="font-size:0.6rem">0 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(253,240,245);color:#333"><div class="heatmap-label">Thu</div>$0.00<br><span style="font-size:0.6rem">0 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(253,240,245);color:#333"><div class="heatmap-label">Fri</div>$0.00<br><span style="font-size:0.6rem">0 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(253,240,245);color:#333"><div class="heatmap-label">Sat</div>$0.00<br><span style="font-size:0.6rem">0 txns</span></div>
+<div class="heatmap-cell" style="background:rgb(253,240,245);color:#333"><div class="heatmap-label">Sun</div>$0.00<br><span style="font-size:0.6rem">0 txns</span></div>
+</div>
+<div class="insight-box"><strong>Monday</strong> is the peak day ($0.06). <strong>Tuesday</strong> is slowest ($0.00). Consider promotions or reduced staffing on Tuesdays.</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Peak Hours</h2>
+<p class="desc">Transaction volume by hour — optimize scheduling</p>
+<div class="chart-container"><canvas id="hoursChart_2026"></canvas></div>
+</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Grooming Service Mix</h2>
+<p class="desc">Revenue and volume by service type</p>
+<div class="grid-2">
+<div>
+<table><thead><tr><th>Service Type</th><th>Units</th><th>Revenue</th><th>% Rev</th><th>Avg Ticket</th></tr></thead><tbody>
+</tbody></table>
+</div>
+<div><div class="chart-container"><canvas id="svcMixChart_2026"></canvas></div></div>
+</div></div>
+<div class="section">
+<h2><span class="dot"></span>Retail Attachment to Grooming</h2>
+<p class="desc">What percentage of grooming visits include a retail purchase?</p>
+<div class="kpi-grid" style="margin-bottom:14px">
+<div class="kpi-card amber"><div class="kpi-label">Current Attach Rate</div><div class="kpi-value">0.0%</div><div class="kpi-sub">0 of 0 groom orders</div></div>
+<div class="kpi-card"><div class="kpi-label">Groom-Only Orders</div><div class="kpi-value">0</div><div class="kpi-sub">0.0% leave with zero retail</div></div>
+<div class="kpi-card"><div class="kpi-label">Avg Retail on Attached</div><div class="kpi-value">$0.00</div><div class="kpi-sub">Per groom order with retail</div></div>
+<div class="kpi-card green"><div class="kpi-label">+10pt Attach Opportunity</div><div class="kpi-value">$0.00</div><div class="kpi-sub">0 more orders × $0.00 avg</div></div>
+</div>
+<div class="alert-box"><strong>0.0% of groom clients leave empty-handed.</strong> Every grooming checkout is a retail opportunity. A treat display at the grooming pickup counter, or a "Pick a treat for your pup on us" with $5 minimum purchase, could capture <strong>$0.00</strong> in additional annual revenue.</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Dog Size vs. Retail & Add-On Attachment</h2>
+<p class="desc">Do bigger dogs mean bigger baskets? Attachment rates by weight class</p>
+<table><thead><tr><th>Dog Size</th><th>Groom Orders</th><th>Unique Clients</th><th>Retail Attach %</th><th>Add-On Attach %</th><th>SPA Attach %</th><th>Avg Retail Spend</th><th>Avg Total Ticket</th></tr></thead><tbody>
+</tbody></table>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Rotational Customer Base</h2>
+<p class="desc">How many unique grooming customers are actively returning? Split by groom vs. bath, with 10-week and full-year retention windows.</p>
+<div class="kpi-grid" style="margin-bottom:14px">
+<div class="kpi-card green"><div class="kpi-label">Rotational Base (2+ visits)</div><div class="kpi-value">0</div><div class="kpi-sub">of 0 total customers</div></div>
+<div class="kpi-card accent"><div class="kpi-label">Groom Retention (Overall)</div><div class="kpi-value">0.0%</div><div class="kpi-sub">0 of 0</div></div>
+<div class="kpi-card"><div class="kpi-label">Bath Retention (Overall)</div><div class="kpi-value">0.0%</div><div class="kpi-sub">0 of 0</div></div>
+<div class="kpi-card amber"><div class="kpi-label">One-and-Done</div><div class="kpi-value">0</div><div class="kpi-sub">0.0% never returned</div></div>
+<div class="kpi-card brown"><div class="kpi-label">Avg Tenure (Rotational)</div><div class="kpi-value">nan mo</div></div>
+</div>
+<div style="background:#FDF0F5;border-left:4px solid #C4276E;padding:12px 16px;border-radius:6px;margin-bottom:18px;font-size:0.85rem;color:#444;line-height:1.7">
+<strong>Retention Formula:</strong> <code style="background:#fff;padding:2px 6px;border-radius:3px;font-size:0.82rem">Retention Rate = Customers with 2+ visits &divide; Total unique customers (within window)</code><br>
+<strong>10-Week Window:</strong> Only customers whose first visit was &ge;70 days before the data end date are eligible &mdash; gives them enough time to return.<br>
+<strong>Full-Year Window:</strong> Only customers whose first visit was &ge;365 days ago are eligible &mdash; true annual retention.<br>
+<strong>Overall:</strong> All customers in the dataset regardless of when they first appeared.
+</div>
+<div class="grid-2">
+<div><h3 style="color:#6B3520;margin:14px 0 8px;font-size:1rem">Groom Customers</h3>
+<table><thead><tr><th>Window</th><th>Eligible</th><th>Retained</th><th>Rate</th></tr></thead><tbody>
+<tr><td>10-Week</td><td class="num">0</td><td class="num">0</td><td class="num" style="font-weight:700">0.0%</td></tr>
+<tr><td>Full Year</td><td class="num">0</td><td class="num">0</td><td class="num" style="font-weight:700">0.0%</td></tr>
+<tr style="border-top:2px solid #1B6B6B"><td>Overall</td><td class="num">0</td><td class="num">0</td><td class="num" style="font-weight:700">0.0%</td></tr>
+</tbody></table>
+<div style="font-size:0.82rem;color:#666;margin-top:8px">Active last 30d: <strong>0</strong> &bull; Last 70d: <strong>0</strong> &bull; Last 90d: <strong>0</strong></div>
+</div>
+<div><h3 style="color:#6B3520;margin:14px 0 8px;font-size:1rem">Bath Customers</h3>
+<table><thead><tr><th>Window</th><th>Eligible</th><th>Retained</th><th>Rate</th></tr></thead><tbody>
+<tr><td>10-Week</td><td class="num">0</td><td class="num">0</td><td class="num" style="font-weight:700">0.0%</td></tr>
+<tr><td>Full Year</td><td class="num">0</td><td class="num">0</td><td class="num" style="font-weight:700">0.0%</td></tr>
+<tr style="border-top:2px solid #1B6B6B"><td>Overall</td><td class="num">0</td><td class="num">0</td><td class="num" style="font-weight:700">0.0%</td></tr>
+</tbody></table>
+<div style="font-size:0.82rem;color:#666;margin-top:8px">Active last 30d: <strong>0</strong> &bull; Last 70d: <strong>0</strong> &bull; Last 90d: <strong>0</strong></div>
+</div>
+</div>
+<div class="grid-2">
+<div><h3 style="color:#6B3520;margin:14px 0 8px;font-size:1rem">Rotational Groom Customers by Dog Size</h3>
+<table><thead><tr><th>Dog Size</th><th>Customers</th><th>% of Base</th><th>Avg Visits</th><th>Avg Spend</th><th>Avg Tenure (mo)</th></tr></thead><tbody>
+</tbody></table>
+</div>
+<div><h3 style="color:#6B3520;margin:14px 0 8px;font-size:1rem">Rotational Bath Customers by Dog Size</h3>
+<table><thead><tr><th>Dog Size</th><th>Customers</th><th>% of Base</th><th>Avg Visits</th><th>Avg Spend</th><th>Avg Tenure (mo)</th></tr></thead><tbody>
+</tbody></table>
+</div>
+</div>
+<div class="insight-box"><strong>0.0% overall retention rate.</strong> Groom clients retain at <strong>0.0%</strong> vs. bath clients at <strong>0.0%</strong>. The rotational base of <strong>0</strong> customers is the recurring revenue engine. 0 customers (0.0%) came once and never returned — first-visit conversion opportunity.</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Groomer Productivity Scorecard</h2>
+<p class="desc">Active groomers only (worked within last 60 days). Includes retention rate and performance grade.</p>
+<table><thead><tr><th>Groomer</th><th>Grade</th><th>Started</th><th>Tenure</th><th>Appts</th><th>Revenue</th><th>Avg Ticket</th><th>Appts/Mo</th><th>Upsell</th><th>Retention</th><th>Tips</th></tr></thead><tbody>
+</tbody></table>
+<div style="font-size:0.82rem;color:#666;margin-top:8px;line-height:1.6"><strong>Grade formula:</strong> 30% volume (appts/mo) + 25% upsell rate + 25% customer retention + 20% avg ticket — percentile-ranked against active peers.<br><strong>Retention:</strong> % of unique customers served by this groomer who returned 2+ times to the store.</div>
+</div>
+<div class="grid-2">
+<div class="section">
+<h2><span class="dot"></span>Revenue Concentration</h2>
+<p class="desc">Pareto analysis — customer dependency risk</p>
+<div style="margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px"><span>Top 10% (1 customers)</span><span><strong>100.0%</strong> of revenue</span></div>
+<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:100.0%;background:#C4276E"></div></div>
+</div>
+<div style="margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px"><span>Top 20% (1 customers)</span><span><strong>100.0%</strong> of revenue</span></div>
+<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:100.0%;background:#1B6B6B"></div></div>
+</div>
+<div style="margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px"><span>Bottom 80% (0 customers)</span><span><strong>0.0%</strong> of revenue</span></div>
+<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0.0%;background:#6B3520"></div></div>
+</div>
+<div class="alert-box"><strong>Concentration risk:</strong> Your top 10% of customers drive 100.0% of revenue. Losing even a few high-value clients would materially impact the business. Prioritize retention programs for VIP customers.</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Customer Intelligence</h2>
+<p class="desc">Visit frequency and lifetime value distribution</p>
+<div class="grid-2"><div>
+<table><thead><tr><th>Segment</th><th>Customers</th><th>%</th><th>Revenue</th><th>Avg Spend</th></tr></thead><tbody>
+<tr><td>1 visit</td><td class="num">0</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$0.00</td></tr>
+<tr><td>2 visits</td><td class="num">0</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$0.00</td></tr>
+<tr><td>3-4 visits</td><td class="num">0</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$0.00</td></tr>
+<tr><td>5-8 visits</td><td class="num">0</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$0.00</td></tr>
+<tr><td>9-12 visits</td><td class="num">0</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$0.00</td></tr>
+<tr><td>13+ visits</td><td class="num">0</td><td class="num">0.0%</td><td class="num">$0.00</td><td class="num">$0.00</td></tr>
+</tbody></table></div>
+<div><div class="chart-container"><canvas id="custSegChart_2026"></canvas></div></div></div>
+<div class="alert-box"><strong>0 loyal customers (3+ visits) haven't returned in 90+ days.</strong> They represent $0.00 in historical spend. A re-engagement campaign (text/email with a small incentive) could recapture this segment.</div>
+</div>
+</div>
+<div class="section">
+<h2><span class="dot"></span>Monthly Performance Detail</h2>
+<p class="desc">Revenue, margins, transactions, and tips by month</p>
+<table><thead><tr><th>Month</th><th>Net Revenue</th><th>Grooming</th><th>Commission (50%)</th><th>Retail</th><th>Gross Margin</th><th>Txns</th><th>Avg Ticket</th><th>Tips</th><th>MoM</th></tr></thead><tbody>
+<tr><td>Oct '26</td><td class="num">$0.06</td><td class="num">$0.00</td><td class="num">$0.00</td><td class="num">$0.06</td><td class="num">51.5%</td><td class="num">2</td><td class="num">$0.03</td><td class="num">$0.00</td><td class="num ">—</td></tr>
+</tbody></table></div>
+<div class="grid-2">
+<div class="section"><h2><span class="dot"></span>Top 20 Retail Products</h2><p class="desc">Ranked by net revenue</p>
+<table><thead><tr><th>#</th><th>Product</th><th>Category</th><th>Units</th><th>Revenue</th><th>Avg Price</th></tr></thead><tbody>
+<tr><td>1</td><td>Miscellaneous</td><td>Other</td><td class="num">2</td><td class="num">$0.06</td><td class="num">$0.03</td></tr>
+</tbody></table></div>
+<div class="section"><h2><span class="dot"></span>Retail Categories</h2><p class="desc">Revenue and margin by category</p><div class="chart-container"><canvas id="catChart_2026"></canvas></div></div>
+</div>
+
+<script>
+function initCharts_2026() {
+const cc = ["#C4276E", "#1B6B6B", "#6B3520", "#E91E63", "#26A69A", "#8D6E63", "#F06292", "#4DB6AC", "#A1887F", "#CE93D8", "#80CBC4", "#FFAB91"];
+const mg = '#C4276E', tl = '#1B6B6B', br = '#6B3520', gn = '#2E7D32';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#666';
+
+(function() {
+    var _trendData = [0.37];
+    var _revColors = [0.37].map(function(v,i,a) { return (i === a.length - 1 && true) ? mg+'66' : mg+'cc'; });
+    var _datasets = [
+        { label: 'Actual Revenue', data: [0.37], backgroundColor: _revColors, borderRadius: 6 }
+    ];
+    if (_trendData.length > 0) {
+        _datasets.push({ label: 'Trend Line', data: _trendData, type: 'line', borderColor: tl, borderWidth: 2, borderDash: [6,3], pointRadius: 0, fill: false });
+    }
+    new Chart(document.getElementById('trajectoryChart_2026'), {
+        type: 'bar',
+        data: { labels: ["Oct '26 (est.)"], datasets: _datasets },
+        options: { responsive: true, maintainAspectRatio: true,
+            scales: { y: { ticks: { callback: v => '$'+v.toLocaleString() } } },
+            plugins: { legend: { position: 'bottom' },
+                tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits:0}) } } } }
+    });
+})();
+
+new Chart(document.getElementById('revMixChart_2026'), {
+    type: 'doughnut',
+    data: { labels: ['Grooming','Retail','Gift Cards'],
+        datasets: [{ data: [0.00,0.06,0.00], backgroundColor: [mg,tl,br], borderWidth: 0, hoverOffset: 8 }] },
+    options: { responsive: true, cutout: '65%',
+        plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ctx => ctx.label+': $'+ctx.parsed.toLocaleString() } } } }
+});
+
+new Chart(document.getElementById('monthlyChart_2026'), {
+    type: 'bar',
+    data: { labels: ["Oct '26 (est.)"],
+        datasets: [
+            { label: 'Grooming', data: [0.0], backgroundColor: mg, borderRadius: 4 },
+            { label: 'Retail', data: [0.37], backgroundColor: tl, borderRadius: 4 }
+        ] },
+    options: { responsive: true, interaction: { mode: 'index' },
+        scales: { x: { stacked: true }, y: { stacked: true, ticks: { callback: v => '$'+v.toLocaleString() } } },
+        plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('hoursChart_2026'), {
+    type: 'bar',
+    data: { labels: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'],
+        datasets: [{ data: [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0], backgroundColor: cc.slice(0,12).map((c,i) => {
+            const max = Math.max(...[0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0]);
+            const ratio = [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0][i] / max;
+            return ratio > 0.8 ? mg : ratio > 0.5 ? tl : br+'88';
+        }), borderRadius: 6 }] },
+    options: { responsive: true, plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: v => v.toLocaleString() } } } }
+});
+
+new Chart(document.getElementById('svcMixChart_2026'), {
+    type: 'bar',
+    data: { labels: [], datasets: [{ data: [], backgroundColor: cc.slice(0,0), borderRadius: 6 }] },
+    options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } },
+        scales: { x: { ticks: { callback: v => '$'+v.toLocaleString() } } } }
+});
+
+new Chart(document.getElementById('dogSizeChart_2026'), {
+    type: 'bar',
+    data: { labels: ['0-20 lbs', '21-40 lbs', '41-75 lbs', '76-100 lbs', 'Over 100 lbs'], datasets: [{ data: [0, 0, 0, 0, 0], backgroundColor: cc.slice(0,5), borderRadius: 6 }] },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+});
+
+new Chart(document.getElementById('catChart_2026'), {
+    type: 'doughnut',
+    data: { labels: ['Other'], datasets: [{ data: [0.06], backgroundColor: cc.slice(0,1), borderWidth: 0 }] },
+    options: { responsive: true, cutout: '55%', plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+});
+
+new Chart(document.getElementById('custSegChart_2026'), {
+    type: 'bar',
+    data: { labels: ['1 visit', '2 visits', '3-4 visits', '5-8 visits', '9-12 visits', '13+ visits'], datasets: [{ data: [0, 0, 0, 0, 0, 0], backgroundColor: cc.slice(0,6), borderRadius: 6 }] },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+});
+
+if (document.getElementById('refundTrendChart_2026')) {
+    new Chart(document.getElementById('refundTrendChart_2026'), {
+        type: 'bar',
+        data: {
+            labels: ["Oct '26 (est.)"],
+            datasets: [
+                { label: 'Refund Value', data: [0], backgroundColor: '#C6282888', borderRadius: 4, yAxisID: 'y' },
+                { label: 'Items Returned', data: [0], type: 'line', borderColor: '#1B6B6B', borderWidth: 2, pointBackgroundColor: '#1B6B6B', fill: false, yAxisID: 'y1' }
+            ]
+        },
+        options: { responsive: true, interaction: { mode: 'index' },
+            scales: {
+                y: { position: 'left', ticks: { callback: v => '$'+v.toLocaleString() } },
+                y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Items' } }
+            },
+            plugins: { legend: { position: 'bottom' },
+                tooltip: { callbacks: { label: ctx => {
+                    if (ctx.dataset.yAxisID === 'y') return 'Refund Value: $' + ctx.parsed.y.toLocaleString();
+                    return 'Items: ' + ctx.parsed.y;
+                } } }
+            }
+        }
+    });
+}
+
+if (document.getElementById('cancelTrendChart_2026')) {
+    new Chart(document.getElementById('cancelTrendChart_2026'), {
+        type: 'bar',
+        data: {
+            labels: ["Oct '26 (est.)"],
+            datasets: [
+                { label: 'Cancel Events', data: [0], backgroundColor: '#C6282899', borderRadius: 4, yAxisID: 'y' },
+                { label: 'Cancel Rate %', data: [0], type: 'line', borderColor: '#C4276E', borderWidth: 2, pointBackgroundColor: '#C4276E', fill: false, yAxisID: 'y1' }
+            ]
+        },
+        options: { responsive: true, interaction: { mode: 'index' },
+            scales: {
+                y: { position: 'left', title: { display: true, text: 'Events' }, beginAtZero: true },
+                y1: { position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Rate %' }, beginAtZero: true }
+            },
+            plugins: { legend: { position: 'bottom' },
+                tooltip: { callbacks: { label: ctx => {
+                    if (ctx.dataset.yAxisID === 'y1') return 'Cancel Rate: ' + ctx.parsed.y.toFixed(1) + '%';
+                    return 'Events: ' + ctx.parsed.y;
+                } } }
+            }
+        }
+    });
+}
+
+}
+</script>
+</div>
+<div class="yr-panel" id="panel-monthly" style="display:none">
+<div class="view-toggle" id="cmp-toggle">
+  <button class="active" onclick="_showView('cmp','detail',this)">Detail</button>
+  <button onclick="_showView('cmp','compare',this)">Compare</button>
+</div>
+<div id="cmp-detail-panel">
+  <div class="section">
+    <h2><span class="dot"></span>Period Detail</h2>
+    <p class="desc">View KPIs for a single period</p>
+    <div class="monthly-controls">
+      <div class="control-group">
+        <label for="cmp-detail-sel">Period</label>
+        <select id="cmp-detail-sel" onchange="updateMonthlyDetail()"><option value="2026-10"selected>Oct '26</option></select>
+      </div>
+    </div>
+  </div>
+  <div class="detail-grid"><div class="kpi-card detail-card " id="cmp-det-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="kpi-value" id="cmp-det-total_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card accent" id="cmp-det-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="kpi-value" id="cmp-det-groom_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card " id="cmp-det-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="kpi-value" id="cmp-det-retail_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card green" id="cmp-det-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="kpi-value" id="cmp-det-appointments-val"></div>
+</div>
+<div class="kpi-card detail-card " id="cmp-det-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="kpi-value" id="cmp-det-transactions-val"></div>
+</div>
+<div class="kpi-card detail-card green" id="cmp-det-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="kpi-value" id="cmp-det-avg_ticket-val"></div>
+</div>
+<div class="kpi-card detail-card " id="cmp-det-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="kpi-value" id="cmp-det-unique_customers-val"></div>
+</div>
+<div class="kpi-card detail-card " id="cmp-det-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="kpi-value" id="cmp-det-tips-val"></div>
+</div>
+<div class="kpi-card detail-card " id="cmp-det-days_open">
+  <div class="kpi-label">Days Open</div>
+  <div class="kpi-value" id="cmp-det-days_open-val"></div>
+</div>
+<div class="kpi-card detail-card accent" id="cmp-det-groomer_days">
+  <div class="kpi-label">Groomer Days</div>
+  <div class="kpi-value" id="cmp-det-groomer_days-val"></div>
+</div>
+</div>
+  <div class="section" id="cmp-detail-chart-section">
+    <h2><span class="dot"></span>Daily Breakdown</h2>
+    <p class="desc">Revenue by day within the selected period</p>
+    <div class="chart-container"><canvas id="monthlyDetailChart" style="max-height:400px"></canvas></div>
+  </div>
+</div>
+<div id="cmp-compare-panel" style="display:none">
+<div class="section">
+  <h2><span class="dot"></span>Month-to-Month Comparison</h2>
+  <p class="desc">Select two months to compare key performance metrics side by side</p>
+  <div class="quick-btns"><button class="quick-btn" onclick="_qcMonth('prev')">vs Last Month</button> <button class="quick-btn" onclick="_qcMonth('yoy')">vs Same Month Last Year</button></div>
+  <div class="monthly-controls">
+    <div class="control-group">
+      <label for="monthA">Period A</label>
+      <select id="monthA" onchange="updateMonthlyComparison()"><option value="2026-10"selected>Oct '26</option></select>
+    </div>
+    <span class="vs-label">vs</span>
+    <div class="control-group">
+      <label for="monthB">Period B</label>
+      <select id="monthB" onchange="updateMonthlyComparison()"><option value="2026-10"selected>Oct '26</option></select>
+    </div>
+    <label class="prorate-toggle" title="Limit Period A to the same number of calendar days as Period B (useful for partial months/weeks)"><input type="checkbox" id="cmp-prorate" onchange="updateMonthlyComparison()"><span>Pro-rate to match days</span></label>
+  </div>
+</div>
+<div class="comparison-grid">
+<div class="comparison-card kpi-card " id="cmp-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-total_revenue-labelA"></div>
+      <div class="kpi-value" id="cmp-total_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-total_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-total_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-total_revenue-labelB"></div>
+      <div class="kpi-value" id="cmp-total_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="cmp-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-groom_revenue-labelA"></div>
+      <div class="kpi-value" id="cmp-groom_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-groom_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-groom_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-groom_revenue-labelB"></div>
+      <div class="kpi-value" id="cmp-groom_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-retail_revenue-labelA"></div>
+      <div class="kpi-value" id="cmp-retail_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-retail_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-retail_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-retail_revenue-labelB"></div>
+      <div class="kpi-value" id="cmp-retail_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="cmp-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-appointments-labelA"></div>
+      <div class="kpi-value" id="cmp-appointments-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-appointments-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-appointments-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-appointments-labelB"></div>
+      <div class="kpi-value" id="cmp-appointments-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-transactions-labelA"></div>
+      <div class="kpi-value" id="cmp-transactions-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-transactions-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-transactions-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-transactions-labelB"></div>
+      <div class="kpi-value" id="cmp-transactions-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="cmp-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-avg_ticket-labelA"></div>
+      <div class="kpi-value" id="cmp-avg_ticket-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-avg_ticket-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-avg_ticket-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-avg_ticket-labelB"></div>
+      <div class="kpi-value" id="cmp-avg_ticket-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-unique_customers-labelA"></div>
+      <div class="kpi-value" id="cmp-unique_customers-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-unique_customers-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-unique_customers-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-unique_customers-labelB"></div>
+      <div class="kpi-value" id="cmp-unique_customers-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-tips-labelA"></div>
+      <div class="kpi-value" id="cmp-tips-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-tips-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-tips-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-tips-labelB"></div>
+      <div class="kpi-value" id="cmp-tips-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="cmp-days_open">
+  <div class="kpi-label">Days Open</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-days_open-labelA"></div>
+      <div class="kpi-value" id="cmp-days_open-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-days_open-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-days_open-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-days_open-labelB"></div>
+      <div class="kpi-value" id="cmp-days_open-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="cmp-groomer_days">
+  <div class="kpi-label">Groomer Days</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-groomer_days-labelA"></div>
+      <div class="kpi-value" id="cmp-groomer_days-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="cmp-groomer_days-delta"></div>
+      <div class="cmp-delta-pct" id="cmp-groomer_days-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="cmp-groomer_days-labelB"></div>
+      <div class="kpi-value" id="cmp-groomer_days-valB"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section">
+  <h2><span class="dot"></span>Visual Comparison</h2>
+  <p class="desc">Side-by-side bar chart of selected periods</p>
+  <div class="chart-container"><canvas id="monthlyCompareChart" style="max-height:400px"></canvas></div>
+</div>
+</div>
+</div>
+<div class="yr-panel" id="panel-weekly" style="display:none">
+<div class="view-toggle" id="wcmp-toggle">
+  <button class="active" onclick="_showView('wcmp','detail',this)">Detail</button>
+  <button onclick="_showView('wcmp','compare',this)">Compare</button>
+</div>
+<div id="wcmp-detail-panel">
+  <div class="section">
+    <h2><span class="dot"></span>Period Detail</h2>
+    <p class="desc">View KPIs for a single period</p>
+    <div class="monthly-controls">
+      <div class="control-group">
+        <label for="wcmp-detail-sel">Period</label>
+        <select id="wcmp-detail-sel" onchange="updateWeeklyDetail()"><option value="2026-W41"selected>Oct 5 – Oct 11, 2026</option></select>
+      </div>
+    </div>
+  </div>
+  <div class="detail-grid"><div class="kpi-card detail-card " id="wcmp-det-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="kpi-value" id="wcmp-det-total_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card accent" id="wcmp-det-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="kpi-value" id="wcmp-det-groom_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card " id="wcmp-det-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="kpi-value" id="wcmp-det-retail_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card green" id="wcmp-det-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="kpi-value" id="wcmp-det-appointments-val"></div>
+</div>
+<div class="kpi-card detail-card " id="wcmp-det-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="kpi-value" id="wcmp-det-transactions-val"></div>
+</div>
+<div class="kpi-card detail-card green" id="wcmp-det-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="kpi-value" id="wcmp-det-avg_ticket-val"></div>
+</div>
+<div class="kpi-card detail-card " id="wcmp-det-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="kpi-value" id="wcmp-det-unique_customers-val"></div>
+</div>
+<div class="kpi-card detail-card " id="wcmp-det-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="kpi-value" id="wcmp-det-tips-val"></div>
+</div>
+<div class="kpi-card detail-card " id="wcmp-det-days_open">
+  <div class="kpi-label">Days Open</div>
+  <div class="kpi-value" id="wcmp-det-days_open-val"></div>
+</div>
+<div class="kpi-card detail-card accent" id="wcmp-det-groomer_days">
+  <div class="kpi-label">Groomer Days</div>
+  <div class="kpi-value" id="wcmp-det-groomer_days-val"></div>
+</div>
+</div>
+  <div class="section" id="wcmp-detail-chart-section">
+    <h2><span class="dot"></span>Daily Breakdown</h2>
+    <p class="desc">Revenue by day within the selected period</p>
+    <div class="chart-container"><canvas id="weeklyDetailChart" style="max-height:400px"></canvas></div>
+  </div>
+</div>
+<div id="wcmp-compare-panel" style="display:none">
+<div class="section">
+  <h2><span class="dot"></span>Week-to-Week Comparison</h2>
+  <p class="desc">Select two weeks to compare key performance metrics side by side</p>
+  <div class="quick-btns"><button class="quick-btn" onclick="_qcWeek('prev')">vs Last Week</button> <button class="quick-btn" onclick="_qcWeek('yoy')">vs Same Week Last Year</button></div>
+  <div class="monthly-controls">
+    <div class="control-group">
+      <label for="weekA">Period A</label>
+      <select id="weekA" onchange="updateWeeklyComparison()"><option value="2026-W41"selected>Oct 5 – Oct 11, 2026</option></select>
+    </div>
+    <span class="vs-label">vs</span>
+    <div class="control-group">
+      <label for="weekB">Period B</label>
+      <select id="weekB" onchange="updateWeeklyComparison()"><option value="2026-W41"selected>Oct 5 – Oct 11, 2026</option></select>
+    </div>
+    <label class="prorate-toggle" title="Limit Period A to the same number of calendar days as Period B (useful for partial months/weeks)"><input type="checkbox" id="wcmp-prorate" onchange="updateWeeklyComparison()"><span>Pro-rate to match days</span></label>
+  </div>
+</div>
+<div class="comparison-grid">
+<div class="comparison-card kpi-card " id="wcmp-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-total_revenue-labelA"></div>
+      <div class="kpi-value" id="wcmp-total_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-total_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-total_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-total_revenue-labelB"></div>
+      <div class="kpi-value" id="wcmp-total_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="wcmp-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-groom_revenue-labelA"></div>
+      <div class="kpi-value" id="wcmp-groom_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-groom_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-groom_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-groom_revenue-labelB"></div>
+      <div class="kpi-value" id="wcmp-groom_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-retail_revenue-labelA"></div>
+      <div class="kpi-value" id="wcmp-retail_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-retail_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-retail_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-retail_revenue-labelB"></div>
+      <div class="kpi-value" id="wcmp-retail_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="wcmp-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-appointments-labelA"></div>
+      <div class="kpi-value" id="wcmp-appointments-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-appointments-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-appointments-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-appointments-labelB"></div>
+      <div class="kpi-value" id="wcmp-appointments-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-transactions-labelA"></div>
+      <div class="kpi-value" id="wcmp-transactions-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-transactions-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-transactions-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-transactions-labelB"></div>
+      <div class="kpi-value" id="wcmp-transactions-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="wcmp-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-avg_ticket-labelA"></div>
+      <div class="kpi-value" id="wcmp-avg_ticket-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-avg_ticket-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-avg_ticket-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-avg_ticket-labelB"></div>
+      <div class="kpi-value" id="wcmp-avg_ticket-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-unique_customers-labelA"></div>
+      <div class="kpi-value" id="wcmp-unique_customers-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-unique_customers-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-unique_customers-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-unique_customers-labelB"></div>
+      <div class="kpi-value" id="wcmp-unique_customers-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-tips-labelA"></div>
+      <div class="kpi-value" id="wcmp-tips-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-tips-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-tips-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-tips-labelB"></div>
+      <div class="kpi-value" id="wcmp-tips-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="wcmp-days_open">
+  <div class="kpi-label">Days Open</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-days_open-labelA"></div>
+      <div class="kpi-value" id="wcmp-days_open-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-days_open-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-days_open-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-days_open-labelB"></div>
+      <div class="kpi-value" id="wcmp-days_open-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="wcmp-groomer_days">
+  <div class="kpi-label">Groomer Days</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-groomer_days-labelA"></div>
+      <div class="kpi-value" id="wcmp-groomer_days-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="wcmp-groomer_days-delta"></div>
+      <div class="cmp-delta-pct" id="wcmp-groomer_days-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="wcmp-groomer_days-labelB"></div>
+      <div class="kpi-value" id="wcmp-groomer_days-valB"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section">
+  <h2><span class="dot"></span>Visual Comparison</h2>
+  <p class="desc">Side-by-side bar chart of selected periods</p>
+  <div class="chart-container"><canvas id="weeklyCompareChart" style="max-height:400px"></canvas></div>
+</div>
+</div>
+</div>
+<div class="yr-panel" id="panel-daily" style="display:none">
+<div class="view-toggle" id="dcmp-toggle">
+  <button class="active" onclick="_showView('dcmp','detail',this)">Detail</button>
+  <button onclick="_showView('dcmp','compare',this)">Compare</button>
+</div>
+<div id="dcmp-detail-panel">
+  <div class="section">
+    <h2><span class="dot"></span>Period Detail</h2>
+    <p class="desc">View KPIs for a single period</p>
+    <div class="monthly-controls">
+      <div class="control-group">
+        <label for="dcmp-detail-sel">Period</label>
+        <select id="dcmp-detail-sel" onchange="updateDailyDetail()"><option value="2026-10-05"selected>Mon Oct 5, 2026</option></select>
+      </div>
+    </div>
+  </div>
+  <div class="detail-grid"><div class="kpi-card detail-card " id="dcmp-det-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="kpi-value" id="dcmp-det-total_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card accent" id="dcmp-det-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="kpi-value" id="dcmp-det-groom_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card " id="dcmp-det-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="kpi-value" id="dcmp-det-retail_revenue-val"></div>
+</div>
+<div class="kpi-card detail-card green" id="dcmp-det-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="kpi-value" id="dcmp-det-appointments-val"></div>
+</div>
+<div class="kpi-card detail-card " id="dcmp-det-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="kpi-value" id="dcmp-det-transactions-val"></div>
+</div>
+<div class="kpi-card detail-card green" id="dcmp-det-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="kpi-value" id="dcmp-det-avg_ticket-val"></div>
+</div>
+<div class="kpi-card detail-card " id="dcmp-det-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="kpi-value" id="dcmp-det-unique_customers-val"></div>
+</div>
+<div class="kpi-card detail-card " id="dcmp-det-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="kpi-value" id="dcmp-det-tips-val"></div>
+</div>
+<div class="kpi-card detail-card " id="dcmp-det-days_open">
+  <div class="kpi-label">Days Open</div>
+  <div class="kpi-value" id="dcmp-det-days_open-val"></div>
+</div>
+<div class="kpi-card detail-card accent" id="dcmp-det-groomer_days">
+  <div class="kpi-label">Groomer Days</div>
+  <div class="kpi-value" id="dcmp-det-groomer_days-val"></div>
+</div>
+</div>
+  <div class="section" id="dcmp-detail-chart-section">
+    <h2><span class="dot"></span>Daily Breakdown</h2>
+    <p class="desc">Revenue by day within the selected period</p>
+    <div class="chart-container"><canvas id="dailyDetailChart" style="max-height:400px"></canvas></div>
+  </div>
+</div>
+<div id="dcmp-compare-panel" style="display:none">
+<div class="section">
+  <h2><span class="dot"></span>Day-to-Day Comparison</h2>
+  <p class="desc">Select two days to compare key performance metrics side by side</p>
+  <div class="quick-btns"><button class="quick-btn" onclick="_qcDay('prev')">vs Yesterday</button> <button class="quick-btn" onclick="_qcDay('week')">vs Same Day Last Week</button> <button class="quick-btn" onclick="_qcDay('yoy')">vs Same Day Last Year</button></div>
+  <div class="monthly-controls">
+    <div class="control-group">
+      <label for="dayA">Period A</label>
+      <select id="dayA" onchange="updateDailyComparison()"><option value="2026-10-05"selected>Mon Oct 5, 2026</option></select>
+    </div>
+    <span class="vs-label">vs</span>
+    <div class="control-group">
+      <label for="dayB">Period B</label>
+      <select id="dayB" onchange="updateDailyComparison()"><option value="2026-10-05"selected>Mon Oct 5, 2026</option></select>
+    </div>
+    
+  </div>
+</div>
+<div class="comparison-grid">
+<div class="comparison-card kpi-card " id="dcmp-total_revenue">
+  <div class="kpi-label">Total Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-total_revenue-labelA"></div>
+      <div class="kpi-value" id="dcmp-total_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-total_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-total_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-total_revenue-labelB"></div>
+      <div class="kpi-value" id="dcmp-total_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="dcmp-groom_revenue">
+  <div class="kpi-label">Grooming Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-groom_revenue-labelA"></div>
+      <div class="kpi-value" id="dcmp-groom_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-groom_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-groom_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-groom_revenue-labelB"></div>
+      <div class="kpi-value" id="dcmp-groom_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-retail_revenue">
+  <div class="kpi-label">Retail Revenue</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-retail_revenue-labelA"></div>
+      <div class="kpi-value" id="dcmp-retail_revenue-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-retail_revenue-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-retail_revenue-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-retail_revenue-labelB"></div>
+      <div class="kpi-value" id="dcmp-retail_revenue-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="dcmp-appointments">
+  <div class="kpi-label">Appointments</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-appointments-labelA"></div>
+      <div class="kpi-value" id="dcmp-appointments-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-appointments-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-appointments-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-appointments-labelB"></div>
+      <div class="kpi-value" id="dcmp-appointments-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-transactions">
+  <div class="kpi-label">Transactions</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-transactions-labelA"></div>
+      <div class="kpi-value" id="dcmp-transactions-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-transactions-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-transactions-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-transactions-labelB"></div>
+      <div class="kpi-value" id="dcmp-transactions-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card green" id="dcmp-avg_ticket">
+  <div class="kpi-label">Avg Ticket</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-avg_ticket-labelA"></div>
+      <div class="kpi-value" id="dcmp-avg_ticket-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-avg_ticket-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-avg_ticket-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-avg_ticket-labelB"></div>
+      <div class="kpi-value" id="dcmp-avg_ticket-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-unique_customers">
+  <div class="kpi-label">Unique Customers</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-unique_customers-labelA"></div>
+      <div class="kpi-value" id="dcmp-unique_customers-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-unique_customers-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-unique_customers-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-unique_customers-labelB"></div>
+      <div class="kpi-value" id="dcmp-unique_customers-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-tips">
+  <div class="kpi-label">Tips</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-tips-labelA"></div>
+      <div class="kpi-value" id="dcmp-tips-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-tips-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-tips-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-tips-labelB"></div>
+      <div class="kpi-value" id="dcmp-tips-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card " id="dcmp-days_open">
+  <div class="kpi-label">Days Open</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-days_open-labelA"></div>
+      <div class="kpi-value" id="dcmp-days_open-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-days_open-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-days_open-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-days_open-labelB"></div>
+      <div class="kpi-value" id="dcmp-days_open-valB"></div>
+    </div>
+  </div>
+</div>
+<div class="comparison-card kpi-card accent" id="dcmp-groomer_days">
+  <div class="kpi-label">Groomer Days</div>
+  <div class="comparison-values">
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-groomer_days-labelA"></div>
+      <div class="kpi-value" id="dcmp-groomer_days-valA"></div>
+    </div>
+    <div class="cmp-col cmp-delta">
+      <div class="cmp-delta-val" id="dcmp-groomer_days-delta"></div>
+      <div class="cmp-delta-pct" id="dcmp-groomer_days-deltaPct"></div>
+    </div>
+    <div class="cmp-col">
+      <div class="cmp-month-label" id="dcmp-groomer_days-labelB"></div>
+      <div class="kpi-value" id="dcmp-groomer_days-valB"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="section">
+  <h2><span class="dot"></span>Visual Comparison</h2>
+  <p class="desc">Side-by-side bar chart of selected periods</p>
+  <div class="chart-container"><canvas id="dailyCompareChart" style="max-height:400px"></canvas></div>
+</div>
+</div>
+</div>
+<script>
+
+var _chartsInited = {};
+function showYear(yr) {
+    document.querySelectorAll('.yr-panel').forEach(function(p) { p.style.display = 'none'; });
+    document.querySelectorAll('.yr-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.getElementById('panel-' + yr).style.display = 'block';
+    document.getElementById('tab-' + yr).classList.add('active');
+    if (!_chartsInited[yr]) {
+        _chartsInited[yr] = true;
+        if (yr === '2026' && typeof initCharts_2026 === 'function') initCharts_2026();
+        if (yr === 'monthly') updateMonthlyDetail();
+        if (yr === 'weekly') updateWeeklyDetail();
+        if (yr === 'daily') updateDailyDetail();
+    }
+}
+window.addEventListener('DOMContentLoaded', function() { showYear('2026'); });
+
+</script>
+<script>
+
+var MONTHLY_DATA = {"periods": [{"key": "2026-10", "label": "Oct '26"}], "data": {"2026-10": {"total_revenue": 0.06, "groom_revenue": 0.0, "retail_revenue": 0.06, "appointments": 0, "transactions": 2, "avg_ticket": 0.03, "unique_customers": 1, "tips": 0.0, "days_open": 1, "groomer_days": 0, "daily": [{"total_revenue": 0.06, "groom_revenue": 0.0, "retail_revenue": 0.06, "appointments": 0, "transactions": 2, "avg_ticket": 0.03, "unique_customers": 1, "tips": 0.0, "days_open": 1, "groomer_days": 0, "dom": 5, "dow": 0}]}}};
+var WEEKLY_DATA = {"periods": [{"key": "2026-W41", "label": "Oct 5 \u2013 Oct 11, 2026"}], "data": {"2026-W41": {"total_revenue": 0.06, "groom_revenue": 0.0, "retail_revenue": 0.06, "appointments": 0, "transactions": 2, "avg_ticket": 0.03, "unique_customers": 1, "tips": 0.0, "days_open": 1, "groomer_days": 0, "daily": [{"total_revenue": 0.06, "groom_revenue": 0.0, "retail_revenue": 0.06, "appointments": 0, "transactions": 2, "avg_ticket": 0.03, "unique_customers": 1, "tips": 0.0, "days_open": 1, "groomer_days": 0, "dom": 5, "dow": 0}]}}};
+var DAILY_DATA = {"periods": [{"key": "2026-10-05", "label": "Mon Oct 5, 2026"}], "data": {"2026-10-05": {"total_revenue": 0.06, "groom_revenue": 0.0, "retail_revenue": 0.06, "appointments": 0, "transactions": 2, "avg_ticket": 0.03, "unique_customers": 1, "tips": 0.0, "days_open": 1, "groomer_days": 0}}};
+var _monthlyChart = null, _weeklyChart = null, _dailyChart = null;
+
+function _mfc(v) {
+    return (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+function _mfi(v) { return v.toLocaleString(); }
+
+/* ── Pro-rate helper: sum daily sub-data up to a calendar day cutoff ── */
+function _proRate(periodData, maxDom, useDOM) {
+    // periodData has a 'daily' array of {dom, dow, ...kpis}
+    // useDOM=true → filter by dom <= maxDom (monthly: calendar day of month)
+    // useDOM=false → filter by dow <= maxDom (weekly: day of week index)
+    var daily = periodData.daily;
+    if (!daily || !daily.length) return periodData;
+    var filtered = daily.filter(function(d) { return useDOM ? d.dom <= maxDom : d.dow <= maxDom; });
+    if (!filtered.length) return periodData;
+    var sum = {days_open: filtered.length};
+    ['total_revenue','groom_revenue','retail_revenue','appointments','transactions','unique_customers','tips','groomer_days'].forEach(function(k) {
+        sum[k] = 0;
+        filtered.forEach(function(d) { sum[k] += d[k]; });
+        sum[k] = Math.round(sum[k] * 100) / 100;
+    });
+    sum.avg_ticket = sum.transactions > 0 ? Math.round(sum.total_revenue / sum.transactions * 100) / 100 : 0;
+    return sum;
+}
+
+function _updateComparison(DATA, selA, selB, prefix, chartId, chartRef) {
+    var keyA = document.getElementById(selA).value;
+    var keyB = document.getElementById(selB).value;
+    var aRaw = DATA.data[keyA], b = DATA.data[keyB];
+    if (!aRaw || !b) return null;
+    var labelA = document.getElementById(selA).selectedOptions[0].text;
+    var labelB = document.getElementById(selB).selectedOptions[0].text;
+
+    // Check pro-rate checkbox
+    var prCb = document.getElementById(prefix + '-prorate');
+    var prorated = prCb && prCb.checked && b.daily && aRaw.daily;
+    var a = aRaw;
+    if (prorated) {
+        var useDOM = prefix === 'cmp'; // cmp = monthly → day-of-month, wcmp = weekly → day-of-week
+        var field = useDOM ? 'dom' : 'dow';
+        // Find max calendar day in each period
+        var maxA = 0, maxB = 0;
+        aRaw.daily.forEach(function(d) { if (d[field] > maxA) maxA = d[field]; });
+        b.daily.forEach(function(d) { if (d[field] > maxB) maxB = d[field]; });
+        var cutoff = Math.min(maxA, maxB);
+        var daysLabel = useDOM ? cutoff : (cutoff + 1);
+        // Pro-rate whichever period has more days
+        if (maxA > cutoff) {
+            a = _proRate(aRaw, cutoff, useDOM);
+            labelA += ' (first ' + daysLabel + ' days)';
+        }
+        if (maxB > cutoff) {
+            b = _proRate(b, cutoff, useDOM);
+            labelB += ' (first ' + daysLabel + ' days)';
+        }
+    }
+
+    var kpis = [
+        {key: 'total_revenue', fmt: 'c'}, {key: 'groom_revenue', fmt: 'c'},
+        {key: 'retail_revenue', fmt: 'c'}, {key: 'appointments', fmt: 'i'},
+        {key: 'transactions', fmt: 'i'}, {key: 'avg_ticket', fmt: 'c'},
+        {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'},
+        {key: 'days_open', fmt: 'i'},
+        {key: 'groomer_days', fmt: 'i'}
+    ];
+
+    kpis.forEach(function(kpi) {
+        var valA = a[kpi.key], valB = b[kpi.key];
+        var delta = valB - valA;
+        var deltaPct = valA !== 0 ? ((valB - valA) / Math.abs(valA) * 100) : 0;
+        var f = kpi.fmt === 'c' ? _mfc : _mfi;
+        var pid = prefix + '-' + kpi.key;
+        document.getElementById(pid + '-labelA').textContent = labelA;
+        document.getElementById(pid + '-labelB').textContent = labelB;
+        document.getElementById(pid + '-valA').textContent = f(valA);
+        document.getElementById(pid + '-valB').textContent = f(valB);
+        document.getElementById(pid + '-delta').textContent = (delta >= 0 ? '+' : '') + f(delta);
+        document.getElementById(pid + '-deltaPct').textContent = (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + '%';
+        var deltaEl = document.getElementById(pid).querySelector('.cmp-delta');
+        deltaEl.classList.remove('delta-positive', 'delta-negative');
+        deltaEl.classList.add(delta >= 0 ? 'delta-positive' : 'delta-negative');
+    });
+
+    if (chartRef) { chartRef.destroy(); }
+    var ctx = document.getElementById(chartId);
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Revenue', 'Grooming', 'Retail', 'Appointments', 'Avg Ticket', 'Tips'],
+            datasets: [
+                { label: labelA, data: [a.total_revenue, a.groom_revenue, a.retail_revenue, a.appointments, a.avg_ticket, a.tips], backgroundColor: '#C4276E', borderRadius: 6 },
+                { label: labelB, data: [b.total_revenue, b.groom_revenue, b.retail_revenue, b.appointments, b.avg_ticket, b.tips], backgroundColor: '#1B6B6B', borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: function(c) { var v = c.parsed.y; return c.dataset.label + ': ' + (c.dataIndex <= 2 || c.dataIndex === 4 || c.dataIndex === 5 ? '$' + v.toLocaleString() : v.toLocaleString()); } } } },
+            scales: { y: { ticks: { callback: function(v) { return '$' + v.toLocaleString(); } } } }
+        }
+    });
+}
+
+function updateMonthlyComparison() { _monthlyChart = _updateComparison(MONTHLY_DATA, 'monthA', 'monthB', 'cmp', 'monthlyCompareChart', _monthlyChart); }
+function updateWeeklyComparison() { _weeklyChart = _updateComparison(WEEKLY_DATA, 'weekA', 'weekB', 'wcmp', 'weeklyCompareChart', _weeklyChart); }
+function updateDailyComparison() { _dailyChart = _updateComparison(DAILY_DATA, 'dayA', 'dayB', 'dcmp', 'dailyCompareChart', _dailyChart); }
+
+/* ── Quick Compare helpers ─────────────────────────── */
+function _findPeriodIdx(periods, key) {
+    for (var i = 0; i < periods.length; i++) { if (periods[i].key === key) return i; }
+    return -1;
+}
+function _setSelAndUpdate(selA, keyA, updateFn) {
+    var el = document.getElementById(selA);
+    for (var i = 0; i < el.options.length; i++) {
+        if (el.options[i].value === keyA) { el.selectedIndex = i; updateFn(); return true; }
+    }
+    return false;
+}
+
+function _qcMonth(mode) {
+    var keyB = document.getElementById('monthB').value;
+    var idx = _findPeriodIdx(MONTHLY_DATA.periods, keyB);
+    if (idx < 0) return;
+    var targetKey;
+    if (mode === 'prev') {
+        if (idx <= 0) return;
+        targetKey = MONTHLY_DATA.periods[idx - 1].key;
+    } else {
+        // yoy: subtract 1 year from the period key (format: "2026-03")
+        var parts = keyB.split('-');
+        targetKey = (parseInt(parts[0]) - 1) + '-' + parts[1];
+    }
+    _setSelAndUpdate('monthA', targetKey, updateMonthlyComparison);
+}
+
+function _qcWeek(mode) {
+    var keyB = document.getElementById('weekB').value;
+    var idx = _findPeriodIdx(WEEKLY_DATA.periods, keyB);
+    if (idx < 0) return;
+    var targetKey;
+    if (mode === 'prev') {
+        if (idx <= 0) return;
+        targetKey = WEEKLY_DATA.periods[idx - 1].key;
+    } else {
+        // yoy: "2026-W11" → "2025-W11"
+        var parts = keyB.split('-W');
+        targetKey = (parseInt(parts[0]) - 1) + '-W' + parts[1];
+    }
+    _setSelAndUpdate('weekA', targetKey, updateWeeklyComparison);
+}
+
+function _qcDay(mode) {
+    var keyB = document.getElementById('dayB').value;
+    var idx = _findPeriodIdx(DAILY_DATA.periods, keyB);
+    if (idx < 0) return;
+    var targetKey;
+    if (mode === 'prev') {
+        if (idx <= 0) return;
+        targetKey = DAILY_DATA.periods[idx - 1].key;
+    } else if (mode === 'week') {
+        // 7 days back
+        var d = new Date(keyB + 'T12:00:00');
+        d.setDate(d.getDate() - 7);
+        targetKey = d.toISOString().slice(0, 10);
+    } else {
+        // yoy: "2026-03-17" → "2025-03-17"
+        var parts = keyB.split('-');
+        targetKey = (parseInt(parts[0]) - 1) + '-' + parts[1] + '-' + parts[2];
+    }
+    _setSelAndUpdate('dayA', targetKey, updateDailyComparison);
+}
+
+/* ── Compare / Detail toggle ───────────────────────── */
+function _showView(prefix, mode, btn) {
+    var toggle = document.getElementById(prefix + '-toggle');
+    toggle.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById(prefix + '-compare-panel').style.display = mode === 'compare' ? 'block' : 'none';
+    document.getElementById(prefix + '-detail-panel').style.display = mode === 'detail' ? 'block' : 'none';
+    if (mode === 'detail') {
+        if (prefix === 'cmp') updateMonthlyDetail();
+        if (prefix === 'wcmp') updateWeeklyDetail();
+        if (prefix === 'dcmp') updateDailyDetail();
+    }
+}
+
+/* ── Detail view (single period KPIs + breakdown chart) ── */
+var _monthlyDetailChart = null, _weeklyDetailChart = null, _dailyDetailChart = null;
+
+function _updateDetail(DATA, selId, prefix, chartId, chartRef, showChart) {
+    var key = document.getElementById(selId).value;
+    var d = DATA.data[key];
+    if (!d) return chartRef;
+    var kpis = [
+        {key: 'total_revenue', fmt: 'c'}, {key: 'groom_revenue', fmt: 'c'},
+        {key: 'retail_revenue', fmt: 'c'}, {key: 'appointments', fmt: 'i'},
+        {key: 'transactions', fmt: 'i'}, {key: 'avg_ticket', fmt: 'c'},
+        {key: 'unique_customers', fmt: 'i'}, {key: 'tips', fmt: 'c'},
+        {key: 'days_open', fmt: 'i'},
+        {key: 'groomer_days', fmt: 'i'}
+    ];
+    kpis.forEach(function(kpi) {
+        var el = document.getElementById(prefix + '-det-' + kpi.key + '-val');
+        if (el) el.textContent = kpi.fmt === 'c' ? _mfc(d[kpi.key]) : _mfi(d[kpi.key]);
+    });
+    // Breakdown chart: horizontal bars for the key revenue metrics
+    var chartSection = document.getElementById(prefix + '-detail-chart-section');
+    if (!showChart) { if (chartSection) chartSection.style.display = 'none'; return chartRef; }
+    if (chartSection) chartSection.style.display = 'block';
+    if (chartRef) chartRef.destroy();
+    var ctx = document.getElementById(chartId);
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Total Revenue', 'Grooming', 'Retail', 'Avg Ticket', 'Tips'],
+            datasets: [{
+                data: [d.total_revenue, d.groom_revenue, d.retail_revenue, d.avg_ticket, d.tips],
+                backgroundColor: ['#C4276E', '#1B6B6B', '#6B3520', '#2E7D32', '#F4A261'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c) { return '$' + c.parsed.x.toLocaleString(); } } } },
+            scales: { x: { ticks: { callback: function(v) { return '$' + v.toLocaleString(); } } } }
+        }
+    });
+}
+
+function updateMonthlyDetail() { _monthlyDetailChart = _updateDetail(MONTHLY_DATA, 'cmp-detail-sel', 'cmp', 'monthlyDetailChart', _monthlyDetailChart, true); }
+function updateWeeklyDetail() { _weeklyDetailChart = _updateDetail(WEEKLY_DATA, 'wcmp-detail-sel', 'wcmp', 'weeklyDetailChart', _weeklyDetailChart, true); }
+function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dcmp-detail-sel', 'dcmp', 'dailyDetailChart', _dailyDetailChart, false); }
+
+</script>
+
+</div>
+<div class="footer">
+    Generated October 06, 2026 &mdash; <span>Woof Gang Bakery & Grooming</span> &mdash; Operations Intelligence Dashboard
+</div>
+</body>
+</html>

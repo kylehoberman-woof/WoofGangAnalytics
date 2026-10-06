@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Woof Gang Commission · Port Washington</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:#f5f4f0;color:#1a1a1a}
+.topbar{background:#C4276E;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(196,39,110,0.3)}
+.topbar-title{color:white;font-size:1.1rem;font-weight:700}.topbar-sub{color:rgba(255,255,255,0.75);font-size:0.82rem;margin-top:2px}
+.topbar-date{color:rgba(255,255,255,0.85);font-size:0.82rem}
+.tab-bar{background:white;border-bottom:2px solid #eee;padding:0 32px;display:flex;gap:4px;position:sticky;top:57px;z-index:99;align-items:center}
+.tab{padding:14px 20px;border:none;background:transparent;color:#999;font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;font-family:inherit;margin-bottom:-2px;white-space:nowrap}
+.tab:hover{color:#C4276E}.tab.active{color:#C4276E;border-bottom-color:#C4276E}
+.tab-archived{display:none}
+.archive-toggle-btn{padding:6px 12px;border:1px solid #ddd;border-radius:20px;background:white;color:#999;font-size:0.76rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;margin-left:4px}
+.archive-toggle-btn:hover{border-color:#C4276E;color:#C4276E}
+.archive-toggle-btn.on{border-color:#C4276E;color:#C4276E;background:#FDF0F5}
+.pp-select{margin-left:auto;margin-right:8px;padding:7px 12px;border:1px solid #ddd;border-radius:8px;font-size:0.84rem;font-family:inherit;outline:none;cursor:pointer;display:none}
+.pp-select:focus{border-color:#C4276E}
+.page{max-width:1300px;margin:0 auto;padding:28px 24px}
+.panel{display:none}.panel.active{display:block}
+.stitle{font-size:1.05rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.stitle::before{content:"";width:4px;height:18px;background:#C4276E;border-radius:2px;display:inline-block}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px}
+.kpi{background:white;border-radius:12px;padding:16px;border-top:3px solid #C4276E;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.kpi.blue{border-color:#1976D2}.kpi.green{border-color:#388E3C}.kpi.orange{border-color:#F57C00}.kpi.grey{border-color:#aaa}
+.kpi-val{font-size:1.6rem;font-weight:700;line-height:1;color:#C4276E}
+.kpi.blue .kpi-val{color:#1976D2}.kpi.green .kpi-val{color:#388E3C}.kpi.orange .kpi-val{color:#F57C00}.kpi.grey .kpi-val{color:#888}
+.kpi-label{font-size:0.73rem;color:#999;margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.card{background:white;border-radius:14px;padding:22px;margin-bottom:22px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+th{background:#f8f7f4;padding:9px 12px;text-align:left;font-size:0.72rem;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.04em;border-bottom:2px solid #eee;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid #f0ede8;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8!important}
+.toggle-btn{background:none;border:none;color:#C4276E;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;padding:4px 0;margin-top:10px}
+.toggle-btn:hover{text-decoration:underline}
+.detail-section{display:none;margin-top:16px;border-top:1px solid #eee;padding-top:16px}
+.info-box{background:#f0f7ff;border-left:4px solid #1976D2;border-radius:8px;padding:12px 16px;margin-bottom:18px;font-size:0.85rem;line-height:1.6}
+.header{background:linear-gradient(135deg,#1B6B6B 0%,#6B3520 100%);color:white;padding:40px 0 30px;text-align:center;position:relative;overflow:hidden}
+.header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(196,39,110,0.15) 0%,transparent 50%)}
+.header h1{font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;position:relative;margin-bottom:4px}
+.header .subtitle{font-size:1rem;font-weight:400;opacity:0.9;position:relative}
+.header .brand-tag{display:inline-block;background:#C4276E;color:white;padding:4px 16px;border-radius:20px;font-size:0.75rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:12px;position:relative}
+.header-timestamp{position:absolute;top:12px;right:20px;font-size:0.78rem;opacity:0.85;font-weight:400;z-index:1}
+.adj-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.42);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.adj-overlay.hidden{display:none}
+.adj-modal{background:white;border-radius:14px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.adj-modal-hdr{padding:18px 22px 12px;border-bottom:1px solid #eee}
+.adj-modal-hdr h3{font-size:1rem;font-weight:800;margin:0;color:#1a1a2e}
+.adj-modal-body{padding:16px 22px}
+.adj-fg{margin-bottom:13px}
+.adj-fg label{display:block;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:4px}
+.adj-fg input,.adj-fg textarea{width:100%;padding:8px 11px;border:2px solid #e8e8e8;border-radius:8px;font-family:inherit;font-size:0.9rem;box-sizing:border-box}
+.adj-fg input:focus,.adj-fg textarea:focus{outline:none;border-color:#C4276E}
+.adj-fg textarea{resize:vertical;min-height:52px}
+.adj-orig{font-size:0.8rem;color:#999;margin-top:3px}
+.adj-modal-actions{padding:10px 22px 18px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.adj-save-btn{padding:9px 22px;background:#C4276E;color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.87rem;font-weight:700;cursor:pointer}
+.adj-save-btn:hover{background:#a31f5b}
+.adj-save-btn:disabled{opacity:.5;cursor:not-allowed}
+.adj-cancel-btn{padding:9px 18px;background:white;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.87rem;font-weight:600;cursor:pointer;color:#888}
+.adj-clear-btn{padding:9px 18px;background:white;border:2px solid #e53935;border-radius:8px;font-family:inherit;font-size:0.87rem;font-weight:600;cursor:pointer;color:#e53935}
+.adj-clear-btn:hover{background:#ffebee}
+.adj-tag{font-size:0.68rem;padding:1px 5px;border-radius:5px;font-weight:700;background:#fff3e0;color:#e65100;margin-left:5px;vertical-align:middle}
+.adj-edit-btn{padding:1px 5px;border-radius:5px;border:1px solid #ccc;background:#fff;color:#aaa;font-size:0.7rem;cursor:pointer;margin-left:5px;vertical-align:middle}
+.adj-edit-btn:hover{border-color:#C4276E;color:#C4276E}
+
+/* ── Print Sheet styles ── */
+@media print {
+  /* Hide everything except the print sheet card */
+  body * { visibility: hidden !important; }
+  #print-sheet-card, #print-sheet-card * { visibility: visible !important; }
+  #print-sheet-card {
+    position: absolute !important;
+    left: 0 !important; top: 0 !important; right: 0 !important;
+    width: 100% !important;
+    margin: 0 !important; padding: 24px 32px !important;
+    box-shadow: none !important; border-radius: 0 !important;
+    background: white !important;
+    page-break-inside: avoid;
+  }
+  .print-hide { display: none !important; }
+  .print-sheet-header { border-top-color: #C4276E !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #print-sheet-body table { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  #print-sheet-body table th { background: #FDF0F5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: #C4276E !important; }
+  #print-sheet-body table tfoot tr { background: #FDF0F5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: white !important; padding: 0 !important; margin: 0 !important; }
+  @page { margin: 0.5in; }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="header">
+    <div class="header-timestamp">Updated October 06, 2026 at 06:38 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a> <a href="../hicksville/WoofGang_Hicksville_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
+    <h1>Woof Gang Glen Cove</h1>
+    <div class="subtitle">Groomer Commission Dashboard</div>
+    <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
+</div>
+<div class="topbar">
+  <a id="portal-back" href="../index.html" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" onclick="showTab('ytd',this)">2026 YTD</button>
+  <button class="tab" onclick="showTab('l30',this)">Last 30 Days</button>
+  <button class="tab" onclick="showTab('pp',this)">Pay Period</button>
+  <button class="tab" onclick="showTab('exec',this)">&#128200; Executive</button>
+  
+  
+  
+  <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
+    <option value="pp_0" selected>Oct 1 – Oct 7, 2026</option><option value="pp_1" >Sep 24 – Sep 30, 2026</option>
+  </select>
+  <button id="download-csv-btn" onclick="downloadPayrollCSV(document.getElementById('pp-select').value)" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:1px solid #2C1A0E;background:#fff;color:#2C1A0E;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">⬇ Payroll CSV</button>
+  <button id="save-overrides-btn" onclick="saveOverrides()" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:none;background:#C4276E;color:#fff;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">💾 Save Overrides</button>
+</div>
+
+<div class="page">
+
+<!-- ── YTD ── -->
+<div class="panel active" id="panel-ytd">
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-val">$0.00</div><div class="kpi-label">Groom Revenue</div></div>
+    <div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-$0.00</div><div class="kpi-label">Grooming Discounts</div></div>
+    <div class="kpi blue"><div class="kpi-val">$0.00</div><div class="kpi-label">Commission Paid</div></div>
+    <div class="kpi orange"><div class="kpi-val">$0.00</div><div class="kpi-label">Tips</div></div>
+    <div class="kpi green"><div class="kpi-val">$0.00</div><div class="kpi-label">Total Groomer Pay</div></div>
+    
+    <div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">$0.00</div><div class="kpi-label">Bather Pay</div></div>
+    <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">$0.00</div><div class="kpi-label">Retail Staff Pay</div></div>
+    <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">$0.00</div><div class="kpi-label">Royalties + Marketing</div></div>
+    <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">$45,000.00</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">279 days</div></div>
+    <div class="kpi" style="border-color:#D84315"><div class="kpi-val" style="color:#D84315">$0.00</div><div class="kpi-label">Payroll Tax</div><div style="font-size:0.78rem;color:#D84315;margin-top:3px">11.25% of wages</div></div>
+    
+    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">-$45,000.00</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">-4500000.0%</div></div>
+    <div class="kpi grey"><div class="kpi-val">0</div><div class="kpi-label">Guarantee Days</div></div>
+  </div>
+  <div class="info-box">Commission = 50% of daily grooming revenue. All groomers (except Kimberly) receive a <strong>$200/day guarantee</strong> for their first 90 days (Sue M: $300/day). Paid whichever is higher. Tips assigned to the groomer who performed the service.</div>
+  <div class="card">
+    <div class="stitle">2026 YTD Summary</div>
+    <div class="tbl-wrap"><table><thead><tr>
+  <th>Groomer</th>
+  <th style="text-align:right">Days</th>
+  <th style="text-align:right">Groom Revenue</th>
+  <th style="text-align:right">Discounts</th>
+  <th style="text-align:right">50% Comm</th>
+  <th style="text-align:right">Comm Paid</th>
+  <th style="text-align:right">Tips</th>
+  <th style="text-align:right;color:#16a34a">PTO</th>
+  <th style="text-align:right">Total Pay</th>
+  <th style="text-align:right">Avg/Day</th>
+</tr></thead><tbody></tbody></table></div>
+    <button class="toggle-btn" onclick="toggleDetail('ytd-detail',this)">▼ Show daily detail</button>
+    <div class="detail-section" id="ytd-detail">
+      <div class="tbl-wrap"><table><thead><tr>
+  <th>Groomer</th>
+  <th style="text-align:right">Days</th>
+  <th style="text-align:right">Groom Revenue</th>
+  <th style="text-align:right">Discounts</th>
+  <th style="text-align:right">50% Comm</th>
+  <th style="text-align:right">Comm Paid</th>
+  <th style="text-align:right">Tips</th>
+  <th style="text-align:right;color:#16a34a">PTO</th>
+  <th style="text-align:right">Total Pay</th>
+  <th style="text-align:right">Avg/Day</th>
+</tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+  
+</div>
+
+<!-- ── Last 30 Days ── -->
+<div class="panel" id="panel-l30">
+  <div class="card">
+    <div class="stitle">Last 30 Days Summary</div>
+    <div class="tbl-wrap"><table><thead><tr>
+  <th>Groomer</th>
+  <th style="text-align:right">Days</th>
+  <th style="text-align:right">Groom Revenue</th>
+  <th style="text-align:right">Discounts</th>
+  <th style="text-align:right">50% Comm</th>
+  <th style="text-align:right">Comm Paid</th>
+  <th style="text-align:right">Tips</th>
+  <th style="text-align:right;color:#16a34a">PTO</th>
+  <th style="text-align:right">Total Pay</th>
+  <th style="text-align:right">Avg/Day</th>
+</tr></thead><tbody></tbody></table></div>
+    <button class="toggle-btn" onclick="toggleDetail('l30-detail',this)">▼ Show daily detail</button>
+    <div class="detail-section" id="l30-detail">
+      <div class="tbl-wrap"><table><thead><tr>
+  <th>Groomer</th>
+  <th style="text-align:right">Days</th>
+  <th style="text-align:right">Groom Revenue</th>
+  <th style="text-align:right">Discounts</th>
+  <th style="text-align:right">50% Comm</th>
+  <th style="text-align:right">Comm Paid</th>
+  <th style="text-align:right">Tips</th>
+  <th style="text-align:right;color:#16a34a">PTO</th>
+  <th style="text-align:right">Total Pay</th>
+  <th style="text-align:right">Avg/Day</th>
+</tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Pay Period ── -->
+<div class="panel" id="panel-pp">
+  <div id="pp-kpis" class="kpi-grid"></div>
+  <div class="card" id="pp-confirm-card" style="display:none">
+    <div class="stitle">Payment Confirmation</div>
+    <div id="pp-confirm-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+  <div class="card">
+    <div class="stitle" id="pp-title">Pay Period Summary</div>
+    <div class="tbl-wrap"><table><thead><tr>
+  <th>Groomer</th>
+  <th style="text-align:right">Days</th>
+  <th style="text-align:right">Groom Revenue</th>
+  <th style="text-align:right">Discounts</th>
+  <th style="text-align:right">50% Comm</th>
+  <th style="text-align:right">Comm Paid</th>
+  <th style="text-align:right">Tips</th>
+  <th style="text-align:right;color:#16a34a">PTO</th>
+  <th style="text-align:right">Total Pay</th>
+  <th style="text-align:right">Avg/Day</th>
+</tr></thead><tbody id="pp-tbody"></tbody></table></div>
+    <button class="toggle-btn" onclick="toggleDetail('pp-detail',this)">▼ Show daily detail</button>
+    <div class="detail-section" id="pp-detail">
+      <div class="tbl-wrap"><table><thead><tr>
+  <th>Groomer</th>
+  <th style="text-align:right">Days</th>
+  <th style="text-align:right">Groom Revenue</th>
+  <th style="text-align:right">Discounts</th>
+  <th style="text-align:right">50% Comm</th>
+  <th style="text-align:right">Comm Paid</th>
+  <th style="text-align:right">Tips</th>
+  <th style="text-align:right;color:#16a34a">PTO</th>
+  <th style="text-align:right">Total Pay</th>
+  <th style="text-align:right">Avg/Day</th>
+</tr></thead><tbody id="pp-detail-tbody"></tbody></table></div>
+    </div>
+  </div>
+  <div class="card" id="bather-pp-card" style="display:none">
+    <div class="stitle">Bathers (Hourly)</div>
+    <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap" id="bather-pp-kpis"></div>
+    <div class="detail-section" id="bather-pp-detail" style="display:none;margin-top:12px"></div>
+    <button class="toggle-btn" data-label="details by person" onclick="toggleDetail('bather-pp-detail',this)">▼ Show details by person</button>
+  </div>
+  <div class="card" id="retail-pp-card" style="display:none">
+    <div class="stitle">Retail Staff</div>
+    <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap" id="retail-pp-kpis"></div>
+    <div class="detail-section" id="retail-pp-detail" style="display:none;margin-top:12px"></div>
+    <button class="toggle-btn" data-label="details by person" onclick="toggleDetail('retail-pp-detail',this)">▼ Show details by person</button>
+  </div>
+  <div class="card" id="cindy-pp-card" style="display:none">
+    <div class="stitle">Manager Salary — Cindy Szczudlo</div>
+    <div style="display:flex;gap:16px;margin-bottom:18px;flex-wrap:wrap" id="cindy-pp-kpis"></div>
+    <button class="toggle-btn" onclick="toggleDetail('cindy-pp-detail',this)">▼ Show daily breakdown</button>
+    <div class="detail-section" id="cindy-pp-detail">
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Date</th><th>Day</th><th style="text-align:right">Annual Rate</th><th style="text-align:right">Daily Pay</th><th style="text-align:right">Bonus</th></tr></thead>
+        <tbody id="cindy-pp-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- ── Printable Groomer Sheet ── -->
+  <div class="card no-print-shadow" id="print-sheet-card">
+    <div class="stitle print-hide">&#128424; Printable Groomer Sheet</div>
+    <div class="print-controls print-hide" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+      <label style="font-size:0.82rem;font-weight:600;color:#666">Groomer:</label>
+      <select id="print-groomer-select" onchange="renderPrintSheet()" style="padding:8px 14px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:600;min-width:180px">
+        <option value="">Select a groomer…</option>
+      </select>
+      <button onclick="window.print()" id="print-btn" style="padding:9px 20px;background:#C4276E;color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:0.87rem;font-weight:700;cursor:pointer">&#128424; Print Sheet</button>
+      <span style="font-size:0.78rem;color:#999;font-style:italic">Select a groomer to generate their daily pay period sheet</span>
+    </div>
+    <div id="print-sheet-body"></div>
+  </div>
+</div>
+
+</div>
+
+
+
+
+<div class="panel" id="panel-exec">
+  <div style="padding:32px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px" id="exec-kpis"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px">
+      <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <h3 style="margin:0 0 4px;font-size:0.95rem;color:#444">2025 — Monthly Net Margin</h3>
+        <p style="margin:0 0 14px;font-size:0.78rem;color:#aaa">Revenue vs. all costs by month</p>
+        <canvas id="chart-margin-2025" height="240"></canvas>
+      </div>
+      <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)">
+        <h3 style="margin:0 0 4px;font-size:0.95rem;color:#444">2026 — Monthly Net Margin</h3>
+        <p style="margin:0 0 14px;font-size:0.78rem;color:#aaa">Revenue vs. all costs by month</p>
+        <canvas id="chart-margin-2026" height="240"></canvas>
+      </div>
+    </div>
+    <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:24px">
+      <h3 style="margin:0 0 16px;font-size:0.95rem;color:#444">Monthly Breakdown</h3>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.84rem">
+        <thead><tr style="border-bottom:2px solid #eee">
+          <th style="text-align:left;padding:8px 12px;color:#888;font-weight:600">Month</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Revenue</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Commission</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Manager</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Bather</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Retail Staff</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Royalties</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Rent</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Net Margin</th>
+          <th style="text-align:right;padding:8px 12px;color:#888;font-weight:600">Rev/Day</th>
+        </tr></thead>
+        <tbody id="exec-monthly-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var PP_DATA = {"pp_0": {"_royalty_rate": 0.060000000000000005, "_monthly_rent": 4500.0, "_cc_fees": 0.0, "_manager_salary": 0, "_manager_old_days": 0, "_manager_new_days": 0, "_manager_daily": [], "_manager_bonus": 0, "_bather_rev": 0, "_bather_pay": {}, "_bather_hours": {}, "_bather_daily": {}, "_bather_tips": {}, "_bather_tips_daily": {}, "_retail_pay": {}, "_retail_hours": {}, "_retail_daily": {}, "_retail_rates": {}}, "pp_1": {"_royalty_rate": 0.060000000000000005, "_monthly_rent": 4500.0, "_cc_fees": 0.0, "_manager_salary": 0, "_manager_old_days": 0, "_manager_new_days": 0, "_manager_daily": [], "_manager_bonus": 0, "_bather_rev": 0, "_bather_pay": {}, "_bather_hours": {}, "_bather_daily": {}, "_bather_tips": {}, "_bather_tips_daily": {}, "_retail_pay": {}, "_retail_hours": {}, "_retail_daily": {}, "_retail_rates": {}}};
+var GROOMERS = [];
+var MONTHLY_DATA = [{"month": "Sep 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Oct 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Nov 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Dec 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jan 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Feb 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Mar 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Apr 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "May 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jun 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Jul 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Aug 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Sep 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Oct 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Nov 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Dec 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Jan 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Feb 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Mar 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Apr 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "May 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Jun 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jul 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Aug 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Sep 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Oct 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 4, "rev_per_day": 0.0}];
+var COLORS = {};
+var GUARANTEES = {"Julianne D": {"rate": 200.0, "start": "2026-06-23", "end": "2026-09-21"}};
+var BATHER_RATE_MAP = {};
+var SUE_WEEKLY = [];
+var PP_DATES = {"pp_0": {"start": "2026-10-01", "end": "2026-10-07"}, "pp_1": {"start": "2026-09-24", "end": "2026-09-30"}};
+var PAY_CONFIRM_NAMES = [];
+var _payConfirmCache = {}; // period_start -> {name -> row}
+var GUSTO_PAYROLL_CONFIG = {"Bella F": {"mode": "full", "fixed_amount": null}, "Christine Brower": {"mode": "full", "fixed_amount": null}, "Cindy Szczudlo": {"mode": "full", "fixed_amount": null}, "Julianne D": {"mode": "full", "fixed_amount": null}, "Shay Richardson": {"mode": "full", "fixed_amount": null}};
+var PAYROLL_TAX_RATE = 0.1125;
+
+function fc(v) { return '$' + parseFloat(v).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+  var sel = document.getElementById('pp-select');
+  sel.style.display = id === 'pp' ? 'block' : 'none';
+  document.getElementById('download-csv-btn').style.display = id === 'pp' ? 'inline-block' : 'none';
+  if (id === 'pp') renderPayPeriod(sel.value);
+  if (id === 'exec') renderExec();
+  if (id === 'sue') renderSue();
+  if (id === 'carol') renderCarol();
+}
+
+function toggleArchivedTabs() {
+  var btn = document.getElementById('archive-toggle-btn');
+  var show = btn.classList.toggle('on');
+  // Class rule is display:none, so showing needs an explicit inline
+  // override — clearing the inline style would just fall back to it.
+  document.querySelectorAll('.tab-archived').forEach(t => { t.style.display = show ? 'inline-block' : 'none'; });
+}
+
+// Off-books staff (see PAY_CONFIRM_NAMES) don't run through a payroll
+// system with its own paid/unpaid status, so this is Kyle's own record
+// of which pay periods he's actually handed money for — keyed by the
+// period's real start date, not its pp_N id (that id is positional and
+// shifts every time a new period rolls in, so it can't be a stable key).
+function renderPayConfirm(ppDates) {
+  var card = document.getElementById('pp-confirm-card');
+  var list = document.getElementById('pp-confirm-list');
+  if (!ppDates || !PAY_CONFIRM_NAMES.length) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  var periodStart = ppDates.start;
+  list.innerHTML = PAY_CONFIRM_NAMES.map(function(name) {
+    return '<label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;cursor:pointer">'
+      + '<input type="checkbox" disabled data-name="' + name + '" style="width:16px;height:16px">'
+      + name + '<span class="pc-meta" style="font-size:0.76rem;color:#999"></span></label>';
+  }).join('');
+
+  fetch(_sbUrl + '/rest/v1/pay_period_confirmations?store_key=eq.' + encodeURIComponent(_storeKey)
+    + '&period_start=eq.' + periodStart + '&select=employee_name,paid,confirmed_by,confirmed_at', {headers: _sbHeaders})
+    .then(function(r) { return r.ok ? r.json() : []; })
+    .then(function(rows) {
+      var byName = {};
+      (Array.isArray(rows) ? rows : []).forEach(function(row) { byName[row.employee_name] = row; });
+      list.querySelectorAll('input[type=checkbox]').forEach(function(cb) {
+        var row = byName[cb.dataset.name];
+        cb.checked = !!(row && row.paid);
+        cb.disabled = false;
+        var meta = cb.parentElement.querySelector('.pc-meta');
+        meta.textContent = (row && row.paid && row.confirmed_at) ? ('paid ' + row.confirmed_at.slice(0,10)) : '';
+        cb.onchange = function() { setPayConfirm(name_for(cb), periodStart, cb.checked, cb, meta); };
+      });
+    })
+    .catch(function() { list.querySelectorAll('input[type=checkbox]').forEach(function(cb) { cb.disabled = false; }); });
+
+  function name_for(cb) { return cb.dataset.name; }
+}
+
+function setPayConfirm(employeeName, periodStart, paid, cb, meta) {
+  cb.disabled = true;
+  var hdrs = Object.assign({}, _sbHeaders, {'Prefer': 'return=minimal,resolution=merge-duplicates'});
+  fetch(_sbUrl + '/rest/v1/pay_period_confirmations', {
+    method: 'POST', headers: hdrs,
+    body: JSON.stringify({
+      employee_name: employeeName,
+      store_key: _storeKey,
+      period_start: periodStart,
+      paid: paid,
+      confirmed_by: null,
+      confirmed_at: new Date().toISOString()
+    })
+  }).then(function(r) {
+    cb.disabled = false;
+    if (r.ok || r.status === 201 || r.status === 204) {
+      meta.textContent = paid ? ('paid ' + new Date().toISOString().slice(0,10)) : '';
+    } else {
+      cb.checked = !paid;
+      r.text().then(function(t) { alert('Save failed: ' + t); });
+    }
+  }).catch(function() { cb.disabled = false; cb.checked = !paid; alert('Save failed'); });
+}
+
+function toggleDetail(id, btn) {
+  var el = document.getElementById(id);
+  var open = el.style.display === 'block';
+  el.style.display = open ? 'none' : 'block';
+  var label = btn.getAttribute('data-label') || 'daily detail';
+  btn.textContent = open ? '▼ Show ' + label : '▲ Hide ' + label;
+}
+
+function getGuarRate(g, day) {
+  var gd = GUARANTEES[g];
+  if (!gd) return 0;
+  if (day && (day < gd.start || day > gd.end)) return 0;
+  return gd.rate;
+}
+function groomerBadge(g) {
+  var gd = GUARANTEES[g];
+  var today = new Date().toISOString().slice(0,10);
+  var badge = (gd && today <= gd.end) ? ' <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$'+gd.rate+'</span>' : '';
+  return '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+COLORS[g]+';margin-right:7px"></span><strong>'+g+'</strong>'+badge;
+}
+
+// ── Overrides system (Supabase) ──────────────────────────────────────────────
+var _overrides = {};
+var _adjMap = {};  // _adjMap[groomer][date][type] = corrected_amount
+var _sbUrl = 'https://bqzinttbjeeaybywhhet.supabase.co';
+var _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var _storeKey = 'glen-cove';
+var _sbHeaders = {
+  'apikey': _sbKey,
+  'Authorization': 'Bearer ' + _sbKey,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=minimal'
+};
+
+function _loadOverrides() {
+  var p1 = fetch(_sbUrl + '/rest/v1/guarantee_overrides?select=groomer_name,override_date,waived', {
+    headers: { 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey }
+  }).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; });
+  var p2 = fetch(_sbUrl + '/rest/v1/commission_adjustments?select=groomer_name,adj_date,adj_type,corrected_amount&store_key=eq.' + encodeURIComponent(_storeKey), {
+    headers: { 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey }
+  }).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; });
+  Promise.all([p1, p2]).then(function(results) {
+    _overrides = {};
+    results[0].forEach(function(row) {
+      if (row.waived) _overrides['guar_override_' + row.override_date + '_' + row.groomer_name] = true;
+    });
+    _adjMap = {};
+    results[1].forEach(function(row) {
+      if (!_adjMap[row.groomer_name]) _adjMap[row.groomer_name] = {};
+      if (!_adjMap[row.groomer_name][row.adj_date]) _adjMap[row.groomer_name][row.adj_date] = {};
+      _adjMap[row.groomer_name][row.adj_date][row.adj_type] = parseFloat(row.corrected_amount);
+    });
+    renderPayPeriod(document.getElementById('pp-select').value);
+  }).catch(function() {
+    renderPayPeriod(document.getElementById('pp-select').value);
+  });
+}
+_loadOverrides();
+
+function getOverride(key) {
+  return _overrides[key] === true;
+}
+function getAdj(g, date, type) {
+  return (_adjMap[g] && _adjMap[g][date] && _adjMap[g][date][type] !== undefined) ? _adjMap[g][date][type] : null;
+}
+
+// ── PTO Payouts (live from Supabase time_off) ─────────────────────────────────
+var PTO_RECORDS = [];
+var _PTO_LOADED = false;
+function _loadPto(cb) {
+  if (_PTO_LOADED) { if (cb) cb(); return; }
+  fetch(_sbUrl + '/rest/v1/time_off?store_key=eq.' + _storeKey + '&paid_pto=eq.true&status=eq.approved&select=employee_name,start_date,end_date', {
+    headers: { 'apikey': _sbKey, 'Authorization': 'Bearer ' + _sbKey }
+  }).then(function(r){ return r.ok ? r.json() : []; }).then(function(d){
+    PTO_RECORDS = d || [];
+    _PTO_LOADED = true;
+    if (cb) cb();
+  }).catch(function(){ _PTO_LOADED = true; if (cb) cb(); });
+}
+function getPtoPayout(groomer, ppId) {
+  // Show payout in the pay period where the PTO starts (avoids splitting across periods)
+  var dates = PP_DATES[ppId];
+  if (!dates) return 0;
+  var ppStart = dates.start, ppEnd = dates.end;
+  var payout = 0;
+  PTO_RECORDS.forEach(function(r) {
+    if (r.employee_name !== groomer) return;
+    if (r.start_date >= ppStart && r.start_date <= ppEnd) {
+      var days = Math.round((new Date(r.end_date) - new Date(r.start_date)) / 86400000) + 1;
+      payout += Math.min(days, 5) * 100;
+    }
+  });
+  return payout;
+}
+_loadPto(function() {
+  var ppPanel = document.getElementById('panel-pp');
+  if (ppPanel && ppPanel.classList.contains('active')) {
+    renderPayPeriod(document.getElementById('pp-select').value);
+  }
+});
+
+function _parseOverrideKey(key) {
+  // key format: guar_override_YYYY-MM-DD_Groomer Name
+  var parts = key.replace('guar_override_', '').split('_');
+  var dt = parts[0];
+  var name = parts.slice(1).join('_');
+  return { groomer_name: name, override_date: dt };
+}
+
+function setOverride(key, val) {
+  var parsed = _parseOverrideKey(key);
+  var btn = document.getElementById('save-overrides-btn');
+  btn.style.display = 'inline-block';
+  btn.textContent = '⏳ Saving...';
+  btn.style.background = '#888';
+
+  if (val) {
+    // Upsert: insert or update
+    _overrides[key] = true;
+    fetch(_sbUrl + '/rest/v1/guarantee_overrides', {
+      method: 'POST',
+      headers: Object.assign({}, _sbHeaders, {'Prefer': 'return=minimal,resolution=merge-duplicates'}),
+      body: JSON.stringify({ groomer_name: parsed.groomer_name, override_date: parsed.override_date, waived: true })
+    })
+    .then(function(r) {
+      if (r.ok || r.status === 201 || r.status === 200) {
+        btn.textContent = '✓ Saved';
+        btn.style.background = '#388E3C';
+      } else {
+        btn.textContent = '✗ Error';
+        btn.style.background = '#c62828';
+      }
+      setTimeout(function() { btn.style.display = 'none'; }, 2000);
+    })
+    .catch(function() {
+      btn.textContent = '✗ Error';
+      btn.style.background = '#c62828';
+      setTimeout(function() { btn.style.display = 'none'; }, 3000);
+    });
+  } else {
+    // Delete the override row
+    delete _overrides[key];
+    fetch(_sbUrl + '/rest/v1/guarantee_overrides?groomer_name=eq.' + encodeURIComponent(parsed.groomer_name) + '&override_date=eq.' + parsed.override_date, {
+      method: 'DELETE',
+      headers: _sbHeaders
+    })
+    .then(function(r) {
+      if (r.ok) {
+        btn.textContent = '✓ Saved';
+        btn.style.background = '#388E3C';
+      } else {
+        btn.textContent = '✗ Error';
+        btn.style.background = '#c62828';
+      }
+      setTimeout(function() { btn.style.display = 'none'; }, 2000);
+    })
+    .catch(function() {
+      btn.textContent = '✗ Error';
+      btn.style.background = '#c62828';
+      setTimeout(function() { btn.style.display = 'none'; }, 3000);
+    });
+  }
+}
+
+function saveOverrides() {
+  // No-op: overrides auto-save on each toggle now
+}
+
+function toggleGuar(key, ppId) {
+  var current = getOverride(key);
+  setOverride(key, !current);
+  renderPayPeriod(ppId);
+}
+
+function computeGroomerPayout(g, ppId) {
+  // Final paid/tips for one groomer/period, applying guarantee overrides and
+  // commission_adjustments the same way renderPayPeriod does — shared so the
+  // CSV export never drifts from what's shown on screen.
+  var data = PP_DATA[ppId];
+  var d = data && data[g];
+  if (!d) return {paid: 0, tips: 0};
+  if (!d.daily || !d.daily.length) return {paid: d.paid || 0, tips: d.tips || 0};
+  var paid = 0, tips = 0;
+  d.daily.forEach(function(day) {
+    var guar = getGuarRate(g, day.date);
+    var overrideKey = 'guar_override_'+day.date+'_'+g;
+    var overridden = getOverride(overrideKey);
+    var guarActive = guar > 0 && day.guar_applied && !overridden;
+    var commVal = getAdj(g, day.date, 'commission'); if (commVal === null) commVal = day.comm;
+    var tipsVal = getAdj(g, day.date, 'tip');        if (tipsVal === null) tipsVal = day.tips;
+    var p = guarActive ? Math.max(commVal, guar) : commVal;
+    paid += p; tips += tipsVal;
+  });
+  return {paid: paid, tips: tips};
+}
+
+function applyGustoMode(name, commission, tips, bonus, hours) {
+  // Not everyone's full computed pay goes through Gusto — some are paid
+  // entirely another way (mode "none"), some only get their commission/hours
+  // through Gusto with tips handled separately (mode "commission_only"), and
+  // some get a flat capped amount with the remainder paid by check (mode
+  // "fixed_amount"). Defaults to "full" (unchanged) for anyone not configured.
+  var cfg = GUSTO_PAYROLL_CONFIG[name] || {mode: 'full'};
+  var mode = cfg.mode || 'full';
+  if (mode === 'none') return null;
+  if (mode === 'fixed_amount') return {commission: cfg.fixed_amount || 0, tips: 0, bonus: 0, hours: 0};
+  if (mode === 'commission_only') return {commission: commission, tips: 0, bonus: 0, hours: hours};
+  return {commission: commission, tips: tips, bonus: bonus, hours: hours};
+}
+
+function downloadPayrollCSV(ppId) {
+  var data = PP_DATA[ppId];
+  if (!data) return;
+  // "Paycheck Tips", not "Cash Tips" — these are credit card tips the
+  // business is holding and must actually disburse through payroll.
+  // "Cash Tips" in Gusto means the tip was already handed to the employee
+  // directly, so Gusto would only withhold tax on it without paying it out.
+  var rows = [['Employee Name','Commission','Paycheck Tips','Bonus','Regular Hours']];
+
+  function esc(v) {
+    v = String(v);
+    return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+  }
+  function addRow(name, commission, tips, bonus, hours) {
+    var r = applyGustoMode(name, commission, tips, bonus, hours);
+    if (!r) return; // mode "none" — paid outside Gusto entirely
+    if (!r.commission && !r.tips && !r.bonus && !r.hours) return;
+    rows.push([
+      name,
+      r.commission ? r.commission.toFixed(2) : '',
+      r.tips ? r.tips.toFixed(2) : '',
+      r.bonus ? r.bonus.toFixed(2) : '',
+      r.hours ? r.hours.toFixed(3) : '',
+    ]);
+  }
+
+  GROOMERS.forEach(function(g) {
+    var d = data[g]; if (!d) return;
+    var payout = computeGroomerPayout(g, ppId);
+    var pto = getPtoPayout(g, ppId);
+    addRow(g, payout.paid, payout.tips, pto, 0);
+  });
+
+  var batherHours = data._bather_hours || {};
+  var batherTips = data._bather_tips || {};
+  Object.keys(batherHours).forEach(function(name) {
+    addRow(name, 0, batherTips[name] || 0, 0, batherHours[name] || 0);
+  });
+
+  var retailHours = data._retail_hours || {};
+  Object.keys(retailHours).forEach(function(name) {
+    addRow(name, 0, 0, 0, retailHours[name] || 0);
+  });
+
+  if (data._manager_bonus) {
+    addRow('Cindy Szczudlo', 0, 0, data._manager_bonus, 0);
+  }
+
+  var csv = rows.map(function(r) { return r.map(esc).join(','); }).join('\r\n');
+  var blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'gusto_payroll_' + ppId + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function renderPayPeriod(ppId) {
+  var data = PP_DATA[ppId];
+  if (!data) return;
+
+  // Find period label from select
+  var sel = document.getElementById('pp-select');
+  var label = sel.options[sel.selectedIndex].text;
+  document.getElementById('pp-title').innerHTML = '<span style="content:none"></span>' + label;
+
+  // Totals
+  var totRev=0, totDisc=0, totPaid=0, totTips=0, totTotal=0, totGuar=0;
+  GROOMERS.forEach(function(g) {
+    var d = data[g]; if (!d) return;
+    totDisc += (d.disc || 0);
+    var payout = computeGroomerPayout(g, ppId);
+    totRev += d.rev; totPaid += payout.paid; totTips += payout.tips; totTotal += payout.paid + payout.tips;
+    totGuar += d.guar_days;
+  });
+  totRev += (data._bather_rev || 0);
+  var totRoyalties = totRev * (data._royalty_rate || 0.07);
+  var DAILY_RENT = (data._monthly_rent || 4500.0) * 12 / 365;
+  var ppDates = PP_DATES[ppId];
+  renderPayConfirm(ppDates);
+  var PP_LENGTH = ppDates ? Math.round((new Date(ppDates.end) - new Date(ppDates.start)) / 86400000) + 1
+                          : 7;
+  var totRent = DAILY_RENT * PP_LENGTH;
+  var totManager = data._manager_salary || 0;
+  var batherPay = data._bather_pay || {};
+  var batherHours = data._bather_hours || {};
+  var totBatherPay = Object.values(batherPay).reduce(function(a,b){return a+b;}, 0);
+  var retailPay = data._retail_pay || {};
+  var retailHours = data._retail_hours || {};
+  var retailRates = data._retail_rates || {};
+  var totRetailPay = Object.values(retailPay).reduce(function(a,b){return a+b;}, 0);
+  // Payroll tax computed live off the (possibly override-adjusted) totPaid,
+  // not a server-precomputed figure — matches how totRoyalties already
+  // tracks live totRev rather than a frozen dollar amount.
+  var totPayrollTax = (totManager + totBatherPay + totRetailPay + totPaid) * PAYROLL_TAX_RATE;
+  // CC fees come from actual ticket payment methods, not touched by the
+  // commission-adjustment system, so this one is safe to precompute server-side.
+  var totCcFees = data._cc_fees || 0;
+  var totMargin = totRev - totDisc - totPaid - totRoyalties - totRent - totManager - totBatherPay - totRetailPay - totPayrollTax - totCcFees;
+  var totMarginPct = totRev > 0 ? (totMargin / totRev * 100).toFixed(1) : '0.0';
+  var totPtoPay = 0;
+  GROOMERS.forEach(function(g) { totPtoPay += getPtoPayout(g, ppId); });
+
+  document.getElementById('pp-kpis').innerHTML =
+    '<div class="kpi"><div class="kpi-val">'+fc(totRev)+'</div><div class="kpi-label">Groom Revenue</div></div>'+
+    (totDisc > 0 ? '<div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-'+fc(totDisc)+'</div><div class="kpi-label">Grooming Discounts</div></div>' : '')+
+    '<div class="kpi blue"><div class="kpi-val">'+fc(totPaid)+'</div><div class="kpi-label">Commission Paid</div></div>'+
+    '<div class="kpi orange"><div class="kpi-val">'+fc(totTips)+'</div><div class="kpi-label">Tips</div></div>'+
+    '<div class="kpi green"><div class="kpi-val">'+fc(totTotal)+'</div><div class="kpi-label">Total Pay</div></div>'+
+    (totManager ? '<div class="kpi" style="border-color:#5C6BC0"><div class="kpi-val" style="color:#5C6BC0">'+fc(totManager)+'</div><div class="kpi-label">Manager Salary</div></div>' : '')+
+    (totBatherPay ? '<div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">'+fc(totBatherPay)+'</div><div class="kpi-label">Bather Pay</div></div>' : '')+
+    (totRetailPay ? '<div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">'+fc(totRetailPay)+'</div><div class="kpi-label">Retail Staff Pay</div></div>' : '')+
+    '<div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">'+fc(totRoyalties)+'</div><div class="kpi-label">Royalties + Marketing</div></div>'+
+    '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totRent)+'</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">'+PP_LENGTH+' days</div></div>'+
+    '<div class="kpi" style="border-color:#D84315"><div class="kpi-val" style="color:#D84315">'+fc(totPayrollTax)+'</div><div class="kpi-label">Payroll Tax</div><div style="font-size:0.78rem;color:#D84315;margin-top:3px">'+(PAYROLL_TAX_RATE*100).toFixed(2)+'% of wages</div></div>'+
+    (totCcFees > 0 ? '<div class="kpi" style="border-color:#757575"><div class="kpi-val" style="color:#757575">'+fc(totCcFees)+'</div><div class="kpi-label">CC Processing Fees</div></div>' : '')+
+    '<div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">'+fc(totMargin)+'</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">'+totMarginPct+'%</div></div>'+
+    '<div class="kpi grey"><div class="kpi-val">'+totGuar+'</div><div class="kpi-label">Guarantee Days</div></div>'+
+    (totPtoPay > 0 ? '<div class="kpi" style="border-color:#16a34a"><div class="kpi-val" style="color:#16a34a">'+fc(totPtoPay)+'</div><div class="kpi-label">PTO Payouts</div></div>' : '');
+
+  // Summary rows
+  var sorted = GROOMERS.slice().sort(function(a,b) { return (data[b]||{total:0}).total - (data[a]||{total:0}).total; });
+  var rows = '';
+  sorted.forEach(function(g) {
+    var ptoPay = getPtoPayout(g, ppId);
+    var d = data[g] || {rev:0,disc:0,comm:0,paid:0,tips:0,total:0,working_days:0,guar_days:0,daily:[]};
+    if (d.rev===0 && d.tips===0 && ptoPay===0) return;
+    // Recompute paid/total respecting guarantee overrides + commission adjustments
+    var adjPaid = 0, adjTotal = 0;
+    if (d.daily && d.daily.length) {
+      d.daily.forEach(function(day) {
+        var guar = getGuarRate(g, day.date);
+        var overrideKey = 'guar_override_'+day.date+'_'+g;
+        var guarActive = guar > 0 && day.guar_applied && !getOverride(overrideKey);
+        var commVal = getAdj(g, day.date, 'commission'); if (commVal === null) commVal = day.comm;
+        var tipsVal = getAdj(g, day.date, 'tip');        if (tipsVal === null) tipsVal = day.tips;
+        var p = guarActive ? Math.max(commVal, guar) : commVal;
+        adjPaid += p; adjTotal += p + tipsVal;
+      });
+    } else {
+      adjPaid = d.paid; adjTotal = d.total;
+    }
+    var guarNote = d.guar_days ? '<br><span style="font-size:0.72rem;color:#1565c0">↑ '+d.guar_days+' guar days</span>' : '';
+    var avgDay = d.working_days ? fc(adjTotal/d.working_days) : '—';
+    var discCell = (d.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(d.disc)+'</span>' : '—';
+    var ptoPay = getPtoPayout(g, ppId);
+    rows += '<tr>'+
+      '<td>'+groomerBadge(g)+'</td>'+
+      '<td style="text-align:right;color:#888;font-weight:600">'+d.working_days+'</td>'+
+      '<td style="text-align:right">'+fc(d.rev)+'</td>'+
+      '<td style="text-align:right">'+discCell+'</td>'+
+      '<td style="text-align:right;color:#888">'+fc(d.comm)+'</td>'+
+      '<td style="text-align:right;color:#1565c0;font-weight:600">'+fc(adjPaid)+guarNote+'</td>'+
+      '<td style="text-align:right;color:#f57c00">'+fc(d.tips)+'</td>'+
+      '<td style="text-align:right;color:#16a34a;font-weight:600">'+(ptoPay>0?fc(ptoPay):'—')+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:#C4276E">'+fc(adjTotal+ptoPay)+'</td>'+
+      '<td style="text-align:right;color:#888;font-size:0.82rem">'+avgDay+'</td>'+
+      '</tr>';
+  });
+  document.getElementById('pp-tbody').innerHTML = rows;
+
+  // Daily detail
+  var detailRows = '';
+  sorted.forEach(function(g) {
+    var d = data[g]; if (!d || !d.daily || !d.daily.length) return;
+    detailRows += '<tr style="background:#f8f7f4"><td colspan="10" style="padding:10px 14px;font-weight:700">'+groomerBadge(g)+'</td></tr>';
+    d.daily.forEach(function(day) {
+      var guar = getGuarRate(g, day.date);
+      var overrideKey = 'guar_override_'+day.date+'_'+g;
+      var overridden = getOverride(overrideKey);
+      var guarActive = guar > 0 && day.guar_applied && !overridden;
+      var commAdj = getAdj(g, day.date, 'commission');
+      var tipsAdj = getAdj(g, day.date, 'tip');
+      var commVal = (commAdj !== null) ? commAdj : day.comm;
+      var tipsVal = (tipsAdj !== null) ? tipsAdj : day.tips;
+      var actualPaid = guarActive ? Math.max(commVal, guar) : commVal;
+      var actualTotal = actualPaid + tipsVal;
+      var gflag = '';
+      if (day.guar_applied) {
+        if (overridden) {
+          gflag = '<span style="background:#fce4ec;color:#c62828;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px;text-decoration:line-through">guarantee</span>'+
+                  '<button onclick="toggleGuar(&quot;'+overrideKey+'&quot;,&quot;'+ppId+'&quot;)" style="margin-left:6px;font-size:0.7rem;padding:1px 6px;border-radius:5px;border:1px solid #c62828;background:#fff;color:#c62828;cursor:pointer">restore</button>';
+        } else {
+          gflag = '<span style="background:#e3f2fd;color:#1565c0;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px">guarantee</span>'+
+                  '<button onclick="toggleGuar(&quot;'+overrideKey+'&quot;,&quot;'+ppId+'&quot;)" style="margin-left:6px;font-size:0.7rem;padding:1px 6px;border-radius:5px;border:1px solid #e57373;background:#fff;color:#e57373;cursor:pointer">waive</button>';
+        }
+      }
+      var commAdjTag = commAdj !== null ? '<span class="adj-tag">adj</span>' : '';
+      var tipsAdjTag = tipsAdj !== null ? '<span class="adj-tag">adj</span>' : '';
+      var editCommBtn = '<button class="adj-edit-btn" onclick="openAdjModal(&quot;'+g+'&quot;,&quot;'+day.date+'&quot;,&quot;commission&quot;,'+day.comm+','+(commAdj!==null?commAdj:'null')+')">✏</button>';
+      var editTipsBtn = '<button class="adj-edit-btn" onclick="openAdjModal(&quot;'+g+'&quot;,&quot;'+day.date+'&quot;,&quot;tip&quot;,'+day.tips+','+(tipsAdj!==null?tipsAdj:'null')+')">✏</button>';
+      var dayDisc = (day.disc || 0) > 0 ? '<span style="color:#e53935">-'+fc(day.disc)+'</span>' : '—';
+      detailRows += '<tr>'+
+        '<td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">'+day.date+'</td>'+
+        '<td style="text-align:right">'+fc(day.rev)+'</td>'+
+        '<td style="text-align:right">'+dayDisc+'</td>'+
+        '<td style="text-align:right;color:#888">'+fc(day.comm)+'</td>'+
+        '<td style="text-align:right;color:#1565c0">'+fc(actualPaid)+gflag+commAdjTag+editCommBtn+'</td>'+
+        '<td style="text-align:right;color:#f57c00">'+fc(tipsVal)+tipsAdjTag+editTipsBtn+'</td>'+
+        '<td style="text-align:right;color:#16a34a">—</td>'+
+        '<td style="text-align:right;font-weight:600;color:#C4276E">'+fc(actualTotal)+'</td>'+
+        '<td></td></tr>';
+    });
+    var _ptoPay = getPtoPayout(g, ppId);
+    if (_ptoPay > 0) {
+      detailRows += '<tr style="background:#f0fdf4">'+
+        '<td colspan="2" style="padding-left:24px;color:#15803d;font-size:0.82rem;font-weight:600">PTO stipend</td>'+
+        '<td colspan="4"></td>'+
+        '<td style="text-align:right;color:#16a34a;font-weight:700">'+fc(_ptoPay)+'</td>'+
+        '<td style="text-align:right;color:#16a34a;font-weight:700">'+fc(_ptoPay)+'</td>'+
+        '<td></td></tr>';
+    }
+  });
+  document.getElementById('pp-detail-tbody').innerHTML = detailRows;
+
+  // Cindy manager card
+  var mgr = data._manager_salary || 0;
+  var mgrOld = data._manager_old_days || 0;
+  var mgrNew = data._manager_new_days || 0;
+  var mgrDaily = data._manager_daily || [];
+  var mgrBonus = data._manager_bonus || 0;
+  var cindyCard = document.getElementById('cindy-pp-card');
+  cindyCard.style.display = mgr > 0 ? 'block' : 'none';
+
+  // Bather card — summary KPIs + per-person detail
+  var batherCard = document.getElementById('bather-pp-card');
+  var batherNames = Object.keys(batherPay);
+  var batherTips = data._bather_tips || {};
+  var batherTipsDaily = data._bather_tips_daily || {};
+  var allBatherNames = Array.from(new Set(batherNames.concat(Object.keys(batherTips))));
+  var batherRev = data._bather_rev || 0;
+  batherCard.style.display = allBatherNames.length > 0 ? 'block' : 'none';
+  if (allBatherNames.length > 0) {{
+    var totBHrs = 0, totBTips = 0;
+    allBatherNames.forEach(function(name) {{ totBHrs += (batherHours[name] || 0); totBTips += (batherTips[name] || 0); }});
+    document.getElementById('bather-pp-kpis').innerHTML =
+      '<div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">'+fc(batherRev)+'</div><div class="kpi-label">Bather Revenue</div></div>'+
+      '<div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">'+totBHrs.toFixed(1)+'h</div><div class="kpi-label">Total Hours</div></div>'+
+      '<div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">'+fc(totBatherPay)+'</div><div class="kpi-label">Total Pay</div></div>'+
+      '<div class="kpi" style="border-color:#f57c00"><div class="kpi-val" style="color:#f57c00">'+fc(totBTips)+'</div><div class="kpi-label">Total Tips</div></div>';
+    // Per-person detail
+    var batherDailyData = data._bather_daily || {};
+    var batherDetailHtml = '';
+    allBatherNames.forEach(function(name) {{
+      var hrs = batherHours[name] || 0;
+      var pay = batherPay[name] || 0;
+      var tips = batherTips[name] || 0;
+      batherDetailHtml += '<div style="margin-bottom:18px"><div style="font-weight:700;font-size:0.95rem;margin-bottom:8px;color:#00796B">'+name+' — '+hrs.toFixed(2)+'h · Pay: '+fc(pay)+' · Tips: '+fc(tips)+' · Total: '+fc(pay+tips)+'</div>';
+      var days = batherDailyData[name] || [];
+      if (days.length > 0) {{
+        batherDetailHtml += '<table style="width:100%;border-collapse:collapse;font-size:0.83rem"><thead><tr><th style="text-align:left;padding:6px 10px;color:#888">Date</th><th style="text-align:right;padding:6px 10px;color:#888">Hours</th><th style="text-align:right;padding:6px 10px;color:#888">Pay</th><th style="text-align:right;padding:6px 10px;color:#888">Tips</th><th style="text-align:right;padding:6px 10px;color:#888">Total</th></tr></thead><tbody>';
+        var seenDates = {};
+        var bRate = BATHER_RATE_MAP[name] || 17;
+        days.forEach(function(r) {{
+          var tipForDay = seenDates[r.date] ? 0 : ((batherTipsDaily[name] || {})[r.date] || 0);
+          seenDates[r.date] = true;
+          var dayPay = r.hours * bRate;
+          batherDetailHtml += '<tr><td>'+r.date+'</td><td style="text-align:right">'+r.hours.toFixed(2)+'h</td><td style="text-align:right;color:#00796B">'+fc(dayPay)+'</td><td style="text-align:right;color:#f57c00">'+fc(tipForDay)+'</td><td style="text-align:right;font-weight:700">'+fc(dayPay+tipForDay)+'</td></tr>';
+        }});
+        batherDetailHtml += '</tbody></table>';
+      }}
+      batherDetailHtml += '</div>';
+    }});
+    document.getElementById('bather-pp-detail').innerHTML = batherDetailHtml;
+  }}
+  // Retail staff card — summary KPIs + daily detail
+  var retailCard = document.getElementById('retail-pp-card');
+  var retailNames = Object.keys(retailPay);
+  var totRHrs = 0;
+  retailNames.forEach(function(name) { totRHrs += (retailHours[name] || 0); });
+  retailCard.style.display = retailNames.length > 0 ? 'block' : 'none';
+  if (retailNames.length > 0) {
+    document.getElementById('retail-pp-kpis').innerHTML =
+      '<div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">'+totRHrs.toFixed(1)+'h</div><div class="kpi-label">Total Hours</div></div>'+
+      '<div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">'+fc(totRetailPay)+'</div><div class="kpi-label">Total Retail Wages</div></div>';
+    // Per-person detail breakdown
+    var retailDailyData = data._retail_daily || {};
+    var retailDetailHtml = '';
+    retailNames.forEach(function(name) {
+      var hrs = retailHours[name] || 0;
+      var pay = retailPay[name] || 0;
+      var rate = retailRates[name] || 0;
+      retailDetailHtml += '<div style="margin-bottom:18px"><div style="font-weight:700;font-size:0.95rem;margin-bottom:8px;color:#6A1B9A">'+name+' — '+hrs.toFixed(2)+'h · $'+rate.toFixed(2)+'/hr · Pay: '+fc(pay)+'</div>';
+      var days = retailDailyData[name] || [];
+      if (days.length > 0) {
+        retailDetailHtml += '<table style="width:100%;border-collapse:collapse;font-size:0.83rem"><thead><tr><th style="text-align:left;padding:6px 10px;color:#888">Date</th><th style="text-align:right;padding:6px 10px;color:#888">Hours</th><th style="text-align:right;padding:6px 10px;color:#888">Rate</th><th style="text-align:right;padding:6px 10px;color:#888">Pay</th></tr></thead><tbody>';
+        days.forEach(function(r) {
+          retailDetailHtml += '<tr><td>'+r.date+'</td><td style="text-align:right">'+r.hours.toFixed(2)+'h</td><td style="text-align:right">'+fc(rate)+'</td><td style="text-align:right;font-weight:600;color:#6A1B9A">'+fc(r.hours*rate)+'</td></tr>';
+        });
+        retailDetailHtml += '</tbody></table>';
+      }
+      retailDetailHtml += '</div>';
+    });
+    document.getElementById('retail-pp-detail').innerHTML = retailDetailHtml;
+  }
+  if (mgr > 0) {
+    document.getElementById('cindy-pp-kpis').innerHTML =
+      '<div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">'+fc(mgr)+'</div><div class="kpi-label">Period Total</div></div>'+
+      (mgrOld ? '<div class="kpi" style="border-color:#7986CB;flex:1;min-width:120px"><div class="kpi-val" style="color:#7986CB;font-size:1.4rem">'+mgrOld+'</div><div class="kpi-label">Days @ $65k</div></div>' : '')+
+      (mgrNew ? '<div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">'+mgrNew+'</div><div class="kpi-label">Days @ $67k</div></div>' : '')+
+      (mgrBonus ? '<div class="kpi" style="border-color:#E91E63;flex:1;min-width:120px"><div class="kpi-val" style="color:#E91E63;font-size:1.4rem">'+fc(mgrBonus)+'</div><div class="kpi-label">Bonus (Mar 1)</div></div>' : '')+
+      (mgrOld ? '<div class="kpi" style="border-color:#9FA8DA;flex:1;min-width:120px"><div class="kpi-val" style="color:#9FA8DA;font-size:1.4rem">$250.00</div><div class="kpi-label">Old Rate/Day</div></div>' : '')+
+      (mgrNew ? '<div class="kpi" style="border-color:#5C6BC0;flex:1;min-width:120px"><div class="kpi-val" style="color:#5C6BC0;font-size:1.4rem">$257.69</div><div class="kpi-label">New Rate/Day</div></div>' : '');
+    var DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var cindyRows = '';
+    mgrDaily.forEach(function(r) {
+      var d = new Date(r.date+'T12:00:00');
+      var raised = r.date === '2026-03-01' ? '<span style="font-size:0.72rem;color:#5C6BC0;margin-left:6px">↑ raised</span>' : '';
+      var bonusCell = r.bonus ? '<strong style="color:#E91E63">'+fc(r.bonus)+'</strong>' : '—';
+      cindyRows += '<tr>'+
+        '<td style="font-size:0.84rem">'+r.date+'</td>'+
+        '<td style="font-size:0.84rem;color:#888">'+DAYS[d.getDay()]+'</td>'+
+        '<td style="text-align:right;font-size:0.84rem">'+(r.rate===65000?'$65,000':'$67,000')+raised+'</td>'+
+        '<td style="text-align:right;font-weight:600;color:#5C6BC0">'+fc(r.pay)+'</td>'+
+        '<td style="text-align:right">'+bonusCell+'</td>'+
+        '</tr>';
+    });
+    document.getElementById('cindy-pp-tbody').innerHTML = cindyRows;
+  }
+
+  // Populate print sheet groomer dropdown with groomers who have activity this pay period
+  _populatePrintGroomerSelect(ppId);
+  // Re-render print sheet if a groomer is already selected
+  if (document.getElementById('print-groomer-select').value) {
+    renderPrintSheet();
+  } else {
+    document.getElementById('print-sheet-body').innerHTML = '';
+  }
+}
+
+// ── Print Sheet: per-groomer daily pay period breakdown ──────────────────
+function _populatePrintGroomerSelect(ppId) {
+  var data = PP_DATA[ppId];
+  if (!data) return;
+  var sel = document.getElementById('print-groomer-select');
+  var prior = sel.value;
+  // Only include groomers with daily activity in this pay period
+  var active = GROOMERS.filter(function(g) {
+    var d = data[g];
+    return d && d.daily && d.daily.length > 0;
+  });
+  var opts = '<option value="">Select a groomer…</option>';
+  active.forEach(function(g) {
+    opts += '<option value="'+g+'"'+(g===prior?' selected':'')+'>'+g+'</option>';
+  });
+  sel.innerHTML = opts;
+}
+
+function renderPrintSheet() {
+  var DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var ppId = document.getElementById('pp-select').value;
+  var groomer = document.getElementById('print-groomer-select').value;
+  var body = document.getElementById('print-sheet-body');
+  if (!groomer || !ppId) { body.innerHTML = ''; return; }
+
+  var data = PP_DATA[ppId];
+  var sel = document.getElementById('pp-select');
+  var ppLabel = sel.options[sel.selectedIndex].text;
+  var d = data[groomer];
+  if (!d) { body.innerHTML = '<div style="padding:20px;text-align:center;color:#999">No data for '+groomer+' in this pay period.</div>'; return; }
+
+  // Recompute totals respecting adjustments + guarantee overrides (matches main renderPayPeriod logic)
+  var rows = '';
+  var sumRev=0, sumDisc=0, sumComm=0, sumPaid=0, sumTips=0, sumTotal=0;
+  var dayCount = 0;
+  (d.daily || []).forEach(function(day) {
+    var guar = getGuarRate(groomer, day.date);
+    var overrideKey = 'guar_override_'+day.date+'_'+groomer;
+    var overridden = getOverride(overrideKey);
+    var guarActive = guar > 0 && day.guar_applied && !overridden;
+    var commVal = getAdj(groomer, day.date, 'commission'); if (commVal === null) commVal = day.comm;
+    var tipsVal = getAdj(groomer, day.date, 'tip'); if (tipsVal === null) tipsVal = day.tips;
+    var p = guarActive ? Math.max(commVal, guar) : commVal;
+    var tot = p + tipsVal;
+    sumRev += day.rev; sumDisc += (day.disc||0); sumComm += commVal;
+    sumPaid += p; sumTips += tipsVal; sumTotal += tot;
+    dayCount++;
+    var dt = new Date(day.date+'T12:00:00');
+    var dayName = DAYS[dt.getDay()];
+    var guarTag = guarActive && p > commVal ? ' <span style="font-size:0.7rem;color:#1565c0">(guar)</span>' : '';
+    rows += '<tr>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee">'+day.date+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;color:#888">'+dayName+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">'+fc(day.rev)+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;color:'+((day.disc||0)>0?'#e53935':'#ccc')+'">'+((day.disc||0)>0?'-'+fc(day.disc):'—')+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">'+fc(commVal)+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:600;color:#1565c0">'+fc(p)+guarTag+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;color:#f57c00">'+fc(tipsVal)+'</td>'+
+      '<td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:700;color:#2E7D32">'+fc(tot)+'</td>'+
+      '</tr>';
+  });
+
+  body.innerHTML =
+    '<div class="print-sheet-header" style="border-top:3px solid #C4276E;border-bottom:1px solid #eee;padding:18px 2px 14px;margin-bottom:16px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">'+
+        '<div>'+
+          '<div style="font-size:0.78rem;color:#999;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Woof Gang Glen Cove — Groomer Pay Sheet</div>'+
+          '<div style="font-size:1.6rem;font-weight:800;color:#1a1a2e;margin-top:4px">'+groomer+'</div>'+
+          '<div style="font-size:0.9rem;color:#666;margin-top:2px">Pay period: <strong>'+ppLabel+'</strong></div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:0.72rem;color:#999;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">Total Pay</div>'+
+          '<div style="font-size:2rem;font-weight:800;color:#2E7D32">'+fc(sumTotal)+'</div>'+
+          '<div style="font-size:0.78rem;color:#666">'+dayCount+' working day'+(dayCount===1?'':'s')+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="tbl-wrap"><table style="width:100%;border-collapse:collapse;font-size:0.88rem">'+
+      '<thead>'+
+        '<tr style="background:#FDF0F5">'+
+          '<th style="padding:10px 12px;text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Date</th>'+
+          '<th style="padding:10px 12px;text-align:left;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Day</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Revenue</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Discounts</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">50% Comm</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Paid</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Tips</th>'+
+          '<th style="padding:10px 12px;text-align:right;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.04em;color:#C4276E;border-bottom:2px solid #C4276E">Day Total</th>'+
+        '</tr>'+
+      '</thead>'+
+      '<tbody>'+rows+'</tbody>'+
+      '<tfoot>'+
+        '<tr style="background:#FDF0F5">'+
+          '<td colspan="2" style="padding:12px;font-weight:700;color:#1a1a2e;border-top:2px solid #C4276E">TOTAL ('+dayCount+' days)</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:700;border-top:2px solid #C4276E">'+fc(sumRev)+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:700;color:'+(sumDisc>0?'#e53935':'#ccc')+';border-top:2px solid #C4276E">'+(sumDisc>0?'-'+fc(sumDisc):'—')+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:700;border-top:2px solid #C4276E">'+fc(sumComm)+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:800;color:#1565c0;border-top:2px solid #C4276E">'+fc(sumPaid)+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:800;color:#f57c00;border-top:2px solid #C4276E">'+fc(sumTips)+'</td>'+
+          '<td style="padding:12px;text-align:right;font-weight:800;color:#2E7D32;font-size:1.05rem;border-top:2px solid #C4276E">'+fc(sumTotal)+'</td>'+
+        '</tr>'+
+      '</tfoot>'+
+    '</table></div>'+
+    '<div class="print-footer" style="margin-top:20px;padding-top:14px;border-top:1px solid #eee;display:flex;justify-content:space-between;font-size:0.72rem;color:#999">'+
+      '<div>Generated '+new Date().toLocaleString()+'</div>'+
+      '<div>Woof Gang Bakery &amp; Grooming — Glen Cove</div>'+
+    '</div>';
+}
+
+// Init pay period on load
+renderPayPeriod(document.getElementById('pp-select').value);
+
+// ── Sue M Weekly Tab ──────────────────────────────────────────────────────
+var _sueRendered = false;
+function renderSue() {
+  if (_sueRendered) return;
+  _sueRendered = true;
+
+  // KPIs
+  var totalTips = 0, totalOwed = 0;
+  SUE_WEEKLY.forEach(function(w) {
+    totalTips += w.tips;
+    totalOwed += w.owed;
+  });
+  var totalNet = totalTips - totalOwed;
+
+  document.getElementById('sue-kpis').innerHTML =
+    '<div class="kpi orange"><div class="kpi-val">'+fc(totalTips)+'</div><div class="kpi-label">Total Tips</div></div>'+
+    '<div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">'+fc(totalOwed)+'</div><div class="kpi-label">Product Purchases (80%)</div></div>'+
+    '<div class="kpi green"><div class="kpi-val">'+fc(totalNet)+'</div><div class="kpi-label">Net Tips</div></div>';
+
+  // Weekly rows
+  var html = '<div class="card"><div class="stitle">Weekly Summary</div><div class="tbl-wrap"><table>'+
+    '<thead><tr><th>Week</th><th style="text-align:right">Tips</th><th style="text-align:right">Purchases (80%)</th><th style="text-align:right">Net</th></tr></thead><tbody>';
+  SUE_WEEKLY.forEach(function(w, i) {
+    var purchases = w.purchases || [];
+    var netColor = w.net >= 0 ? '#388E3C' : '#e53935';
+    html += '<tr>'+
+      '<td style="font-weight:600">'+w.label+'</td>'+
+      '<td style="text-align:right;color:#f57c00">'+fc(w.tips)+'</td>'+
+      '<td style="text-align:right;color:#6D4C41">'+(w.owed > 0 ? fc(w.owed) : '—')+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:'+netColor+'">'+fc(w.net)+'</td>'+
+      '</tr>';
+    // Show purchase detail rows
+    if (purchases.length > 0) {
+      purchases.forEach(function(p) {
+        html += '<tr style="background:#fff8f0">'+
+          '<td colspan="1" style="padding-left:24px;font-size:0.8rem;color:#888">'+p.date+'</td>'+
+          '<td colspan="2" style="font-size:0.8rem;color:#666">'+p.items+'</td>'+
+          '<td style="text-align:right;font-size:0.8rem;color:#6D4C41">'+fc(p.owed)+' <span style="color:#aaa;font-size:0.72rem">('+fc(p.subtotal)+' × 80%)</span></td>'+
+          '</tr>';
+      });
+    }
+  });
+  html += '</tbody></table></div></div>';
+  document.getElementById('sue-weeks-container').innerHTML = html;
+}
+
+// ── Carol W Weekly Payroll Tab (Hicksville) ───────────────────────────────
+var _carolRendered = false;
+function renderCarol() {
+  if (_carolRendered) return;
+  _carolRendered = true;
+
+  var CAROL_PAYROLL = 100; // $100/week goes on payroll
+
+  // Build pay period label map from the select element
+  var sel = document.getElementById('pp-select');
+  var labelMap = {};
+  for (var i = 0; i < sel.options.length; i++) {
+    labelMap[sel.options[i].value] = sel.options[i].text;
+  }
+
+  // Gather Carol's data across all pay periods (PP_DATA is most-recent-first)
+  var carolPeriods = [];
+  var totalEarned = 0, totalPayroll = 0, totalOffBooks = 0;
+
+  Object.keys(PP_DATA).forEach(function(ppId) {
+    var d = PP_DATA[ppId]['Carol W'];
+    if (!d || (d.total <= 0 && d.rev <= 0)) return;
+    var total = d.total; // comm paid + tips
+    var payroll = CAROL_PAYROLL;
+    var offBook = total - CAROL_PAYROLL;
+    totalEarned  += total;
+    totalPayroll += payroll;
+    totalOffBooks += offBook;
+    carolPeriods.push({
+      label: labelMap[ppId] || ppId,
+      rev:  d.rev,
+      comm: d.paid,
+      tips: d.tips,
+      total: total,
+      payroll: payroll,
+      offBook: offBook,
+      days: d.working_days
+    });
+  });
+
+  // KPI cards
+  document.getElementById('carol-kpis').innerHTML =
+    '<div class="kpi green"><div class="kpi-val">'+fc(totalEarned)+'</div><div class="kpi-label">Total Earned</div></div>'+
+    '<div class="kpi blue"><div class="kpi-val">'+fc(totalPayroll)+'</div><div class="kpi-label">Total on Payroll</div></div>'+
+    '<div class="kpi orange"><div class="kpi-val">'+fc(totalOffBooks)+'</div><div class="kpi-label">Total Off-Books (Check)</div></div>'+
+    '<div class="kpi grey"><div class="kpi-val">'+carolPeriods.length+'</div><div class="kpi-label">Working Weeks</div></div>';
+
+  // Table
+  var html = '<div class="card"><div class="stitle">Weekly Payroll Breakdown — Carol W</div><div class="tbl-wrap"><table>'+
+    '<thead><tr>'+
+    '<th>Pay Period</th>'+
+    '<th style="text-align:right">Days</th>'+
+    '<th style="text-align:right">Groom Revenue</th>'+
+    '<th style="text-align:right">Commission</th>'+
+    '<th style="text-align:right">Tips</th>'+
+    '<th style="text-align:right">Total Earned</th>'+
+    '<th style="text-align:right">On Payroll</th>'+
+    '<th style="text-align:right">Off-Books (Check)</th>'+
+    '</tr></thead><tbody>';
+
+  carolPeriods.forEach(function(p) {
+    var offColor = p.offBook < 0 ? '#e53935' : '#F57C00';
+    html += '<tr>'+
+      '<td style="font-weight:600">'+p.label+'</td>'+
+      '<td style="text-align:right">'+p.days+'</td>'+
+      '<td style="text-align:right">'+fc(p.rev)+'</td>'+
+      '<td style="text-align:right;color:#388E3C">'+fc(p.comm)+'</td>'+
+      '<td style="text-align:right;color:#F57C00">'+(p.tips > 0 ? fc(p.tips) : '—')+'</td>'+
+      '<td style="text-align:right;font-weight:700">'+fc(p.total)+'</td>'+
+      '<td style="text-align:right;color:#1976D2">'+fc(p.payroll)+'</td>'+
+      '<td style="text-align:right;font-weight:700;color:'+offColor+'">'+fc(p.offBook)+'</td>'+
+      '</tr>';
+  });
+
+  html += '</tbody></table></div></div>';
+  document.getElementById('carol-weeks-container').innerHTML = html;
+}
+
+// ── Executive Dashboard ───────────────────────────────────────────────────
+var _execCharts = {};
+function renderExec() {
+  var ytd = MONTHLY_DATA.filter(function(m) { return m.year === 2026; });
+  var all = MONTHLY_DATA;
+
+  // KPIs - YTD 2026
+  var ytdRev = ytd.reduce(function(a,m){return a+m.rev;},0);
+  var ytdPaid = ytd.reduce(function(a,m){return a+m.paid;},0);
+  var ytdMgr = ytd.reduce(function(a,m){return a+m.mgr;},0);
+  var ytdBather = ytd.reduce(function(a,m){return a+(m.bather_pay||0);},0);
+  var ytdRetail = ytd.reduce(function(a,m){return a+(m.retail_pay||0);},0);
+  var ytdRoyalties = ytd.reduce(function(a,m){return a+(m.royalties||0);},0);
+  var ytdRent = ytd.reduce(function(a,m){return a+(m.rent||0);},0);
+  var ytdPayrollTax = ytd.reduce(function(a,m){return a+(m.payroll_tax||0);},0);
+  var ytdCcFees = ytd.reduce(function(a,m){return a+(m.cc_fees||0);},0);
+  var ytdMargin = ytd.reduce(function(a,m){return a+m.margin;},0);
+  var ytdMarginPct = ytdRev ? (ytdMargin/ytdRev*100).toFixed(1) : 0;
+  var ytdRevDay = ytd.reduce(function(a,m){return a+m.working_days;},0);
+  ytdRevDay = ytdRevDay ? (ytdRev/ytdRevDay).toFixed(0) : 0;
+
+  document.getElementById('exec-kpis').innerHTML =
+    kpiCard('2026 YTD Revenue', fc(ytdRev), '#C4276E') +
+    kpiCard('Groomer Commission', fc(ytdPaid), '#1565c0') +
+    kpiCard('Bather Pay', fc(ytdBather), '#00796B') +
+    kpiCard(ytdMgr > 0 ? 'Manager + Retail Staff' : 'Retail Staff Pay', fc(ytdMgr + ytdRetail), '#7B1FA2') +
+    kpiCard('Royalties + Marketing', fc(ytdRoyalties), '#AD1457') +
+    kpiCard('Rent', fc(ytdRent), '#6D4C41') +
+    kpiCard('Payroll Tax', fc(ytdPayrollTax), '#D84315') +
+    kpiCard('CC Processing Fees', fc(ytdCcFees), '#757575') +
+    kpiCard('Net Margin', fc(ytdMargin) + ' ('+ytdMarginPct+'%)', parseFloat(ytdMarginPct) >= 0 ? '#558B2F' : '#e53935');
+
+  // Monthly table
+  var tbody = '';
+  all.forEach(function(m) {
+    var marginColor = m.margin < 0 ? '#e53935' : '#558B2F';
+    var yearBg = m.year === 2025 ? '' : 'background:#fdf8fb';
+    tbody += '<tr style="border-bottom:1px solid #f5f5f5;'+yearBg+'">'+
+      '<td style="padding:8px 12px;font-weight:600">'+m.month+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;font-weight:700;color:#C4276E">'+fc(m.rev)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#1565c0">'+fc(m.paid)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#5C6BC0">'+fc(m.mgr)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#00796B">'+fc(m.bather_pay||0)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#6A1B9A">'+fc(m.retail_pay||0)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#AD1457">'+fc(m.royalties||0)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#6D4C41">'+fc(m.rent||0)+'</td>'+
+      '<td style="text-align:right;padding:8px 12px;font-weight:700;color:'+marginColor+'">'+fc(m.margin)+'<br><span style="font-size:0.72rem;font-weight:400">'+m.margin_pct+'%</span></td>'+
+      '<td style="text-align:right;padding:8px 12px;color:#888">'+fc(m.rev_per_day)+'</td>'+
+      '</tr>';
+  });
+  document.getElementById('exec-monthly-tbody').innerHTML = tbody;
+
+  // ── Margin Charts: 2025 and 2026 side by side ──
+  function buildMarginChart(canvasId, yearData) {
+    if (_execCharts[canvasId]) { _execCharts[canvasId].destroy(); }
+    var labels = yearData.map(function(m){return m.month.replace(' 2025','').replace(' 2026','');});
+    var commissions = yearData.map(function(m){return m.paid;});
+    var managers    = yearData.map(function(m){return m.mgr;});
+    var bathers     = yearData.map(function(m){return m.bather_pay||0;});
+    var retails     = yearData.map(function(m){return m.retail_pay||0;});
+    var royalties   = yearData.map(function(m){return m.royalties||0;});
+    var rents       = yearData.map(function(m){return m.rent||0;});
+    var margins     = yearData.map(function(m){return m.margin;});
+    var revs        = yearData.map(function(m){return m.rev;});
+
+    _execCharts[canvasId] = new Chart(document.getElementById(canvasId), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {label:'Commission',  data:commissions, backgroundColor:'rgba(21,101,192,0.75)',  stack:'costs'},
+          {label:'Manager',     data:managers,    backgroundColor:'rgba(92,107,192,0.75)',  stack:'costs'},
+          {label:'Bather',      data:bathers,     backgroundColor:'rgba(0,121,107,0.75)',   stack:'costs'},
+          {label:'Retail Staff',data:retails,     backgroundColor:'rgba(106,27,154,0.75)',  stack:'costs'},
+          {label:'Royalties',   data:royalties,   backgroundColor:'rgba(173,20,87,0.75)',   stack:'costs'},
+          {label:'Rent',        data:rents,       backgroundColor:'rgba(109,76,65,0.75)',   stack:'costs'},
+          {label:'Net Margin',  data:margins,     backgroundColor: margins.map(function(v){return v>=0?'rgba(85,139,47,0.85)':'rgba(229,57,53,0.85)'}), stack:'costs'},
+          {label:'Revenue',     data:revs,        type:'line', borderColor:'#C4276E', backgroundColor:'transparent',
+            borderWidth:2, pointRadius:4, pointBackgroundColor:'#C4276E', order:0, yAxisID:'y'}
+        ]
+      },
+      options: {
+        responsive:true,
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{position:'bottom', labels:{font:{size:11},boxWidth:12,padding:10}},
+          tooltip:{callbacks:{label:function(ctx){
+            return ctx.dataset.label+': $'+parseFloat(ctx.raw).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0});
+          }}}
+        },
+        scales:{
+          x:{stacked:true},
+          y:{stacked:true, ticks:{callback:function(v){return '$'+v.toLocaleString();}}}
+        }
+      }
+    });
+  }
+
+  var data2025 = all.filter(function(m){return m.year===2025;});
+  var data2026 = all.filter(function(m){return m.year===2026;});
+  buildMarginChart('chart-margin-2025', data2025);
+  buildMarginChart('chart-margin-2026', data2026);
+}
+
+function kpiCard(label, val, color) {
+  return '<div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);border-top:3px solid '+color+'">'+
+    '<div style="font-size:1.4rem;font-weight:800;color:'+color+'">'+val+'</div>'+
+    '<div style="font-size:0.82rem;color:#888;margin-top:4px">'+label+'</div>'+
+    '</div>';
+}
+
+// ── Commission / Tip Adjustment Modal ────────────────────────────────────────
+var _adjModal = {g:'', date:'', type:'', original:0};
+
+function openAdjModal(g, date, type, original, current) {
+  _adjModal = {g:g, date:date, type:type, original:original};
+  document.getElementById('adj-modal-title').textContent =
+    'Adjust ' + (type==='commission'?'Commission':'Tips') + ' — ' + g + ' on ' + date;
+  document.getElementById('adj-original').textContent = 'FranPOS value: $' + parseFloat(original).toFixed(2);
+  document.getElementById('adj-amount').value = current !== null ? parseFloat(current).toFixed(2) : parseFloat(original).toFixed(2);
+  document.getElementById('adj-note').value = '';
+  document.getElementById('adj-clear-btn').style.display = current !== null ? 'inline-block' : 'none';
+  document.getElementById('adj-overlay').classList.remove('hidden');
+  setTimeout(function() {
+    var inp = document.getElementById('adj-amount');
+    inp.focus(); inp.select();
+  }, 50);
+}
+
+function closeAdjModal() {
+  document.getElementById('adj-overlay').classList.add('hidden');
+}
+
+function saveAdj() {
+  var amount = parseFloat(document.getElementById('adj-amount').value);
+  if (isNaN(amount) || amount < 0) { alert('Enter a valid amount (0 or more)'); return; }
+  var note = document.getElementById('adj-note').value.trim();
+  var btn = document.getElementById('adj-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  var hdrs = Object.assign({}, _sbHeaders, {'Prefer': 'return=minimal,resolution=merge-duplicates'});
+  fetch(_sbUrl + '/rest/v1/commission_adjustments', {
+    method: 'POST', headers: hdrs,
+    body: JSON.stringify({
+      store_key: _storeKey,
+      groomer_name: _adjModal.g,
+      adj_date: _adjModal.date,
+      adj_type: _adjModal.type,
+      corrected_amount: amount,
+      note: note || null
+    })
+  }).then(function(r) {
+    btn.disabled = false; btn.textContent = 'Save';
+    if (r.ok || r.status === 201 || r.status === 200) { closeAdjModal(); _loadOverrides(); }
+    else { r.text().then(function(t) { alert('Save failed: ' + t); }); }
+  }).catch(function(e) { btn.disabled = false; btn.textContent = 'Save'; alert('Save failed'); });
+}
+
+function clearAdj() {
+  var btn = document.getElementById('adj-clear-btn');
+  btn.disabled = true;
+  fetch(_sbUrl + '/rest/v1/commission_adjustments?store_key=eq.' + encodeURIComponent(_storeKey) +
+    '&groomer_name=eq.' + encodeURIComponent(_adjModal.g) +
+    '&adj_date=eq.' + _adjModal.date +
+    '&adj_type=eq.' + _adjModal.type, {
+    method: 'DELETE', headers: _sbHeaders
+  }).then(function() { btn.disabled = false; closeAdjModal(); _loadOverrides(); })
+    .catch(function() { btn.disabled = false; alert('Clear failed'); });
+}
+</script>
+
+<!-- Commission/Tip Adjustment Modal -->
+<div class="adj-overlay hidden" id="adj-overlay" onclick="if(event.target===this)closeAdjModal()">
+  <div class="adj-modal">
+    <div class="adj-modal-hdr">
+      <h3 id="adj-modal-title">Adjust Commission</h3>
+      <div class="adj-orig" id="adj-original"></div>
+    </div>
+    <div class="adj-modal-body">
+      <div class="adj-fg">
+        <label>Corrected Amount ($)</label>
+        <input type="number" id="adj-amount" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="adj-fg">
+        <label>Note (optional)</label>
+        <textarea id="adj-note" placeholder="Reason for correction…"></textarea>
+      </div>
+    </div>
+    <div class="adj-modal-actions">
+      <button class="adj-clear-btn" id="adj-clear-btn" onclick="clearAdj()" style="display:none;margin-right:auto">Clear Adjustment</button>
+      <button class="adj-cancel-btn" onclick="closeAdjModal()">Cancel</button>
+      <button class="adj-save-btn" id="adj-save-btn" onclick="saveAdj()">Save</button>
+    </div>
+  </div>
+</div>
+</body></html>

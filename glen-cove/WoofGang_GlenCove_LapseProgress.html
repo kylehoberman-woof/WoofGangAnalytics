@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lapse Calls Progress — Glen Cove</title>
+<style>
+:root { --brown:#2C1A0E; --pink:#E8006A; --bg:#fdf8f5; --card:#fff; --border:#e5e7eb; --text:#1f2937; --muted:#6b7280; }
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); font-size:14px; }
+header { background:var(--brown); color:#fff; padding:16px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; position:sticky; top:0; z-index:100; }
+header h1 { font-size:18px; font-weight:700; }
+header nav { display:flex; gap:8px; margin-left:auto; }
+header nav a { color:rgba(255,255,255,0.75); text-decoration:none; font-size:13px; padding:6px 12px; border-radius:6px; }
+header nav a:hover { background:rgba(255,255,255,0.12); color:#fff; }
+header nav a.lc-store-switch { background:rgba(255,255,255,0.18); color:#fff; font-weight:700; }
+header nav a.lc-store-switch:hover { background:rgba(255,255,255,0.3); }
+main { max-width:1100px; margin:0 auto; padding:24px 16px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px; }
+.card h2 { font-size:16px; font-weight:700; margin-bottom:14px; color:var(--brown); }
+table { width:100%; border-collapse:collapse; }
+th { background:var(--brown); color:#fff; padding:10px 12px; text-align:left; font-size:12px; font-weight:600; }
+td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+th.n, td.n { text-align:right; }
+.lc-progress-row { cursor:pointer; }
+.lc-progress-row:hover td { background:#fef9f5; }
+.lc-progress-date { font-weight:700; color:var(--brown); }
+.lc-progress-caret { display:inline-block; margin-right:6px; transition:transform .15s; color:var(--muted); }
+.lc-progress-row.open .lc-progress-caret { transform:rotate(90deg); }
+.lc-progress-detail-row.lc-pd-hidden { display:none; }
+.lc-progress-detail-row td { background:#f9fafb; padding:12px 16px; }
+.lc-progress-entry { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; padding:6px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.lc-progress-entry:last-child { border-bottom:none; }
+.lc-progress-entry-dog { font-weight:700; min-width:160px; }
+.lc-progress-entry-owner { font-weight:400; color:var(--muted); }
+.lc-progress-entry-action { font-weight:600; min-width:170px; }
+.lc-progress-entry-notes { color:var(--muted); flex:1; }
+.lc-progress-entry-converted { font-weight:700; color:#16a34a; }
+.lc-progress-empty { color:#9ca3af; text-align:center; padding:24px; }
+@media(max-width:600px) { th,td { padding:8px 6px; font-size:12px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>📊 Lapse Calls Progress — Glen Cove</h1>
+  <nav>
+    <a id="portal-back" href="../index.html">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
+    <a href="../port-washington/WoofGang_PortWashington_LapseProgress.html" class="lc-store-switch">&#x21C4; Port Washington</a><a href="../hicksville/WoofGang_Hicksville_LapseProgress.html" class="lc-store-switch">&#x21C4; Hicksville</a>
+    <a href="WoofGang_GlenCove_LapseCalls.html">Lapse Calls</a>
+  </nav>
+</header>
+<main>
+  <div class="card">
+    <h2>Day-by-Day Progress</h2>
+    <p style="color:#6b7280;font-size:13px;margin-bottom:16px">
+      Every call logged, grouped by the day it was logged. Click a day to see exactly which dogs were called and the outcome of each.
+    </p>
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Date</th><th class="n">Calls Logged</th><th class="n">✅ Booked</th><th class="n">📞 Voicemail</th><th class="n">📅 Will Book</th><th class="n">✗ Not Interested</th></tr></thead>
+      <tbody id="lc-progress-body"><tr><td colspan=6 class="lc-progress-empty">Loading…</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+</main>
+<script>
+var LC_STORE = "glen-cove";
+var CID_OWNER = {"420995944": "Sheena  Sardana", "420984662": "Gabi Chait", "420984885": "Rafaela Duffy", "420993003": "Michelle innamorato", "420997416": "Christina Marotta", "420998064": "Ruth Diaz", "420999105": "Marisa Damiano", "421000179": "Anne Rose", "420981058": "Joy Sullivan", "420993476": "Analis Briones", "420984288": "Julia Trif", "420994179": "Rita Cipriano", "420996891": "Angela Danisi", "420997096": "Jennifer  Gunyan", "420999188": "Cuahutemoc SANCHEZ", "420997543": "Joy Sullivan", "420999186": "Cuahutemoc SANCHEZ"};
+var PET_HISTORY = {"420984288": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "XLG", "groomer": "Julianne D"}], "notes": []}, "420994179": {"appointments": [{"date": "2026-10-06", "service": "Lux Bath", "size": "LG", "groomer": "Melanie M"}], "notes": []}, "420996891": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Melanie M"}], "notes": []}, "420997096": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "LG", "groomer": "Melanie M"}], "notes": []}, "420999188": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "MD", "groomer": "Julianne D"}], "notes": []}};
+var BOOKED_WITHIN_DAYS = 14;
+
+// Same check as the main Lapse Calls page — did a real appointment land
+// within N days after this call, per the dog's own appointment history.
+function bookingAfterCall(cid, callDateStr, days){
+  var hist = PET_HISTORY[cid];
+  if(!hist || !hist.appointments || !callDateStr) return null;
+  var callDate = new Date(callDateStr + 'T00:00:00');
+  if(isNaN(callDate)) return null;
+  var cutoff = new Date(callDate.getTime() + days * 86400000);
+  var best = null;
+  hist.appointments.forEach(function(a){
+    if(!a.date) return;
+    var d = new Date(a.date + 'T00:00:00');
+    if(isNaN(d) || d <= callDate || d > cutoff) return;
+    if(!best || d < new Date(best.date + 'T00:00:00')) best = a;
+  });
+  return best;
+}
+var LC_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var LC_SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var LC_SHD = {'apikey':LC_SK,'Authorization':'Bearer '+LC_SK,'Content-Type':'application/json'};
+
+var ACTION_LABELS = {
+  booked: '✅ Booked',
+  left_voicemail: '📞 Left Voicemail',
+  will_book: '📅 Will Book When Ready',
+  not_interested: '✗ Not Interested'
+};
+var ACTION_COLORS = {
+  booked: '#16a34a',
+  left_voicemail: '#d97706',
+  will_book: '#2563eb',
+  not_interested: '#dc2626'
+};
+
+function lcEsc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function loadDayProgress(){
+  fetch(LC_SB + '/lapse_call_log?store=eq.' + encodeURIComponent(LC_STORE) + '&order=call_date.desc,created_at.desc', {headers:LC_SHD})
+    .then(function(r){ return r.json(); })
+    .then(renderDayProgress)
+    .catch(function(){
+      document.getElementById('lc-progress-body').innerHTML = '<tr><td colspan=6 class="lc-progress-empty">Failed to load call log</td></tr>';
+    });
+}
+
+function renderDayProgress(rows){
+  var body = document.getElementById('lc-progress-body');
+  var byDate = {};
+  (Array.isArray(rows) ? rows : []).forEach(function(entry){
+    var d = entry.call_date;
+    if(!d) return;
+    if(!byDate[d]) byDate[d] = [];
+    byDate[d].push(entry);
+  });
+  var dates = Object.keys(byDate).sort().reverse();
+  if(!dates.length){
+    body.innerHTML = '<tr><td colspan=6 class="lc-progress-empty">No calls logged yet</td></tr>';
+    return;
+  }
+  body.innerHTML = dates.map(function(d){
+    var entries = byDate[d];
+    var counts = {booked:0, left_voicemail:0, will_book:0, not_interested:0};
+    entries.forEach(function(e){ if(counts[e.action] !== undefined) counts[e.action]++; });
+    var rowId = 'lc-day-' + d.replace(/[^0-9]/g, '');
+    var detailHtml = entries.map(function(e){
+      var label = ACTION_LABELS[e.action] || e.action;
+      var color = ACTION_COLORS[e.action] || '#6b7280';
+      var owner = CID_OWNER[e.pet_cid] || '';
+      var conv = bookingAfterCall(e.pet_cid, e.call_date, BOOKED_WITHIN_DAYS);
+      var convHtml = '';
+      if(conv){
+        var gapDays = Math.round((new Date(conv.date + 'T00:00:00') - new Date(e.call_date + 'T00:00:00')) / 86400000);
+        convHtml = '<span class="lc-progress-entry-converted">✅ Booked ' + gapDays + 'd later</span>';
+      }
+      return '<div class="lc-progress-entry">'
+        + '<span class="lc-progress-entry-dog">' + lcEsc(e.pet_name || '') + (owner ? ' <span class="lc-progress-entry-owner">(' + lcEsc(owner) + ')</span>' : '') + '</span>'
+        + '<span class="lc-progress-entry-action" style="color:' + color + '">' + lcEsc(label) + '</span>'
+        + (e.notes ? '<span class="lc-progress-entry-notes">' + lcEsc(e.notes) + '</span>' : '')
+        + convHtml
+        + '</div>';
+    }).join('');
+    return '<tr class="lc-progress-row" id="' + rowId + '-toggle" onclick="toggleDayDetail(\'' + rowId + '\')">'
+      + '<td class="lc-progress-date"><span class="lc-progress-caret">&#9656;</span>' + lcEsc(d) + '</td>'
+      + '<td class="n">' + entries.length + '</td>'
+      + '<td class="n">' + counts.booked + '</td>'
+      + '<td class="n">' + counts.left_voicemail + '</td>'
+      + '<td class="n">' + counts.will_book + '</td>'
+      + '<td class="n">' + counts.not_interested + '</td>'
+      + '</tr>'
+      + '<tr class="lc-progress-detail-row lc-pd-hidden" id="' + rowId + '"><td colspan=6>' + detailHtml + '</td></tr>';
+  }).join('');
+}
+
+function toggleDayDetail(rowId){
+  var detail = document.getElementById(rowId);
+  var toggleRow = document.getElementById(rowId + '-toggle');
+  if(detail) detail.classList.toggle('lc-pd-hidden');
+  if(toggleRow) toggleRow.classList.toggle('open');
+}
+
+loadDayProgress();
+</script>
+</body>
+</html>
