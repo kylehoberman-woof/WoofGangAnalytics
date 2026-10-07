@@ -1,32 +1,32 @@
 {
   "walkin_booking_appointments_iso": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-06",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-07",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_iso_midnight": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-06T00%3A00%3A00",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-07T00%3A00%3A00",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_us_slash": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=10%2F06%2F2026",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=10%2F07%2F2026",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_us_dash": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=10-06-2026",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=10-07-2026",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_iso_space": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-06+00%3A00%3A00",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-07+00%3A00%3A00",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_locationid": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-06",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-07",
     "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-"
   },
   "walkin_queue": {
@@ -189,37 +189,325 @@
   },
   "booking_list_by_date": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/list?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-06",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/list?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-06'.\",\"MessageD"
+    "url": "https://publicapi.franpos.com/api/booking/list?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-07",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/list?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-07'.\",\"MessageD"
   },
   "booking_getbookings": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/getbookings?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-06",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getbookings?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-06'.\",\"M"
+    "url": "https://publicapi.franpos.com/api/booking/getbookings?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-07",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getbookings?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-07'.\",\"M"
   },
   "booking_bydate": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/bydate?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-06",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/bydate?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-06'.\",\"Messag"
+    "url": "https://publicapi.franpos.com/api/booking/bydate?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-07",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/bydate?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&dateStr=2026-10-07'.\",\"Messag"
   },
   "booking_search": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/search?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&startDate=2026-10-06&endDate=2026-10-06",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/search?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&startDate=2026-10-06&endDate="
+    "url": "https://publicapi.franpos.com/api/booking/search?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&startDate=2026-10-07&endDate=2026-10-07",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/search?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058&startDate=2026-10-07&endDate="
   },
   "walkin_employee_schedules_today": {
-    "status": 404,
-    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-06",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-06'"
-  },
-  "walkin_employee_schedules_tomorrow": {
     "status": 404,
     "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-07",
     "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-07'"
   },
+  "walkin_employee_schedules_tomorrow": {
+    "status": 404,
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-08",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&companyId=207058&dateStr=2026-10-08'"
+  },
+  "customer_history_Brody": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420981058/json?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 1,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-10-07T09:00:00",
+        "Type": 4,
+        "SalesPerson": "Joy Sullivan",
+        "Stylist": "Melanie M",
+        "Store": "Woof Gang Glen Cove, NY (#266)",
+        "Items": "FG / Poodle-Doodle / LG"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-10-07T09:00:00",
+          "Type": 4,
+          "SalesPerson": "Joy Sullivan",
+          "Stylist": "Melanie M",
+          "Store": "Woof Gang Glen Cove, NY (#266)",
+          "Items": "FG / Poodle-Doodle / LG"
+        }
+      ],
+      "totalVisit": 1,
+      "totalSales": 0.0
+    }
+  },
+  "customer_history_Brody_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420981058/csv?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-10-07 09:00:00,Visits,Joy Sullivan,Melanie M,\"Woof Gang Glen Cove, NY (#266)\",FG / Poodle-Doodle / LG\r\n"
+  },
+  "customer_record_Brody": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/420981058?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 420981058,
+      "FirstName": "Brody",
+      "LastName": null,
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "sulysjoy@aol.com",
+      "CellPhone": "9178816047",
+      "WorkPhone": null,
+      "DateOfBirth": "2021-10-18T00:00:00",
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": null,
+      "StateProvinceId": null,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 207058
+    }
+  },
+  "customer_history_Hugo": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420984288/json?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 1,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-10-06T11:00:00",
+        "Type": 4,
+        "SalesPerson": "Julia Trif",
+        "Stylist": "Julianne D",
+        "Store": "Woof Gang Glen Cove, NY (#266)",
+        "Items": "FG / Poodle-Doodle / XLG"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-10-06T11:00:00",
+          "Type": 4,
+          "SalesPerson": "Julia Trif",
+          "Stylist": "Julianne D",
+          "Store": "Woof Gang Glen Cove, NY (#266)",
+          "Items": "FG / Poodle-Doodle / XLG"
+        }
+      ],
+      "totalVisit": 1,
+      "totalSales": 0.0
+    }
+  },
+  "customer_history_Hugo_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420984288/csv?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-10-06 11:00:00,Visits,Julia Trif,Julianne D,\"Woof Gang Glen Cove, NY (#266)\",FG / Poodle-Doodle / XLG\r\n"
+  },
+  "customer_record_Hugo": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/420984288?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 420984288,
+      "FirstName": "Hugo",
+      "LastName": null,
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "Julia.trif@gmail.com",
+      "CellPhone": "9174966674",
+      "WorkPhone": null,
+      "DateOfBirth": "2021-01-21T00:00:00",
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": null,
+      "StateProvinceId": null,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 207058
+    }
+  },
+  "customer_history_Ella": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420984662/json?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "type": "dict",
+    "keys": [
+      "data",
+      "isSuccess",
+      "totalSales",
+      "totalVisit"
+    ],
+    "nested_data_count": 1,
+    "nested_data_keys": [
+      "Date",
+      "Items",
+      "SalesPerson",
+      "Store",
+      "Stylist",
+      "Type"
+    ],
+    "nested_data_sample": [
+      {
+        "Date": "2026-10-09T10:30:00",
+        "Type": 4,
+        "SalesPerson": "Gabi Chait",
+        "Stylist": "Julianne D",
+        "Store": "Woof Gang Glen Cove, NY (#266)",
+        "Items": "FG / Poodle-Doodle / SM"
+      }
+    ],
+    "sample": {
+      "isSuccess": true,
+      "data": [
+        {
+          "Date": "2026-10-09T10:30:00",
+          "Type": 4,
+          "SalesPerson": "Gabi Chait",
+          "Stylist": "Julianne D",
+          "Store": "Woof Gang Glen Cove, NY (#266)",
+          "Items": "FG / Poodle-Doodle / SM"
+        }
+      ],
+      "totalVisit": 1,
+      "totalSales": 0.0
+    }
+  },
+  "customer_history_Ella_csv": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/customers/history/420984662/csv?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "parse_error": "Expecting value: line 1 column 1 (char 0)",
+    "raw": "Date,Type,SalesPerson,Stylist,Store,Items\r\n2026-10-09 10:30:00,Visits,Gabi Chait,Julianne D,\"Woof Gang Glen Cove, NY (#266)\",FG / Poodle-Doodle / SM\r\n"
+  },
+  "customer_record_Ella": {
+    "status": 200,
+    "url": "https://publicapi.franpos.com/api/Customers/420984662?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107&locationId=207058",
+    "type": "dict",
+    "keys": [
+      "AccessPermissionId",
+      "Address",
+      "Address2",
+      "Balance",
+      "CellPhone",
+      "City",
+      "CountryId",
+      "CustomerCode",
+      "DateOfBirth",
+      "Email",
+      "FirstName",
+      "Id",
+      "LastName",
+      "LocationId",
+      "RewardPoints",
+      "StateProvinceId",
+      "WorkPhone",
+      "ZipPostal"
+    ],
+    "sample": {
+      "Id": 420984662,
+      "FirstName": "Ella",
+      "LastName": null,
+      "AccessPermissionId": null,
+      "CustomerCode": null,
+      "Email": "gabatopia@gmail.com",
+      "CellPhone": "5163181517",
+      "WorkPhone": null,
+      "DateOfBirth": "2026-05-11T00:00:00",
+      "Address": null,
+      "Address2": null,
+      "City": null,
+      "ZipPostal": null,
+      "CountryId": null,
+      "StateProvinceId": null,
+      "Balance": 0.0,
+      "RewardPoints": 0.0,
+      "LocationId": 207058
+    }
+  },
   "datadump_customers_sample": {
     "status": 200,
-    "url": "https://publicapi.franpos.com/api/datadump/v1/customers/7/0/2026-10-05/207058?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
+    "url": "https://publicapi.franpos.com/api/datadump/v1/customers/7/0/2026-10-06/207058?Token=63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
     "type": "dict",
     "keys": [
       "data",
@@ -227,7 +515,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 3,
+    "nested_data_count": 13,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -257,11 +545,11 @@
         "CellPhone": "",
         "City": null,
         "CompanyId": 207058,
-        "CustomerId": 420681274,
+        "CustomerId": 420995015,
         "DateOfBirth": null,
-        "Email": "glencoveny@woofgangbakery.com",
-        "FirstName": "Wgb",
-        "LastName": "Glen Cove",
+        "Email": "melaniem.720@gmail.com",
+        "FirstName": "Melanie",
+        "LastName": "M",
         "Membership": null,
         "MembershipBalance": null,
         "MembershipId": null,
@@ -269,22 +557,22 @@
         "StateProvinceId": null,
         "ZipPostal": null,
         "IsAdmin": true,
-        "CreationDate": "2026-08-04T17:28:59.61",
-        "ModifiedDate": "2026-10-05T16:09:08.433",
+        "CreationDate": "2026-10-02T23:57:56.42",
+        "ModifiedDate": "2026-10-07T00:29:33.193",
         "ParentCustomerId": null,
         "CustomerCode": null,
         "CustomFieldValues": []
       },
       {
         "Address": null,
-        "CellPhone": "5163536945",
+        "CellPhone": "5169722252",
         "City": null,
         "CompanyId": 207058,
-        "CustomerId": 421000178,
+        "CustomerId": 421001844,
         "DateOfBirth": null,
-        "Email": "Aer0228@aol.com",
-        "FirstName": "Anne",
-        "LastName": "Rose",
+        "Email": "dobrien.bkr@gmail.com",
+        "FirstName": "David",
+        "LastName": "OBrien",
         "Membership": null,
         "MembershipBalance": null,
         "MembershipId": null,
@@ -292,8 +580,8 @@
         "StateProvinceId": null,
         "ZipPostal": null,
         "IsAdmin": false,
-        "CreationDate": "2026-10-05T15:53:37.243",
-        "ModifiedDate": "2026-10-05T15:53:37.353",
+        "CreationDate": "2026-10-06T11:03:16.383",
+        "ModifiedDate": "2026-10-06T11:03:16.617",
         "ParentCustomerId": null,
         "CustomerCode": null,
         "CustomFieldValues": []
@@ -307,11 +595,11 @@
           "CellPhone": "",
           "City": null,
           "CompanyId": 207058,
-          "CustomerId": 420681274,
+          "CustomerId": 420995015,
           "DateOfBirth": null,
-          "Email": "glencoveny@woofgangbakery.com",
-          "FirstName": "Wgb",
-          "LastName": "Glen Cove",
+          "Email": "melaniem.720@gmail.com",
+          "FirstName": "Melanie",
+          "LastName": "M",
           "Membership": null,
           "MembershipBalance": null,
           "MembershipId": null,
@@ -319,22 +607,22 @@
           "StateProvinceId": null,
           "ZipPostal": null,
           "IsAdmin": true,
-          "CreationDate": "2026-08-04T17:28:59.61",
-          "ModifiedDate": "2026-10-05T16:09:08.433",
+          "CreationDate": "2026-10-02T23:57:56.42",
+          "ModifiedDate": "2026-10-07T00:29:33.193",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
         },
         {
           "Address": null,
-          "CellPhone": "5163536945",
+          "CellPhone": "5169722252",
           "City": null,
           "CompanyId": 207058,
-          "CustomerId": 421000178,
+          "CustomerId": 421001844,
           "DateOfBirth": null,
-          "Email": "Aer0228@aol.com",
-          "FirstName": "Anne",
-          "LastName": "Rose",
+          "Email": "dobrien.bkr@gmail.com",
+          "FirstName": "David",
+          "LastName": "OBrien",
           "Membership": null,
           "MembershipBalance": null,
           "MembershipId": null,
@@ -342,8 +630,8 @@
           "StateProvinceId": null,
           "ZipPostal": null,
           "IsAdmin": false,
-          "CreationDate": "2026-10-05T15:53:37.243",
-          "ModifiedDate": "2026-10-05T15:53:37.353",
+          "CreationDate": "2026-10-06T11:03:16.383",
+          "ModifiedDate": "2026-10-06T11:03:16.617",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
@@ -353,10 +641,10 @@
           "CellPhone": "",
           "City": null,
           "CompanyId": 207058,
-          "CustomerId": 421000179,
-          "DateOfBirth": "2025-02-17T00:00:00",
+          "CustomerId": 421001845,
+          "DateOfBirth": null,
           "Email": "",
-          "FirstName": "Lucy",
+          "FirstName": "Theodore",
           "LastName": "",
           "Membership": null,
           "MembershipBalance": null,
@@ -365,9 +653,9 @@
           "StateProvinceId": null,
           "ZipPostal": null,
           "IsAdmin": false,
-          "CreationDate": "2026-10-05T15:53:37.79",
-          "ModifiedDate": "2026-10-05T15:53:38.04",
-          "ParentCustomerId": 421000178,
+          "CreationDate": "2026-10-06T11:03:17.1",
+          "ModifiedDate": "2026-10-06T11:03:17.227",
+          "ParentCustomerId": 421001844,
           "CustomerCode": null,
           "CustomFieldValues": [
             {
@@ -376,7 +664,7 @@
             },
             {
               "id": 373,
-              "name": "-1"
+              "name": "156"
             },
             {
               "id": 374,
@@ -384,11 +672,98 @@
             },
             {
               "id": 377,
-              "name": "19"
+              "name": "65"
             },
             {
               "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
               "name": null
+            },
+            {
+              "id": 378,
+              "name": "3"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "6469966223",
+          "City": "Glen Cove",
+          "CompanyId": 207058,
+          "CustomerId": 421002027,
+          "DateOfBirth": null,
+          "Email": "jyee_2000@yahoo.com",
+          "FirstName": "John",
+          "LastName": "Yee",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T13:43:03",
+          "ModifiedDate": "2026-10-06T13:44:09",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "6469966223",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421002028,
+          "DateOfBirth": "2010-10-06T09:45:05",
+          "Email": "jyee_2000@yahoo.com",
+          "FirstName": "Coco",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T13:44:09",
+          "ModifiedDate": "2026-10-06T13:51:40",
+          "ParentCustomerId": 421002027,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6286,
+              "name": "2026-10-06 09:45:39"
+            },
+            {
+              "id": 6104,
+              "name": "Locust Valley Vet"
+            },
+            {
+              "id": 6121,
+              "name": "Shitzu Maltese"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "294"
+            },
+            {
+              "id": 377,
+              "name": "17.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
             },
             {
               "id": 376,
@@ -403,10 +778,367 @@
               "name": "3"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "6469966223",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421002029,
+          "DateOfBirth": "2021-10-06T09:46:35",
+          "Email": "jyee_2000@yahoo.com",
+          "FirstName": "Lulu",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T13:46:06",
+          "ModifiedDate": "2026-10-06T13:51:40",
+          "ParentCustomerId": 421002027,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "locust valley vet"
+            },
+            {
+              "id": 6121,
+              "name": "maltese"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "208"
+            },
+            {
+              "id": 377,
+              "name": "5.0"
+            },
+            {
+              "id": 375,
+              "name": "3"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "1"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "6469966223",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421002030,
+          "DateOfBirth": "2021-10-06T09:47:35",
+          "Email": "jyee_2000@yahoo.com",
+          "FirstName": "Leila",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T13:47:08",
+          "ModifiedDate": "2026-10-06T13:51:40",
+          "ParentCustomerId": 421002027,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6121,
+              "name": "maltese"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "208"
+            },
+            {
+              "id": 377,
+              "name": "7.0"
+            },
+            {
+              "id": 375,
+              "name": "3"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "1"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5168058617",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421002210,
+          "DateOfBirth": null,
+          "Email": "seacliff18@gmail.com",
+          "FirstName": "Jeanne Marie",
+          "LastName": "O'Donnell",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "5168058617",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T15:03:35.56",
+          "ModifiedDate": "2026-10-06T15:03:36.17",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5168058617",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421002211,
+          "DateOfBirth": "2019-04-13T00:00:00",
+          "Email": "seacliff18@gmail.com",
+          "FirstName": "Luther",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T15:03:36.407",
+          "ModifiedDate": "2026-10-06T15:03:36.517",
+          "ParentCustomerId": 421002210,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "17"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "112"
+            },
+            {
+              "id": 375,
+              "name": "1"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "5"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5164135515",
+          "City": "Locust Valley",
+          "CompanyId": 207058,
+          "CustomerId": 421002224,
+          "DateOfBirth": null,
+          "Email": "nilolinakiessling@gmail.com",
+          "FirstName": "Nikolina",
+          "LastName": "Kiessling",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T15:04:16",
+          "ModifiedDate": "2026-10-06T15:05:07",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5164135515",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421002225,
+          "DateOfBirth": "2026-04-06T11:05:54",
+          "Email": "nilolinakiessling@gmail.com",
+          "FirstName": "Winston",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T15:05:07",
+          "ModifiedDate": "2026-10-06T15:07:10",
+          "ParentCustomerId": 421002224,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "Green forest Vet "
+            },
+            {
+              "id": 6121,
+              "name": "Cavapoo"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "249"
+            },
+            {
+              "id": 377,
+              "name": "14.0"
+            },
+            {
+              "id": 380,
+              "name": "2027-08-29 11:06:24"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "9172259611",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421002256,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Jennifer",
+          "LastName": "Dellapolla",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T15:12:00",
+          "ModifiedDate": "2026-10-06T15:12:31",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "9172259611",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421002257,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Chewy",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-06T15:12:31",
+          "ModifiedDate": "2026-10-06T15:15:40",
+          "ParentCustomerId": 421002256,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "250"
+            },
+            {
+              "id": 377,
+              "name": "20.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 813530818
+      "version": 815002906
     }
   }
 }
