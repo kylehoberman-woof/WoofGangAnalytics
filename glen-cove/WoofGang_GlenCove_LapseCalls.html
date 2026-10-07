@@ -115,7 +115,7 @@ tr:hover td { background:#fef9f5; }
 <main>
   <div class="bucket-row">
     <button class="bucket-btn active" data-bucket-btn="initial" onclick="setBucket('initial')">
-      <div class="val" id="bucket-count-initial">10</div>
+      <div class="val" id="bucket-count-initial">11</div>
       <div class="lbl">Needs Initial Contact</div>
     </button>
     <button class="bucket-btn" data-bucket-btn="followup" onclick="setBucket('followup')">
@@ -127,7 +127,7 @@ tr:hover td { background:#fef9f5; }
       <div class="lbl">Resolved (booked / will book / not interested)</div>
     </button>
     <button class="bucket-btn" data-bucket-btn="all" onclick="setBucket('all')">
-      <div class="val" id="bucket-count-all">10</div>
+      <div class="val" id="bucket-count-all">11</div>
       <div class="lbl">All Candidates</div>
     </button>
   </div>
@@ -292,6 +292,20 @@ tr:hover td { background:#fef9f5; }
           <div class="lc-action-badge">Not yet contacted</div>
           <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
         </td>
+      </tr>
+      <tr class="lc-row" data-cid="421003710" data-last-visit="2026-10-07" data-pet-name="Bambie" data-owner-name="Ashly Oxlaj Cartagena" data-owner-phone="5168208960" data-bucket="initial">
+        <td><button class="lc-name-btn" onclick="openLapseDetail('421003710')">Bambie</button><br><small style="color:var(--muted)"> · ONLINE SERVICE (#2) - DOG - Mini Groom</small></td>
+        <td>Ashly Oxlaj Cartagena<br><small><a href="tel:5168208960" style="color:var(--pink);text-decoration:none">5168208960</a></small></td>
+        <td style="color:#9ca3af;font-weight:700">—</td>
+        <td>2026-10-07<br><small style="color:var(--muted)">0d ago</small></td>
+        <td>—</td>
+        <td><small>Julianne D</small></td>
+        <td>1</td>
+        <td class="lc-action-cell">
+          <button class="lc-log-btn" onclick="openLapseDetail('421003710')">Log call</button>
+          <div class="lc-action-badge">Not yet contacted</div>
+          <div class="lc-complaint-flag" style="display:none">⚠ Complaint on file</div>
+        </td>
       </tr></tbody>
     </table>
     </div>
@@ -351,7 +365,7 @@ tr:hover td { background:#fef9f5; }
 
 <script>
 var LC_STORE = "glen-cove";
-var PET_HISTORY = {"420981058": {"appointments": [{"date": "2026-10-07", "service": "FG", "size": "LG", "groomer": "Melanie M"}], "notes": []}, "420993476": {"appointments": [{"date": "2026-10-07", "service": "FG", "size": "SM", "groomer": "Julianne D"}], "notes": [{"date": "2026-10-06", "text": "10/6 10:30 vs 11:00 BF"}]}, "421001845": {"appointments": [{"date": "2026-10-07", "service": "FG", "size": "LG", "groomer": "Melanie M"}], "notes": []}, "421002211": {"appointments": [{"date": "2026-10-07", "service": "MG", "size": "XXLG", "groomer": "Melanie M"}], "notes": []}, "420984288": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "XLG", "groomer": "Julianne D"}], "notes": []}, "420994179": {"appointments": [{"date": "2026-10-06", "service": "Lux Bath", "size": "LG", "groomer": "Melanie M"}], "notes": []}, "420996891": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Julianne D"}], "notes": []}, "421002028": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Julianne D"}], "notes": [{"date": "2026-10-06", "text": "OKAY TO CHARGE 70 EACH IF BOOKING THREE DOGS TOGETHER. CS"}]}, "421002029": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Melanie M"}], "notes": [{"date": "2026-10-06", "text": "CAN CHARGE 70 PER DOG IF BOOKING ALL THREE TOGETHER."}]}, "421002030": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Melanie M"}], "notes": [{"date": "2026-10-06", "text": "cAN CHARGE 70 PER DOG IF BOOKING ALL THREE TOGETHER."}]}};
+var PET_HISTORY = {"420981058": {"appointments": [{"date": "2026-10-07", "service": "FG", "size": "LG", "groomer": "Melanie M"}], "notes": []}, "420993476": {"appointments": [{"date": "2026-10-07", "service": "FG", "size": "SM", "groomer": "Julianne D"}], "notes": [{"date": "2026-10-06", "text": "10/6 10:30 vs 11:00 BF"}]}, "421001845": {"appointments": [{"date": "2026-10-07", "service": "FG", "size": "LG", "groomer": "Melanie M"}], "notes": []}, "421002211": {"appointments": [{"date": "2026-10-07", "service": "MG", "size": "XXLG", "groomer": "Melanie M"}], "notes": []}, "421003710": {"appointments": [{"date": "2026-10-07", "service": "ONLINE SERVICE (#2) - DOG - Mini Groom", "size": "", "groomer": "Julianne D"}], "notes": []}, "420984288": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "XLG", "groomer": "Julianne D"}], "notes": []}, "420994179": {"appointments": [{"date": "2026-10-06", "service": "Lux Bath", "size": "LG", "groomer": "Melanie M"}], "notes": []}, "420996891": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Julianne D"}], "notes": []}, "421002028": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Julianne D"}], "notes": [{"date": "2026-10-06", "text": "OKAY TO CHARGE 70 EACH IF BOOKING THREE DOGS TOGETHER. CS"}]}, "421002029": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Melanie M"}], "notes": [{"date": "2026-10-06", "text": "CAN CHARGE 70 PER DOG IF BOOKING ALL THREE TOGETHER."}]}, "421002030": {"appointments": [{"date": "2026-10-06", "service": "FG", "size": "SM", "groomer": "Melanie M"}], "notes": [{"date": "2026-10-06", "text": "cAN CHARGE 70 PER DOG IF BOOKING ALL THREE TOGETHER."}]}};
 var LC_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
 var LC_SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
 var LC_SHD = {'apikey':LC_SK,'Authorization':'Bearer '+LC_SK,'Content-Type':'application/json'};
