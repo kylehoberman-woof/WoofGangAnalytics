@@ -1,32 +1,32 @@
 {
   "walkin_booking_appointments_iso": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-08",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-09",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_iso_midnight": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-08T00%3A00%3A00",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-09T00%3A00%3A00",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_us_slash": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=10%2F08%2F2026",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=10%2F09%2F2026",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_us_dash": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=10-08-2026",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=10-09-2026",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_iso_space": {
     "status": 400,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-08+00%3A00%3A00",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-09+00%3A00%3A00",
     "body": "{\"Message\":\"String was not recognized as a valid DateTime.\"}"
   },
   "walkin_booking_appointments_locationid": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-08",
+    "url": "https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-09",
     "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/booking/appointments?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-"
   },
   "walkin_queue": {
@@ -217,33 +217,33 @@
   },
   "booking_list_by_date": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/list?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-08",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/list?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-08'.\",\"MessageD"
+    "url": "https://publicapi.franpos.com/api/booking/list?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-09",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/list?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-09'.\",\"MessageD"
   },
   "booking_getbookings": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/getbookings?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-08",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getbookings?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-08'.\",\"M"
+    "url": "https://publicapi.franpos.com/api/booking/getbookings?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-09",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/getbookings?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-09'.\",\"M"
   },
   "booking_bydate": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/bydate?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-08",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/bydate?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-08'.\",\"Messag"
+    "url": "https://publicapi.franpos.com/api/booking/bydate?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-09",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/bydate?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&dateStr=2026-10-09'.\",\"Messag"
   },
   "booking_search": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/booking/search?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&startDate=2026-10-08&endDate=2026-10-08",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/search?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&startDate=2026-10-08&endDate="
+    "url": "https://publicapi.franpos.com/api/booking/search?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&startDate=2026-10-09&endDate=2026-10-09",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/booking/search?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&locationId=203698&startDate=2026-10-09&endDate="
   },
   "walkin_employee_schedules_today": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-08",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-08'"
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-09",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-09'"
   },
   "walkin_employee_schedules_tomorrow": {
     "status": 404,
-    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-09",
-    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-09'"
+    "url": "https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-10",
+    "body": "{\"Message\":\"No HTTP resource was found that matches the request URI 'https://publicapi.franpos.com/api/walkin/employee/schedules?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844&companyId=203698&dateStr=2026-10-10'"
   },
   "customer_history_Jack": {
     "status": 200,
@@ -823,7 +823,7 @@
   },
   "datadump_customers_sample": {
     "status": 200,
-    "url": "https://publicapi.franpos.com/api/datadump/v1/customers/7/0/2026-10-07/203698?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
+    "url": "https://publicapi.franpos.com/api/datadump/v1/customers/7/0/2026-10-08/203698?Token=FAF11AD5771F74C3ABF5D6FB2965A21BF4F9A93B5FB3ED2AE7DF66B53C0AE23B058586C983CE6B53660530838748D490D6E10291F158DF791B1BA278FEDAA844",
     "type": "dict",
     "keys": [
       "data",
@@ -831,7 +831,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 14,
+    "nested_data_count": 13,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -874,66 +874,33 @@
         "ZipPostal": null,
         "IsAdmin": true,
         "CreationDate": "2024-06-12T19:47:48.73",
-        "ModifiedDate": "2026-10-08T01:11:52.977",
+        "ModifiedDate": "2026-10-08T20:38:11.813",
         "ParentCustomerId": null,
         "CustomerCode": null,
         "CustomFieldValues": []
       },
       {
         "Address": null,
-        "CellPhone": "5167612425",
+        "CellPhone": "6469962100",
         "City": null,
         "CompanyId": 203698,
-        "CustomerId": 418758973,
+        "CustomerId": 418975093,
         "DateOfBirth": null,
-        "Email": "rosemdevito@gmail.com",
-        "FirstName": "Roxy",
-        "LastName": null,
+        "Email": "Debra.m.schwan@gmail.com",
+        "FirstName": "Debra",
+        "LastName": "Schwan",
         "Membership": null,
         "MembershipBalance": null,
         "MembershipId": null,
-        "Phone": null,
+        "Phone": "6469962100",
         "StateProvinceId": null,
         "ZipPostal": null,
         "IsAdmin": false,
-        "CreationDate": "2024-11-11T23:06:18",
-        "ModifiedDate": "2026-10-08T02:19:03.18",
-        "ParentCustomerId": 418758972,
+        "CreationDate": "2025-01-27T23:44:24.07",
+        "ModifiedDate": "2026-10-08T16:38:42.51",
+        "ParentCustomerId": null,
         "CustomerCode": null,
-        "CustomFieldValues": [
-          {
-            "id": 372,
-            "name": "1"
-          },
-          {
-            "id": 373,
-            "name": "199"
-          },
-          {
-            "id": 377,
-            "name": "50"
-          },
-          {
-            "id": 375,
-            "name": "4"
-          },
-          {
-            "id": 376,
-            "name": null
-          },
-          {
-            "id": 378,
-            "name": "3"
-          },
-          {
-            "id": 379,
-            "name": "3"
-          },
-          {
-            "id": 374,
-            "name": "-1"
-          }
-        ]
+        "CustomFieldValues": []
       }
     ],
     "sample": {
@@ -957,66 +924,33 @@
           "ZipPostal": null,
           "IsAdmin": true,
           "CreationDate": "2024-06-12T19:47:48.73",
-          "ModifiedDate": "2026-10-08T01:11:52.977",
+          "ModifiedDate": "2026-10-08T20:38:11.813",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
         },
         {
           "Address": null,
-          "CellPhone": "5167612425",
+          "CellPhone": "6469962100",
           "City": null,
           "CompanyId": 203698,
-          "CustomerId": 418758973,
+          "CustomerId": 418975093,
           "DateOfBirth": null,
-          "Email": "rosemdevito@gmail.com",
-          "FirstName": "Roxy",
-          "LastName": null,
+          "Email": "Debra.m.schwan@gmail.com",
+          "FirstName": "Debra",
+          "LastName": "Schwan",
           "Membership": null,
           "MembershipBalance": null,
           "MembershipId": null,
-          "Phone": null,
+          "Phone": "6469962100",
           "StateProvinceId": null,
           "ZipPostal": null,
           "IsAdmin": false,
-          "CreationDate": "2024-11-11T23:06:18",
-          "ModifiedDate": "2026-10-08T02:19:03.18",
-          "ParentCustomerId": 418758972,
+          "CreationDate": "2025-01-27T23:44:24.07",
+          "ModifiedDate": "2026-10-08T16:38:42.51",
+          "ParentCustomerId": null,
           "CustomerCode": null,
-          "CustomFieldValues": [
-            {
-              "id": 372,
-              "name": "1"
-            },
-            {
-              "id": 373,
-              "name": "199"
-            },
-            {
-              "id": 377,
-              "name": "50"
-            },
-            {
-              "id": 375,
-              "name": "4"
-            },
-            {
-              "id": 376,
-              "name": null
-            },
-            {
-              "id": 378,
-              "name": "3"
-            },
-            {
-              "id": 379,
-              "name": "3"
-            },
-            {
-              "id": 374,
-              "name": "-1"
-            }
-          ]
+          "CustomFieldValues": []
         },
         {
           "Address": null,
@@ -1036,165 +970,30 @@
           "ZipPostal": null,
           "IsAdmin": true,
           "CreationDate": "2025-02-26T01:58:17.83",
-          "ModifiedDate": "2026-10-07T17:20:36.133",
+          "ModifiedDate": "2026-10-08T15:21:19.373",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
         },
         {
           "Address": null,
-          "CellPhone": "7039011213",
+          "CellPhone": "6177770352",
           "City": null,
           "CompanyId": 203698,
-          "CustomerId": 419146125,
+          "CustomerId": 420523302,
           "DateOfBirth": null,
-          "Email": "shaildayev75@yahoo.com",
-          "FirstName": "Aydar",
-          "LastName": "Shaildayev (DUPE)",
+          "Email": "lisamurfe@gmail.com",
+          "FirstName": "LISA",
+          "LastName": "Murphy",
           "Membership": null,
           "MembershipBalance": null,
           "MembershipId": null,
-          "Phone": "",
+          "Phone": "6177770352",
           "StateProvinceId": null,
           "ZipPostal": null,
           "IsAdmin": false,
-          "CreationDate": "2025-04-17T12:11:51",
-          "ModifiedDate": "2026-10-07T19:07:36",
-          "ParentCustomerId": null,
-          "CustomerCode": null,
-          "CustomFieldValues": [
-            {
-              "id": 6136,
-              "name": "(516)-359-6541 (Cristina)"
-            }
-          ]
-        },
-        {
-          "Address": null,
-          "CellPhone": "9178647590",
-          "City": null,
-          "CompanyId": 203698,
-          "CustomerId": 419206785,
-          "DateOfBirth": "2017-07-20T00:00:00",
-          "Email": "nsdancer79@gmail.com",
-          "FirstName": "Biscuit",
-          "LastName": null,
-          "Membership": null,
-          "MembershipBalance": null,
-          "MembershipId": null,
-          "Phone": null,
-          "StateProvinceId": null,
-          "ZipPostal": null,
-          "IsAdmin": false,
-          "CreationDate": "2025-05-20T20:23:48",
-          "ModifiedDate": "2026-10-07T20:38:26.26",
-          "ParentCustomerId": 419206776,
-          "CustomerCode": null,
-          "CustomFieldValues": [
-            {
-              "id": 372,
-              "name": "1"
-            },
-            {
-              "id": 373,
-              "name": "252"
-            },
-            {
-              "id": 374,
-              "name": "-1"
-            },
-            {
-              "id": 377,
-              "name": "70"
-            },
-            {
-              "id": 380,
-              "name": "2028-02-28 00:00:00"
-            },
-            {
-              "id": 375,
-              "name": "5"
-            },
-            {
-              "id": 376,
-              "name": null
-            },
-            {
-              "id": 378,
-              "name": "3"
-            },
-            {
-              "id": 379,
-              "name": "3"
-            },
-            {
-              "id": 6285,
-              "name": "2026-02-28 13:27:58"
-            },
-            {
-              "id": 6286,
-              "name": "2026-02-28 13:27:40"
-            },
-            {
-              "id": 6167,
-              "name": "2026-02-28 13:28:02"
-            },
-            {
-              "id": 6168,
-              "name": "2026-02-28 13:27:54"
-            },
-            {
-              "id": 6169,
-              "name": "2026-02-28 13:28:06"
-            },
-            {
-              "id": 6569,
-              "name": "false"
-            }
-          ]
-        },
-        {
-          "Address": null,
-          "CellPhone": "5162325709",
-          "City": "Port Washington",
-          "CompanyId": 203698,
-          "CustomerId": 419596999,
-          "DateOfBirth": null,
-          "Email": "pdgalvin720@gmail.com",
-          "FirstName": "Paulette",
-          "LastName": "Galvin",
-          "Membership": null,
-          "MembershipBalance": null,
-          "MembershipId": null,
-          "Phone": "",
-          "StateProvinceId": 41,
-          "ZipPostal": null,
-          "IsAdmin": false,
-          "CreationDate": "2025-08-20T14:30:56",
-          "ModifiedDate": "2026-10-07T15:07:30",
-          "ParentCustomerId": null,
-          "CustomerCode": null,
-          "CustomFieldValues": []
-        },
-        {
-          "Address": null,
-          "CellPhone": "5162442830",
-          "City": null,
-          "CompanyId": 203698,
-          "CustomerId": 420321600,
-          "DateOfBirth": null,
-          "Email": "lrynston@verizon.net",
-          "FirstName": "Lisa",
-          "LastName": "Rynston-Lobel",
-          "Membership": null,
-          "MembershipBalance": null,
-          "MembershipId": null,
-          "Phone": "5162442830",
-          "StateProvinceId": null,
-          "ZipPostal": null,
-          "IsAdmin": false,
-          "CreationDate": "2026-04-10T17:38:09",
-          "ModifiedDate": "2026-10-07T16:01:45.017",
+          "CreationDate": "2026-06-29T16:04:30",
+          "ModifiedDate": "2026-10-09T00:59:06.55",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
@@ -1217,20 +1016,48 @@
           "ZipPostal": null,
           "IsAdmin": true,
           "CreationDate": "2026-07-28T17:37:47.593",
-          "ModifiedDate": "2026-10-07T17:22:39.573",
+          "ModifiedDate": "2026-10-08T16:34:38.1",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
         },
         {
           "Address": null,
-          "CellPhone": "5162442830",
+          "CellPhone": "6313719077",
           "City": null,
           "CompanyId": 203698,
-          "CustomerId": 421005343,
-          "DateOfBirth": "2025-02-25T00:00:00",
-          "Email": "lrynston@verizon.net",
-          "FirstName": "Yogi",
+          "CustomerId": 420878458,
+          "DateOfBirth": null,
+          "Email": "mikew80@aol.com",
+          "FirstName": "Mike",
+          "LastName": "Whitman",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "6313719077",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-09-10T13:34:27",
+          "ModifiedDate": "2026-10-08T11:26:22.58",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6136,
+              "name": "3104996767"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "6313719077",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 421006884,
+          "DateOfBirth": "2026-04-24T00:00:00",
+          "Email": "mikew80@aol.com",
+          "FirstName": "Kevin ",
           "LastName": null,
           "Membership": null,
           "MembershipBalance": null,
@@ -1239,9 +1066,9 @@
           "StateProvinceId": null,
           "ZipPostal": null,
           "IsAdmin": false,
-          "CreationDate": "2026-10-07T16:01:45.253",
-          "ModifiedDate": "2026-10-07T16:01:45.363",
-          "ParentCustomerId": 420321600,
+          "CreationDate": "2026-10-08T11:26:22.797",
+          "ModifiedDate": "2026-10-08T11:26:22.953",
+          "ParentCustomerId": 420878458,
           "CustomerCode": null,
           "CustomFieldValues": [
             {
@@ -1250,7 +1077,7 @@
             },
             {
               "id": 373,
-              "name": "251"
+              "name": "156"
             },
             {
               "id": 374,
@@ -1258,213 +1085,7 @@
             },
             {
               "id": 377,
-              "name": "45"
-            },
-            {
-              "id": 375,
-              "name": "5"
-            },
-            {
-              "id": 376,
-              "name": null
-            },
-            {
-              "id": 378,
-              "name": "3"
-            },
-            {
-              "id": 379,
-              "name": "3"
-            }
-          ]
-        },
-        {
-          "Address": null,
-          "CellPhone": "5167291199",
-          "City": null,
-          "CompanyId": 203698,
-          "CustomerId": 421005578,
-          "DateOfBirth": null,
-          "Email": "",
-          "FirstName": "Lana",
-          "LastName": "Ventura",
-          "Membership": null,
-          "MembershipBalance": null,
-          "MembershipId": null,
-          "Phone": "",
-          "StateProvinceId": 41,
-          "ZipPostal": null,
-          "IsAdmin": false,
-          "CreationDate": "2026-10-07T17:12:37",
-          "ModifiedDate": "2026-10-07T17:12:57",
-          "ParentCustomerId": null,
-          "CustomerCode": null,
-          "CustomFieldValues": []
-        },
-        {
-          "Address": null,
-          "CellPhone": "5167291199",
-          "City": null,
-          "CompanyId": 203698,
-          "CustomerId": 421005579,
-          "DateOfBirth": "2026-04-20T13:13:27",
-          "Email": "",
-          "FirstName": "Maverick",
-          "LastName": "",
-          "Membership": null,
-          "MembershipBalance": null,
-          "MembershipId": null,
-          "Phone": "",
-          "StateProvinceId": null,
-          "ZipPostal": null,
-          "IsAdmin": false,
-          "CreationDate": "2026-10-07T17:12:58",
-          "ModifiedDate": "2026-10-07T17:14:02",
-          "ParentCustomerId": 421005578,
-          "CustomerCode": null,
-          "CustomFieldValues": [
-            {
-              "id": 6104,
-              "name": "Williston "
-            },
-            {
-              "id": 372,
-              "name": "1"
-            },
-            {
-              "id": 377,
-              "name": "5.0"
-            },
-            {
-              "id": 375,
-              "name": null
-            },
-            {
-              "id": 376,
-              "name": null
-            },
-            {
-              "id": 378,
-              "name": "1"
-            },
-            {
-              "id": 379,
-              "name": "1"
-            }
-          ]
-        },
-        {
-          "Address": null,
-          "CellPhone": "6465330487",
-          "City": null,
-          "CompanyId": 203698,
-          "CustomerId": 421005856,
-          "DateOfBirth": null,
-          "Email": "",
-          "FirstName": "Laurie",
-          "LastName": "Hindrey",
-          "Membership": null,
-          "MembershipBalance": null,
-          "MembershipId": null,
-          "Phone": "",
-          "StateProvinceId": 41,
-          "ZipPostal": null,
-          "IsAdmin": false,
-          "CreationDate": "2026-10-07T18:54:04",
-          "ModifiedDate": "2026-10-07T18:54:37",
-          "ParentCustomerId": null,
-          "CustomerCode": null,
-          "CustomFieldValues": []
-        },
-        {
-          "Address": null,
-          "CellPhone": "6465330487",
-          "City": null,
-          "CompanyId": 203698,
-          "CustomerId": 421005857,
-          "DateOfBirth": null,
-          "Email": "",
-          "FirstName": "Smokey",
-          "LastName": "",
-          "Membership": null,
-          "MembershipBalance": null,
-          "MembershipId": null,
-          "Phone": "",
-          "StateProvinceId": null,
-          "ZipPostal": null,
-          "IsAdmin": false,
-          "CreationDate": "2026-10-07T18:54:37",
-          "ModifiedDate": "2026-10-07T18:56:59",
-          "ParentCustomerId": 421005856,
-          "CustomerCode": null,
-          "CustomFieldValues": [
-            {
-              "id": 6569,
-              "name": "false"
-            },
-            {
-              "id": 372,
-              "name": "1"
-            },
-            {
-              "id": 373,
-              "name": "3002"
-            },
-            {
-              "id": 377,
-              "name": "78.0"
-            },
-            {
-              "id": 375,
-              "name": "5"
-            },
-            {
-              "id": 376,
-              "name": null
-            },
-            {
-              "id": 378,
-              "name": "4"
-            },
-            {
-              "id": 379,
-              "name": "3"
-            }
-          ]
-        },
-        {
-          "Address": null,
-          "CellPhone": "6465330487",
-          "City": null,
-          "CompanyId": 203698,
-          "CustomerId": 421005859,
-          "DateOfBirth": null,
-          "Email": "",
-          "FirstName": "Winston",
-          "LastName": "",
-          "Membership": null,
-          "MembershipBalance": null,
-          "MembershipId": null,
-          "Phone": "",
-          "StateProvinceId": null,
-          "ZipPostal": null,
-          "IsAdmin": false,
-          "CreationDate": "2026-10-07T18:57:23",
-          "ModifiedDate": "2026-10-07T18:57:59",
-          "ParentCustomerId": 421005856,
-          "CustomerCode": null,
-          "CustomFieldValues": [
-            {
-              "id": 372,
-              "name": "1"
-            },
-            {
-              "id": 373,
-              "name": "3001"
-            },
-            {
-              "id": 377,
-              "name": "20.0"
+              "name": "37"
             },
             {
               "id": 375,
@@ -1483,10 +1104,305 @@
               "name": "3"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5164593659",
+          "City": "Port Washington",
+          "CompanyId": 203698,
+          "CustomerId": 421007112,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Jennifer",
+          "LastName": "Larsen",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": "11050",
+          "IsAdmin": false,
+          "CreationDate": "2026-10-08T14:24:14",
+          "ModifiedDate": "2026-10-08T14:25:05",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5164593659",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 421007113,
+          "DateOfBirth": "2021-10-08T10:25:33",
+          "Email": "",
+          "FirstName": "Aries",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-08T14:25:05",
+          "ModifiedDate": "2026-10-08T14:28:29",
+          "ParentCustomerId": 421007112,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "3015"
+            },
+            {
+              "id": 377,
+              "name": "40.0"
+            },
+            {
+              "id": 375,
+              "name": "1"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "3"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5164593659",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 421007114,
+          "DateOfBirth": "2021-10-08T10:26:47",
+          "Email": "",
+          "FirstName": "Dudley",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-08T14:26:23",
+          "ModifiedDate": "2026-10-08T14:28:29",
+          "ParentCustomerId": 421007112,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "38"
+            },
+            {
+              "id": 377,
+              "name": "40.0"
+            },
+            {
+              "id": 375,
+              "name": "1"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "3"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5132890657",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 421007216,
+          "DateOfBirth": "2023-10-08T11:00:14",
+          "Email": "jahurier@gmail.com",
+          "FirstName": "Mina",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-08T14:59:41",
+          "ModifiedDate": "2026-10-08T15:00:24",
+          "ParentCustomerId": 420408371,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6121,
+              "name": "aussie doodle"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "250"
+            },
+            {
+              "id": 377,
+              "name": "25.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "6177770352",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 421008703,
+          "DateOfBirth": "2020-08-08T00:00:00",
+          "Email": "lisamurfe@gmail.com",
+          "FirstName": "Lyra",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-09T00:59:06.8",
+          "ModifiedDate": "2026-10-09T00:59:45.643",
+          "ParentCustomerId": 420523302,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "3000"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "38"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "6177770352",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 421008704,
+          "DateOfBirth": "2022-05-13T00:00:00",
+          "Email": "lisamurfe@gmail.com",
+          "FirstName": "Lucky",
+          "LastName": null,
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": null,
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-09T00:59:12.58",
+          "ModifiedDate": "2026-10-09T00:59:12.72",
+          "ParentCustomerId": 420523302,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "2"
+            },
+            {
+              "id": 373,
+              "name": "-1"
+            },
+            {
+              "id": 374,
+              "name": "60"
+            },
+            {
+              "id": 377,
+              "name": "26"
+            },
+            {
+              "id": 375,
+              "name": null
+            },
+            {
+              "id": 376,
+              "name": "1"
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 816848171
+      "version": 818234134
     }
   }
 }
