@@ -142,7 +142,7 @@ tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
 <body>
 
 <div class="header">
-  <div class="header-timestamp">Updated October 08, 2026 at 06:50 AM ET<br><a href="../port-washington/WoofGang_PortWashington_BookingAnomalies.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a> <a href="../hicksville/WoofGang_Hicksville_BookingAnomalies.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
+  <div class="header-timestamp">Updated October 08, 2026 at 08:24 PM ET<br><a href="../port-washington/WoofGang_PortWashington_BookingAnomalies.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a> <a href="../hicksville/WoofGang_Hicksville_BookingAnomalies.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
   <h1>Woof Gang Glen Cove</h1>
   <div class="subtitle">Booking Anomaly Detector</div>
   <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
@@ -151,17 +151,17 @@ tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
 <div class="topbar">
   <a id="portal-back" href="../index.html" class="home-link">&larr; Home</a><script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\u2190 Store Portal";}else{a.innerHTML="\u2190 Owner Portal";}}}();</script>
   <span class="topbar-center">Booking Anomalies</span>
-  <span class="topbar-right">0 anomalies detected</span>
+  <span class="topbar-right">1 anomalies detected</span>
 </div>
 
 <div class="tabs">
-  <button class="tab" onclick="setTab('upcoming',this)">&#x1F52E; Upcoming Bookings (0)</button>
-  <button class="tab active" onclick="setTab('all',this)">All Anomalies (0)</button>
+  <button class="tab" onclick="setTab('upcoming',this)">&#x1F52E; Upcoming Bookings (1)</button>
+  <button class="tab active" onclick="setTab('all',this)">All Anomalies (1)</button>
   <button class="tab" onclick="setTab('breed_change',this)">&#x1F534; Breed Changes (0)</button>
   <button class="tab" onclick="setTab('size_change',this)">&#x1F7E1; Size Changes (0)</button>
   <button class="tab" onclick="setTab('service_change',this)">&#x1F7E0; Service Changes (0)</button>
   <button class="tab" onclick="setTab('price_anomaly',this)">&#x1F4B2; Price Anomalies (0)</button>
-  <button class="tab" onclick="setTab('close_together',this)">&#x1F7E3; Booked Too Close Together (0)</button>
+  <button class="tab" onclick="setTab('close_together',this)">&#x1F7E3; Booked Too Close Together (1)</button>
   <button class="tab" onclick="setTab('groomer_off',this)">&#x1F334; Groomer Not Working (0)</button>
   <button class="tab" onclick="setTab('outside_hours',this)">&#x1F319; Outside Business Hours (0)</button>
 </div>
@@ -182,15 +182,15 @@ tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
 </div>
 
 <div class="kpi-grid">
-  <div class="kpi blue"><div class="kpi-val" id="kpi-future">0</div><div class="kpi-label">&#x1F52E; Upcoming Bookings</div></div>
+  <div class="kpi blue"><div class="kpi-val" id="kpi-future">1</div><div class="kpi-label">&#x1F52E; Upcoming Bookings</div></div>
   <div class="kpi teal"><div class="kpi-val" id="kpi-groomer-off">0</div><div class="kpi-label">&#x1F334; Groomer Not Working</div></div>
   <div class="kpi navy"><div class="kpi-val" id="kpi-outside-hours">0</div><div class="kpi-label">&#x1F319; Outside Business Hours</div></div>
-  <div class="kpi purple"><div class="kpi-val" id="kpi-close">0</div><div class="kpi-label">&#x1F7E3; Booked Too Close Together</div></div>
+  <div class="kpi purple"><div class="kpi-val" id="kpi-close">1</div><div class="kpi-label">&#x1F7E3; Booked Too Close Together</div></div>
   <div class="kpi red"><div class="kpi-val" id="kpi-breed">0</div><div class="kpi-label">&#x1F534; Breed Changes</div></div>
   <div class="kpi yellow"><div class="kpi-val" id="kpi-size">0</div><div class="kpi-label">&#x1F7E1; Size Changes</div></div>
   <div class="kpi orange"><div class="kpi-val" id="kpi-service">0</div><div class="kpi-label">&#x1F7E0; Service Changes</div></div>
   <div class="kpi gray"><div class="kpi-val" id="kpi-price">0</div><div class="kpi-label">&#x1F4B2; Price Anomalies</div></div>
-  <div class="kpi gray"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-label">Total Anomalies</div></div>
+  <div class="kpi gray"><div class="kpi-val" id="kpi-total">1</div><div class="kpi-label">Total Anomalies</div></div>
 </div>
 
 <div class="filter-bar">
@@ -204,7 +204,7 @@ tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
   <span class="filter-label">Groomer:</span>
   <select class="filter-select" id="groomer-select" onchange="setGroomer(this.value)">
     <option value="">All Groomers</option>
-    
+    <option value="Melanie M">Melanie M</option>
   </select>
   <span class="result-count" id="result-count"></span>
 </div>
@@ -291,8 +291,8 @@ tr.anomaly-row td:first-child::before{content:"⚠️ ";font-style:normal}
 </div>
 
 <script>
-var ANOMALIES = [];
-var PROFILES = {};
+var ANOMALIES = [{"cid": "421002211", "dog_key": "421002211", "customer_name": "Jeanne Marie O'Donnell", "pet_name": "Luther", "is_future": true, "visit_count": 2, "modal_size": "XXLG", "modal_size_short": "XXLG", "modal_doodle": false, "modal_service": "Clsc Bath", "modal_breed": "Dbl Coat", "size_counts": {"XXLG": 2}, "service_counts": {"Clsc Bath": 2}, "last_date": "2026-10-14", "last_size": "XXLG", "last_size_short": "XXLG", "last_doodle": false, "last_service": "Clsc Bath", "last_breed": "Dbl Coat", "last_groomer": "Melanie M", "last_price": 0.0, "flags": ["close_together"], "flag_details": {"close_together": {"date_a": "2026-10-07", "date_b": "2026-10-14", "gap_days": 7}}}];
+var PROFILES = {"421002211": [{"date": "2026-10-14", "service": "Clsc Bath", "size": "XXLG", "breed_group": "Dbl Coat", "items_raw": "Clsc Bath / Dbl Coat / XXLG", "groomer": "Melanie M", "price": 0, "price_match": "no_match", "addon": false}, {"date": "2026-10-07", "service": "Clsc Bath", "size": "XXLG", "breed_group": "Dbl Coat", "items_raw": "Clsc Bath / Dbl Coat / XXLG", "groomer": "Melanie M", "price": 90.0, "price_match": "exact", "addon": false}]};
 var STORE_KEY = "glen-cove";
 
 var BA_SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';

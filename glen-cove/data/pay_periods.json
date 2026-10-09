@@ -2,26 +2,48 @@
   "periods": {
     "pp_0": {
       "Julianne D": {
-        "rev": 0,
-        "disc": 0,
-        "comm": 0,
-        "paid": 0,
+        "rev": 335.0,
+        "disc": 45.0,
+        "comm": 167.5,
+        "paid": 200.0,
         "tips": 0,
-        "total": 0,
-        "working_days": 0,
-        "guar_days": 0,
-        "daily": []
+        "total": 200.0,
+        "working_days": 1,
+        "guar_days": 1,
+        "daily": [
+          {
+            "date": "2026-10-08",
+            "rev": 335.0,
+            "disc": 45.0,
+            "comm": 167.5,
+            "paid": 200.0,
+            "tips": 0,
+            "total": 200.0,
+            "guar_applied": true
+          }
+        ]
       },
       "Melanie M": {
-        "rev": 0,
-        "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
-        "guar_days": 0,
-        "daily": []
+        "rev": 290.0,
+        "disc": 60.0,
+        "comm": 145.0,
+        "paid": 200.0,
+        "tips": 36.6,
+        "total": 236.6,
+        "working_days": 1,
+        "guar_days": 1,
+        "daily": [
+          {
+            "date": "2026-10-08",
+            "rev": 290.0,
+            "disc": 60.0,
+            "comm": 145.0,
+            "paid": 200.0,
+            "tips": 36.6,
+            "total": 236.6,
+            "guar_applied": true
+          }
+        ]
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 4500.0,
@@ -37,10 +59,23 @@
       "_bather_daily": {},
       "_bather_tips": {},
       "_bather_tips_daily": {},
-      "_retail_pay": {},
-      "_retail_hours": {},
-      "_retail_daily": {},
-      "_retail_rates": {}
+      "_retail_pay": {
+        "Shay": 189.0
+      },
+      "_retail_hours": {
+        "Shay": 9.0
+      },
+      "_retail_daily": {
+        "Shay": [
+          {
+            "date": "2026-10-08",
+            "hours": 9.0
+          }
+        ]
+      },
+      "_retail_rates": {
+        "Shay": 21.0
+      }
     },
     "pp_1": {
       "Julianne D": {
@@ -109,7 +144,7 @@
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 4500.0,
-      "_cc_fees": 14.59,
+      "_cc_fees": 43.71,
       "_manager_salary": 0,
       "_manager_old_days": 0,
       "_manager_new_days": 0,
