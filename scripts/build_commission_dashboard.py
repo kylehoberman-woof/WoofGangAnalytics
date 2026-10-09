@@ -892,6 +892,7 @@ tr:hover td{{background:#fafaf8!important}}
   <div id="pp-kpis" class="kpi-grid"></div>
   <div class="card" id="pp-confirm-card" style="display:none">
     <div class="stitle">Payment Confirmation</div>
+    <div id="pp-confirm-note" style="font-size:0.82rem;color:#999;margin-bottom:10px"></div>
     <div id="pp-confirm-list" style="display:flex;flex-direction:column;gap:8px"></div>
   </div>
   <div class="card">
@@ -1025,12 +1026,30 @@ function toggleArchivedTabs() {{
 // of which pay periods he's actually handed money for — keyed by the
 // period's real start date, not its pp_N id (that id is positional and
 // shifts every time a new period rolls in, so it can't be a stable key).
-function renderPayConfirm(ppDates) {{
+function renderPayConfirm(ppDates, ppId) {{
   var card = document.getElementById('pp-confirm-card');
   var list = document.getElementById('pp-confirm-list');
+  var note = document.getElementById('pp-confirm-note');
   if (!ppDates || !PAY_CONFIRM_NAMES.length) {{ card.style.display = 'none'; return; }}
   card.style.display = '';
   var periodStart = ppDates.start;
+
+  // Joyce/Marie/Angela are paid in cash, every other week, on a Friday —
+  // each cash payment covers THIS period plus the one before it. Surface
+  // that pairing + the expected payout date so it's never ambiguous which
+  // two weeks a given Friday's cash is supposed to cover.
+  var priorIdx = parseInt(ppId.slice(3), 10) + 1;
+  var priorDates = PP_DATES['pp_' + priorIdx];
+  var endDate = new Date(ppDates.end + 'T00:00:00');
+  var payoutDate = new Date(endDate.getTime() + 5 * 86400000); // Sun end -> Fri payout
+  var fmt = function(d) {{ return d.toLocaleDateString('en-US', {{month:'short', day:'numeric'}}); }};
+  if (priorDates) {{
+    note.textContent = 'Paid in cash, biweekly on Fridays. This cash payment covers '
+      + fmt(new Date(priorDates.start + 'T00:00:00')) + '–' + fmt(endDate)
+      + ' together, expected on or around ' + fmt(payoutDate) + '.';
+  }} else {{
+    note.textContent = 'Paid in cash, biweekly on Fridays, together with the prior week.';
+  }}
   list.innerHTML = PAY_CONFIRM_NAMES.map(function(name) {{
     return '<label style="display:flex;align-items:center;gap:8px;font-size:0.88rem;cursor:pointer">'
       + '<input type="checkbox" disabled data-name="' + name + '" style="width:16px;height:16px">'
@@ -1373,7 +1392,7 @@ function renderPayPeriod(ppId) {{
   var totRoyalties = totRev * (data._royalty_rate || 0.07);
   var DAILY_RENT = (data._monthly_rent || {MONTHLY_RENT}) * 12 / 365;
   var ppDates = PP_DATES[ppId];
-  renderPayConfirm(ppDates);
+  renderPayConfirm(ppDates, ppId);
   var PP_LENGTH = ppDates ? Math.round((new Date(ppDates.end) - new Date(ppDates.start)) / 86400000) + 1
                           : {PAY_PERIOD_CONFIG.get(_store_name, PAY_PERIOD_CONFIG["port-washington"])["length_days"]};
   var totRent = DAILY_RENT * PP_LENGTH;
