@@ -82,12 +82,12 @@ STORES = {
         data_dir=PROJ_ROOT / "hicksville" / "data",
         output_dir=PROJ_ROOT / "hicksville",
     ),
-    # Opens 2026-09-24.
+    # Opened 2026-10-06 (confirmed real opening day — was a placeholder date before).
     "glen-cove": StoreConfig(
         name="Woof Gang zz_Glen Cove, NY (#266)",
         location_id=207058,
         token="63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
-        start_date="2026-09-24",
+        start_date="2026-10-06",
         end_date="2027-12-31",
         data_dir=PROJ_ROOT / "glen-cove" / "data",
         output_dir=PROJ_ROOT / "glen-cove",

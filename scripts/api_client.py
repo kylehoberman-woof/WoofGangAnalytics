@@ -126,11 +126,19 @@ def extract_paginated(endpoint_template, start, end, label="data", id_field="Ord
     return all_data
 
 
-def _gap_detection(data, start_date, location_id, token, closures=None):
+def _gap_detection(data, start_date, location_id, token, closures=None, end_date=None):
     """Detect and patch dates with suspiciously few orders.
 
     closures: optional set of ISO date strings to skip. Falls back to
     KNOWN_CLOSURES if not provided.
+    end_date: exclusive upper bound (ISO string). Pass the incremental
+    window's own start date here so this only re-checks dates the
+    incremental fetch didn't just freshly re-pull itself — otherwise a
+    low-volume store re-fails its own "<15 orders" heuristic every single
+    night across its whole recent history, re-fetching dates that were
+    never actually missing, which is wasted API calls at best and can trip
+    a per-location rate/usage limit at worst. Defaults to today (scans
+    everything) for the full-extraction path, which has no such window.
     """
     print("\n[Gap detection] Checking for missing data...")
     if closures is None:
@@ -144,7 +152,7 @@ def _gap_detection(data, start_date, location_id, token, closures=None):
             daily_orders[d].add(oid)
 
     cur = datetime.strptime(start_date, "%Y-%m-%d").date()
-    today = date.today()
+    today = (datetime.strptime(end_date, "%Y-%m-%d").date() - timedelta(days=1)) if end_date else date.today()
     gap_dates = []
     while cur <= today:
         day = str(cur)
@@ -323,11 +331,14 @@ def extract_all_data(store):
         # Gap detection — same safety net as the full-extraction path. Without this,
         # any date whose order_items came back incomplete during a past incremental
         # run is silently kept broken forever once it ages past the incremental
-        # window, since nothing else ever re-checks it. Scans the whole history
-        # each run (cheap — it's just a dict count), only re-fetches actual gaps.
+        # window, since nothing else ever re-checks it. Bounded to dates OLDER than
+        # the incremental window itself (inc_start) — those were just freshly
+        # re-pulled above, so re-checking them here is redundant and, for a
+        # low-volume store, re-triggers the "<15 orders" false positive on most of
+        # its recent history every single night (see _gap_detection's docstring).
         _store_key = next((k for k, v in STORES.items() if v.location_id == location_id), None)
         _store_closures = fetch_closures(_store_key) if (fetch_closures and _store_key) else None
-        _gap_detection(cached, store.start_date, location_id, token, _store_closures)
+        _gap_detection(cached, store.start_date, location_id, token, _store_closures, end_date=inc_start)
 
         with open(cache_file, "w") as f:
             json.dump(cached, f)
