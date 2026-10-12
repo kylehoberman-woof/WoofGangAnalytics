@@ -97,7 +97,7 @@ tr:hover td{background:#fafaf8!important}
 </head>
 <body>
 <div class="header">
-    <div class="header-timestamp">Updated October 12, 2026 at 07:11 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a> <a href="../hicksville/WoofGang_Hicksville_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
+    <div class="header-timestamp">Updated October 12, 2026 at 09:47 AM ET<br><a href="../port-washington/WoofGang_PortWashington_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Port Washington</a> <a href="../hicksville/WoofGang_Hicksville_Commission_Dashboard.html" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; Hicksville</a></div>
     <h1>Woof Gang Glen Cove</h1>
     <div class="subtitle">Groomer Commission Dashboard</div>
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
@@ -115,7 +115,7 @@ tr:hover td{background:#fafaf8!important}
   
   
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
-    <option value="pp_0" selected>Oct 8 – Oct 14, 2026</option><option value="pp_1" >Oct 1 – Oct 7, 2026</option><option value="pp_2" >Sep 24 – Sep 30, 2026</option>
+    <option value="pp_0" selected>Oct 12 – Oct 18, 2026</option><option value="pp_1" >Oct 5 – Oct 11, 2026</option>
   </select>
   <button id="download-csv-btn" onclick="downloadPayrollCSV(document.getElementById('pp-select').value)" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:1px solid #2C1A0E;background:#fff;color:#2C1A0E;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">⬇ Payroll CSV</button>
   <button id="save-overrides-btn" onclick="saveOverrides()" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:none;background:#C4276E;color:#fff;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">💾 Save Overrides</button>
@@ -126,20 +126,20 @@ tr:hover td{background:#fafaf8!important}
 <!-- ── YTD ── -->
 <div class="panel active" id="panel-ytd">
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-val">$3,235.00</div><div class="kpi-label">Groom Revenue</div></div>
-    <div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-$555.00</div><div class="kpi-label">Grooming Discounts</div></div>
-    <div class="kpi blue"><div class="kpi-val">$2,150.00</div><div class="kpi-label">Commission Paid</div></div>
-    <div class="kpi orange"><div class="kpi-val">$300.75</div><div class="kpi-label">Tips</div></div>
-    <div class="kpi green"><div class="kpi-val">$2,450.75</div><div class="kpi-label">Total Groomer Pay</div></div>
+    <div class="kpi"><div class="kpi-val">$1,895.00</div><div class="kpi-label">Groom Revenue</div></div>
+    <div class="kpi" style="border-color:#e53935"><div class="kpi-val" style="color:#e53935">-$265.00</div><div class="kpi-label">Grooming Discounts</div></div>
+    <div class="kpi blue"><div class="kpi-val">$1,230.00</div><div class="kpi-label">Commission Paid</div></div>
+    <div class="kpi orange"><div class="kpi-val">$134.75</div><div class="kpi-label">Tips</div></div>
+    <div class="kpi green"><div class="kpi-val">$1,364.75</div><div class="kpi-label">Total Groomer Pay</div></div>
     
     <div class="kpi" style="border-color:#00796B"><div class="kpi-val" style="color:#00796B">$0.00</div><div class="kpi-label">Bather Pay</div></div>
-    <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">$1,013.69</div><div class="kpi-label">Retail Staff Pay</div></div>
-    <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">$194.10</div><div class="kpi-label">Royalties + Marketing</div></div>
+    <div class="kpi" style="border-color:#6A1B9A"><div class="kpi-val" style="color:#6A1B9A">$549.64</div><div class="kpi-label">Retail Staff Pay</div></div>
+    <div class="kpi" style="border-color:#AD1457"><div class="kpi-val" style="color:#AD1457">$113.70</div><div class="kpi-label">Royalties + Marketing</div></div>
     <div class="kpi" style="border-color:#6D4C41"><div class="kpi-val" style="color:#6D4C41">$45,000.00</div><div class="kpi-label">Rent</div><div style="font-size:0.78rem;color:#6D4C41;margin-top:3px">285 days</div></div>
-    <div class="kpi" style="border-color:#D84315"><div class="kpi-val" style="color:#D84315">$355.92</div><div class="kpi-label">Payroll Tax</div><div style="font-size:0.78rem;color:#D84315;margin-top:3px">11.25% of wages</div></div>
-    <div class="kpi" style="border-color:#757575"><div class="kpi-val" style="color:#757575">$88.77</div><div class="kpi-label">CC Processing Fees</div></div>
-    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">-$46,122.48</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">-1425.7%</div></div>
-    <div class="kpi grey"><div class="kpi-val">7</div><div class="kpi-label">Guarantee Days</div></div>
+    <div class="kpi" style="border-color:#D84315"><div class="kpi-val" style="color:#D84315">$200.21</div><div class="kpi-label">Payroll Tax</div><div style="font-size:0.78rem;color:#D84315;margin-top:3px">11.25% of wages</div></div>
+    <div class="kpi" style="border-color:#757575"><div class="kpi-val" style="color:#757575">$43.71</div><div class="kpi-label">CC Processing Fees</div></div>
+    <div class="kpi" style="border-color:#00838F"><div class="kpi-val" style="color:#00838F">-$45,507.26</div><div class="kpi-label">Margin</div><div style="font-size:0.78rem;color:#00838F;margin-top:3px;font-weight:600">-2401.4%</div></div>
+    <div class="kpi grey"><div class="kpi-val">5</div><div class="kpi-label">Guarantee Days</div></div>
   </div>
   <div class="info-box">Commission = 50% of daily grooming revenue. All groomers (except Kimberly) receive a <strong>$200/day guarantee</strong> for their first 90 days (Sue M: $300/day). Paid whichever is higher. Tips assigned to the groomer who performed the service.</div>
   <div class="card">
@@ -157,26 +157,26 @@ tr:hover td{background:#fafaf8!important}
   <th style="text-align:right">Avg/Day</th>
 </tr></thead><tbody><tr>
           <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#1976D2;margin-right:7px"></span><strong>Melanie M</strong> <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$200</span></td>
-          <td style="text-align:right;color:#888;font-weight:600">5</td>
-          <td style="text-align:right">$1,570.00</td>
-          <td style="text-align:right"><span style="color:#e53935">-$295.00</span></td>
-          <td style="text-align:right;color:#888">$785.00</td>
-          <td style="text-align:right;color:#1565c0;font-weight:600">$1,055.00<br><span style='font-size:0.72rem;color:#1565c0'>↑ 4 guar days</span></td>
-          <td style="text-align:right;color:#f57c00">$188.10</td>
+          <td style="text-align:right;color:#888;font-weight:600">3</td>
+          <td style="text-align:right">$910.00</td>
+          <td style="text-align:right"><span style="color:#e53935">-$120.00</span></td>
+          <td style="text-align:right;color:#888">$455.00</td>
+          <td style="text-align:right;color:#1565c0;font-weight:600">$600.00<br><span style='font-size:0.72rem;color:#1565c0'>↑ 3 guar days</span></td>
+          <td style="text-align:right;color:#f57c00">$83.85</td>
           <td style="text-align:right;color:#16a34a">—</td>
-          <td style="text-align:right;font-weight:700;color:#C4276E">$1,243.10</td>
-          <td style="text-align:right;color:#888;font-size:0.82rem">$248.62</td>
+          <td style="text-align:right;font-weight:700;color:#C4276E">$683.85</td>
+          <td style="text-align:right;color:#888;font-size:0.82rem">$227.95</td>
         </tr><tr>
           <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#C4276E;margin-right:7px"></span><strong>Julianne D</strong> <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$200</span></td>
-          <td style="text-align:right;color:#888;font-weight:600">5</td>
-          <td style="text-align:right">$1,665.00</td>
-          <td style="text-align:right"><span style="color:#e53935">-$260.00</span></td>
-          <td style="text-align:right;color:#888">$832.50</td>
-          <td style="text-align:right;color:#1565c0;font-weight:600">$1,095.00<br><span style='font-size:0.72rem;color:#1565c0'>↑ 3 guar days</span></td>
-          <td style="text-align:right;color:#f57c00">$112.65</td>
+          <td style="text-align:right;color:#888;font-weight:600">3</td>
+          <td style="text-align:right">$985.00</td>
+          <td style="text-align:right"><span style="color:#e53935">-$145.00</span></td>
+          <td style="text-align:right;color:#888">$492.50</td>
+          <td style="text-align:right;color:#1565c0;font-weight:600">$630.00<br><span style='font-size:0.72rem;color:#1565c0'>↑ 2 guar days</span></td>
+          <td style="text-align:right;color:#f57c00">$50.90</td>
           <td style="text-align:right;color:#16a34a">—</td>
-          <td style="text-align:right;font-weight:700;color:#C4276E">$1,207.65</td>
-          <td style="text-align:right;color:#888;font-size:0.82rem">$241.53</td>
+          <td style="text-align:right;font-weight:700;color:#C4276E">$680.90</td>
+          <td style="text-align:right;color:#888;font-size:0.82rem">$226.97</td>
         </tr></tbody></table></div>
     <button class="toggle-btn" onclick="toggleDetail('ytd-detail',this)">▼ Show daily detail</button>
     <div class="detail-section" id="ytd-detail">
@@ -221,26 +221,6 @@ tr:hover td{background:#fafaf8!important}
               <td style="text-align:right;color:#16a34a">—</td>
               <td style="text-align:right;font-weight:600;color:#C4276E">$236.60</td>
               <td></td>
-            </tr><tr>
-              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-09</td>
-              <td style="text-align:right">$150.00</td>
-              <td style="text-align:right"><span style="color:#e53935">-$65.00</span></td>
-              <td style="text-align:right;color:#888">$75.00</td>
-              <td style="text-align:right;color:#1565c0">$200.00<span style="background:#e3f2fd;color:#1565c0;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px">guarantee</span><span style="background:#fce4ec;color:#c62828;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:4px">waive</span></td>
-              <td style="text-align:right;color:#f57c00">$34.25</td>
-              <td style="text-align:right;color:#16a34a">—</td>
-              <td style="text-align:right;font-weight:600;color:#C4276E">$234.25</td>
-              <td></td>
-            </tr><tr>
-              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-10</td>
-              <td style="text-align:right">$510.00</td>
-              <td style="text-align:right"><span style="color:#e53935">-$110.00</span></td>
-              <td style="text-align:right;color:#888">$255.00</td>
-              <td style="text-align:right;color:#1565c0">$255.00</td>
-              <td style="text-align:right;color:#f57c00">$70.00</td>
-              <td style="text-align:right;color:#16a34a">—</td>
-              <td style="text-align:right;font-weight:600;color:#C4276E">$325.00</td>
-              <td></td>
             </tr><tr style="background:#f8f7f4"><td colspan="10" style="padding:10px 14px;font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#C4276E;margin-right:7px"></span><strong>Julianne D</strong> <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$200</span></td></tr><tr>
               <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-06</td>
               <td style="text-align:right">$460.00</td>
@@ -271,26 +251,6 @@ tr:hover td{background:#fafaf8!important}
               <td style="text-align:right;color:#16a34a">—</td>
               <td style="text-align:right;font-weight:600;color:#C4276E">$200.00</td>
               <td></td>
-            </tr><tr>
-              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-09</td>
-              <td style="text-align:right">$150.00</td>
-              <td style="text-align:right"><span style="color:#e53935">-$30.00</span></td>
-              <td style="text-align:right;color:#888">$75.00</td>
-              <td style="text-align:right;color:#1565c0">$200.00<span style="background:#e3f2fd;color:#1565c0;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px">guarantee</span><span style="background:#fce4ec;color:#c62828;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:4px">waive</span></td>
-              <td style="text-align:right;color:#f57c00">$20.00</td>
-              <td style="text-align:right;color:#16a34a">—</td>
-              <td style="text-align:right;font-weight:600;color:#C4276E">$220.00</td>
-              <td></td>
-            </tr><tr>
-              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-10</td>
-              <td style="text-align:right">$530.00</td>
-              <td style="text-align:right"><span style="color:#e53935">-$85.00</span></td>
-              <td style="text-align:right;color:#888">$265.00</td>
-              <td style="text-align:right;color:#1565c0">$265.00</td>
-              <td style="text-align:right;color:#f57c00">$41.75</td>
-              <td style="text-align:right;color:#16a34a">—</td>
-              <td style="text-align:right;font-weight:600;color:#C4276E">$306.75</td>
-              <td></td>
             </tr></tbody></table></div>
     </div>
   </div>
@@ -314,26 +274,26 @@ tr:hover td{background:#fafaf8!important}
   <th style="text-align:right">Avg/Day</th>
 </tr></thead><tbody><tr>
           <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#1976D2;margin-right:7px"></span><strong>Melanie M</strong> <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$200</span></td>
-          <td style="text-align:right;color:#888;font-weight:600">5</td>
-          <td style="text-align:right">$1,570.00</td>
-          <td style="text-align:right"><span style="color:#e53935">-$295.00</span></td>
-          <td style="text-align:right;color:#888">$785.00</td>
-          <td style="text-align:right;color:#1565c0;font-weight:600">$1,055.00<br><span style='font-size:0.72rem;color:#1565c0'>↑ 4 guar days</span></td>
-          <td style="text-align:right;color:#f57c00">$188.10</td>
+          <td style="text-align:right;color:#888;font-weight:600">3</td>
+          <td style="text-align:right">$910.00</td>
+          <td style="text-align:right"><span style="color:#e53935">-$120.00</span></td>
+          <td style="text-align:right;color:#888">$455.00</td>
+          <td style="text-align:right;color:#1565c0;font-weight:600">$600.00<br><span style='font-size:0.72rem;color:#1565c0'>↑ 3 guar days</span></td>
+          <td style="text-align:right;color:#f57c00">$83.85</td>
           <td style="text-align:right;color:#16a34a">—</td>
-          <td style="text-align:right;font-weight:700;color:#C4276E">$1,243.10</td>
-          <td style="text-align:right;color:#888;font-size:0.82rem">$248.62</td>
+          <td style="text-align:right;font-weight:700;color:#C4276E">$683.85</td>
+          <td style="text-align:right;color:#888;font-size:0.82rem">$227.95</td>
         </tr><tr>
           <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#C4276E;margin-right:7px"></span><strong>Julianne D</strong> <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$200</span></td>
-          <td style="text-align:right;color:#888;font-weight:600">5</td>
-          <td style="text-align:right">$1,665.00</td>
-          <td style="text-align:right"><span style="color:#e53935">-$260.00</span></td>
-          <td style="text-align:right;color:#888">$832.50</td>
-          <td style="text-align:right;color:#1565c0;font-weight:600">$1,095.00<br><span style='font-size:0.72rem;color:#1565c0'>↑ 3 guar days</span></td>
-          <td style="text-align:right;color:#f57c00">$112.65</td>
+          <td style="text-align:right;color:#888;font-weight:600">3</td>
+          <td style="text-align:right">$985.00</td>
+          <td style="text-align:right"><span style="color:#e53935">-$145.00</span></td>
+          <td style="text-align:right;color:#888">$492.50</td>
+          <td style="text-align:right;color:#1565c0;font-weight:600">$630.00<br><span style='font-size:0.72rem;color:#1565c0'>↑ 2 guar days</span></td>
+          <td style="text-align:right;color:#f57c00">$50.90</td>
           <td style="text-align:right;color:#16a34a">—</td>
-          <td style="text-align:right;font-weight:700;color:#C4276E">$1,207.65</td>
-          <td style="text-align:right;color:#888;font-size:0.82rem">$241.53</td>
+          <td style="text-align:right;font-weight:700;color:#C4276E">$680.90</td>
+          <td style="text-align:right;color:#888;font-size:0.82rem">$226.97</td>
         </tr></tbody></table></div>
     <button class="toggle-btn" onclick="toggleDetail('l30-detail',this)">▼ Show daily detail</button>
     <div class="detail-section" id="l30-detail">
@@ -378,26 +338,6 @@ tr:hover td{background:#fafaf8!important}
               <td style="text-align:right;color:#16a34a">—</td>
               <td style="text-align:right;font-weight:600;color:#C4276E">$236.60</td>
               <td></td>
-            </tr><tr>
-              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-09</td>
-              <td style="text-align:right">$150.00</td>
-              <td style="text-align:right"><span style="color:#e53935">-$65.00</span></td>
-              <td style="text-align:right;color:#888">$75.00</td>
-              <td style="text-align:right;color:#1565c0">$200.00<span style="background:#e3f2fd;color:#1565c0;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px">guarantee</span><span style="background:#fce4ec;color:#c62828;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:4px">waive</span></td>
-              <td style="text-align:right;color:#f57c00">$34.25</td>
-              <td style="text-align:right;color:#16a34a">—</td>
-              <td style="text-align:right;font-weight:600;color:#C4276E">$234.25</td>
-              <td></td>
-            </tr><tr>
-              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-10</td>
-              <td style="text-align:right">$510.00</td>
-              <td style="text-align:right"><span style="color:#e53935">-$110.00</span></td>
-              <td style="text-align:right;color:#888">$255.00</td>
-              <td style="text-align:right;color:#1565c0">$255.00</td>
-              <td style="text-align:right;color:#f57c00">$70.00</td>
-              <td style="text-align:right;color:#16a34a">—</td>
-              <td style="text-align:right;font-weight:600;color:#C4276E">$325.00</td>
-              <td></td>
             </tr><tr style="background:#f8f7f4"><td colspan="10" style="padding:10px 14px;font-weight:700"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#C4276E;margin-right:7px"></span><strong>Julianne D</strong> <span style="background:#e3f2fd;color:#1565c0;padding:1px 6px;border-radius:6px;font-size:0.7rem;font-weight:700">G$200</span></td></tr><tr>
               <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-06</td>
               <td style="text-align:right">$460.00</td>
@@ -427,26 +367,6 @@ tr:hover td{background:#fafaf8!important}
               <td style="text-align:right;color:#f57c00">$0.00</td>
               <td style="text-align:right;color:#16a34a">—</td>
               <td style="text-align:right;font-weight:600;color:#C4276E">$200.00</td>
-              <td></td>
-            </tr><tr>
-              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-09</td>
-              <td style="text-align:right">$150.00</td>
-              <td style="text-align:right"><span style="color:#e53935">-$30.00</span></td>
-              <td style="text-align:right;color:#888">$75.00</td>
-              <td style="text-align:right;color:#1565c0">$200.00<span style="background:#e3f2fd;color:#1565c0;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:6px">guarantee</span><span style="background:#fce4ec;color:#c62828;padding:1px 5px;border-radius:5px;font-size:0.7rem;margin-left:4px">waive</span></td>
-              <td style="text-align:right;color:#f57c00">$20.00</td>
-              <td style="text-align:right;color:#16a34a">—</td>
-              <td style="text-align:right;font-weight:600;color:#C4276E">$220.00</td>
-              <td></td>
-            </tr><tr>
-              <td colspan="2" style="padding-left:24px;color:#888;font-size:0.82rem">2026-10-10</td>
-              <td style="text-align:right">$530.00</td>
-              <td style="text-align:right"><span style="color:#e53935">-$85.00</span></td>
-              <td style="text-align:right;color:#888">$265.00</td>
-              <td style="text-align:right;color:#1565c0">$265.00</td>
-              <td style="text-align:right;color:#f57c00">$41.75</td>
-              <td style="text-align:right;color:#16a34a">—</td>
-              <td style="text-align:right;font-weight:600;color:#C4276E">$306.75</td>
               <td></td>
             </tr></tbody></table></div>
     </div>
@@ -572,14 +492,14 @@ tr:hover td{background:#fafaf8!important}
 </div>
 
 <script>
-var PP_DATA = {"pp_0": {"Julianne D": {"rev": 1015.0, "disc": 160.0, "comm": 507.5, "paid": 665.0, "tips": 61.75, "total": 726.75, "working_days": 3, "guar_days": 2, "daily": [{"date": "2026-10-08", "rev": 335.0, "disc": 45.0, "comm": 167.5, "paid": 200.0, "tips": 0, "total": 200.0, "guar_applied": true}, {"date": "2026-10-09", "rev": 150.0, "disc": 30.0, "comm": 75.0, "paid": 200.0, "tips": 20.0, "total": 220.0, "guar_applied": true}, {"date": "2026-10-10", "rev": 530.0, "disc": 85.0, "comm": 265.0, "paid": 265.0, "tips": 41.75, "total": 306.75, "guar_applied": false}]}, "Melanie M": {"rev": 950.0, "disc": 235.0, "comm": 475.0, "paid": 655.0, "tips": 140.85, "total": 795.85, "working_days": 3, "guar_days": 2, "daily": [{"date": "2026-10-08", "rev": 290.0, "disc": 60.0, "comm": 145.0, "paid": 200.0, "tips": 36.6, "total": 236.6, "guar_applied": true}, {"date": "2026-10-09", "rev": 150.0, "disc": 65.0, "comm": 75.0, "paid": 200.0, "tips": 34.25, "total": 234.25, "guar_applied": true}, {"date": "2026-10-10", "rev": 510.0, "disc": 110.0, "comm": 255.0, "paid": 255.0, "tips": 70.0, "total": 325.0, "guar_applied": false}]}, "_royalty_rate": 0.060000000000000005, "_monthly_rent": 4500.0, "_cc_fees": 45.06, "_manager_salary": 0, "_manager_old_days": 0, "_manager_new_days": 0, "_manager_daily": [], "_manager_bonus": 0, "_bather_rev": 0, "_bather_pay": {}, "_bather_hours": {}, "_bather_daily": {}, "_bather_tips": {}, "_bather_tips_daily": {}, "_retail_pay": {"Shay": 513.45, "Bella F": 139.6}, "_retail_hours": {"Shay": 24.45, "Bella F": 6.98}, "_retail_daily": {"Shay": [{"date": "2026-10-08", "hours": 9.0}, {"date": "2026-10-09", "hours": 9.12}, {"date": "2026-10-10", "hours": 6.33}], "Bella F": [{"date": "2026-10-11", "hours": 6.98}]}, "_retail_rates": {"Shay": 21.0, "Bella F": 20.0}}, "pp_1": {"Julianne D": {"rev": 650.0, "disc": 100.0, "comm": 325.0, "paid": 430.0, "tips": 50.9, "total": 480.9, "working_days": 2, "guar_days": 1, "daily": [{"date": "2026-10-06", "rev": 460.0, "disc": 100.0, "comm": 230.0, "paid": 230.0, "tips": 34.4, "total": 264.4, "guar_applied": false}, {"date": "2026-10-07", "rev": 190.0, "disc": 0, "comm": 95.0, "paid": 200.0, "tips": 16.5, "total": 216.5, "guar_applied": true}]}, "Melanie M": {"rev": 620.0, "disc": 60.0, "comm": 310.0, "paid": 400.0, "tips": 47.25, "total": 447.25, "working_days": 2, "guar_days": 2, "daily": [{"date": "2026-10-06", "rev": 265.0, "disc": 45.0, "comm": 132.5, "paid": 200.0, "tips": 21.0, "total": 221.0, "guar_applied": true}, {"date": "2026-10-07", "rev": 355.0, "disc": 15.0, "comm": 177.5, "paid": 200.0, "tips": 26.25, "total": 226.25, "guar_applied": true}]}, "_royalty_rate": 0.060000000000000005, "_monthly_rent": 4500.0, "_cc_fees": 43.71, "_manager_salary": 0, "_manager_old_days": 0, "_manager_new_days": 0, "_manager_daily": [], "_manager_bonus": 0, "_bather_rev": 0, "_bather_pay": {}, "_bather_hours": {}, "_bather_daily": {}, "_bather_tips": {}, "_bather_tips_daily": {}, "_retail_pay": {"Shay": 278.04, "Bella F": 82.6}, "_retail_hours": {"Shay": 13.24, "Bella F": 4.13}, "_retail_daily": {"Shay": [{"date": "2026-10-06", "hours": 3.8}, {"date": "2026-10-06", "hours": 0.98}, {"date": "2026-10-07", "hours": 3.93}, {"date": "2026-10-07", "hours": 4.53}], "Bella F": [{"date": "2026-10-06", "hours": 4.13}]}, "_retail_rates": {"Shay": 21.0, "Bella F": 20.0}}, "pp_2": {"Julianne D": {"rev": 0, "disc": 0, "comm": 0, "paid": 0, "tips": 0, "total": 0, "working_days": 0, "guar_days": 0, "daily": []}, "Melanie M": {"rev": 0, "disc": 0, "comm": 0, "paid": 0, "tips": 0, "total": 0, "working_days": 0, "guar_days": 0, "daily": []}, "_royalty_rate": 0.060000000000000005, "_monthly_rent": 4500.0, "_cc_fees": 0.0, "_manager_salary": 0, "_manager_old_days": 0, "_manager_new_days": 0, "_manager_daily": [], "_manager_bonus": 0, "_bather_rev": 0, "_bather_pay": {}, "_bather_hours": {}, "_bather_daily": {}, "_bather_tips": {}, "_bather_tips_daily": {}, "_retail_pay": {}, "_retail_hours": {}, "_retail_daily": {}, "_retail_rates": {}}};
+var PP_DATA = {"pp_0": {"Julianne D": {"rev": 0, "disc": 0, "comm": 0, "paid": 0, "tips": 0, "total": 0, "working_days": 0, "guar_days": 0, "daily": []}, "Melanie M": {"rev": 0, "disc": 0, "comm": 0, "paid": 0, "tips": 0, "total": 0, "working_days": 0, "guar_days": 0, "daily": []}, "_royalty_rate": 0.060000000000000005, "_monthly_rent": 4500.0, "_cc_fees": 0.0, "_manager_salary": 0, "_manager_old_days": 0, "_manager_new_days": 0, "_manager_daily": [], "_manager_bonus": 0, "_bather_rev": 0, "_bather_pay": {}, "_bather_hours": {}, "_bather_daily": {}, "_bather_tips": {}, "_bather_tips_daily": {}, "_retail_pay": {}, "_retail_hours": {}, "_retail_daily": {}, "_retail_rates": {}}, "pp_1": {"Julianne D": {"rev": 985.0, "disc": 145.0, "comm": 492.5, "paid": 630.0, "tips": 50.9, "total": 680.9, "working_days": 3, "guar_days": 2, "daily": [{"date": "2026-10-06", "rev": 460.0, "disc": 100.0, "comm": 230.0, "paid": 230.0, "tips": 34.4, "total": 264.4, "guar_applied": false}, {"date": "2026-10-07", "rev": 190.0, "disc": 0, "comm": 95.0, "paid": 200.0, "tips": 16.5, "total": 216.5, "guar_applied": true}, {"date": "2026-10-08", "rev": 335.0, "disc": 45.0, "comm": 167.5, "paid": 200.0, "tips": 0, "total": 200.0, "guar_applied": true}]}, "Melanie M": {"rev": 910.0, "disc": 120.0, "comm": 455.0, "paid": 600.0, "tips": 83.85, "total": 683.85, "working_days": 3, "guar_days": 3, "daily": [{"date": "2026-10-06", "rev": 265.0, "disc": 45.0, "comm": 132.5, "paid": 200.0, "tips": 21.0, "total": 221.0, "guar_applied": true}, {"date": "2026-10-07", "rev": 355.0, "disc": 15.0, "comm": 177.5, "paid": 200.0, "tips": 26.25, "total": 226.25, "guar_applied": true}, {"date": "2026-10-08", "rev": 290.0, "disc": 60.0, "comm": 145.0, "paid": 200.0, "tips": 36.6, "total": 236.6, "guar_applied": true}]}, "_royalty_rate": 0.060000000000000005, "_monthly_rent": 4500.0, "_cc_fees": 43.71, "_manager_salary": 0, "_manager_old_days": 0, "_manager_new_days": 0, "_manager_daily": [], "_manager_bonus": 0, "_bather_rev": 0, "_bather_pay": {}, "_bather_hours": {}, "_bather_daily": {}, "_bather_tips": {}, "_bather_tips_daily": {}, "_retail_pay": {"Shay": 467.04, "Bella F": 82.6}, "_retail_hours": {"Shay": 22.24, "Bella F": 4.13}, "_retail_daily": {"Shay": [{"date": "2026-10-06", "hours": 3.8}, {"date": "2026-10-06", "hours": 0.98}, {"date": "2026-10-07", "hours": 3.93}, {"date": "2026-10-07", "hours": 4.53}, {"date": "2026-10-08", "hours": 9.0}], "Bella F": [{"date": "2026-10-06", "hours": 4.13}]}, "_retail_rates": {"Shay": 21.0, "Bella F": 20.0}}};
 var GROOMERS = ["Julianne D", "Melanie M"];
-var MONTHLY_DATA = [{"month": "Sep 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Oct 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Nov 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Dec 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jan 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Feb 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Mar 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Apr 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "May 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jun 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Jul 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Aug 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Sep 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Oct 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Nov 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Dec 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Jan 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Feb 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Mar 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Apr 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "May 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Jun 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jul 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Aug 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Sep 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Oct 2026", "year": 2026, "rev": 3235.0, "paid": 2150.0, "tips": 300.75, "mgr": 0, "bather_pay": 0, "retail_pay": 1013.69, "royalties": 194.1, "rent": 4500.0, "payroll_tax": 355.92, "cc_fees": 88.77, "payroll": 2150.0, "margin": -5622.48, "margin_pct": -173.8, "payroll_pct": 66.5, "working_days": 8, "rev_per_day": 404.38}];
+var MONTHLY_DATA = [{"month": "Sep 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Oct 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Nov 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Dec 2024", "year": 2024, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jan 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Feb 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Mar 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Apr 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "May 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jun 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Jul 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Aug 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Sep 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Oct 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Nov 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Dec 2025", "year": 2025, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Jan 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Feb 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 20, "rev_per_day": 0.0}, {"month": "Mar 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Apr 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "May 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Jun 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Jul 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 23, "rev_per_day": 0.0}, {"month": "Aug 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 21, "rev_per_day": 0.0}, {"month": "Sep 2026", "year": 2026, "rev": 0, "paid": 0, "tips": 0, "mgr": 0, "bather_pay": 0, "retail_pay": 0, "royalties": 0.0, "rent": 4500.0, "payroll_tax": 0.0, "cc_fees": 0.0, "payroll": 0, "margin": -4500.0, "margin_pct": 0, "payroll_pct": 0, "working_days": 22, "rev_per_day": 0.0}, {"month": "Oct 2026", "year": 2026, "rev": 1895.0, "paid": 1230.0, "tips": 134.75, "mgr": 0, "bather_pay": 0, "retail_pay": 549.64, "royalties": 113.7, "rent": 4500.0, "payroll_tax": 200.21, "cc_fees": 43.71, "payroll": 1230.0, "margin": -5007.26, "margin_pct": -264.2, "payroll_pct": 64.9, "working_days": 8, "rev_per_day": 236.88}];
 var COLORS = {"Julianne D": "#C4276E", "Melanie M": "#1976D2"};
 var GUARANTEES = {"Julianne D": {"rate": 200.0, "start": "2026-06-23", "end": "2027-01-04"}, "Melanie M": {"rate": 200.0, "start": "2026-10-06", "end": "2027-01-04"}};
 var BATHER_RATE_MAP = {};
 var SUE_WEEKLY = [];
-var PP_DATES = {"pp_0": {"start": "2026-10-08", "end": "2026-10-14"}, "pp_1": {"start": "2026-10-01", "end": "2026-10-07"}, "pp_2": {"start": "2026-09-24", "end": "2026-09-30"}};
+var PP_DATES = {"pp_0": {"start": "2026-10-12", "end": "2026-10-18"}, "pp_1": {"start": "2026-10-05", "end": "2026-10-11"}};
 var PAY_CONFIRM_NAMES = [];
 var _payConfirmCache = {}; // period_start -> {name -> row}
 var GUSTO_PAYROLL_CONFIG = {"Bella F": {"mode": "full", "fixed_amount": null}, "Christine Brower": {"mode": "full", "fixed_amount": null}, "Cindy Szczudlo": {"mode": "full", "fixed_amount": null}, "Julianne D": {"mode": "full", "fixed_amount": null}, "Melanie M": {"mode": "full", "fixed_amount": null}, "Shay Richardson": {"mode": "full", "fixed_amount": null}};
