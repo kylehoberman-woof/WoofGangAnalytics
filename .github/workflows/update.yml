@@ -1,7 +1,9 @@
 name: Nightly Update
 on:
   schedule:
-    - cron: "30 3 * * *"
+    # 7:15 PM ET. Fixed UTC-4 (EDT) offset, same convention as booking_requests.yml —
+    # shifts to 6:15 PM during EST (Nov-Mar) without a DST-aware adjustment.
+    - cron: "15 23 * * *"
   workflow_dispatch:
 permissions:
   contents: write
