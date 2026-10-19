@@ -84,7 +84,7 @@ STORES = {
     ),
     # Opened 2026-10-06 (confirmed real opening day — was a placeholder date before).
     "glen-cove": StoreConfig(
-        name="Woof Gang zz_Glen Cove, NY (#266)",
+        name="Woof Gang Bakery & Grooming -- Glen Cove, NY (#266)",
         location_id=207058,
         token="63C080304D8CAEDAAE8F2D49154FF1867800C9DF1202FFDBB61F81E0C219E973E9921BF856B877B5EFCAAD81BBAA4B67F068F793E40BE5470459E5FB9189D107",
         start_date="2026-10-06",

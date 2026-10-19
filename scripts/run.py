@@ -19,7 +19,8 @@ import httpx
 import pandas as pd
 
 from config import (
-    get_store, BASE_URL, UNTRACKED_SKUS,
+    get_store, get_store_fn, get_store_display, get_other_stores, STORES,
+    BASE_URL, UNTRACKED_SKUS,
     # Re-export for backward compatibility with scripts that import from run
     C, PAW_MAGENTA, TEDDY_BROWN, LIGHT_PINK, DARK_TEAL, WHITE, LIGHT_GRAY,
     FDD_RETAIL_COGS_PCT, FDD_GROOM_COGS_PCT, PORTAL_BACK_JS,
@@ -434,7 +435,9 @@ def generate_dashboard(store):
 .prorate-toggle:hover span { color: #C4276E; }
 """
     _year_strs = [str(y) for y in available_years]
-    _default_year = _year_strs[-1] if len(_year_strs) == 1 else (_year_strs[-2] if len(_year_strs) >= 2 else _year_strs[0])
+    _default_year = _year_strs[-1]  # always open to the most recent year
+    _current_yr = _year_strs[-1]
+    _archive_yrs = _year_strs[:-1]
     _init_chart_checks = "\n".join(
         f"        if (yr === '{y}' && typeof initCharts_{y} === 'function') initCharts_{y}();"
         for y in _year_strs
@@ -445,7 +448,11 @@ function showYear(yr) {{
     document.querySelectorAll('.yr-panel').forEach(function(p) {{ p.style.display = 'none'; }});
     document.querySelectorAll('.yr-tab').forEach(function(t) {{ t.classList.remove('active'); }});
     document.getElementById('panel-' + yr).style.display = 'block';
-    document.getElementById('tab-' + yr).classList.add('active');
+    var tab = document.getElementById('tab-' + yr);
+    if (tab) tab.classList.add('active');
+    var archiveBtn = document.getElementById('archive-toggle-btn');
+    var archiveYrs = {repr(_archive_yrs)};
+    if (archiveBtn) archiveBtn.classList.toggle('active', archiveYrs.indexOf(yr) !== -1);
     if (!_chartsInited[yr]) {{
         _chartsInited[yr] = true;
 {_init_chart_checks}
@@ -454,6 +461,20 @@ function showYear(yr) {{
         if (yr === 'daily') updateDailyDetail();
     }}
 }}
+function toggleArchive() {{
+    var d = document.getElementById('archive-dropdown');
+    var arrow = document.getElementById('archive-arrow');
+    if (d) {{ var open = d.style.display === 'block'; d.style.display = open ? 'none' : 'block'; if (arrow) arrow.innerHTML = open ? '&#9660;' : '&#9650;'; }}
+}}
+document.addEventListener('click', function(e) {{
+    var dd = document.getElementById('archive-dropdown');
+    var btn = document.getElementById('archive-toggle-btn');
+    if (dd && dd.style.display === 'block' && !dd.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {{
+        dd.style.display = 'none';
+        var arrow = document.getElementById('archive-arrow');
+        if (arrow) arrow.innerHTML = '&#9660;';
+    }}
+}});
 window.addEventListener('DOMContentLoaded', function() {{ showYear('{_default_year}'); }});
 """
 
@@ -706,22 +727,56 @@ function updateWeeklyDetail() { _weeklyDetailChart = _updateDetail(WEEKLY_DATA, 
 function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dcmp-detail-sel', 'dcmp', 'dailyDetailChart', _dailyDetailChart, false); }
 """
 
-    _is_pw = "port" in str(store.output_dir).lower()
-    _store_title = "Woof Gang " + ("Port Washington" if _is_pw else "Hicksville")
+    _store_key = next(k for k, v in STORES.items() if v.output_dir == store.output_dir)
+    _store_display = get_store_display(_store_key)
+    _store_title = f"Woof Gang {_store_display}"
     _home_url = "../index.html"
-    _other_fn = "Hicksville" if _is_pw else "PortWashington"
-    _other_dir = "../hicksville" if _is_pw else "../port-washington"
-    _other_name = "Hicksville" if _is_pw else "Port Washington"
-    _switch = (f"{_other_dir}/WoofGang_{_other_fn}_NY_AllYears_Dashboard.html", _other_name)
-    html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url, show_home=False, store_switch=_switch)
+    _other_stores = get_other_stores(_store_key)
+    _other_key = _other_stores[0] if _other_stores else None
+    if _other_key:
+        _other_display = get_store_display(_other_key)
+        _other_fn = get_store_fn(_other_key)
+        _other_dir = f"../{_other_key}"
+        _switch = (f"{_other_dir}/WoofGang_{_other_fn}_NY_AllYears_Dashboard.html", _other_display)
+    else:
+        _switch = None
+    html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url, show_home=False, store_switch=None)
     html = html.replace("</style>", tabbed_css + "\n</style>", 1)
-    html += f'<div style="background:#C4276E;padding:12px 32px;display:flex;align-items:center;position:sticky;top:0;z-index:101;box-shadow:0 2px 12px rgba(196,39,110,0.3)">\n'
-    html += f'  <a id="portal-back" href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>{PORTAL_BACK_JS}\n'
-    html += '</div>\n'
+    _store_options = ""
+    for _sk, _sv in STORES.items():
+        _sfn = get_store_fn(_sk)
+        _sdisp = get_store_display(_sk)
+        _spath = f"WoofGang_{_sfn}_NY_AllYears_Dashboard.html" if _sk == _store_key else f"../{_sk}/WoofGang_{_sfn}_NY_AllYears_Dashboard.html"
+        _sel = ' selected' if _sk == _store_key else ''
+        _store_options += f'<option value="{_spath}"{_sel}>{_sdisp}</option>'
+    html += (
+        f'<div style="background:#C4276E;padding:10px 32px;display:flex;align-items:center;gap:16px;'
+        f'position:sticky;top:0;z-index:101;box-shadow:0 2px 12px rgba(196,39,110,0.3)">\n'
+        f'  <a id="portal-back" href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>{PORTAL_BACK_JS}\n'
+        f'  <select onchange="location.href=this.value" style="margin-left:auto;background:#a8004e;color:#fff;border:1px solid rgba(255,255,255,0.3);'
+        f'border-radius:6px;padding:5px 10px;font-size:0.82rem;font-weight:600;cursor:pointer">'
+        f'{_store_options}</select>\n'
+        f'</div>\n'
+    )
     html += '<div class="yr-tab-bar">\n'
-    for yr in _year_strs:
-        active = "active" if yr == _default_year else ""
-        html += f'  <button class="yr-tab {active}" onclick="showYear(\'{yr}\')" id="tab-{yr}">{YEAR_LABELS[yr]}</button>\n'
+    html += f'  <button class="yr-tab active" onclick="showYear(\'{_current_yr}\')" id="tab-{_current_yr}">{YEAR_LABELS[_current_yr]}</button>\n'
+    if _archive_yrs:
+        html += (
+            '  <div style="position:relative;display:inline-block">\n'
+            '    <button class="yr-tab" id="archive-toggle-btn" onclick="toggleArchive()" '
+            'style="display:flex;align-items:center;gap:5px">Archive <span id="archive-arrow" style="font-size:0.7rem">&#9660;</span></button>\n'
+            '    <div id="archive-dropdown" style="display:none;position:absolute;top:100%;left:0;background:#fff;'
+            'border:1px solid #e0e0e0;border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:200;min-width:140px;padding:4px 0">\n'
+        )
+        for yr in _archive_yrs:
+            html += (
+                f'      <button onclick="showYear(\'{yr}\');toggleArchive()" '
+                f'style="display:block;width:100%;text-align:left;padding:8px 16px;border:none;background:none;'
+                f'cursor:pointer;font-size:0.85rem;font-weight:600;color:#444;white-space:nowrap" '
+                f'onmouseover="this.style.background=\'#fdf0f5\'" onmouseout="this.style.background=\'none\'">'
+                f'{YEAR_LABELS[yr]}</button>\n'
+            )
+        html += '    </div>\n  </div>\n'
     html += '  <button class="yr-tab" onclick="showYear(\'monthly\')" id="tab-monthly">Monthly</button>\n'
     html += '  <button class="yr-tab" onclick="showYear(\'weekly\')" id="tab-weekly">Weekly</button>\n'
     html += '  <button class="yr-tab" onclick="showYear(\'daily\')" id="tab-daily">Daily</button>\n'
@@ -753,8 +808,7 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
     html += f'<script>\n{comparison_js}\n</script>\n'
     html += gd.HTML_FOOT
 
-    _fn = "PortWashington" if "port" in str(store.output_dir).lower() else "Hicksville"
-    out_path = store.output_dir / f"WoofGang_{_fn}_NY_AllYears_Dashboard.html"
+    out_path = store.output_dir / f"WoofGang_{get_store_fn(_store_key)}_NY_AllYears_Dashboard.html"
     with open(out_path, "w") as f:
         f.write(html)
     print(f"  Dashboard saved: {out_path}")
