@@ -555,7 +555,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 7,
+    "nested_data_count": 18,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -582,68 +582,77 @@
     "nested_data_sample": [
       {
         "Address": null,
-        "CellPhone": "3474300825",
+        "CellPhone": "5168011649",
         "City": null,
         "CompanyId": 207058,
-        "CustomerId": 421030176,
+        "CustomerId": 421019529,
         "DateOfBirth": null,
-        "Email": "Whyramos80@gmail.com",
-        "FirstName": "Ramos",
-        "LastName": "Erick",
+        "Email": "",
+        "FirstName": "Lucy",
+        "LastName": "Cimino",
         "Membership": null,
         "MembershipBalance": null,
         "MembershipId": null,
-        "Phone": "3474300825",
-        "StateProvinceId": null,
+        "Phone": "",
+        "StateProvinceId": 41,
         "ZipPostal": null,
         "IsAdmin": false,
-        "CreationDate": "2026-10-19T15:01:00.503",
-        "ModifiedDate": "2026-10-19T15:01:00.583",
+        "CreationDate": "2026-10-14T13:08:02",
+        "ModifiedDate": "2026-10-20T15:01:15",
         "ParentCustomerId": null,
         "CustomerCode": null,
-        "CustomFieldValues": []
+        "CustomFieldValues": [
+          {
+            "id": 6136,
+            "name": "3476042334"
+          }
+        ]
       },
       {
         "Address": null,
-        "CellPhone": "3474300825",
+        "CellPhone": "5168011649",
         "City": null,
         "CompanyId": 207058,
-        "CustomerId": 421030177,
-        "DateOfBirth": "2025-05-24T00:00:00",
-        "Email": "Whyramos80@gmail.com",
-        "FirstName": "Bruno Bartholomew ",
-        "LastName": null,
+        "CustomerId": 421019530,
+        "DateOfBirth": "2022-10-14T09:10:27",
+        "Email": "",
+        "FirstName": "Noah",
+        "LastName": "Cimino",
         "Membership": null,
         "MembershipBalance": null,
         "MembershipId": null,
-        "Phone": null,
+        "Phone": "",
         "StateProvinceId": null,
         "ZipPostal": null,
         "IsAdmin": false,
-        "CreationDate": "2026-10-19T15:01:00.583",
-        "ModifiedDate": "2026-10-19T15:01:00.583",
-        "ParentCustomerId": 421030176,
+        "CreationDate": "2026-10-14T13:09:02",
+        "ModifiedDate": "2026-10-20T14:56:32",
+        "ParentCustomerId": 421019529,
         "CustomerCode": null,
         "CustomFieldValues": [
+          {
+            "id": 6104,
+            "name": "Brookville animal hosipal"
+          },
           {
             "id": 372,
             "name": "1"
           },
           {
             "id": 373,
-            "name": "209"
-          },
-          {
-            "id": 374,
-            "name": "-1"
+            "name": "217"
           },
           {
             "id": 377,
-            "name": ""
+            "name": "20.0"
+          },
+          {
+            "id": 380,
+            "name": "2027-01-14 00:00:00"
           },
           {
             "id": 375,
-            "name": "3"
+            "name": "2"
           },
           {
             "id": 376,
@@ -651,11 +660,19 @@
           },
           {
             "id": 378,
-            "name": null
+            "name": "2"
           },
           {
             "id": 379,
-            "name": null
+            "name": "3"
+          },
+          {
+            "id": 6114,
+            "name": "5166743322"
+          },
+          {
+            "id": 6569,
+            "name": "false"
           }
         ]
       }
@@ -663,6 +680,102 @@
     "sample": {
       "isSuccess": true,
       "data": [
+        {
+          "Address": null,
+          "CellPhone": "5168011649",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421019529,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Lucy",
+          "LastName": "Cimino",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-14T13:08:02",
+          "ModifiedDate": "2026-10-20T15:01:15",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6136,
+              "name": "3476042334"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5168011649",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421019530,
+          "DateOfBirth": "2022-10-14T09:10:27",
+          "Email": "",
+          "FirstName": "Noah",
+          "LastName": "Cimino",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-14T13:09:02",
+          "ModifiedDate": "2026-10-20T14:56:32",
+          "ParentCustomerId": 421019529,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 6104,
+              "name": "Brookville animal hosipal"
+            },
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "217"
+            },
+            {
+              "id": 377,
+              "name": "20.0"
+            },
+            {
+              "id": 380,
+              "name": "2027-01-14 00:00:00"
+            },
+            {
+              "id": 375,
+              "name": "2"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            },
+            {
+              "id": 6114,
+              "name": "5166743322"
+            },
+            {
+              "id": 6569,
+              "name": "false"
+            }
+          ]
+        },
         {
           "Address": null,
           "CellPhone": "3474300825",
@@ -955,10 +1068,354 @@
               "name": "3"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5166058359",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421032452,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Elda",
+          "LastName": "Chavaz",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T16:11:02",
+          "ModifiedDate": "2026-10-20T16:11:30",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5166058359",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421032453,
+          "DateOfBirth": "2022-10-20T12:12:41",
+          "Email": "",
+          "FirstName": "Jump",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T16:11:30",
+          "ModifiedDate": "2026-10-20T16:14:02",
+          "ParentCustomerId": 421032452,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "98"
+            },
+            {
+              "id": 377,
+              "name": "9.0"
+            },
+            {
+              "id": 375,
+              "name": "1"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "2817733257",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421033037,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Joselyn",
+          "LastName": "Domingue",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T19:18:16",
+          "ModifiedDate": "2026-10-20T19:19:26",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "2817733257",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421033038,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Cooper",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T19:19:26",
+          "ModifiedDate": "2026-10-20T19:20:14",
+          "ParentCustomerId": 421033037,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 375,
+              "name": null
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": null
+            },
+            {
+              "id": 379,
+              "name": null
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5168520422",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421033264,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "John",
+          "LastName": "Schepanski",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T20:30:32",
+          "ModifiedDate": "2026-10-20T20:31:20",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "5168520422",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421033265,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Spencer",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T20:31:20",
+          "ModifiedDate": "2026-10-20T20:35:47",
+          "ParentCustomerId": 421033264,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "3001"
+            },
+            {
+              "id": 377,
+              "name": "35.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5168520422",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421033266,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Tommy",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T20:32:18",
+          "ModifiedDate": "2026-10-20T20:35:47",
+          "ParentCustomerId": 421033264,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "3001"
+            },
+            {
+              "id": 377,
+              "name": "25.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "3478203070",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421033436,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Monyka",
+          "LastName": "Velandia",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": 41,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T21:37:05",
+          "ModifiedDate": "2026-10-20T21:37:56",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "3478203070",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421033437,
+          "DateOfBirth": null,
+          "Email": "",
+          "FirstName": "Maxwell",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-20T21:37:56",
+          "ModifiedDate": "2026-10-20T21:39:28",
+          "ParentCustomerId": 421033436,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "293"
+            },
+            {
+              "id": 377,
+              "name": "13.0"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "1"
+            },
+            {
+              "id": 379,
+              "name": "2"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 835490645
+      "version": 836811656
     }
   }
 }
