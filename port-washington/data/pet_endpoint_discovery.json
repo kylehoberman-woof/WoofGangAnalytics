@@ -831,7 +831,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 18,
+    "nested_data_count": 20,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -874,7 +874,7 @@
         "ZipPostal": null,
         "IsAdmin": true,
         "CreationDate": "2024-06-12T19:47:48.73",
-        "ModifiedDate": "2026-10-20T23:38:57.933",
+        "ModifiedDate": "2026-10-21T22:12:16.91",
         "ParentCustomerId": null,
         "CustomerCode": null,
         "CustomFieldValues": []
@@ -897,7 +897,7 @@
         "ZipPostal": null,
         "IsAdmin": true,
         "CreationDate": "2025-02-26T01:58:17.83",
-        "ModifiedDate": "2026-10-20T21:09:58.887",
+        "ModifiedDate": "2026-10-21T20:39:19.943",
         "ParentCustomerId": null,
         "CustomerCode": null,
         "CustomFieldValues": []
@@ -924,7 +924,7 @@
           "ZipPostal": null,
           "IsAdmin": true,
           "CreationDate": "2024-06-12T19:47:48.73",
-          "ModifiedDate": "2026-10-20T23:38:57.933",
+          "ModifiedDate": "2026-10-21T22:12:16.91",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
@@ -947,7 +947,7 @@
           "ZipPostal": null,
           "IsAdmin": true,
           "CreationDate": "2025-02-26T01:58:17.83",
-          "ModifiedDate": "2026-10-20T21:09:58.887",
+          "ModifiedDate": "2026-10-21T20:39:19.943",
           "ParentCustomerId": null,
           "CustomerCode": null,
           "CustomFieldValues": []
@@ -1674,10 +1674,89 @@
               "name": "3"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5164196888",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 421035076,
+          "DateOfBirth": null,
+          "Email": "lexzar1@gmail.com",
+          "FirstName": "Alexis",
+          "LastName": "Cruz",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-21T19:42:11.337",
+          "ModifiedDate": "2026-10-21T19:42:11.807",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "",
+          "City": null,
+          "CompanyId": 203698,
+          "CustomerId": 421035077,
+          "DateOfBirth": "2018-01-01T00:00:00",
+          "Email": "",
+          "FirstName": "Jameson",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-21T19:42:12.603",
+          "ModifiedDate": "2026-10-21T19:42:12.773",
+          "ParentCustomerId": 421035076,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "17"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "85"
+            },
+            {
+              "id": 375,
+              "name": "1"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "4"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 836964543
+      "version": 838414695
     }
   }
 }
