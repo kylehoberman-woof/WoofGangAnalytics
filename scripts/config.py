@@ -151,9 +151,13 @@ INCREMENTAL_DAYS = 60
 # ─── Credit Card Processing Fees ─────────────────────────────────────────────
 # Update these when you confirm your actual processor rate
 CC_RATE_PCT = 0.029       # 2.9% per transaction (estimate — update with actual rate)
-CC_RATE_FLAT = 0.30       # $0.30 per transaction (estimate — update with actual rate)
-# Payment methods considered "credit card" (from FranPOS EZPAY field)
-CC_PAYMENT_METHODS = {"amex", "visa", "mastercard", "discover", "credit", "debit"}
+CC_RATE_FLAT = 0.0        # no per-transaction flat fee (FranPOS processor is % only)
+# Treat everything NOT in this set as a card transaction. FranPOS returns many
+# network-specific codes (pulse, accel, star, nyce, maestro_usa, mc,
+# visastandardcredit, mcsuperpremiumcredit, etc.) — excluding known non-card
+# values is simpler than maintaining an ever-growing card allowlist.
+CC_NON_CARD = {"cash", "", "x", "other"}
+CC_PAYMENT_METHODS = CC_NON_CARD  # kept for any legacy references; use CC_NON_CARD logic
 # Anything not in this set (e.g., "cash", "", "check") is treated as non-CC
 
 # Shared JS snippet for dynamic portal back link in generated dashboards

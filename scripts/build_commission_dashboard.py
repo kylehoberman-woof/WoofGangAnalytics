@@ -18,7 +18,7 @@ from config import (
     STORE_OPEN_DATES, get_royalty_rate, get_monthly_rent,
     SUPABASE_URL, SUPABASE_ANON_KEY, PORTAL_BACK_JS,
     STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
-    PAYROLL_TAX_RATE, CC_RATE_PCT, CC_RATE_FLAT, CC_PAYMENT_METHODS,
+    PAYROLL_TAX_RATE, CC_RATE_PCT, CC_RATE_FLAT, CC_NON_CARD,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data, get_exclude_set, get_gusto_payroll_config
@@ -37,6 +37,16 @@ _switch_links = " ".join(
     f'&#x21C4; {get_store_display(k)}</a>'
     for k in _other_keys
 )
+# Store switcher dropdown for tab bar (all 3 stores, current one selected)
+from config import STORES as _ALL_STORES
+_store_switcher_options = ""
+for _sk, _sv in _ALL_STORES.items():
+    _sfn = get_store_fn(_sk)
+    _sdisp = get_store_display(_sk)
+    _spath = f"WoofGang_{_sfn}_Commission_Dashboard.html" if _sk == _store_name else f"../{_sk}/WoofGang_{_sfn}_Commission_Dashboard.html"
+    _sel = ' selected' if _sk == _store_name else ''
+    _store_switcher_options += f'<option value="{_spath}"{_sel}>{_sdisp}</option>'
+_store_switcher = f'<select class="pp-select" style="margin-left:8px;margin-right:0;display:inline-block" onchange="window.location.href=this.value">{_store_switcher_options}</select>'
 MONTHLY_RENT = STORE_RENT.get(_store_name, _DEFAULT_RENT)
 
 # Load employee maps/rates from Supabase (falls back to config.py if not yet populated)
@@ -105,7 +115,7 @@ def get_period_cc_fees(period_start, period_end):
         d = t.get("date", "")
         if d < ps or d > pe:
             continue
-        if t.get("payment_method", "") in CC_PAYMENT_METHODS:
+        if t.get("payment_method", "").lower() not in CC_NON_CARD:
             total_fee += round(float(t.get("total", 0)) * CC_RATE_PCT + CC_RATE_FLAT, 2)
     return round(total_fee, 2)
 if True:
@@ -839,6 +849,7 @@ tr:hover td{{background:#fafaf8!important}}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
+  {_store_switcher}
   <button id="download-csv-btn" onclick="downloadPayrollCSV(document.getElementById('pp-select').value)" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:1px solid #2C1A0E;background:#fff;color:#2C1A0E;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">⬇ Payroll CSV</button>
   <button id="save-overrides-btn" onclick="saveOverrides()" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:none;background:#C4276E;color:#fff;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">💾 Save Overrides</button>
 </div>

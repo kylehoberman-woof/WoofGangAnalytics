@@ -69,7 +69,7 @@ except Exception as _e:
     print(f"  Operating expenses fetch failed: {_e}")
 
 # ── Load ticket data for CC fee calculation ──────────────────────────────────
-from config import CC_RATE_PCT, CC_RATE_FLAT, CC_PAYMENT_METHODS
+from config import CC_RATE_PCT, CC_RATE_FLAT, CC_NON_CARD
 
 _tickets = {}
 _tickets_file = DATA_DIR / "tickets.json"
@@ -89,8 +89,8 @@ def get_monthly_cc_fees(month_start, month_end):
         d = t.get("date", "")
         if d < ms or d > me:
             continue
-        method = t.get("payment_method", "")
-        if method in CC_PAYMENT_METHODS:
+        method = t.get("payment_method", "").lower()
+        if method not in CC_NON_CARD:
             order_total = float(t.get("total", 0))
             fee = round(order_total * CC_RATE_PCT + CC_RATE_FLAT, 2)
             total_fee += fee
