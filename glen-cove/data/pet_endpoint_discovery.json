@@ -555,7 +555,7 @@
       "pages",
       "version"
     ],
-    "nested_data_count": 5,
+    "nested_data_count": 7,
     "nested_data_keys": [
       "Address",
       "CellPhone",
@@ -1110,10 +1110,89 @@
               "name": "2"
             }
           ]
+        },
+        {
+          "Address": null,
+          "CellPhone": "5165329682",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421040001,
+          "DateOfBirth": null,
+          "Email": "Sam.seaman27@gmail.com",
+          "FirstName": "Samantha",
+          "LastName": "Seaman",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-24T01:24:46.633",
+          "ModifiedDate": "2026-10-24T01:24:46.71",
+          "ParentCustomerId": null,
+          "CustomerCode": null,
+          "CustomFieldValues": []
+        },
+        {
+          "Address": null,
+          "CellPhone": "",
+          "City": null,
+          "CompanyId": 207058,
+          "CustomerId": 421040002,
+          "DateOfBirth": "2020-10-31T00:00:00",
+          "Email": "",
+          "FirstName": "Bishop",
+          "LastName": "",
+          "Membership": null,
+          "MembershipBalance": null,
+          "MembershipId": null,
+          "Phone": "",
+          "StateProvinceId": null,
+          "ZipPostal": null,
+          "IsAdmin": false,
+          "CreationDate": "2026-10-24T01:24:47.01",
+          "ModifiedDate": "2026-10-24T01:24:47.15",
+          "ParentCustomerId": 421040001,
+          "CustomerCode": null,
+          "CustomFieldValues": [
+            {
+              "id": 372,
+              "name": "1"
+            },
+            {
+              "id": 373,
+              "name": "61"
+            },
+            {
+              "id": 374,
+              "name": "-1"
+            },
+            {
+              "id": 377,
+              "name": "36"
+            },
+            {
+              "id": 375,
+              "name": "5"
+            },
+            {
+              "id": 376,
+              "name": null
+            },
+            {
+              "id": 378,
+              "name": "2"
+            },
+            {
+              "id": 379,
+              "name": "3"
+            }
+          ]
         }
       ],
       "pages": 1,
-      "version": 841611514
+      "version": 841658882
     }
   }
 }
