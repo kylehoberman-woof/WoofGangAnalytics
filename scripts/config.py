@@ -149,16 +149,20 @@ ET_BUFFER_DAYS = 2
 INCREMENTAL_DAYS = 60
 
 # ─── Credit Card Processing Fees ─────────────────────────────────────────────
-# Update these when you confirm your actual processor rate
-CC_RATE_PCT = 0.029       # 2.9% per transaction (estimate — update with actual rate)
-CC_RATE_FLAT = 0.0        # no per-transaction flat fee (FranPOS processor is % only)
+# Effective rates confirmed from FranPOS processor statements (including debit)
+CC_RATE_BY_STORE = {
+    "port-washington": 0.0300,   # 3.00% effective (incl. debit)
+    "hicksville":      0.0271,   # 2.71% effective (incl. debit)
+    "glen-cove":       0.0300,   # assume PW rate until confirmed
+}
+CC_RATE_PCT = 0.0300   # fallback if store not in CC_RATE_BY_STORE
+CC_RATE_FLAT = 0.0     # no per-transaction flat fee (FranPOS processor is % only)
 # Treat everything NOT in this set as a card transaction. FranPOS returns many
 # network-specific codes (pulse, accel, star, nyce, maestro_usa, mc,
 # visastandardcredit, mcsuperpremiumcredit, etc.) — excluding known non-card
 # values is simpler than maintaining an ever-growing card allowlist.
 CC_NON_CARD = {"cash", "", "x", "other"}
 CC_PAYMENT_METHODS = CC_NON_CARD  # kept for any legacy references; use CC_NON_CARD logic
-# Anything not in this set (e.g., "cash", "", "check") is treated as non-CC
 
 # Shared JS snippet for dynamic portal back link in generated dashboards
 PORTAL_BACK_JS = '<script>!function(){var l=sessionStorage.getItem("wg_portal_level"),a=document.getElementById("portal-back");if(a){if(l==="manager"){a.href=a.href.replace("index.html","manager.html");a.innerHTML="\\u2190 Manager Portal";}else if(l==="store"){a.href=a.href.replace("index.html","store.html");a.innerHTML="\\u2190 Store Portal";}else{a.innerHTML="\\u2190 Owner Portal";}}}();</script>'

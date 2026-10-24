@@ -18,7 +18,7 @@ from config import (
     STORE_OPEN_DATES, get_royalty_rate, get_monthly_rent,
     SUPABASE_URL, SUPABASE_ANON_KEY, PORTAL_BACK_JS,
     STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
-    PAYROLL_TAX_RATE, CC_RATE_PCT, CC_RATE_FLAT, CC_NON_CARD,
+    PAYROLL_TAX_RATE, CC_RATE_BY_STORE, CC_RATE_PCT, CC_RATE_FLAT, CC_NON_CARD,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data, get_exclude_set, get_gusto_payroll_config
@@ -103,11 +103,12 @@ if _tickets_file.exists():
         _tickets = json.load(_f)
 
 
+_cc_rate = CC_RATE_BY_STORE.get(_store_name, CC_RATE_PCT)
+
 def get_period_cc_fees(period_start, period_end):
-    """Sum estimated card-processing fees for tickets paid by card within
-    [period_start, period_end] (date objects, inclusive). Same formula as
-    the Financial Dashboard's monthly calc (CC_RATE_PCT + CC_RATE_FLAT per
-    transaction) so the two stay consistent."""
+    """Sum card-processing fees for tickets paid by card within
+    [period_start, period_end] (date objects, inclusive). Uses the confirmed
+    effective rate for this store from CC_RATE_BY_STORE."""
     ps = period_start.isoformat()
     pe = period_end.isoformat()
     total_fee = 0.0
@@ -116,7 +117,7 @@ def get_period_cc_fees(period_start, period_end):
         if d < ps or d > pe:
             continue
         if t.get("payment_method", "").lower() not in CC_NON_CARD:
-            total_fee += round(float(t.get("total", 0)) * CC_RATE_PCT + CC_RATE_FLAT, 2)
+            total_fee += float(t.get("total", 0)) * _cc_rate
     return round(total_fee, 2)
 if True:
     for item in data["order_items"]:
