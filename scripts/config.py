@@ -363,6 +363,12 @@ def get_monthly_rent(store_name, month_date):
             break
     return rent
 
+# Monthly debt service (loan payments) per store — treated as a fixed cost in margin
+STORE_DEBT_SERVICE = {
+    "hicksville": 3094.0,   # monthly loan payment
+}
+
+
 STORE_OPEN_DATES = {
     k: date.fromisoformat(v["open_date"])
     for k, v in STORE_REGISTRY.items()

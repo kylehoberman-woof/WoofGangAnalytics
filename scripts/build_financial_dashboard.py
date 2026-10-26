@@ -16,7 +16,7 @@ from config import (
     BATHER_RATE, PAYROLL_TAX_RATE,
     MANAGER_SALARY_OLD, MANAGER_SALARY_NEW, MANAGER_RAISE_DATE,
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
-    get_royalty_rate, get_monthly_rent, PORTAL_BACK_JS,
+    get_royalty_rate, get_monthly_rent, STORE_DEBT_SERVICE, PORTAL_BACK_JS,
     get_retail_rate,
     STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
 )
@@ -294,7 +294,8 @@ while m_start <= TODAY:
 
     gross_profit = round(net_rev - retail_cogs - comm_paid, 2)
     payroll_tax = round((mgr + bather_pay + retail_pay + comm_paid) * PAYROLL_TAX_RATE, 2)
-    total_opex = round(mgr + bather_pay + retail_pay + payroll_tax + royalties + rent + owner_exp + operating_exp + cc_fees, 2)
+    debt_service = STORE_DEBT_SERVICE.get(_store_name, 0.0)
+    total_opex = round(mgr + bather_pay + retail_pay + payroll_tax + royalties + rent + owner_exp + operating_exp + cc_fees + debt_service, 2)
     net_margin = round(gross_profit - total_opex, 2)
     net_margin_pct = round(net_margin / total_rev * 100, 1) if total_rev else 0
 
@@ -328,6 +329,7 @@ while m_start <= TODAY:
         "owner_exp": owner_exp,
         "operating_exp": operating_exp,
         "cc_fees": cc_fees,
+        "debt_service": debt_service,
         "cc_txn_count": cc_txn_count,
         "cc_volume": cc_volume,
         "total_opex": total_opex,
@@ -353,7 +355,7 @@ ytd = [m for m in monthly if m["year"] == 2026]
 ytd_sums = {}
 for key in ["groom_rev", "retail_rev", "total_rev", "groom_disc", "net_rev",
             "retail_cogs", "comm_paid", "gross_profit", "mgr", "bather_pay",
-            "retail_pay", "payroll_tax", "royalties", "rent", "owner_exp", "operating_exp", "cc_fees", "total_opex", "net_margin", "tips"]:
+            "retail_pay", "payroll_tax", "royalties", "rent", "owner_exp", "operating_exp", "cc_fees", "debt_service", "total_opex", "net_margin", "tips"]:
     ytd_sums[key] = round(sum(m[key] for m in ytd), 2)
 ytd_sums["net_margin_pct"] = round(ytd_sums["net_margin"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
 ytd_sums["gross_margin_pct"] = round(ytd_sums["gross_profit"] / ytd_sums["total_rev"] * 100, 1) if ytd_sums["total_rev"] else 0
