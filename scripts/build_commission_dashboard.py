@@ -834,7 +834,7 @@ tr:hover td{{background:#fafaf8!important}}
 </head>
 <body>
 <div class="header">
-    <div class="header-timestamp">Updated {now_et}<br>{_switch_links}</div>
+    <div class="header-timestamp">Updated {now_et}<br><select onchange="window.location.href=this.value" style="margin-top:6px;padding:4px 8px;border:1px solid rgba(255,255,255,0.4);border-radius:6px;background:rgba(255,255,255,0.15);color:white;font-size:0.76rem;font-family:inherit;cursor:pointer;outline:none">{_store_switcher_options}</select></div>
     <h1>Woof Gang {_store_display}</h1>
     <div class="subtitle">Groomer Commission Dashboard</div>
     <div class="brand-tag">Woof Gang Bakery &amp; Grooming</div>
@@ -854,7 +854,6 @@ tr:hover td{{background:#fafaf8!important}}
   <select class="pp-select" id="pp-select" onchange="renderPayPeriod(this.value)">
     {pp_options}
   </select>
-  {_store_switcher}
   <button id="download-csv-btn" onclick="downloadPayrollCSV(document.getElementById('pp-select').value)" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:1px solid #2C1A0E;background:#fff;color:#2C1A0E;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">⬇ Payroll CSV</button>
   <button id="save-overrides-btn" onclick="saveOverrides()" style="display:none;margin-left:8px;padding:7px 14px;border-radius:8px;border:none;background:#C4276E;color:#fff;font-size:0.84rem;font-family:inherit;cursor:pointer;font-weight:600">💾 Save Overrides</button>
 </div>
