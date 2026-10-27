@@ -22,6 +22,7 @@ from config import (
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data, get_exclude_set, get_gusto_payroll_config
+from classifier import is_service
 
 SCRIPTS_DIR = Path(__file__).parent
 _store_name = sys.argv[1] if len(sys.argv) > 1 else "port-washington"
@@ -102,19 +103,27 @@ if _tickets_file.exists():
     with open(_tickets_file) as _f:
         _tickets = json.load(_f)
 
+# Orders that contain at least one service item — CC fees apply to services only
+_service_order_ids = {
+    str(item.get("OrderId"))
+    for item in data["order_items"]
+    if is_service(item.get("Sku", ""), item.get("Name", ""))
+}
 
 _cc_rate = CC_RATE_BY_STORE.get(_store_name, CC_RATE_PCT)
 
 def get_period_cc_fees(period_start, period_end):
-    """Sum card-processing fees for tickets paid by card within
-    [period_start, period_end] (date objects, inclusive). Uses the confirmed
-    effective rate for this store from CC_RATE_BY_STORE."""
+    """Sum card-processing fees for service tickets paid by card within
+    [period_start, period_end] (date objects, inclusive). Retail-only tickets
+    are excluded — CC fees are tracked against service revenue only."""
     ps = period_start.isoformat()
     pe = period_end.isoformat()
     total_fee = 0.0
-    for t in _tickets.values():
+    for tid, t in _tickets.items():
         d = t.get("date", "")
         if d < ps or d > pe:
+            continue
+        if str(t.get("order_id", tid)) not in _service_order_ids:
             continue
         if t.get("payment_method", "").lower() not in CC_NON_CARD:
             total_fee += float(t.get("total", 0)) * _cc_rate
