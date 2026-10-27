@@ -2,14 +2,69 @@
   "periods": {
     "pp_0": {
       "Julianne D": {
-        "rev": 1125.0,
-        "disc": 100.0,
-        "comm": 562.5,
-        "paid": 800.0,
-        "tips": 135.3,
-        "total": 935.3,
-        "working_days": 4,
-        "guar_days": 4,
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Melanie M": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "_royalty_rate": 0.060000000000000005,
+      "_monthly_rent": 4500.0,
+      "_cc_fees": 0.39,
+      "_manager_salary": 0,
+      "_manager_old_days": 0,
+      "_manager_new_days": 0,
+      "_manager_daily": [],
+      "_manager_bonus": 0,
+      "_bather_rev": 0,
+      "_bather_pay": {},
+      "_bather_hours": {},
+      "_bather_daily": {},
+      "_bather_tips": {},
+      "_bather_tips_daily": {},
+      "_retail_pay": {
+        "Bella F": 186.4
+      },
+      "_retail_hours": {
+        "Bella F": 9.32
+      },
+      "_retail_daily": {
+        "Bella F": [
+          {
+            "date": "2026-10-26",
+            "hours": 9.32
+          }
+        ]
+      },
+      "_retail_rates": {
+        "Bella F": 20.0
+      }
+    },
+    "pp_1": {
+      "Julianne D": {
+        "rev": 1480.0,
+        "disc": 150.0,
+        "comm": 740.0,
+        "paid": 1000.0,
+        "tips": 162.3,
+        "total": 1162.3,
+        "working_days": 5,
+        "guar_days": 5,
         "daily": [
           {
             "date": "2026-10-20",
@@ -50,17 +105,27 @@
             "tips": 13.75,
             "total": 213.75,
             "guar_applied": true
+          },
+          {
+            "date": "2026-10-24",
+            "rev": 355.0,
+            "disc": 50.0,
+            "comm": 177.5,
+            "paid": 200.0,
+            "tips": 27.0,
+            "total": 227.0,
+            "guar_applied": true
           }
         ]
       },
       "Melanie M": {
-        "rev": 760.0,
-        "disc": 100.0,
-        "comm": 380.0,
-        "paid": 800.0,
-        "tips": 68.25,
-        "total": 868.25,
-        "working_days": 4,
+        "rev": 1195.0,
+        "disc": 260.0,
+        "comm": 597.5,
+        "paid": 1017.5,
+        "tips": 143.25,
+        "total": 1160.75,
+        "working_days": 5,
         "guar_days": 4,
         "daily": [
           {
@@ -102,12 +167,22 @@
             "tips": 0,
             "total": 200.0,
             "guar_applied": true
+          },
+          {
+            "date": "2026-10-24",
+            "rev": 435.0,
+            "disc": 160.0,
+            "comm": 217.5,
+            "paid": 217.5,
+            "tips": 75.0,
+            "total": 292.5,
+            "guar_applied": false
           }
         ]
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 4500.0,
-      "_cc_fees": 58.65,
+      "_cc_fees": 93.25,
       "_manager_salary": 0,
       "_manager_old_days": 0,
       "_manager_new_days": 0,
@@ -120,12 +195,12 @@
       "_bather_tips": {},
       "_bather_tips_daily": {},
       "_retail_pay": {
-        "Bella F": 456.4,
-        "Shay": 478.38
+        "Bella F": 602.8,
+        "Shay": 666.75
       },
       "_retail_hours": {
-        "Bella F": 22.82,
-        "Shay": 22.78
+        "Bella F": 30.14,
+        "Shay": 31.75
       },
       "_retail_daily": {
         "Bella F": [
@@ -140,6 +215,10 @@
           {
             "date": "2026-10-21",
             "hours": 9.3
+          },
+          {
+            "date": "2026-10-25",
+            "hours": 7.32
           }
         ],
         "Shay": [
@@ -154,6 +233,10 @@
           {
             "date": "2026-10-23",
             "hours": 9.02
+          },
+          {
+            "date": "2026-10-24",
+            "hours": 8.97
           }
         ]
       },
@@ -162,7 +245,7 @@
         "Shay": 21.0
       }
     },
-    "pp_1": {
+    "pp_2": {
       "Julianne D": {
         "rev": 1530.0,
         "disc": 335.0,
@@ -279,7 +362,7 @@
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 4500.0,
-      "_cc_fees": 55.93,
+      "_cc_fees": 79.9,
       "_manager_salary": 0,
       "_manager_old_days": 0,
       "_manager_new_days": 0,
@@ -342,7 +425,7 @@
         "Shay": 21.0
       }
     },
-    "pp_2": {
+    "pp_3": {
       "Julianne D": {
         "rev": 1665.0,
         "disc": 260.0,
@@ -469,7 +552,7 @@
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 4500.0,
-      "_cc_fees": 88.77,
+      "_cc_fees": 105.49,
       "_manager_salary": 0,
       "_manager_old_days": 0,
       "_manager_new_days": 0,
@@ -539,14 +622,18 @@
   },
   "dates": {
     "pp_0": {
+      "start": "2026-10-26",
+      "end": "2026-11-01"
+    },
+    "pp_1": {
       "start": "2026-10-19",
       "end": "2026-10-25"
     },
-    "pp_1": {
+    "pp_2": {
       "start": "2026-10-12",
       "end": "2026-10-18"
     },
-    "pp_2": {
+    "pp_3": {
       "start": "2026-10-05",
       "end": "2026-10-11"
     }
