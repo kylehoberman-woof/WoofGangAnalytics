@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 from classifier import classify_item
-from config import C, FDD_RETAIL_COGS_PCT, FDD_GROOM_COGS_PCT
+from config import C, FDD_RETAIL_COGS_PCT, FDD_GROOM_COGS_PCT, store_switcher_html
 from formatting import to_py, jslist
 
 # Backward compat: these are read from the 'run' module at import time by some scripts.
@@ -368,14 +368,19 @@ td.magenta { color: """ + C['magenta'] + """; font-weight: 600; }
 """
 
 
-def html_head(title, subtitle="", timestamp=None, home_url="index.html", show_home=True, store_switch=None):
+def html_head(title, subtitle="", timestamp=None, home_url="index.html", show_home=True, store_switch=None, store_key=None, switcher_template=None):
     if timestamp is None:
         from zoneinfo import ZoneInfo
         timestamp = datetime.now(ZoneInfo("America/New_York")).strftime("%B %d, %Y at %I:%M %p ET")
     from config import PORTAL_BACK_JS
     _home_link = (f'<a id="portal-back" href="{home_url}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>'
         f'{PORTAL_BACK_JS}') if show_home else ''
-    _switch_link = f'<br><a href="{store_switch[0]}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; {store_switch[1]}</a>' if store_switch else ''
+    if store_key and switcher_template:
+        _switch_link = '<br>' + store_switcher_html(store_key, switcher_template)
+    elif store_switch:
+        _switch_link = f'<br><a href="{store_switch[0]}" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">&#x21C4; {store_switch[1]}</a>'
+    else:
+        _switch_link = ''
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>

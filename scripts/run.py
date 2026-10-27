@@ -740,22 +740,12 @@ function updateDailyDetail() { _dailyDetailChart = _updateDetail(DAILY_DATA, 'dc
         _switch = (f"{_other_dir}/WoofGang_{_other_fn}_NY_AllYears_Dashboard.html", _other_display)
     else:
         _switch = None
-    html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url, show_home=False, store_switch=None)
+    html = gd.html_head(_store_title, f"Store Performance Analysis \u00b7 Sales through {through}", home_url=_home_url, show_home=False, store_key=_store_key, switcher_template="WoofGang_{store_fn}_NY_AllYears_Dashboard.html")
     html = html.replace("</style>", tabbed_css + "\n</style>", 1)
-    _store_options = ""
-    for _sk, _sv in STORES.items():
-        _sfn = get_store_fn(_sk)
-        _sdisp = get_store_display(_sk)
-        _spath = f"WoofGang_{_sfn}_NY_AllYears_Dashboard.html" if _sk == _store_key else f"../{_sk}/WoofGang_{_sfn}_NY_AllYears_Dashboard.html"
-        _sel = ' selected' if _sk == _store_key else ''
-        _store_options += f'<option value="{_spath}"{_sel}>{_sdisp}</option>'
     html += (
         f'<div style="background:#C4276E;padding:10px 32px;display:flex;align-items:center;gap:16px;'
         f'position:sticky;top:0;z-index:101;box-shadow:0 2px 12px rgba(196,39,110,0.3)">\n'
         f'  <a id="portal-back" href="{_home_url}" style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.85rem;font-weight:600">&larr; Home</a>{PORTAL_BACK_JS}\n'
-        f'  <select onchange="location.href=this.value" style="margin-left:auto;background:#a8004e;color:#fff;border:1px solid rgba(255,255,255,0.3);'
-        f'border-radius:6px;padding:5px 10px;font-size:0.82rem;font-weight:600;cursor:pointer">'
-        f'{_store_options}</select>\n'
         f'</div>\n'
     )
     html += '<div class="yr-tab-bar">\n'
