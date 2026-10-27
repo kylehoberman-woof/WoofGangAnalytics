@@ -15,7 +15,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores
+from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores, store_switcher_html
 from classifier import classify_item
 import pandas as pd
 
@@ -386,12 +386,7 @@ insight_cards_html = build_insight_cards()
 # ── Portal back / switch links ────────────────────────────────────────────────
 # One switch link per other store (not just the first) — with 3+ stores,
 # a single link can't represent all of them.
-_switch_links = " ".join(
-    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_Retail_Dashboard.html" '
-    f'style="color:rgba(255,255,255,0.8);text-decoration:none;font-size:0.78rem">'
-    f'&#x21C4; {get_store_display(k)}</a>'
-    for k in _other_keys
-)
+_switch_links = store_switcher_html(_sn, "WoofGang_{store_fn}_Retail_Dashboard.html")
 _home_url    = "../index.html"
 
 # ── CSS ───────────────────────────────────────────────────────────────────────

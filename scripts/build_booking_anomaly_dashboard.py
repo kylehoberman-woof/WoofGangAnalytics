@@ -21,7 +21,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, str(Path(__file__).parent))
 
 import config
-from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores, STORE_REGISTRY
+from config import get_store, PORTAL_BACK_JS, get_store_display, get_store_fn, get_other_stores, STORE_REGISTRY, store_switcher_html
 from formatting import esc
 from lapse_calls_lib import get_store_tag, filter_pet_records_to_store, group_records_by_dog, is_real_appointment, clean_size, SERVICE_KEYWORD_RE
 
@@ -35,12 +35,7 @@ _home_url = "../index.html"
 _other_keys = get_other_stores(_store_name)
 # One switch link per other store (not just the first) — with 3+ stores,
 # a single link can't represent all of them.
-_switch_links = " ".join(
-    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_BookingAnomalies.html" '
-    f'style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">'
-    f'&#x21C4; {esc(get_store_display(k))}</a>'
-    for k in _other_keys
-)
+_switch_links = store_switcher_html(_store_name, "WoofGang_{store_fn}_BookingAnomalies.html")
 
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir

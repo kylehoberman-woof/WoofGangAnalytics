@@ -21,7 +21,7 @@ import json, sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY, PORTAL_BACK_JS, get_other_stores
+from config import get_store, get_store_display, get_store_fn, STORE_REGISTRY, PORTAL_BACK_JS, get_other_stores, store_switcher_html
 from lapse_calls_lib import (
     get_store_tag, filter_pet_records_to_store, load_customer_visit_staff,
     compute_lapse_candidates, group_records_by_dog,
@@ -76,11 +76,7 @@ def esc(s):
 
 # One switch link per other store (not just the first) — with 3+ stores,
 # a single link can't represent all of them.
-_switch_links_calls = "".join(
-    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_LapseCalls.html" class="lc-store-switch">'
-    f'&#x21C4; {esc(get_store_display(k))}</a>'
-    for k in _other_keys
-)
+_switch_links_calls = store_switcher_html(store_name, "WoofGang_{store_fn}_LapseCalls.html")
 
 rows = []
 for d in lapsed_dogs:
@@ -857,11 +853,7 @@ print(f"Lapse Calls widget written → {out_html}")
 # associates working the outreach list; owners check it on its own.
 
 out_progress_html = data_dir.parent / f"WoofGang_{store_fn}_LapseProgress.html"
-_switch_links_progress = "".join(
-    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_LapseProgress.html" class="lc-store-switch">'
-    f'&#x21C4; {esc(get_store_display(k))}</a>'
-    for k in _other_keys
-)
+_switch_links_progress = store_switcher_html(store_name, "WoofGang_{store_fn}_LapseProgress.html")
 CID_OWNER_JSON = json.dumps(cid_owner_map).replace("</", "<\\/")
 
 PROGRESS_CSS = """

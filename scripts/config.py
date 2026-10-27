@@ -41,6 +41,31 @@ def get_other_stores(store_key: str) -> list:
     return [k for k in STORE_REGISTRY if k != store_key]
 
 
+def store_switcher_html(current_store_key: str, filename_template: str) -> str:
+    """Return a <select> dropdown for switching between stores, styled for the dark header.
+
+    filename_template: the dashboard filename with {store_fn} as placeholder, e.g.
+        'WoofGang_{store_fn}_Commission_Dashboard.html'
+    The current store's file is served relative (no path prefix); others get '../{key}/' prefix.
+    """
+    options = ""
+    for k in STORE_REGISTRY:
+        fn = get_store_fn(k)
+        path = filename_template.format(store_fn=fn)
+        if k != current_store_key:
+            path = f"../{k}/{path}"
+        sel = " selected" if k == current_store_key else ""
+        disp = get_store_display(k)
+        options += f'<option value="{path}"{sel}>{disp}</option>'
+    return (
+        f'<select onchange="window.location.href=this.value" '
+        f'style="margin-top:6px;padding:4px 8px;border:1px solid rgba(255,255,255,0.4);'
+        f'border-radius:6px;background:rgba(255,255,255,0.15);color:white;'
+        f'font-size:0.76rem;font-family:inherit;cursor:pointer;outline:none">'
+        f'{options}</select>'
+    )
+
+
 def store_includes_manager(store_key: str) -> bool:
     return STORE_REGISTRY.get(store_key, {}).get("include_manager", False)
 

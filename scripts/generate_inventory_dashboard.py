@@ -6,7 +6,7 @@ from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from config import get_store, STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores
+from config import get_store, STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores, store_switcher_html
 from classifier import is_service, detect_vendor
 from config import PORTAL_BACK_JS
 
@@ -18,12 +18,7 @@ _home_url = "../index.html"
 _other_keys = get_other_stores(_store_name)
 # One switch link per other store (not just the first) — with 3+ stores,
 # a single link can't represent all of them.
-_switch_links = " ".join(
-    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_Inventory_Dashboard.html" '
-    f'style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">'
-    f'&#x21C4; {get_store_display(k)}</a>'
-    for k in _other_keys
-)
+_switch_links = store_switcher_html(_store_name, "WoofGang_{store_fn}_Inventory_Dashboard.html")
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 

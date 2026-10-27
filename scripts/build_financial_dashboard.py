@@ -18,7 +18,7 @@ from config import (
     MANAGER_BONUS_DATE, MANAGER_BONUS, MANAGER_START,
     get_royalty_rate, get_monthly_rent, STORE_DEBT_SERVICE, PORTAL_BACK_JS,
     get_retail_rate,
-    STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
+    STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores, store_switcher_html,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data, get_exclude_set
@@ -31,12 +31,7 @@ _home_url = "../index.html"
 _other_keys = get_other_stores(_store_name)
 # One switch link per other store (not just the first) — with 3+ stores,
 # a single link can't represent all of them.
-_switch_links = " ".join(
-    f'<a href="../{k}/WoofGang_{get_store_fn(k)}_Financial_Dashboard.html" '
-    f'style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.78rem">'
-    f'&#x21C4; {get_store_display(k)}</a>'
-    for k in _other_keys
-)
+_switch_links = store_switcher_html(_store_name, "WoofGang_{store_fn}_Financial_Dashboard.html")
 DATA_DIR = _store.data_dir
 OUTPUT_DIR = _store.output_dir
 TODAY = date.today()
