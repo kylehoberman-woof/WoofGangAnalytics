@@ -103,19 +103,27 @@ if _tickets_file.exists():
     with open(_tickets_file) as _f:
         _tickets = json.load(_f)
 
-# Orders that contain at least one service item — CC fees apply to services only
+# Retail item prices per order — used to strip retail from mixed ticket totals
+_retail_rev_by_order = {}
+for _item in data["order_items"]:
+    if not is_service(_item.get("Sku", ""), _item.get("Name", "")):
+        _oid = str(_item.get("OrderId"))
+        _retail_rev_by_order[_oid] = _retail_rev_by_order.get(_oid, 0.0) + float(_item.get("Price", 0)) * float(_item.get("Quantity", 1))
+
+# Orders that have at least one service item
 _service_order_ids = {
-    str(item.get("OrderId"))
-    for item in data["order_items"]
-    if is_service(item.get("Sku", ""), item.get("Name", ""))
+    str(_item.get("OrderId"))
+    for _item in data["order_items"]
+    if is_service(_item.get("Sku", ""), _item.get("Name", ""))
 }
 
 _cc_rate = CC_RATE_BY_STORE.get(_store_name, CC_RATE_PCT)
 
 def get_period_cc_fees(period_start, period_end):
-    """Sum card-processing fees for service tickets paid by card within
-    [period_start, period_end] (date objects, inclusive). Retail-only tickets
-    are excluded — CC fees are tracked against service revenue only."""
+    """Sum card-processing fees on service revenue (incl. tips/tax) within
+    [period_start, period_end]. For mixed orders, retail item prices are
+    subtracted from the ticket total so tips and tax on service items are
+    still captured. Retail-only tickets are excluded entirely."""
     ps = period_start.isoformat()
     pe = period_end.isoformat()
     total_fee = 0.0
@@ -123,10 +131,12 @@ def get_period_cc_fees(period_start, period_end):
         d = t.get("date", "")
         if d < ps or d > pe:
             continue
-        if str(t.get("order_id", tid)) not in _service_order_ids:
+        if tid not in _service_order_ids:
             continue
         if t.get("payment_method", "").lower() not in CC_NON_CARD:
-            total_fee += float(t.get("total", 0)) * _cc_rate
+            retail_portion = _retail_rev_by_order.get(tid, 0.0)
+            svc_total = max(0.0, float(t.get("total", 0)) - retail_portion)
+            total_fee += svc_total * _cc_rate
     return round(total_fee, 2)
 if True:
     for item in data["order_items"]:
