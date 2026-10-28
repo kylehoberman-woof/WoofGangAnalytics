@@ -269,6 +269,7 @@ const DOC_TYPES = [
   { doc_type: 'insurance_pfl_dbl',      icon: '📋', name: 'PFL / DBL Policy',         meta: 'Paid Family Leave & Disability Benefits' },
 ];
 
+// uploadedDocs: { 'store_key:doc_type': [row, ...] }
 let uploadedDocs = {};
 let pendingUpload = null;
 let currentStore = 'port-washington';
@@ -289,7 +290,7 @@ async function ensureBucket() {
 }
 
 async function loadDocs() {
-  const r = await fetch(`${SB_URL}/rest/v1/documents?select=*`, { headers: HDR });
+  const r = await fetch(`${SB_URL}/rest/v1/documents?select=*&order=uploaded_at.asc`, { headers: HDR });
   if (!r.ok) {
     const txt = await r.text().catch(() => '');
     if (txt.includes('does not exist') || txt.includes('relation') || r.status === 404) {
@@ -297,12 +298,15 @@ async function loadDocs() {
     } else {
       showToast('Failed to load documents', 'error');
     }
-    updateProgress(0, 24);
     return false;
   }
   const rows = await r.json();
   uploadedDocs = {};
-  rows.forEach(row => { uploadedDocs[`${row.store_key}:${row.doc_type}`] = row; });
+  rows.forEach(row => {
+    const key = `${row.store_key}:${row.doc_type}`;
+    if (!uploadedDocs[key]) uploadedDocs[key] = [];
+    uploadedDocs[key].push(row);
+  });
   return true;
 }
 
@@ -313,47 +317,49 @@ function renderAll() {
   updateTabCounts();
 }
 
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 function renderPanel(store) {
   const panel = document.getElementById(`panel-${store.key}`);
   let html = '<div class="doc-grid">';
 
   DOC_TYPES.forEach(dt => {
     const key = `${store.key}:${dt.doc_type}`;
-    const row = uploadedDocs[key];
-    const cardId = `card-${store.key}-${dt.doc_type}`;
+    const rows = uploadedDocs[key] || [];
+    const cardId = `card-${store.key}-${dt.doc_type}`.replace(/[^a-z0-9-]/g, '-');
+    const hasFiles = rows.length > 0;
 
     html += `<div class="doc-card ${store.color}" id="${cardId}">
       <div class="doc-icon-row">
         <span class="doc-icon">${dt.icon}</span>
-        <span class="doc-type-label">${store.label}</span>
+        <span class="doc-type-label">${esc(store.label)}</span>
       </div>
-      <div class="doc-name">${dt.name}</div>
-      <div class="doc-meta">${dt.meta}</div>`;
+      <div class="doc-name">${esc(dt.name)}</div>
+      <div class="doc-meta">${esc(dt.meta)}</div>`;
 
-    if (row) {
-      const dt2 = new Date(row.uploaded_at);
-      const dateStr = dt2.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const publicUrl = `${SB_URL}/storage/v1/object/public/${BUCKET}/${row.storage_path}`;
-      html += `<div class="doc-filename" title="${row.original_filename || ''}">${row.original_filename || ''}</div>
-        <div class="doc-status-row">
-          <div>
-            <span class="status-pill uploaded"><span class="dot"></span> Uploaded</span>
-            <div class="doc-uploaded-date">${dateStr}</div>
+    if (hasFiles) {
+      html += `<div style="margin-bottom:10px">`;
+      rows.forEach(row => {
+        const dateStr = new Date(row.uploaded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const publicUrl = `${SB_URL}/storage/v1/object/public/${BUCKET}/${row.storage_path}`;
+        html += `<div style="display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:1px solid #f0f0f0">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.78rem;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(row.original_filename||'')}">${esc(row.original_filename||'document')}</div>
+            <div style="font-size:0.7rem;color:#bbb">${dateStr}</div>
           </div>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <a href="${publicUrl}" target="_blank" class="btn-view">&#128065; View</a>
-          <button class="btn-replace" onclick="triggerUpload('${store.key}','${dt.doc_type}','${cardId}')">&#8593; Replace</button>
+          <a href="${publicUrl}" target="_blank" class="btn-view" style="padding:5px 10px;font-size:0.72rem">View</a>
+          <button onclick="deleteDoc(${row.id},'${esc(row.storage_path)}','${store.key}','${dt.doc_type}')" style="background:none;border:none;cursor:pointer;color:#ccc;font-size:1rem;padding:4px;line-height:1" title="Remove">&#10005;</button>
         </div>`;
+      });
+      html += `</div>`;
     } else {
-      html += `<div class="doc-status-row" style="margin-bottom:12px">
-          <span class="status-pill missing"><span class="dot"></span> Not uploaded</span>
-        </div>
-        <button class="btn-upload" id="btn-${cardId}" onclick="triggerUpload('${store.key}','${dt.doc_type}','${cardId}')">
-          <span class="upload-label">&#8593; Upload</span>
-          <span class="upload-spinner">&#8635; Uploading…</span>
-        </button>`;
+      html += `<div style="margin-bottom:10px"><span class="status-pill missing"><span class="dot"></span> No files yet</span></div>`;
     }
+
+    html += `<button class="btn-upload" id="btn-${cardId}" onclick="triggerUpload('${store.key}','${dt.doc_type}','${cardId}')">
+        <span class="upload-label">&#8593; ${hasFiles ? 'Add Another File' : 'Upload'}</span>
+        <span class="upload-spinner">&#8635; Uploading…</span>
+      </button>`;
 
     html += `</div>`;
   });
@@ -363,19 +369,20 @@ function renderPanel(store) {
 }
 
 function updateProgress() {
-  const total = STORES.length * DOC_TYPES.length; // 4 stores × 9 doc types = 36
-  const uploaded = Object.keys(uploadedDocs).length;
-  const pct = Math.round(uploaded / total * 100);
-  document.getElementById('progress-count').textContent = `${uploaded} of ${total} documents uploaded`;
+  const total = STORES.length * DOC_TYPES.length;
+  const filled = STORES.reduce((acc, store) =>
+    acc + DOC_TYPES.filter(dt => (uploadedDocs[`${store.key}:${dt.doc_type}`] || []).length > 0).length, 0);
+  const pct = Math.round(filled / total * 100);
+  document.getElementById('progress-count').textContent = `${filled} of ${total} categories have files`;
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-pct').textContent = pct + '%';
 }
 
 function updateTabCounts() {
   STORES.forEach(store => {
-    const uploaded = DOC_TYPES.filter(dt => uploadedDocs[`${store.key}:${dt.doc_type}`]).length;
+    const filled = DOC_TYPES.filter(dt => (uploadedDocs[`${store.key}:${dt.doc_type}`] || []).length > 0).length;
     const el = document.getElementById(`count-${store.key}`);
-    if (el) el.textContent = `${uploaded}/6`;
+    if (el) el.textContent = `${filled}/9`;
   });
 }
 
@@ -401,8 +408,9 @@ document.getElementById('file-input').addEventListener('change', async function(
   const btn = document.getElementById(`btn-${cardId}`);
   if (btn) { btn.disabled = true; btn.closest('.doc-card').classList.add('uploading'); }
 
+  // Unique path per file using timestamp
   const ext = file.name.split('.').pop();
-  const storagePath = `${store_key}/${doc_type}.${ext}`;
+  const storagePath = `${store_key}/${doc_type}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
 
   const uploadRes = await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${storagePath}`, {
     method: 'POST',
@@ -419,16 +427,10 @@ document.getElementById('file-input').addEventListener('change', async function(
     return;
   }
 
-  const existing = uploadedDocs[`${store_key}:${doc_type}`];
   const payload = { store_key, doc_type, storage_path: storagePath, original_filename: file.name, uploaded_at: new Date().toISOString() };
 
-  const dbUrl = existing
-    ? `${SB_URL}/rest/v1/documents?store_key=eq.${store_key}&doc_type=eq.${doc_type}`
-    : `${SB_URL}/rest/v1/documents`;
-  const dbMethod = existing ? 'PATCH' : 'POST';
-
-  const dbRes = await fetch(dbUrl, {
-    method: dbMethod,
+  const dbRes = await fetch(`${SB_URL}/rest/v1/documents`, {
+    method: 'POST',
     headers: { ...HDR, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
     body: JSON.stringify(payload)
   });
@@ -439,15 +441,42 @@ document.getElementById('file-input').addEventListener('change', async function(
     return;
   }
 
-  uploadedDocs[`${store_key}:${doc_type}`] = payload;
-  showToast('✓ ' + file.name + ' uploaded', 'success');
+  const saved = await dbRes.json();
+  const newRow = Array.isArray(saved) ? saved[0] : saved;
+  const key = `${store_key}:${doc_type}`;
+  if (!uploadedDocs[key]) uploadedDocs[key] = [];
+  uploadedDocs[key].push(newRow || payload);
 
-  // Re-render just this store's panel
+  showToast('✓ ' + file.name + ' uploaded', 'success');
   const store = STORES.find(s => s.key === store_key);
   if (store) renderPanel(store);
   updateProgress();
   updateTabCounts();
 });
+
+// ── Delete flow ───────────────────────────────────────────────────────────────
+async function deleteDoc(id, storagePath, store_key, doc_type) {
+  if (!confirm('Remove this file?')) return;
+
+  // Delete from storage
+  await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${storagePath}`, {
+    method: 'DELETE', headers: HDR
+  });
+
+  // Delete DB record
+  await fetch(`${SB_URL}/rest/v1/documents?id=eq.${id}`, {
+    method: 'DELETE', headers: HDR
+  });
+
+  const key = `${store_key}:${doc_type}`;
+  if (uploadedDocs[key]) uploadedDocs[key] = uploadedDocs[key].filter(r => r.id !== id);
+
+  showToast('File removed', '');
+  const store = STORES.find(s => s.key === store_key);
+  if (store) renderPanel(store);
+  updateProgress();
+  updateTabCounts();
+}
 
 // ── Utilities ────────────────────────────────────────────────────────────────
 let toastTimer;
