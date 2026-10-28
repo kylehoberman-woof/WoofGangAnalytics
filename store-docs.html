@@ -8,86 +8,113 @@
 <style>
 .page-header {
   background: linear-gradient(135deg,#C4276E 0%,#6B3520 100%);
-  padding: 32px 32px 28px; color: white;
+  padding: 32px 32px 0; color: white;
 }
-.page-header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
-.page-header p  { font-size: 0.9rem; opacity: 0.8; }
+.page-header-top { margin-bottom: 20px; }
+.page-header h1  { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
+.page-header p   { font-size: 0.9rem; opacity: 0.8; }
 .back-link {
   display: inline-flex; align-items: center; gap: 6px;
   color: rgba(255,255,255,0.8); text-decoration: none;
-  font-size: 0.85rem; font-weight: 600; margin-bottom: 6px;
+  font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;
 }
 .back-link:hover { color: white; }
 
-.doc-section { margin-bottom: 48px; }
-.doc-section-title {
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: #aaa; margin-bottom: 16px;
-  padding-bottom: 10px; border-bottom: 2px solid #eee;
+/* ── Store Tabs ── */
+.store-tabs {
+  display: flex; gap: 4px; overflow-x: auto;
+  padding: 0 0 0 0; scrollbar-width: none;
 }
+.store-tabs::-webkit-scrollbar { display: none; }
+.store-tab {
+  padding: 12px 24px; border-radius: 10px 10px 0 0;
+  font-size: 0.88rem; font-weight: 700; cursor: pointer;
+  border: none; font-family: inherit;
+  background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.75);
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap; position: relative;
+}
+.store-tab:hover { background: rgba(255,255,255,0.25); color: white; }
+.store-tab.active { background: #FDF0F5; color: #1a1a2e; }
+.store-tab .tab-count {
+  display: inline-block; margin-left: 7px; font-size: 0.68rem;
+  padding: 1px 7px; border-radius: 10px;
+  background: rgba(255,255,255,0.2); color: inherit; font-weight: 700;
+}
+.store-tab.active .tab-count { background: #eee; color: #888; }
+.store-tab .tab-dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: #4caf50; margin-left: 6px; vertical-align: middle;
+}
+
+/* ── Content Panel ── */
+.store-panel { display: none; }
+.store-panel.active { display: block; }
+
+/* ── Doc Grid ── */
 .doc-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 32px 24px 60px;
+  max-width: 1100px; margin: 0 auto;
 }
+@media(max-width: 900px) { .doc-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width: 580px) { .doc-grid { grid-template-columns: 1fr; } }
 
 /* ── Doc Card ── */
 .doc-card {
   background: white; border-radius: 14px;
-  padding: 20px 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  display: flex; align-items: flex-start; gap: 14px;
-  border-left: 4px solid #C4276E;
+  padding: 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  border-top: 4px solid #C4276E;
   transition: transform 0.15s, box-shadow 0.15s;
-  position: relative;
 }
-.doc-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(196,39,110,0.1); }
-.doc-card.green { border-left-color: #2E7D32; }
-.doc-card.blue  { border-left-color: #1565C0; }
-.doc-card.teal  { border-left-color: #1B6B6B; }
-.doc-card.amber { border-left-color: #F57F17; }
+.doc-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.doc-card.green { border-top-color: #2E7D32; }
+.doc-card.blue  { border-top-color: #1565C0; }
+.doc-card.teal  { border-top-color: #1B6B6B; }
+.doc-card.purple{ border-top-color: #6A1B9A; }
 
-.doc-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 2px; }
-.doc-body { flex: 1; min-width: 0; }
-
-.store-badge {
-  display: inline-block; font-size: 0.68rem; font-weight: 700;
-  padding: 2px 8px; border-radius: 10px; margin-bottom: 5px;
-  background: #FDF0F5; color: #C4276E; text-transform: uppercase; letter-spacing: 0.05em;
+.doc-icon-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.doc-icon { font-size: 1.6rem; }
+.doc-type-label {
+  font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.08em; color: #bbb;
 }
-.store-badge.green { background: #e8f5e9; color: #2E7D32; }
-.store-badge.blue  { background: #e3f2fd; color: #1565C0; }
-.store-badge.teal  { background: #e0f2f1; color: #1B6B6B; }
-.store-badge.amber { background: #fff8e1; color: #F57F17; }
+.doc-name { font-size: 1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+.doc-meta { font-size: 0.78rem; color: #aaa; margin-bottom: 14px; line-height: 1.4; }
 
-.doc-name { font-size: 0.92rem; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
-.doc-meta { font-size: 0.75rem; color: #999; margin-bottom: 10px; }
+/* Status */
+.doc-status-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; flex-wrap: wrap;
+}
+.status-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.72rem; font-weight: 700; padding: 4px 10px;
+  border-radius: 20px;
+}
+.status-pill.uploaded { background: #e8f5e9; color: #2E7D32; }
+.status-pill.missing  { background: #fafafa; color: #bbb; border: 1.5px dashed #ddd; }
+.status-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
-/* ── Status / Action ── */
-.doc-status-uploaded {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 0.78rem; font-weight: 600; color: #2E7D32;
-  margin-bottom: 6px;
-}
-.doc-status-uploaded .dot {
-  width: 8px; height: 8px; border-radius: 50%; background: #2E7D32; flex-shrink: 0;
-}
-.doc-uploaded-date { font-size: 0.72rem; color: #aaa; margin-bottom: 8px; }
-.doc-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.doc-uploaded-date { font-size: 0.71rem; color: #bbb; margin-top: 4px; margin-bottom: 10px; }
+.doc-filename { font-size: 0.71rem; color: #aaa; margin-bottom: 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
 .btn-view {
   display: inline-flex; align-items: center; gap: 5px;
-  padding: 7px 14px; border-radius: 8px;
+  padding: 8px 16px; border-radius: 8px;
   background: #e8f5e9; color: #2E7D32;
-  font-size: 0.78rem; font-weight: 700; text-decoration: none;
+  font-size: 0.8rem; font-weight: 700; text-decoration: none;
   border: none; cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
 .btn-view:hover { background: #c8e6c9; }
 
 .btn-replace {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 7px 14px; border-radius: 8px;
-  background: #f5f5f5; color: #888;
+  padding: 8px 14px; border-radius: 8px;
+  background: #f5f5f5; color: #999;
   font-size: 0.78rem; font-weight: 600;
   border: none; cursor: pointer; font-family: inherit;
   transition: background 0.15s;
@@ -95,15 +122,15 @@
 .btn-replace:hover { background: #ebebeb; color: #555; }
 
 .btn-upload {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 9px 18px; border-radius: 8px;
+  width: 100%; padding: 11px; border-radius: 9px;
   background: #C4276E; color: white;
-  font-size: 0.82rem; font-weight: 700;
+  font-size: 0.85rem; font-weight: 700;
   border: none; cursor: pointer; font-family: inherit;
-  transition: background 0.15s, transform 0.1s;
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
 }
-.btn-upload:hover { background: #a31f5b; transform: translateY(-1px); }
-.btn-upload:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-upload:hover { background: #a31f5b; }
+.btn-upload:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .doc-card.green .btn-upload  { background: #2E7D32; }
 .doc-card.green .btn-upload:hover { background: #1b5e20; }
@@ -111,29 +138,38 @@
 .doc-card.blue  .btn-upload:hover { background: #0d47a1; }
 .doc-card.teal  .btn-upload  { background: #1B6B6B; }
 .doc-card.teal  .btn-upload:hover { background: #145252; }
-.doc-card.amber .btn-upload  { background: #F57F17; }
-.doc-card.amber .btn-upload:hover { background: #e65100; }
+.doc-card.purple.btn-upload  { background: #6A1B9A; }
 
-.upload-progress {
-  font-size: 0.78rem; color: #C4276E; font-weight: 600;
-  display: none; align-items: center; gap: 6px;
+.upload-spinner { display: none; }
+.uploading .upload-spinner { display: inline; }
+.uploading .upload-label   { display: none; }
+
+/* ── Progress bar strip ── */
+.progress-strip {
+  background: white; border-bottom: 1px solid #eee;
+  padding: 14px 32px; display: flex; align-items: center; gap: 16px;
+  max-width: 100%;
 }
-.upload-progress.active { display: flex; }
+.progress-strip-inner { display: flex; align-items: center; gap: 14px; flex: 1; max-width: 1100px; margin: 0 auto; }
+.progress-count { font-size: 0.82rem; font-weight: 700; color: #1a1a2e; white-space: nowrap; }
+.progress-bar-bg { flex: 1; background: #efefef; border-radius: 6px; height: 7px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: #2E7D32; border-radius: 6px; transition: width 0.4s; }
+.progress-pct { font-size: 0.8rem; font-weight: 700; color: #2E7D32; white-space: nowrap; }
 
 /* ── Setup banner ── */
 .setup-banner {
   background: #fff3e0; border: 2px solid #F57F17; border-radius: 12px;
-  padding: 20px 24px; margin-bottom: 32px;
+  padding: 20px 24px; margin: 24px;
 }
 .setup-banner h3 { color: #E65100; font-size: 0.95rem; margin-bottom: 8px; }
-.setup-banner p  { font-size: 0.85rem; color: #555; line-height: 1.6; margin-bottom: 12px; }
 .setup-banner code {
   display: block; background: #1a1a2e; color: #e0e0e0;
   padding: 14px 18px; border-radius: 8px; font-size: 0.78rem;
   white-space: pre; overflow-x: auto; font-family: monospace; line-height: 1.6;
+  margin: 10px 0;
 }
 .btn-copy-sql {
-  margin-top: 10px; padding: 8px 16px; background: #F57F17; color: white;
+  padding: 8px 16px; background: #F57F17; color: white;
   border: none; border-radius: 7px; font-size: 0.8rem; font-weight: 700;
   cursor: pointer; font-family: inherit;
 }
@@ -144,31 +180,49 @@
   background: #1a1a2e; color: white; padding: 12px 24px; border-radius: 10px;
   font-size: 0.85rem; font-weight: 600; z-index: 9999;
   opacity: 0; transition: opacity 0.3s; pointer-events: none;
-  display: flex; align-items: center; gap: 8px;
+  white-space: nowrap;
 }
 #toast.show { opacity: 1; }
 #toast.success { background: #2E7D32; }
 #toast.error   { background: #c62828; }
-
-/* skeleton */
-.skel { background: #eee; border-radius: 6px; animation: pulse 1.2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 </style>
 </head>
-<body style="background:#FDF0F5;font-family:'DM Sans',system-ui,sans-serif">
+<body style="background:#FDF0F5;font-family:'DM Sans',system-ui,sans-serif;min-height:100vh">
 
 <div class="page-header">
-  <a class="back-link" href="index.html">&#8592; Owner Portal</a>
-  <h1>&#128193; Documents</h1>
-  <p>Leases, legal filings, certificates, drawings, and contracts — organized by store</p>
+  <div class="page-header-top">
+    <a class="back-link" href="index.html">&#8592; Owner Portal</a>
+    <h1>&#128193; Documents</h1>
+    <p>Leases, filings, certificates, and contracts — organized by store</p>
+  </div>
+  <div class="store-tabs" id="store-tabs">
+    <button class="store-tab active" data-store="port-washington" onclick="switchStore('port-washington')">
+      Port Washington <span class="tab-count" id="count-port-washington">0/9</span>
+    </button>
+    <button class="store-tab" data-store="hicksville" onclick="switchStore('hicksville')">
+      Hicksville <span class="tab-count" id="count-hicksville">0/9</span>
+    </button>
+    <button class="store-tab" data-store="glen-cove" onclick="switchStore('glen-cove')">
+      Glen Cove <span class="tab-count" id="count-glen-cove">0/9</span>
+    </button>
+    <button class="store-tab" data-store="albertson" onclick="switchStore('albertson')">
+      Albertson <span class="tab-count" id="count-albertson">0/9</span>
+    </button>
+  </div>
 </div>
 
-<div style="max-width:1100px;margin:0 auto;padding:40px 24px 60px">
+<div class="progress-strip">
+  <div class="progress-strip-inner">
+    <div class="progress-count" id="progress-count">Loading…</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-pct" id="progress-pct"></div>
+  </div>
+</div>
 
-  <div id="setup-banner" class="setup-banner" style="display:none">
-    <h3>&#9888;&#65039; One-time setup required</h3>
-    <p>Run this SQL in the <a href="https://supabase.com/dashboard/project/bqzinttbjeeaybywhhet/sql" target="_blank" style="color:#E65100">Supabase SQL editor</a>, then reload this page:</p>
-    <code id="setup-sql">create table if not exists documents (
+<div id="setup-banner" class="setup-banner" style="display:none">
+  <h3>&#9888;&#65039; One-time setup required</h3>
+  <p>Run this SQL in the <a href="https://supabase.com/dashboard/project/bqzinttbjeeaybywhhet/sql" target="_blank" style="color:#E65100">Supabase SQL editor</a>, then reload:</p>
+  <code id="setup-sql">create table if not exists documents (
   id bigint generated always as identity primary key,
   store_key text not null,
   doc_type  text not null,
@@ -178,188 +232,158 @@
   constraint documents_store_doc_unique unique(store_key, doc_type)
 );
 alter table documents disable row level security;</code>
-    <button class="btn-copy-sql" onclick="copySetupSql()">Copy SQL</button>
-  </div>
-
-  <div id="docs-root"></div>
-
+  <button class="btn-copy-sql" onclick="copySetupSql()">Copy SQL</button>
 </div>
 
-<div id="toast"></div>
+<!-- Per-store panels -->
+<div id="panel-port-washington" class="store-panel active"></div>
+<div id="panel-hicksville"      class="store-panel"></div>
+<div id="panel-glen-cove"       class="store-panel"></div>
+<div id="panel-albertson"       class="store-panel"></div>
 
-<!-- Hidden file input -->
-<input type="file" id="file-input" accept=".pdf,.doc,.docx,.png,.jpg" style="display:none">
+<div id="toast"></div>
+<input type="file" id="file-input" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display:none">
 
 <script>
-const SB_URL  = 'https://bqzinttbjeeaybywhhet.supabase.co';
-const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
-const BUCKET  = 'woof-documents';
-const HDR     = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
+const SB_URL = 'https://bqzinttbjeeaybywhhet.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+const BUCKET = 'woof-documents';
+const HDR    = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY };
 
-// ── Document catalog ────────────────────────────────────────────────────────
-const CATALOG = [
-  {
-    section: 'Company-Wide',
-    color: 'pink',
-    docs: [
-      { store_key: 'company-gc',  doc_type: 'ein_letter',          icon: '🏛️', name: 'EIN Letter',          meta: 'IRS Employer Identification',   badge: 'Glen Cove LLC',       badgeColor: '' },
-      { store_key: 'company-hv',  doc_type: 'ein_letter',          icon: '🏛️', name: 'EIN Letter',          meta: 'IRS Employer Identification',   badge: 'Hicksville LLC',      badgeColor: 'blue' },
-      { store_key: 'company-pw',  doc_type: 'ein_letter',          icon: '🏛️', name: 'EIN Letter',          meta: 'IRS Employer Identification',   badge: 'PW LLC',              badgeColor: 'green' },
-      { store_key: 'company-gc',  doc_type: 'operating_agreement', icon: '📝', name: 'Operating Agreement', meta: 'LLC Operating Agreement',       badge: 'Glen Cove LLC',       badgeColor: '' },
-      { store_key: 'company-hv',  doc_type: 'operating_agreement', icon: '📝', name: 'Operating Agreement', meta: 'LLC Operating Agreement',       badge: 'Hicksville LLC',      badgeColor: 'blue' },
-      { store_key: 'company-pw',  doc_type: 'operating_agreement', icon: '📝', name: 'Operating Agreement', meta: 'LLC Operating Agreement',       badge: 'PW LLC',              badgeColor: 'green' },
-    ]
-  },
-  {
-    section: 'Port Washington',
-    color: 'green',
-    docs: [
-      { store_key: 'port-washington', doc_type: 'lease',              icon: '🏠', name: 'Lease Agreement',      meta: 'Store lease & exhibits',               badge: 'Port Washington', badgeColor: 'green' },
-      { store_key: 'port-washington', doc_type: 'sales_tax_cert',     icon: '📄', name: 'Sales Tax Certificate', meta: 'NYS Certificate of Authority',          badge: 'Port Washington', badgeColor: 'green' },
-      { store_key: 'port-washington', doc_type: 'franchise_agreement',icon: '🐾', name: 'Franchise Agreement',  meta: 'Woof Gang Bakery & Grooming',           badge: 'Port Washington', badgeColor: 'green' },
-    ]
-  },
-  {
-    section: 'Hicksville',
-    color: 'blue',
-    docs: [
-      { store_key: 'hicksville', doc_type: 'lease',               icon: '🏠', name: 'Lease Agreement',       meta: 'Store lease & exhibits',               badge: 'Hicksville', badgeColor: 'blue' },
-      { store_key: 'hicksville', doc_type: 'sales_tax_cert',      icon: '📄', name: 'Sales Tax Certificate',  meta: 'NYS Certificate of Authority',         badge: 'Hicksville', badgeColor: 'blue' },
-      { store_key: 'hicksville', doc_type: 'franchise_agreement', icon: '🐾', name: 'Franchise Agreement',   meta: 'Woof Gang Bakery & Grooming',          badge: 'Hicksville', badgeColor: 'blue' },
-    ]
-  },
-  {
-    section: 'Glen Cove',
-    color: 'teal',
-    docs: [
-      { store_key: 'glen-cove', doc_type: 'lease',               icon: '🏠', name: 'Lease Agreement',        meta: '195 Forest Ave — executed Apr 2026',   badge: 'Glen Cove', badgeColor: 'teal' },
-      { store_key: 'glen-cove', doc_type: 'sales_tax_cert',      icon: '📄', name: 'Sales Tax Certificate',  meta: 'NYS Certificate of Authority',         badge: 'Glen Cove', badgeColor: 'teal' },
-      { store_key: 'glen-cove', doc_type: 'franchise_agreement', icon: '🐾', name: 'Franchise Agreement',   meta: 'Woof Gang Bakery & Grooming',          badge: 'Glen Cove', badgeColor: 'teal' },
-      { store_key: 'glen-cove', doc_type: 'architecture_drawings',icon: '📐', name: 'Architecture Drawings', meta: 'Luigi Gileno — Apr 27, 2026',          badge: 'Glen Cove', badgeColor: 'teal' },
-      { store_key: 'glen-cove', doc_type: 'construction_contract',icon: '🔧', name: 'Construction Contract', meta: 'GC award — TBD',                       badge: 'Glen Cove', badgeColor: 'amber', cardColor: 'amber' },
-    ]
-  }
+const STORES = [
+  { key: 'port-washington', label: 'Port Washington', color: 'green' },
+  { key: 'hicksville',      label: 'Hicksville',      color: 'blue'  },
+  { key: 'glen-cove',       label: 'Glen Cove',       color: 'teal'  },
+  { key: 'albertson',       label: 'Albertson',       color: 'purple'},
 ];
 
-// ── State ───────────────────────────────────────────────────────────────────
-let uploadedDocs = {}; // key: `${store_key}:${doc_type}` → row
-let pendingUpload = null; // { store_key, doc_type, cardId }
+const DOC_TYPES = [
+  { doc_type: 'ein_letter',             icon: '🏛️', name: 'EIN Letter',              meta: 'IRS Employer Identification Number' },
+  { doc_type: 'formation_documents',    icon: '📝', name: 'Formation Documents',     meta: 'LLC operating agreement & articles' },
+  { doc_type: 'lease',                  icon: '🏠', name: 'Lease',                   meta: 'Store lease agreement & exhibits' },
+  { doc_type: 'architecture_drawings',  icon: '📐', name: 'Architecture Drawings',   meta: 'Architect drawings & floor plans' },
+  { doc_type: 'sales_tax_cert',         icon: '📄', name: 'Sales Tax Certificate',   meta: 'NYS Certificate of Authority' },
+  { doc_type: 'construction_contract',  icon: '🔧', name: 'Construction Contract',   meta: 'GC contract & scope of work' },
+  { doc_type: 'insurance_gl',           icon: '🛡️', name: 'General Liability Policy',meta: 'GL insurance policy & declarations' },
+  { doc_type: 'insurance_wc',           icon: '🩺', name: 'Workers\' Comp Policy',   meta: 'Workers\' compensation policy' },
+  { doc_type: 'insurance_pfl_dbl',      icon: '📋', name: 'PFL / DBL Policy',         meta: 'Paid Family Leave & Disability Benefits' },
+];
 
-// ── Init ────────────────────────────────────────────────────────────────────
+let uploadedDocs = {};
+let pendingUpload = null;
+let currentStore = 'port-washington';
+
+// ── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
-  renderSkeleton();
-  const ok = await ensureBucket();
-  if (!ok) return;
-  const loaded = await loadDocs();
-  if (!loaded) return;
-  renderAll();
+  await ensureBucket();
+  const ok = await loadDocs();
+  if (ok) renderAll();
 }
 
 async function ensureBucket() {
-  // Try to create bucket (no-op if exists)
-  const r = await fetch(`${SB_URL}/storage/v1/bucket`, {
+  await fetch(`${SB_URL}/storage/v1/bucket`, {
     method: 'POST',
     headers: { ...HDR, 'Content-Type': 'application/json' },
     body: JSON.stringify({ id: BUCKET, name: BUCKET, public: true })
   });
-  // 200 = created, 409 = already exists — both fine
-  return true;
 }
 
 async function loadDocs() {
   const r = await fetch(`${SB_URL}/rest/v1/documents?select=*`, { headers: HDR });
-  if (r.status === 404 || r.status === 400) {
-    document.getElementById('setup-banner').style.display = 'block';
-    document.getElementById('docs-root').innerHTML = '';
-    return false;
-  }
   if (!r.ok) {
-    const txt = await r.text();
-    if (txt.includes('does not exist') || txt.includes('relation')) {
+    const txt = await r.text().catch(() => '');
+    if (txt.includes('does not exist') || txt.includes('relation') || r.status === 404) {
       document.getElementById('setup-banner').style.display = 'block';
-      document.getElementById('docs-root').innerHTML = '';
-      return false;
+    } else {
+      showToast('Failed to load documents', 'error');
     }
-    showToast('Failed to load documents', 'error');
+    updateProgress(0, 24);
     return false;
   }
   const rows = await r.json();
   uploadedDocs = {};
-  rows.forEach(row => {
-    uploadedDocs[`${row.store_key}:${row.doc_type}`] = row;
-  });
+  rows.forEach(row => { uploadedDocs[`${row.store_key}:${row.doc_type}`] = row; });
   return true;
 }
 
-// ── Render ───────────────────────────────────────────────────────────────────
-function renderSkeleton() {
-  document.getElementById('docs-root').innerHTML = '<div style="text-align:center;padding:60px;color:#aaa;font-size:0.9rem">Loading documents…</div>';
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderAll() {
+  STORES.forEach(store => renderPanel(store));
+  updateProgress();
+  updateTabCounts();
 }
 
-function renderAll() {
-  const root = document.getElementById('docs-root');
-  let html = '';
+function renderPanel(store) {
+  const panel = document.getElementById(`panel-${store.key}`);
+  let html = '<div class="doc-grid">';
 
-  // Summary counts
-  let total = 0, uploaded = 0;
-  CATALOG.forEach(s => s.docs.forEach(d => { total++; if (uploadedDocs[`${d.store_key}:${d.doc_type}`]) uploaded++; }));
-  html += `<div style="display:flex;align-items:center;gap:16px;margin-bottom:32px;flex-wrap:wrap">
-    <div style="background:white;border-radius:12px;padding:14px 22px;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:flex;align-items:center;gap:10px">
-      <span style="font-size:1.4rem">📂</span>
-      <div>
-        <div style="font-size:1.4rem;font-weight:800;color:#1a1a2e;line-height:1">${uploaded}</div>
-        <div style="font-size:0.72rem;color:#aaa;text-transform:uppercase;letter-spacing:0.06em">of ${total} uploaded</div>
+  DOC_TYPES.forEach(dt => {
+    const key = `${store.key}:${dt.doc_type}`;
+    const row = uploadedDocs[key];
+    const cardId = `card-${store.key}-${dt.doc_type}`;
+
+    html += `<div class="doc-card ${store.color}" id="${cardId}">
+      <div class="doc-icon-row">
+        <span class="doc-icon">${dt.icon}</span>
+        <span class="doc-type-label">${store.label}</span>
       </div>
-    </div>
-    <div style="flex:1;background:#efefef;border-radius:6px;height:8px;overflow:hidden;min-width:120px">
-      <div style="height:100%;width:${Math.round(uploaded/total*100)}%;background:#2E7D32;border-radius:6px;transition:width 0.4s"></div>
-    </div>
-    <div style="font-size:0.88rem;font-weight:700;color:#2E7D32">${Math.round(uploaded/total*100)}%</div>
-  </div>`;
+      <div class="doc-name">${dt.name}</div>
+      <div class="doc-meta">${dt.meta}</div>`;
 
-  CATALOG.forEach(section => {
-    html += `<div class="doc-section">
-      <div class="doc-section-title">${section.section}</div>
-      <div class="doc-grid">`;
+    if (row) {
+      const dt2 = new Date(row.uploaded_at);
+      const dateStr = dt2.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const publicUrl = `${SB_URL}/storage/v1/object/public/${BUCKET}/${row.storage_path}`;
+      html += `<div class="doc-filename" title="${row.original_filename || ''}">${row.original_filename || ''}</div>
+        <div class="doc-status-row">
+          <div>
+            <span class="status-pill uploaded"><span class="dot"></span> Uploaded</span>
+            <div class="doc-uploaded-date">${dateStr}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <a href="${publicUrl}" target="_blank" class="btn-view">&#128065; View</a>
+          <button class="btn-replace" onclick="triggerUpload('${store.key}','${dt.doc_type}','${cardId}')">&#8593; Replace</button>
+        </div>`;
+    } else {
+      html += `<div class="doc-status-row" style="margin-bottom:12px">
+          <span class="status-pill missing"><span class="dot"></span> Not uploaded</span>
+        </div>
+        <button class="btn-upload" id="btn-${cardId}" onclick="triggerUpload('${store.key}','${dt.doc_type}','${cardId}')">
+          <span class="upload-label">&#8593; Upload</span>
+          <span class="upload-spinner">&#8635; Uploading…</span>
+        </button>`;
+    }
 
-    section.docs.forEach(doc => {
-      const key = `${doc.store_key}:${doc.doc_type}`;
-      const row = uploadedDocs[key];
-      const cardColor = doc.cardColor || (doc.badgeColor || section.color === 'pink' ? (doc.badgeColor || '') : section.color);
-      const colorClass = cardColor === 'pink' ? '' : cardColor;
-      const cardId = `card-${doc.store_key}-${doc.doc_type}`.replace(/[^a-z0-9-]/g,'');
-
-      html += `<div class="doc-card ${colorClass}" id="${cardId}">
-        <div class="doc-icon">${doc.icon}</div>
-        <div class="doc-body">
-          <div class="store-badge ${doc.badgeColor || ''}">${doc.badge}</div>
-          <div class="doc-name">${doc.name}</div>
-          <div class="doc-meta">${doc.meta}</div>`;
-
-      if (row) {
-        const dt = new Date(row.uploaded_at);
-        const dateStr = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const publicUrl = `${SB_URL}/storage/v1/object/public/${BUCKET}/${row.storage_path}`;
-        html += `<div class="doc-status-uploaded"><div class="dot"></div> Uploaded</div>
-          <div class="doc-uploaded-date">${dateStr} · ${row.original_filename || 'document'}</div>
-          <div class="doc-actions">
-            <a href="${publicUrl}" target="_blank" class="btn-view">&#128065; View</a>
-            <button class="btn-replace" onclick="triggerUpload('${doc.store_key}','${doc.doc_type}','${cardId}')">&#8593; Replace</button>
-          </div>`;
-      } else {
-        html += `<div class="doc-actions">
-            <button class="btn-upload" onclick="triggerUpload('${doc.store_key}','${doc.doc_type}','${cardId}')">&#8593; Upload</button>
-            <span class="upload-progress" id="prog-${cardId}">&#8635; Uploading…</span>
-          </div>`;
-      }
-
-      html += `</div></div>`;
-    });
-
-    html += `</div></div>`;
+    html += `</div>`;
   });
 
-  root.innerHTML = html;
+  html += '</div>';
+  panel.innerHTML = html;
+}
+
+function updateProgress() {
+  const total = STORES.length * DOC_TYPES.length; // 4 stores × 9 doc types = 36
+  const uploaded = Object.keys(uploadedDocs).length;
+  const pct = Math.round(uploaded / total * 100);
+  document.getElementById('progress-count').textContent = `${uploaded} of ${total} documents uploaded`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+}
+
+function updateTabCounts() {
+  STORES.forEach(store => {
+    const uploaded = DOC_TYPES.filter(dt => uploadedDocs[`${store.key}:${dt.doc_type}`]).length;
+    const el = document.getElementById(`count-${store.key}`);
+    if (el) el.textContent = `${uploaded}/6`;
+  });
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function switchStore(storeKey) {
+  currentStore = storeKey;
+  document.querySelectorAll('.store-tab').forEach(t => t.classList.toggle('active', t.dataset.store === storeKey));
+  document.querySelectorAll('.store-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${storeKey}`));
 }
 
 // ── Upload flow ──────────────────────────────────────────────────────────────
@@ -374,66 +398,58 @@ document.getElementById('file-input').addEventListener('change', async function(
   if (!file || !pendingUpload) return;
   const { store_key, doc_type, cardId } = pendingUpload;
 
-  // Disable button, show progress
-  const btn = document.querySelector(`#${cardId} .btn-upload, #${cardId} .btn-replace`);
-  const prog = document.getElementById(`prog-${cardId}`);
-  if (btn) btn.disabled = true;
-  if (prog) prog.classList.add('active');
+  const btn = document.getElementById(`btn-${cardId}`);
+  if (btn) { btn.disabled = true; btn.closest('.doc-card').classList.add('uploading'); }
 
   const ext = file.name.split('.').pop();
   const storagePath = `${store_key}/${doc_type}.${ext}`;
 
-  // Upload to Supabase Storage (upsert)
   const uploadRes = await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${storagePath}`, {
     method: 'POST',
-    headers: {
-      ...HDR,
-      'Content-Type': file.type || 'application/octet-stream',
-      'x-upsert': 'true'
-    },
+    headers: { ...HDR, 'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'true' },
     body: file
   });
 
   if (!uploadRes.ok) {
-    const err = await uploadRes.text();
-    showToast('Upload failed: ' + (JSON.parse(err).error || err), 'error');
-    if (btn) btn.disabled = false;
-    if (prog) prog.classList.remove('active');
+    const err = await uploadRes.text().catch(() => '{}');
+    let msg = 'Upload failed';
+    try { msg = 'Upload failed: ' + JSON.parse(err).error; } catch(e) {}
+    showToast(msg, 'error');
+    if (btn) { btn.disabled = false; btn.closest('.doc-card').classList.remove('uploading'); }
     return;
   }
 
-  // Upsert record in documents table
   const existing = uploadedDocs[`${store_key}:${doc_type}`];
   const payload = { store_key, doc_type, storage_path: storagePath, original_filename: file.name, uploaded_at: new Date().toISOString() };
 
-  let dbRes;
-  if (existing) {
-    dbRes = await fetch(`${SB_URL}/rest/v1/documents?store_key=eq.${store_key}&doc_type=eq.${doc_type}`, {
-      method: 'PATCH',
-      headers: { ...HDR, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify(payload)
-    });
-  } else {
-    dbRes = await fetch(`${SB_URL}/rest/v1/documents`, {
-      method: 'POST',
-      headers: { ...HDR, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify(payload)
-    });
-  }
+  const dbUrl = existing
+    ? `${SB_URL}/rest/v1/documents?store_key=eq.${store_key}&doc_type=eq.${doc_type}`
+    : `${SB_URL}/rest/v1/documents`;
+  const dbMethod = existing ? 'PATCH' : 'POST';
+
+  const dbRes = await fetch(dbUrl, {
+    method: dbMethod,
+    headers: { ...HDR, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+    body: JSON.stringify(payload)
+  });
 
   if (!dbRes.ok) {
-    showToast('File uploaded but failed to save record', 'error');
-    if (btn) btn.disabled = false;
-    if (prog) prog.classList.remove('active');
+    showToast('Uploaded but failed to save record', 'error');
+    if (btn) { btn.disabled = false; btn.closest('.doc-card').classList.remove('uploading'); }
     return;
   }
 
   uploadedDocs[`${store_key}:${doc_type}`] = payload;
-  showToast('✓ ' + file.name + ' uploaded successfully', 'success');
-  renderAll();
+  showToast('✓ ' + file.name + ' uploaded', 'success');
+
+  // Re-render just this store's panel
+  const store = STORES.find(s => s.key === store_key);
+  if (store) renderPanel(store);
+  updateProgress();
+  updateTabCounts();
 });
 
-// ── Toast ────────────────────────────────────────────────────────────────────
+// ── Utilities ────────────────────────────────────────────────────────────────
 let toastTimer;
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
@@ -443,10 +459,9 @@ function showToast(msg, type = '') {
   toastTimer = setTimeout(() => t.className = '', 3500);
 }
 
-// ── Setup SQL copy ────────────────────────────────────────────────────────────
 function copySetupSql() {
   navigator.clipboard.writeText(document.getElementById('setup-sql').textContent);
-  showToast('SQL copied to clipboard', 'success');
+  showToast('SQL copied', 'success');
 }
 
 init();
