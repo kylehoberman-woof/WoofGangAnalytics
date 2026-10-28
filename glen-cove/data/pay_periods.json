@@ -2,30 +2,52 @@
   "periods": {
     "pp_0": {
       "Julianne D": {
-        "rev": 0,
-        "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "rev": 425.0,
+        "disc": 60.0,
+        "comm": 212.5,
+        "paid": 212.5,
+        "tips": 44.1,
+        "total": 256.6,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-10-27",
+            "rev": 425.0,
+            "disc": 60.0,
+            "comm": 212.5,
+            "paid": 212.5,
+            "tips": 44.1,
+            "total": 256.6,
+            "guar_applied": false
+          }
+        ]
       },
       "Melanie M": {
-        "rev": 0,
-        "disc": 0,
-        "comm": 0,
-        "paid": 0,
+        "rev": 330.0,
+        "disc": 50.0,
+        "comm": 165.0,
+        "paid": 200.0,
         "tips": 0,
-        "total": 0,
-        "working_days": 0,
-        "guar_days": 0,
-        "daily": []
+        "total": 200.0,
+        "working_days": 1,
+        "guar_days": 1,
+        "daily": [
+          {
+            "date": "2026-10-27",
+            "rev": 330.0,
+            "disc": 50.0,
+            "comm": 165.0,
+            "paid": 200.0,
+            "tips": 0,
+            "total": 200.0,
+            "guar_applied": true
+          }
+        ]
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 4500.0,
-      "_cc_fees": 0.39,
+      "_cc_fees": 15.24,
       "_debt_service": 0.0,
       "_manager_salary": 0,
       "_manager_old_days": 0,
@@ -39,16 +61,20 @@
       "_bather_tips": {},
       "_bather_tips_daily": {},
       "_retail_pay": {
-        "Bella F": 186.4
+        "Bella F": 370.8
       },
       "_retail_hours": {
-        "Bella F": 9.32
+        "Bella F": 18.54
       },
       "_retail_daily": {
         "Bella F": [
           {
             "date": "2026-10-26",
             "hours": 9.32
+          },
+          {
+            "date": "2026-10-27",
+            "hours": 9.22
           }
         ]
       },
