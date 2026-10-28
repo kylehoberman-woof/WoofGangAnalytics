@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woof Gang — Documents</title>
+<link rel="stylesheet" href="portal.css">
+<style>
+.doc-section { margin-bottom: 48px; }
+.doc-section-title {
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #aaa; margin-bottom: 16px;
+  padding-bottom: 10px; border-bottom: 2px solid #eee;
+}
+.doc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.doc-card {
+  background: white; border-radius: 14px;
+  padding: 20px 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  display: flex; align-items: flex-start; gap: 16px;
+  border-left: 4px solid #C4276E; transition: transform 0.15s, box-shadow 0.15s;
+  text-decoration: none; color: inherit;
+}
+.doc-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(196,39,110,0.1); }
+.doc-card.green { border-left-color: #2E7D32; }
+.doc-card.blue  { border-left-color: #1565C0; }
+.doc-card.teal  { border-left-color: #1B6B6B; }
+.doc-card.amber { border-left-color: #F57F17; }
+.doc-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 2px; }
+.doc-name { font-size: 0.92rem; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
+.doc-meta { font-size: 0.78rem; color: #999; }
+.doc-card.placeholder { opacity: 0.45; pointer-events: none; border-style: dashed; background: #fafafa; }
+.store-badge {
+  display: inline-block; font-size: 0.68rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px; margin-bottom: 6px;
+  background: #FDF0F5; color: #C4276E; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.store-badge.green { background: #e8f5e9; color: #2E7D32; }
+.store-badge.blue  { background: #e3f2fd; color: #1565C0; }
+.store-badge.teal  { background: #e0f2f1; color: #1B6B6B; }
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: rgba(255,255,255,0.8); text-decoration: none;
+  font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;
+}
+.back-link:hover { color: white; }
+.page-header {
+  background: linear-gradient(135deg,#C4276E 0%,#6B3520 100%);
+  padding: 32px 32px 28px; color: white;
+}
+.page-header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
+.page-header p { font-size: 0.9rem; opacity: 0.8; }
+</style>
+</head>
+<body style="background:#FDF0F5;font-family:'DM Sans',system-ui,sans-serif">
+
+<div class="page-header">
+  <a class="back-link" href="index.html">&#8592; Owner Portal</a>
+  <h1>&#128193; Documents</h1>
+  <p>Leases, legal filings, certificates, drawings, and contracts — organized by store</p>
+</div>
+
+<div style="max-width:1100px;margin:0 auto;padding:40px 24px 60px">
+
+  <!-- ── Company-Wide ─────────────────────────────────────── -->
+  <div class="doc-section">
+    <div class="doc-section-title">Company-Wide</div>
+    <div class="doc-grid">
+
+      <a class="doc-card" href="docs/EIN_GlenCoveLLC.pdf" target="_blank">
+        <div class="doc-icon">&#127981;</div>
+        <div>
+          <div class="store-badge">Glen Cove LLC</div>
+          <div class="doc-name">EIN Letter</div>
+          <div class="doc-meta">IRS Employer Identification</div>
+        </div>
+      </a>
+
+      <a class="doc-card" href="docs/EIN_HicksvilleLLC.pdf" target="_blank">
+        <div class="doc-icon">&#127981;</div>
+        <div>
+          <div class="store-badge">Hicksville LLC</div>
+          <div class="doc-name">EIN Letter</div>
+          <div class="doc-meta">IRS Employer Identification</div>
+        </div>
+      </a>
+
+      <a class="doc-card" href="docs/EIN_PortWashingtonLLC.pdf" target="_blank">
+        <div class="doc-icon">&#127981;</div>
+        <div>
+          <div class="store-badge">PW LLC</div>
+          <div class="doc-name">EIN Letter</div>
+          <div class="doc-meta">IRS Employer Identification</div>
+        </div>
+      </a>
+
+      <a class="doc-card blue" href="docs/OperatingAgreement_GlenCoveLLC.pdf" target="_blank">
+        <div class="doc-icon">&#128221;</div>
+        <div>
+          <div class="store-badge blue">Glen Cove LLC</div>
+          <div class="doc-name">Operating Agreement</div>
+          <div class="doc-meta">LLC Operating Agreement</div>
+        </div>
+      </a>
+
+      <a class="doc-card blue" href="docs/OperatingAgreement_HicksvilleLLC.pdf" target="_blank">
+        <div class="doc-icon">&#128221;</div>
+        <div>
+          <div class="store-badge blue">Hicksville LLC</div>
+          <div class="doc-name">Operating Agreement</div>
+          <div class="doc-meta">LLC Operating Agreement</div>
+        </div>
+      </a>
+
+      <a class="doc-card blue" href="docs/OperatingAgreement_PortWashingtonLLC.pdf" target="_blank">
+        <div class="doc-icon">&#128221;</div>
+        <div>
+          <div class="store-badge blue">PW LLC</div>
+          <div class="doc-name">Operating Agreement</div>
+          <div class="doc-meta">LLC Operating Agreement</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- ── Port Washington ──────────────────────────────────── -->
+  <div class="doc-section">
+    <div class="doc-section-title">Port Washington</div>
+    <div class="doc-grid">
+
+      <a class="doc-card green" href="docs/Lease_PortWashington.pdf" target="_blank">
+        <div class="doc-icon">&#127968;</div>
+        <div>
+          <div class="store-badge green">Port Washington</div>
+          <div class="doc-name">Lease Agreement</div>
+          <div class="doc-meta">Store lease &amp; exhibits</div>
+        </div>
+      </a>
+
+      <a class="doc-card green" href="docs/SalesTaxCert_PortWashington.pdf" target="_blank">
+        <div class="doc-icon">&#128196;</div>
+        <div>
+          <div class="store-badge green">Port Washington</div>
+          <div class="doc-name">Sales Tax Certificate</div>
+          <div class="doc-meta">NYS Certificate of Authority</div>
+        </div>
+      </a>
+
+      <a class="doc-card green" href="docs/FranchiseAgreement_PortWashington.pdf" target="_blank">
+        <div class="doc-icon">&#129331;</div>
+        <div>
+          <div class="store-badge green">Port Washington</div>
+          <div class="doc-name">Franchise Agreement</div>
+          <div class="doc-meta">Woof Gang Bakery &amp; Grooming</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- ── Hicksville ────────────────────────────────────────── -->
+  <div class="doc-section">
+    <div class="doc-section-title">Hicksville</div>
+    <div class="doc-grid">
+
+      <a class="doc-card blue" href="docs/Lease_Hicksville.pdf" target="_blank">
+        <div class="doc-icon">&#127968;</div>
+        <div>
+          <div class="store-badge blue">Hicksville</div>
+          <div class="doc-name">Lease Agreement</div>
+          <div class="doc-meta">Store lease &amp; exhibits</div>
+        </div>
+      </a>
+
+      <a class="doc-card blue" href="docs/SalesTaxCert_Hicksville.pdf" target="_blank">
+        <div class="doc-icon">&#128196;</div>
+        <div>
+          <div class="store-badge blue">Hicksville</div>
+          <div class="doc-name">Sales Tax Certificate</div>
+          <div class="doc-meta">NYS Certificate of Authority</div>
+        </div>
+      </a>
+
+      <a class="doc-card blue" href="docs/FranchiseAgreement_Hicksville.pdf" target="_blank">
+        <div class="doc-icon">&#129331;</div>
+        <div>
+          <div class="store-badge blue">Hicksville</div>
+          <div class="doc-name">Franchise Agreement</div>
+          <div class="doc-meta">Woof Gang Bakery &amp; Grooming</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- ── Glen Cove ─────────────────────────────────────────── -->
+  <div class="doc-section">
+    <div class="doc-section-title">Glen Cove</div>
+    <div class="doc-grid">
+
+      <a class="doc-card teal" href="docs/Lease_GlenCove.pdf" target="_blank">
+        <div class="doc-icon">&#127968;</div>
+        <div>
+          <div class="store-badge teal">Glen Cove</div>
+          <div class="doc-name">Lease Agreement</div>
+          <div class="doc-meta">195 Forest Ave — executed Apr 2026</div>
+        </div>
+      </a>
+
+      <a class="doc-card teal" href="docs/SalesTaxCert_GlenCove.pdf" target="_blank">
+        <div class="doc-icon">&#128196;</div>
+        <div>
+          <div class="store-badge teal">Glen Cove</div>
+          <div class="doc-name">Sales Tax Certificate</div>
+          <div class="doc-meta">NYS Certificate of Authority</div>
+        </div>
+      </a>
+
+      <a class="doc-card teal" href="docs/FranchiseAgreement_GlenCove.pdf" target="_blank">
+        <div class="doc-icon">&#129331;</div>
+        <div>
+          <div class="store-badge teal">Glen Cove</div>
+          <div class="doc-name">Franchise Agreement</div>
+          <div class="doc-meta">Woof Gang Bakery &amp; Grooming</div>
+        </div>
+      </a>
+
+      <a class="doc-card teal" href="docs/Drawings_GlenCove.pdf" target="_blank">
+        <div class="doc-icon">&#128395;</div>
+        <div>
+          <div class="store-badge teal">Glen Cove</div>
+          <div class="doc-name">Architecture Drawings</div>
+          <div class="doc-meta">Luigi Gileno — Apr 27, 2026</div>
+        </div>
+      </a>
+
+      <a class="doc-card amber" href="docs/ConstructionContract_GlenCove.pdf" target="_blank">
+        <div class="doc-icon">&#128736;</div>
+        <div>
+          <div class="store-badge" style="background:#fff8e1;color:#F57F17">Glen Cove</div>
+          <div class="doc-name">Construction Contract</div>
+          <div class="doc-meta">GC award — TBD</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <strong>Woof Gang Bakery &amp; Grooming</strong> &nbsp;·&nbsp; Owner Portal
+</div>
+
+</body>
+</html>
+
