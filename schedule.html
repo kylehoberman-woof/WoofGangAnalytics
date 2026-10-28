@@ -444,6 +444,30 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
       </div>
       <div class="row2">
         <div class="fg">
+          <label>Date of Birth</label>
+          <input type="date" id="em-dob">
+        </div>
+        <div class="fg">
+          <label>Start Date</label>
+          <input type="date" id="em-startdate">
+        </div>
+      </div>
+      <div class="fg">
+        <label>Address</label>
+        <input type="text" id="em-address" placeholder="e.g. 123 Main St, Syosset, NY 11791">
+      </div>
+      <div class="row2">
+        <div class="fg">
+          <label>Emergency Contact</label>
+          <input type="text" id="em-ec-name" placeholder="Name & relationship">
+        </div>
+        <div class="fg">
+          <label>Emergency Phone</label>
+          <input type="tel" id="em-ec-phone" placeholder="e.g. 516-555-0199">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fg">
           <label>Role</label>
           <select id="em-role" onchange="onRoleChange()">
             <option value="groomer">Groomer</option>
@@ -779,6 +803,8 @@ function getMonday(d){var day=d.getDay(),diff=day===0?-6:1-day,m=new Date(d);m.s
 function addDays(d,n){var r=new Date(d);r.setDate(d.getDate()+n);return r;}
 function toISO(d){return d.toISOString().slice(0,10);}
 function fmtShort(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmtDate(iso){var d=new Date(iso+'T12:00:00');return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function revealDob(id,dob){var el=document.getElementById('dob-'+id);if(el)el.outerHTML='<span style="color:#C4276E;font-weight:700">'+fmtDate(dob)+'</span>';}
 function fmtTime(t){if(!t)return '';var p=t.split(':'),h=+p[0],m=p[1],ap=h>=12?'pm':'am';h=h%12||12;return h+(m!=='00'?':'+m:'')+ap;}
 
 /* ════════════════════════════════════════
@@ -1578,6 +1604,10 @@ function renderRoster(){
       (e.full_name?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">FranPOS: '+esc(e.full_name)+'</div>':'')+
       (e.phone?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">&#128222; '+esc(e.phone)+'</div>':'')+
       (e.email?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">&#9993; '+esc(e.email)+'</div>':'')+
+      (e.start_date?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">&#128197; Started '+fmtDate(e.start_date)+'</div>':'')+
+      (e.address?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">&#128205; '+esc(e.address)+'</div>':'')+
+      (e.date_of_birth?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">&#127874; DOB: <span id="dob-'+e.id+'" style="cursor:pointer;text-decoration:underline dotted" onclick="revealDob(\''+e.id+'\',\''+e.date_of_birth+'\')">click to reveal</span></div>':'')+
+      (e.emergency_contact_name?'<div style="font-size:0.72rem;color:#bbb;margin-top:1px">&#128657; Emergency: '+esc(e.emergency_contact_name)+(e.emergency_contact_phone?' · '+esc(e.emergency_contact_phone):'')+'</div>':'')+
       '</div>'+
       '<div class="emp-card-actions">'+
       '<button class="btn-emp-action recurring" onclick="openRecModal(\''+e.id+'\')">⟳ Default Schedule</button>'+
@@ -1771,6 +1801,11 @@ function openEmpModal(id){
   document.getElementById('em-fullname').value=e?(e.full_name||''):'';
   document.getElementById('em-phone').value=e?(e.phone||''):'';
   document.getElementById('em-email').value=e?(e.email||''):'';
+  document.getElementById('em-dob').value=e?(e.date_of_birth||''):'';
+  document.getElementById('em-startdate').value=e?(e.start_date||e.hire_date||''):'';
+  document.getElementById('em-address').value=e?(e.address||''):'';
+  document.getElementById('em-ec-name').value=e?(e.emergency_contact_name||''):'';
+  document.getElementById('em-ec-phone').value=e?(e.emergency_contact_phone||''):'';
   document.getElementById('em-role').value=e?(e.role||'retail'):'retail';
   setStoreButtons(e?(e.store||currentStore):currentStore);
   document.getElementById('em-paytype').value=e?(e.pay_type||'hourly'):'hourly';
@@ -1930,6 +1965,11 @@ function saveEmployee(){
     full_name:document.getElementById('em-fullname').value.trim()||null,
     phone:document.getElementById('em-phone').value.trim()||null,
     email:document.getElementById('em-email').value.trim()||null,
+    date_of_birth:document.getElementById('em-dob').value||null,
+    start_date:document.getElementById('em-startdate').value||null,
+    address:document.getElementById('em-address').value.trim()||null,
+    emergency_contact_name:document.getElementById('em-ec-name').value.trim()||null,
+    emergency_contact_phone:document.getElementById('em-ec-phone').value.trim()||null,
     role:document.getElementById('em-role').value,
     store:getStoreValue(),
     color:selectedColor,
