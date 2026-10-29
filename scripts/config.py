@@ -178,7 +178,7 @@ INCREMENTAL_DAYS = 60
 CC_RATE_BY_STORE = {
     "port-washington": 0.0300,   # 3.00% effective (incl. debit)
     "hicksville":      0.0271,   # 2.71% effective (incl. debit)
-    "glen-cove":       0.0300,   # assume PW rate until confirmed
+    "glen-cove":       0.0275,   # confirmed 2026-10-28
 }
 CC_RATE_PCT = 0.0300   # fallback if store not in CC_RATE_BY_STORE
 CC_RATE_FLAT = 0.0     # no per-transaction flat fee (FranPOS processor is % only)
