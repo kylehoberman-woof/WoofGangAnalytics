@@ -13,15 +13,26 @@
         "daily": []
       },
       "Anastasia C": {
-        "rev": 0,
-        "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "rev": 420.0,
+        "disc": 35.0,
+        "comm": 210.0,
+        "paid": 210.0,
+        "tips": 73.0,
+        "total": 283.0,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-11-01",
+            "rev": 420.0,
+            "disc": 35.0,
+            "comm": 210.0,
+            "paid": 210.0,
+            "tips": 73.0,
+            "total": 283.0,
+            "guar_applied": false
+          }
+        ]
       },
       "April Y": {
         "rev": 0,
@@ -168,7 +179,7 @@
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 6056.07,
-      "_cc_fees": 0.0,
+      "_cc_fees": 43.92,
       "_debt_service": 3094.0,
       "_manager_salary": 0,
       "_manager_old_days": 0,
@@ -182,10 +193,12 @@
       "_bather_tips": {},
       "_bather_tips_daily": {},
       "_retail_pay": {
-        "Hailey": 198.45
+        "Hailey": 198.45,
+        "Kayla": 135.85
       },
       "_retail_hours": {
-        "Hailey": 9.45
+        "Hailey": 9.45,
+        "Kayla": 7.15
       },
       "_retail_daily": {
         "Hailey": [
@@ -193,10 +206,17 @@
             "date": "2026-10-31",
             "hours": 9.45
           }
+        ],
+        "Kayla": [
+          {
+            "date": "2026-11-01",
+            "hours": 7.15
+          }
         ]
       },
       "_retail_rates": {
-        "Hailey": 21.0
+        "Hailey": 21.0,
+        "Kayla": 19.0
       }
     },
     "pp_1": {
