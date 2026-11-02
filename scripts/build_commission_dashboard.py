@@ -19,6 +19,7 @@ from config import (
     SUPABASE_URL, SUPABASE_ANON_KEY, PORTAL_BACK_JS,
     STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
     PAYROLL_TAX_RATE, CC_RATE_BY_STORE, CC_RATE_PCT, CC_RATE_FLAT, CC_NON_CARD,
+    PAYROLL_TAX_EXCLUDE,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data, get_exclude_set, get_gusto_payroll_config
@@ -383,6 +384,12 @@ ytd_bather_pay = round(sum(h * BATHER_RATE_MAP.get(name, BATHER_RATE) for name, 
 ytd_retail_hours, _ = get_hours_from_clocks(data.get("time_clocks", []), RETAIL_NAME_MAP, ytd_start.strftime("%Y-%m-%d"), TODAY.strftime("%Y-%m-%d"))
 ytd_retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in ytd_retail_hours.items()), 2)
 
+# Taxable subsets (exclude off-books employees)
+ytd_paid_taxable = sum(ytd_data[g]["paid"] for g in groomers if g not in PAYROLL_TAX_EXCLUDE)
+ytd_bather_pay_taxable = round(sum(h * BATHER_RATE_MAP.get(name, BATHER_RATE)
+                                   for name, h in ytd_bather_hours.items()
+                                   if name not in PAYROLL_TAX_EXCLUDE), 2)
+
 # Monthly breakdown for exec dashboard
 import calendar as _cal
 monthly_data = []
@@ -412,7 +419,12 @@ while m_start <= TODAY:
     m_retail_pay = round(sum(h * RETAIL_RATES.get(name, 0) for name, h in m_retail_hours.items()), 2)
     m_disc = round(sum(v for g in groom_disc_by_day for d, v in groom_disc_by_day[g].items()
                        if m_start.isoformat() <= d <= m_end.isoformat()), 2)
-    m_payroll_tax = round((m_mgr + m_bather_pay + m_retail_pay + m_paid) * PAYROLL_TAX_RATE, 2)
+    # Exclude off-books employees from payroll tax base
+    m_paid_taxable = sum(d["paid"] for g, d in m_groomer_data.items() if g not in PAYROLL_TAX_EXCLUDE)
+    m_bather_pay_taxable = round(sum(h * BATHER_RATE_MAP.get(name, BATHER_RATE)
+                                     for name, h in m_bather_hours.items()
+                                     if name not in PAYROLL_TAX_EXCLUDE), 2)
+    m_payroll_tax = round((m_mgr + m_bather_pay_taxable + m_retail_pay + m_paid_taxable) * PAYROLL_TAX_RATE, 2)
     m_cc_fees = get_period_cc_fees(m_start, m_end)
     m_debt_service = STORE_DEBT_SERVICE.get(_store_name, 0.0)
     m_total_cost = m_paid + m_mgr + m_bather_pay + m_retail_pay + m_royalties + m_rent + m_payroll_tax + m_cc_fees + m_debt_service
@@ -451,7 +463,7 @@ monthly_json = _json2.dumps(monthly_data)
 # YTD royalties and rent from monthly data (uses tiered rates)
 ytd_royalties = sum(m["royalties"] for m in monthly_data if m["year"] == 2026)
 ytd_rent = sum(m["rent"] for m in monthly_data if m["year"] == 2026)
-ytd_payroll_tax = round((ytd_manager + ytd_bather_pay + ytd_retail_pay + ytd_total["paid"]) * PAYROLL_TAX_RATE, 2)
+ytd_payroll_tax = round((ytd_manager + ytd_bather_pay_taxable + ytd_retail_pay + ytd_paid_taxable) * PAYROLL_TAX_RATE, 2)
 ytd_cc_fees = get_period_cc_fees(ytd_start, TODAY)
 ytd_debt_service = sum(m["debt_service"] for m in monthly_data if m["year"] == 2026)
 ytd_margin = round(ytd_total["rev"] - ytd_total["disc"] - ytd_total["paid"] - ytd_manager - ytd_bather_pay - ytd_retail_pay - ytd_royalties - ytd_rent - ytd_payroll_tax - ytd_cc_fees - ytd_debt_service, 2)

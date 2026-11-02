@@ -294,6 +294,14 @@ BATHER_NAME_MAP = {
     "Brian Labianca": "Brian L",
 }
 
+# Employees paid off books — excluded from payroll tax base
+PAYROLL_TAX_EXCLUDE = {
+    "Joyce P",      # PW groomer, off books
+    "Marie D.",     # PW groomer, off books
+    "Angela R",     # PW bather, off books
+    "Carol W",      # HV groomer, off books
+}
+
 EXCLUDE_EMPLOYEES = {
     "Unknown", "Wgb Port Washington", "Wgb Hicksville", "Kyle Hoberman", "Julie Schorr",
     "Cindy Szczudlo",                             # manager (paid from PW only)
