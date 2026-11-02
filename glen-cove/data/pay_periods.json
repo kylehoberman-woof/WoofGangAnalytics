@@ -2,6 +2,49 @@
   "periods": {
     "pp_0": {
       "Julianne D": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "Melanie M": {
+        "rev": 0,
+        "disc": 0,
+        "comm": 0,
+        "paid": 0,
+        "tips": 0,
+        "total": 0,
+        "working_days": 0,
+        "guar_days": 0,
+        "daily": []
+      },
+      "_royalty_rate": 0.060000000000000005,
+      "_monthly_rent": 4500.0,
+      "_cc_fees": 0.0,
+      "_debt_service": 0.0,
+      "_manager_salary": 0,
+      "_manager_old_days": 0,
+      "_manager_new_days": 0,
+      "_manager_daily": [],
+      "_manager_bonus": 0,
+      "_bather_rev": 0,
+      "_bather_pay": {},
+      "_bather_hours": {},
+      "_bather_daily": {},
+      "_bather_tips": {},
+      "_bather_tips_daily": {},
+      "_retail_pay": {},
+      "_retail_hours": {},
+      "_retail_daily": {},
+      "_retail_rates": {}
+    },
+    "pp_1": {
+      "Julianne D": {
         "rev": 945.0,
         "disc": 120.0,
         "comm": 472.5,
@@ -117,7 +160,7 @@
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 4500.0,
-      "_cc_fees": 38.76,
+      "_cc_fees": 46.66,
       "_debt_service": 0.0,
       "_manager_salary": 0,
       "_manager_old_days": 0,
@@ -131,11 +174,11 @@
       "_bather_tips": {},
       "_bather_tips_daily": {},
       "_retail_pay": {
-        "Bella F": 370.8,
+        "Bella F": 517.4,
         "Shay": 759.15
       },
       "_retail_hours": {
-        "Bella F": 18.54,
+        "Bella F": 25.87,
         "Shay": 36.15
       },
       "_retail_daily": {
@@ -147,6 +190,10 @@
           {
             "date": "2026-10-27",
             "hours": 9.22
+          },
+          {
+            "date": "2026-11-01",
+            "hours": 7.33
           }
         ],
         "Shay": [
@@ -173,7 +220,7 @@
         "Shay": 21.0
       }
     },
-    "pp_1": {
+    "pp_2": {
       "Julianne D": {
         "rev": 1480.0,
         "disc": 150.0,
@@ -364,7 +411,7 @@
         "Shay": 21.0
       }
     },
-    "pp_2": {
+    "pp_3": {
       "Julianne D": {
         "rev": 1530.0,
         "disc": 335.0,
@@ -545,7 +592,7 @@
         "Shay": 21.0
       }
     },
-    "pp_3": {
+    "pp_4": {
       "Julianne D": {
         "rev": 1665.0,
         "disc": 260.0,
@@ -743,18 +790,22 @@
   },
   "dates": {
     "pp_0": {
+      "start": "2026-11-02",
+      "end": "2026-11-08"
+    },
+    "pp_1": {
       "start": "2026-10-26",
       "end": "2026-11-01"
     },
-    "pp_1": {
+    "pp_2": {
       "start": "2026-10-19",
       "end": "2026-10-25"
     },
-    "pp_2": {
+    "pp_3": {
       "start": "2026-10-12",
       "end": "2026-10-18"
     },
-    "pp_3": {
+    "pp_4": {
       "start": "2026-10-05",
       "end": "2026-10-11"
     }
