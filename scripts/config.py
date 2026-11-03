@@ -236,6 +236,8 @@ GUARANTEES = {
     "Sereena C":       (200.0, "2025-12-15", "2026-03-14"),
     "Alex  I":         (200.0, "2026-01-19", "2026-04-18"),
     "Julia B":         (200.0, "2026-02-03", "2026-05-04"),
+    "Anastasia C":     (200.0, "2026-10-20", "2027-01-18"),
+    "Danielle M":      (200.0, "2026-10-24", "2027-01-22"),
 }
 
 # Rate change history — loaded from data/rate_history.json so raises never require code edits.
