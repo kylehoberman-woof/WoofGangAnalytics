@@ -19,7 +19,7 @@ from config import (
     SUPABASE_URL, SUPABASE_ANON_KEY, PORTAL_BACK_JS,
     STORE_REGISTRY, get_store_display, get_store_fn, get_other_stores,
     PAYROLL_TAX_RATE, CC_RATE_BY_STORE, CC_RATE_PCT, CC_RATE_FLAT, CC_NON_CARD,
-    PAYROLL_TAX_EXCLUDE,
+    PAYROLL_TAX_EXCLUDE, TIME_CLOCK_CORRECTIONS,
 )
 from formatting import fc
 from fetch_employees import get_store_pay_data, get_exclude_set, get_gusto_payroll_config
@@ -70,12 +70,29 @@ def get_hours_from_clocks(clocks, name_map, period_start, period_end):
     Returns (total_hours_dict, daily_dict) where daily_dict is {name: [{date, hours}]}"""
     hours = {}
     daily = {}
+    # Build reverse map: short_name -> full_name for correction lookup
+    rev_map = {v: k for k, v in name_map.items()}
+    corrected_dates = {}  # short_name -> set of dates already handled by corrections
+    # Apply manual corrections first
+    for full_name, date_map in TIME_CLOCK_CORRECTIONS.items():
+        short_name = name_map.get(full_name)
+        if not short_name: continue
+        for date_str, corrected_hrs in date_map.items():
+            if period_start <= date_str <= period_end:
+                hours[short_name] = hours.get(short_name, 0) + corrected_hrs
+                if short_name not in daily: daily[short_name] = []
+                daily[short_name].append({"date": date_str, "hours": round(corrected_hrs, 2), "corrected": True})
+                if short_name not in corrected_dates: corrected_dates[short_name] = set()
+                corrected_dates[short_name].add(date_str)
     for c in clocks:
         full_name = c.get("EmployeeName", "")
         short_name = name_map.get(full_name)
         if not short_name: continue
         time_in = (c.get("TimeIn") or "")[:10]
         if period_start <= time_in <= period_end:
+            # Skip dates that were manually corrected
+            if short_name in corrected_dates and time_in in corrected_dates[short_name]:
+                continue
             hrs = c.get("TotalTimeClockHoursDecimal") or 0
             hours[short_name] = hours.get(short_name, 0) + hrs
             if short_name not in daily: daily[short_name] = []

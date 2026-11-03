@@ -294,6 +294,15 @@ BATHER_NAME_MAP = {
     "Brian Labianca": "Brian L",
 }
 
+# Manual time clock corrections — overrides FranPOS data for specific dates
+# Format: { "Employee Name": { "YYYY-MM-DD": corrected_decimal_hours } }
+# Hours should be paid hours only (exclude unpaid lunch breaks)
+TIME_CLOCK_CORRECTIONS = {
+    "Alina S": {
+        "2026-10-27": 7.5,   # 9-1 + 2-5:30 (1-2 unpaid lunch); FranPOS had ~0.95h
+    },
+}
+
 # Employees paid off books — excluded from payroll tax base
 PAYROLL_TAX_EXCLUDE = {
     "Joyce P",      # PW groomer, off books
