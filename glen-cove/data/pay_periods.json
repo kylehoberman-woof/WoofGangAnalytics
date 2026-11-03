@@ -2,15 +2,26 @@
   "periods": {
     "pp_0": {
       "Julianne D": {
-        "rev": 0,
-        "disc": 0,
-        "comm": 0,
-        "paid": 0,
-        "tips": 0,
-        "total": 0,
-        "working_days": 0,
+        "rev": 495.0,
+        "disc": 90.0,
+        "comm": 247.5,
+        "paid": 247.5,
+        "tips": 40.5,
+        "total": 288.0,
+        "working_days": 1,
         "guar_days": 0,
-        "daily": []
+        "daily": [
+          {
+            "date": "2026-11-02",
+            "rev": 495.0,
+            "disc": 90.0,
+            "comm": 247.5,
+            "paid": 247.5,
+            "tips": 40.5,
+            "total": 288.0,
+            "guar_applied": false
+          }
+        ]
       },
       "Melanie M": {
         "rev": 0,
@@ -38,10 +49,27 @@
       "_bather_daily": {},
       "_bather_tips": {},
       "_bather_tips_daily": {},
-      "_retail_pay": {},
-      "_retail_hours": {},
-      "_retail_daily": {},
-      "_retail_rates": {}
+      "_retail_pay": {
+        "Bella F": 185.4
+      },
+      "_retail_hours": {
+        "Bella F": 9.27
+      },
+      "_retail_daily": {
+        "Bella F": [
+          {
+            "date": "2026-11-02",
+            "hours": 9.27
+          },
+          {
+            "date": "2026-11-02",
+            "hours": 0
+          }
+        ]
+      },
+      "_retail_rates": {
+        "Bella F": 20.0
+      }
     },
     "pp_1": {
       "Julianne D": {
@@ -160,7 +188,7 @@
       },
       "_royalty_rate": 0.060000000000000005,
       "_monthly_rent": 4500.0,
-      "_cc_fees": 46.66,
+      "_cc_fees": 48.64,
       "_debt_service": 0.0,
       "_manager_salary": 0,
       "_manager_old_days": 0,
