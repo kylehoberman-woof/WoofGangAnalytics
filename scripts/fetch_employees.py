@@ -120,6 +120,12 @@ def get_store_pay_data(store_key):
     bather_rate_map = build_rate_map(bather_emps)
     guarantees      = build_guarantee_map(groomer_emps)
 
+    # Always merge config.GUARANTEES so manually added entries are always active.
+    # Supabase entries take precedence (they were set explicitly); config fills the rest.
+    merged_guarantees = dict(config.GUARANTEES)
+    merged_guarantees.update(guarantees)
+    guarantees = merged_guarantees
+
     # Fall back to config.py if Supabase employees haven't been entered yet
     if store_key == "port-washington":
         if not retail_name_map:
@@ -131,8 +137,6 @@ def get_store_pay_data(store_key):
             bather_name_map = dict(config.BATHER_NAME_MAP)
         if not bather_rate_map:
             bather_rate_map = {n: config.BATHER_RATE for n in config.BATHER_NAME_MAP.values()}
-        if not guarantees:
-            guarantees = dict(config.GUARANTEES)
 
     elif store_key == "hicksville":
         if not retail_name_map:
@@ -144,8 +148,6 @@ def get_store_pay_data(store_key):
             bather_name_map = dict(config.HICKSVILLE_BATHER_NAME_MAP)
         if not bather_rate_map:
             bather_rate_map = {}
-        if not guarantees:
-            guarantees = dict(config.GUARANTEES)
 
     return retail_name_map, retail_rates, bather_name_map, bather_rate_map, guarantees
 
