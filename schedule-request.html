@@ -100,14 +100,26 @@ textarea{resize:vertical;min-height:80px}
       </div>
     </div>
 
-    <div class="row2" id="time-fields">
-      <div class="fg">
-        <label>Arrival Time</label>
-        <input type="time" id="start-time">
+    <div id="time-fields" style="display:none">
+      <div class="row2">
+        <div class="fg">
+          <label>Original Start Time</label>
+          <input type="time" id="orig-start-time">
+        </div>
+        <div class="fg">
+          <label>New Start Time</label>
+          <input type="time" id="start-time">
+        </div>
       </div>
-      <div class="fg">
-        <label>Leave Time</label>
-        <input type="time" id="end-time">
+      <div class="row2">
+        <div class="fg">
+          <label>Original End Time</label>
+          <input type="time" id="orig-end-time">
+        </div>
+        <div class="fg">
+          <label>New End Time</label>
+          <input type="time" id="end-time">
+        </div>
       </div>
     </div>
 
@@ -140,6 +152,13 @@ var SHD = {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/
 
 var selectedType = '';
 
+function fmtTime(t) {
+  if (!t) return '';
+  var parts = t.split(':'); var h = parseInt(parts[0]); var m = parts[1];
+  var ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+  return h + ':' + m + ' ' + ampm;
+}
+
 function selectType(t) {
   selectedType = t;
   document.querySelectorAll('.type-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.type === t); });
@@ -161,7 +180,10 @@ function loadEmployees() {
     .then(function(r){return r.json();})
     .then(function(rows){
       sel.innerHTML = '<option value="">Select your name…</option>';
-      rows.forEach(function(e){ sel.innerHTML += '<option value="'+e.name+'">'+e.name+'</option>'; });
+      var seen = {};
+      rows.forEach(function(e){
+        if (!seen[e.name]) { seen[e.name] = true; sel.innerHTML += '<option value="'+e.name+'">'+e.name+'</option>'; }
+      });
       sel.disabled = false;
     }).catch(function(){ sel.innerHTML = '<option value="">Error loading — try again</option>'; });
 }
@@ -180,16 +202,28 @@ function submitRequest() {
   err('err-date',     !date);
   if (!ok) return;
 
+  var origStart = document.getElementById('orig-start-time').value;
+  var origEnd   = document.getElementById('orig-end-time').value;
+  var newStart  = document.getElementById('start-time').value;
+  var newEnd    = document.getElementById('end-time').value;
+  var timeNote  = '';
+  if (selectedType === 'late-early') {
+    if (origStart && newStart) timeNote = 'Original start: '+fmtTime(origStart)+' → New start: '+fmtTime(newStart)+'. ';
+    if (origEnd   && newEnd)   timeNote += 'Original end: '+fmtTime(origEnd)+' → New end: '+fmtTime(newEnd)+'.';
+  }
+  var userReason = document.getElementById('reason').value || '';
+  var fullReason = (timeNote + (timeNote && userReason ? ' ' : '') + userReason) || null;
+
   var body = {
     store:         store,
     employee_name: emp,
     request_type:  selectedType,
     start_date:    date,
-    end_date:      document.getElementById('end-date').value   || null,
-    start_time:    document.getElementById('start-time').value || null,
-    end_time:      document.getElementById('end-time').value   || null,
-    swap_with:     document.getElementById('swap-with').value  || null,
-    reason:        document.getElementById('reason').value     || null,
+    end_date:      document.getElementById('end-date').value || null,
+    start_time:    newStart || null,
+    end_time:      newEnd   || null,
+    swap_with:     document.getElementById('swap-with').value || null,
+    reason:        fullReason,
     status:        'pending'
   };
 
@@ -216,10 +250,12 @@ function resetForm() {
   document.getElementById('store').value     = '';
   document.getElementById('employee').innerHTML = '<option value="">Select store first…</option>';
   document.getElementById('employee').disabled  = true;
-  document.getElementById('start-date').value = '';
-  document.getElementById('end-date').value   = '';
-  document.getElementById('start-time').value = '';
-  document.getElementById('end-time').value   = '';
+  document.getElementById('start-date').value     = '';
+  document.getElementById('end-date').value       = '';
+  document.getElementById('start-time').value     = '';
+  document.getElementById('end-time').value       = '';
+  document.getElementById('orig-start-time').value = '';
+  document.getElementById('orig-end-time').value   = '';
   document.getElementById('swap-with').value  = '';
   document.getElementById('reason').value     = '';
   selectedType = '';
