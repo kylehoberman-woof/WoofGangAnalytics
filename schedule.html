@@ -1911,10 +1911,10 @@ function renderRequests(){
   var el = document.getElementById('req-list');
   el.innerHTML = '<div style="color:#aaa;padding:20px;text-align:center">Loading…</div>';
   var qs = filter === 'all' ? '' : '&status=eq.'+filter;
-  var storeFilter = storeKey && storeKey !== 'all' ? '&store=eq.'+storeKey : '';
+  var storeFilter = currentStore && currentStore !== 'all' ? '&store=eq.'+currentStore : '';
   sbGet('/schedule_change_requests?order=submitted_at.desc'+qs+storeFilter).then(function(rows){
     loadRequestsBadge();
-    if (!rows || rows.error) { el.innerHTML = '<div style="color:#C4276E;padding:20px;text-align:center">Could not load requests.</div>'; return; }
+    if (!Array.isArray(rows)) { el.innerHTML = '<div style="color:#C4276E;padding:20px;text-align:center">Could not load requests.</div>'; return; }
     if (!rows.length) { el.innerHTML = '<div style="color:#aaa;padding:40px;text-align:center;background:white;border-radius:10px;font-size:0.88rem">No '+filter+' requests.</div>'; return; }
     var html = '<div style="display:flex;flex-direction:column;gap:14px">';
     rows.forEach(function(r){
@@ -1975,6 +1975,9 @@ function renderRequests(){
     });
     html += '</div>';
     el.innerHTML = html;
+  }).catch(function(err){
+    console.error('renderRequests error:', err);
+    el.innerHTML = '<div style="color:#C4276E;padding:20px;text-align:center">Could not load requests.</div>';
   });
 }
 
@@ -2003,8 +2006,8 @@ function loadRequestsBadge(){
 
 function openNewRequestModal(){
   // Pre-fill store if locked
-  if (storeKey && storeKey !== 'all') {
-    document.getElementById('nr-store').value = storeKey;
+  if (currentStore && currentStore !== 'all') {
+    document.getElementById('nr-store').value = currentStore;
     document.getElementById('nr-store').disabled = true;
     loadNrEmployees();
   }
