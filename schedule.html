@@ -1992,7 +1992,11 @@ function reviewRequest(id, status){
       var r = rows[0];
       autoApplyRequest(r).then(function(autoFlags){
         return sbPatch('schedule_change_requests','id=eq.'+id, autoFlags);
-      }).then(function(){ renderRequests(); });
+      }).then(function(){
+        renderRequests();
+        // Reload the schedule so removed/modified shifts are reflected immediately
+        loadShifts && loadShifts().then(function(){ repaintWeek(); renderMonth&&renderMonth(); });
+      });
     });
   });
 }
