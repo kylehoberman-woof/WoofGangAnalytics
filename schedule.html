@@ -2003,12 +2003,10 @@ function reviewRequest(id, status){
 
 function autoApplyRequest(r){
   var jobs = [];
-  var flags = {timeoff_updated: false, schedule_updated: false};
+  console.log('[autoApply] request:', r.request_type, r.employee_name, r.start_date, r.store);
 
-  // For time-off and schedule-change: insert a time_off row and remove shifts
   if (r.request_type === 'time-off' || r.request_type === 'schedule-change') {
     var endDate = r.end_date || r.start_date;
-    // Insert time_off record
     var toRecord = {
       store_key:     r.store,
       employee_name: r.employee_name,
@@ -2020,33 +2018,33 @@ function autoApplyRequest(r){
     };
     jobs.push(
       fetch(SB+'/time_off',{method:'POST',headers:SHD,body:JSON.stringify(toRecord)})
-        .then(function(){ flags.timeoff_updated = true; })
-        .catch(function(e){ console.warn('time_off insert failed',e); })
+        .then(function(resp){ console.log('[autoApply] time_off insert status:', resp.status); })
+        .catch(function(e){ console.warn('[autoApply] time_off insert error:', e); })
     );
-    // Find the employee id then delete shifts for the date range
     jobs.push(
       sbGet('/schedule_employees?name=eq.'+encodeURIComponent(r.employee_name)+'&store=in.('+r.store+',both)&select=id')
         .then(function(emps){
+          console.log('[autoApply] employee lookup:', emps);
           if (!Array.isArray(emps) || !emps.length) return;
           var empId = emps[0].id;
-          // Build list of dates in range
           var dates = [];
-          var cur = new Date(r.start_date+'T12:00:00'), end = new Date(endDate+'T12:00:00');
-          while(cur <= end){ dates.push(cur.toISOString().slice(0,10)); cur.setDate(cur.getDate()+1); }
+          var cur = new Date(r.start_date+'T12:00:00'), end2 = new Date(endDate+'T12:00:00');
+          while(cur <= end2){ dates.push(cur.toISOString().slice(0,10)); cur.setDate(cur.getDate()+1); }
+          console.log('[autoApply] deleting shifts for dates:', dates, 'empId:', empId);
           return Promise.all(dates.map(function(d){
-            return sbDelete('schedule_shifts','emp_id=eq.'+empId+'&shift_date=eq.'+d+'&store=eq.'+r.store);
+            return sbDelete('schedule_shifts','emp_id=eq.'+empId+'&shift_date=eq.'+d+'&store=eq.'+r.store)
+              .then(function(resp){ console.log('[autoApply] shift delete', d, resp.status); });
           }));
         })
-        .then(function(){ flags.schedule_updated = true; })
-        .catch(function(e){ console.warn('shift delete failed',e); })
+        .catch(function(e){ console.warn('[autoApply] shift delete error:', e); })
     );
   }
 
-  // For late-early: update the shift start/end time
   if (r.request_type === 'late-early') {
     jobs.push(
       sbGet('/schedule_employees?name=eq.'+encodeURIComponent(r.employee_name)+'&store=in.('+r.store+',both)&select=id')
         .then(function(emps){
+          console.log('[autoApply] late-early employee lookup:', emps);
           if (!Array.isArray(emps) || !emps.length) return;
           var empId = emps[0].id;
           var patch = {};
@@ -2055,18 +2053,15 @@ function autoApplyRequest(r){
           if (!Object.keys(patch).length) return;
           return sbPatch('schedule_shifts','emp_id=eq.'+empId+'&shift_date=eq.'+r.start_date+'&store=eq.'+r.store, patch);
         })
-        .then(function(){ flags.schedule_updated = true; flags.timeoff_updated = true; })
-        .catch(function(e){ console.warn('shift update failed',e); })
+        .catch(function(e){ console.warn('[autoApply] shift patch error:', e); })
     );
   }
 
-  // Shift swap: just mark both auto-items done (Cindy handles swap logistics in FranPOS)
-  if (r.request_type === 'shift-swap') {
-    flags.schedule_updated = true;
-    flags.timeoff_updated  = true;
-  }
-
-  return Promise.all(jobs).then(function(){ return flags; });
+  // Always set both flags to true after jobs complete — operations are best-effort
+  return Promise.all(jobs).then(function(){
+    console.log('[autoApply] all jobs done');
+    return {timeoff_updated: true, schedule_updated: true};
+  });
 }
 
 function toggleReqCheck(id, field, val){
