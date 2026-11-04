@@ -61,7 +61,7 @@ textarea{resize:vertical;min-height:80px}
 
     <div class="fg">
       <label>Your Name</label>
-      <select id="employee" disabled>
+      <select id="employee" disabled onchange="if(selectedType==='late-early')tryPrefillShift()">
         <option value="">Select store first…</option>
       </select>
       <div class="err" id="err-employee">Please select your name.</div>
@@ -173,27 +173,17 @@ function selectType(t) {
 
 function tryPrefillShift() {
   var date = document.getElementById('start-date').value;
-  var emp  = document.getElementById('employee').value;
-  if (!date || !emp) return;
-  // Look up their scheduled shift for that date
-  fetch(SB+'/schedule_shifts?shift_date=eq.'+date+'&select=start_time,end_time', {headers:SHD})
+  var sel  = document.getElementById('employee');
+  var opt  = sel.options[sel.selectedIndex];
+  var empId = opt && opt.dataset.empId;
+  if (!date || !empId) return;
+  fetch(SB+'/schedule_shifts?emp_id=eq.'+empId+'&shift_date=eq.'+date+'&select=start_time,end_time', {headers:SHD})
     .then(function(r){return r.json();})
-    .then(function(rows){
-      // Find shift matching this employee by looking up their emp_id first
-      fetch(SB+'/schedule_employees?name=eq.'+encodeURIComponent(emp)+'&select=id', {headers:SHD})
-        .then(function(r){return r.json();})
-        .then(function(emps){
-          if (!emps || !emps.length) return;
-          var empId = emps[0].id;
-          fetch(SB+'/schedule_shifts?emp_id=eq.'+empId+'&shift_date=eq.'+date+'&select=start_time,end_time', {headers:SHD})
-            .then(function(r){return r.json();})
-            .then(function(shifts){
-              if (!shifts || !shifts.length) return;
-              var s = shifts[0];
-              if (s.start_time) document.getElementById('orig-start-time').value = s.start_time.slice(0,5);
-              if (s.end_time)   document.getElementById('orig-end-time').value   = s.end_time.slice(0,5);
-            });
-        });
+    .then(function(shifts){
+      if (!shifts || !shifts.length) return;
+      var s = shifts[0];
+      if (s.start_time) document.getElementById('orig-start-time').value = s.start_time.slice(0,5);
+      if (s.end_time)   document.getElementById('orig-end-time').value   = s.end_time.slice(0,5);
     });
 }
 
@@ -203,13 +193,20 @@ function loadEmployees() {
   sel.innerHTML = '<option value="">Loading…</option>';
   sel.disabled  = true;
   if (!store) { sel.innerHTML = '<option value="">Select store first…</option>'; return; }
-  fetch(SB+'/schedule_employees?store=in.('+store+',both)&is_active=eq.true&order=name', {headers:SHD})
+  fetch(SB+'/schedule_employees?store=in.('+store+',both)&is_active=eq.true&order=name&select=id,name', {headers:SHD})
     .then(function(r){return r.json();})
     .then(function(rows){
       sel.innerHTML = '<option value="">Select your name…</option>';
       var seen = {};
       rows.forEach(function(e){
-        if (!seen[e.name]) { seen[e.name] = true; sel.innerHTML += '<option value="'+e.name+'">'+e.name+'</option>'; }
+        if (!seen[e.name]) {
+          seen[e.name] = true;
+          var opt = document.createElement('option');
+          opt.value = e.name;
+          opt.textContent = e.name;
+          opt.dataset.empId = e.id;
+          sel.appendChild(opt);
+        }
       });
       sel.disabled = false;
     }).catch(function(){ sel.innerHTML = '<option value="">Error loading — try again</option>'; });
