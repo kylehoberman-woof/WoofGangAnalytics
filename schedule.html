@@ -376,12 +376,6 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
     <div class="roster-header">
       <h2>Schedule Change Requests</h2>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <select id="req-filter" onchange="renderRequests()" style="padding:6px 12px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:600">
-          <option value="pending">Pending</option>
-          <option value="all">All Requests</option>
-          <option value="approved">Approved</option>
-          <option value="denied">Denied</option>
-        </select>
         <button class="btn-emp-action" onclick="renderRequests()" style="padding:6px 14px">Refresh</button>
         <button class="btn-emp-action" onclick="openNewRequestModal()" style="padding:6px 14px;background:#C4276E;color:white;border-color:#C4276E">+ New Request</button>
       </div>
@@ -1907,15 +1901,21 @@ var REQ_TYPE_LABEL = {'time-off':'🌴 Time Off','shift-swap':'🔄 Shift Swap',
 var REQ_STATUS_COLOR = {'pending':'#E65100','approved':'#2E7D32','denied':'#C62828'};
 
 function renderRequests(){
-  var filter = document.getElementById('req-filter').value;
   var el = document.getElementById('req-list');
   el.innerHTML = '<div style="color:#aaa;padding:20px;text-align:center">Loading…</div>';
-  var qs = filter === 'all' ? '' : '&status=eq.'+filter;
   var storeFilter = currentStore && currentStore !== 'all' ? '&store=eq.'+currentStore : '';
-  sbGet('/schedule_change_requests?order=submitted_at.desc'+qs+storeFilter).then(function(rows){
+  // Load all — sort pending first, then by most recent
+  sbGet('/schedule_change_requests?order=submitted_at.desc'+storeFilter).then(function(rows){
     loadRequestsBadge();
     if (!Array.isArray(rows)) { el.innerHTML = '<div style="color:#C4276E;padding:20px;text-align:center">Could not load requests.</div>'; return; }
-    if (!rows.length) { el.innerHTML = '<div style="color:#aaa;padding:40px;text-align:center;background:white;border-radius:10px;font-size:0.88rem">No '+filter+' requests.</div>'; return; }
+    if (!rows.length) { el.innerHTML = '<div style="color:#aaa;padding:40px;text-align:center;background:white;border-radius:10px;font-size:0.88rem">No requests yet.</div>'; return; }
+    // Sort: pending first, then approved, then denied
+    var order = {pending:0,approved:1,denied:2};
+    rows.sort(function(a,b){
+      var d = (order[a.status]||0) - (order[b.status]||0);
+      if (d) return d;
+      return (b.submitted_at||'').localeCompare(a.submitted_at||'');
+    });
     var html = '<div style="display:flex;flex-direction:column;gap:14px">';
     rows.forEach(function(r){
       var sc = REQ_STATUS_COLOR[r.status] || '#888';
@@ -1923,24 +1923,23 @@ function renderRequests(){
       var dateStr = r.start_date + (r.end_date && r.end_date !== r.start_date ? ' → '+r.end_date : '');
       var timeStr = r.start_time ? ' &nbsp;·&nbsp; '+r.start_time+(r.end_time?' – '+r.end_time:'') : '';
       var submitted = r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-      var storeLabel = r.store.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+      var sl = (r.store||'').replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
       var rid = r.id;
 
       html += '<div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid '+sc+'">';
 
-      // Top row: name + status badge
       html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">';
       html += '<div>';
       html += '<div style="font-size:1rem;font-weight:700;color:#1a1a2e">'+r.employee_name+' &mdash; '+typeLabel+'</div>';
       html += '<div style="font-size:0.82rem;color:#666;margin-top:3px">'+dateStr+timeStr+'</div>';
       if (r.swap_with) html += '<div style="font-size:0.82rem;color:#555;margin-top:2px">Swap with: <strong>'+r.swap_with+'</strong></div>';
       if (r.reason)    html += '<div style="font-size:0.82rem;color:#555;margin-top:4px;font-style:italic">"'+r.reason+'"</div>';
-      html += '<div style="font-size:0.72rem;color:#bbb;margin-top:6px">'+storeLabel+'  ·  '+submitted+'</div>';
+      html += '<div style="font-size:0.72rem;color:#bbb;margin-top:6px">'+sl+'  ·  '+submitted+'</div>';
       html += '</div>';
       html += '<span style="font-size:0.75rem;font-weight:800;color:'+sc+';text-transform:uppercase;letter-spacing:0.06em;background:'+sc+'18;padding:3px 10px;border-radius:12px;white-space:nowrap">'+r.status+'</span>';
       html += '</div>';
 
-      // Decision radio buttons (always shown so Cindy can change)
+      // Approve / Deny buttons
       html += '<div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">';
       ['approved','denied'].forEach(function(s){
         var checked = r.status === s ? 'checked' : '';
@@ -1951,23 +1950,25 @@ function renderRequests(){
       });
       html += '</div>';
 
-      // Follow-up checklist — only shown after approved
+      // Post-approve checklist: auto-items shown as done, only FranPOS is manual
       if (r.status === 'approved') {
         html += '<div style="background:#f7fdf8;border:1px solid #c8e6c9;border-radius:8px;padding:12px 14px">';
-        html += '<div style="font-size:0.72rem;font-weight:800;color:#2E7D32;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">✅ Follow-up Checklist</div>';
-        var checks = [
-          {key:'franpos_updated',  label:'FranPOS updated'},
-          {key:'timeoff_updated',  label:'Time off tracker updated'},
-          {key:'schedule_updated', label:'Employee schedule updated'},
-        ];
-        checks.forEach(function(c){
-          var chk = r[c.key] ? 'checked' : '';
-          var style = r[c.key]
-            ? 'color:#2E7D32;text-decoration:line-through;font-weight:600'
-            : 'color:#333';
-          html += '<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer;font-size:0.88rem;'+style+'">' +
-            '<input type="checkbox" '+chk+' onchange="toggleReqCheck(\''+rid+'\',\''+c.key+'\',this.checked)" style="width:16px;height:16px;accent-color:#2E7D32;cursor:pointer"> '+c.label+'</label>';
+        html += '<div style="font-size:0.72rem;font-weight:800;color:#2E7D32;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Follow-up</div>';
+        // Auto-completed items
+        [
+          {key:'timeoff_updated',  label:'Time off tracker'},
+          {key:'schedule_updated', label:'Schedule updated'},
+        ].forEach(function(c){
+          var done = !!r[c.key];
+          var col = done ? '#2E7D32' : '#E65100';
+          var icon = done ? '✅' : '⏳';
+          html += '<div style="font-size:0.85rem;color:'+col+';margin-bottom:5px;">'+icon+' '+c.label+' — '+(done?'<strong>done</strong>':'<em>auto-updating…</em>')+'</div>';
         });
+        // Manual: FranPOS
+        var fpDone = !!r.franpos_updated;
+        var fpStyle = fpDone ? 'color:#2E7D32;text-decoration:line-through;font-weight:600' : 'color:#333;font-weight:600';
+        html += '<label style="display:flex;align-items:center;gap:8px;margin-top:4px;cursor:pointer;font-size:0.88rem;'+fpStyle+'">' +
+          '<input type="checkbox" '+(fpDone?'checked':'')+' onchange="toggleReqCheck(\''+rid+'\',\'franpos_updated\',this.checked)" style="width:16px;height:16px;accent-color:#2E7D32;cursor:pointer"> FranPOS — manual step</label>';
         html += '</div>';
       }
 
@@ -1982,9 +1983,86 @@ function renderRequests(){
 }
 
 function reviewRequest(id, status){
+  // First patch the status
   sbPatch('schedule_change_requests','id=eq.'+id,{status:status,reviewed_at:new Date().toISOString()}).then(function(){
-    renderRequests();
+    if (status !== 'approved') { renderRequests(); return; }
+    // On approve: fetch the full request then auto-apply time_off + schedule_shifts
+    sbGet('/schedule_change_requests?id=eq.'+id).then(function(rows){
+      if (!Array.isArray(rows) || !rows.length) { renderRequests(); return; }
+      var r = rows[0];
+      autoApplyRequest(r).then(function(autoFlags){
+        return sbPatch('schedule_change_requests','id=eq.'+id, autoFlags);
+      }).then(function(){ renderRequests(); });
+    });
   });
+}
+
+function autoApplyRequest(r){
+  var jobs = [];
+  var flags = {timeoff_updated: false, schedule_updated: false};
+
+  // For time-off and schedule-change: insert a time_off row and remove shifts
+  if (r.request_type === 'time-off' || r.request_type === 'schedule-change') {
+    var endDate = r.end_date || r.start_date;
+    // Insert time_off record
+    var toRecord = {
+      store_key:     r.store,
+      employee_name: r.employee_name,
+      start_date:    r.start_date,
+      end_date:      endDate,
+      type:          r.request_type === 'time-off' ? 'PTO' : 'Schedule Change',
+      notes:         r.reason || null,
+      status:        'approved'
+    };
+    jobs.push(
+      fetch(SB+'/time_off',{method:'POST',headers:SHD,body:JSON.stringify(toRecord)})
+        .then(function(){ flags.timeoff_updated = true; })
+        .catch(function(e){ console.warn('time_off insert failed',e); })
+    );
+    // Find the employee id then delete shifts for the date range
+    jobs.push(
+      sbGet('/schedule_employees?name=eq.'+encodeURIComponent(r.employee_name)+'&store=in.('+r.store+',both)&select=id')
+        .then(function(emps){
+          if (!Array.isArray(emps) || !emps.length) return;
+          var empId = emps[0].id;
+          // Build list of dates in range
+          var dates = [];
+          var cur = new Date(r.start_date+'T12:00:00'), end = new Date(endDate+'T12:00:00');
+          while(cur <= end){ dates.push(cur.toISOString().slice(0,10)); cur.setDate(cur.getDate()+1); }
+          return Promise.all(dates.map(function(d){
+            return sbDelete('schedule_shifts','emp_id=eq.'+empId+'&shift_date=eq.'+d+'&store=eq.'+r.store);
+          }));
+        })
+        .then(function(){ flags.schedule_updated = true; })
+        .catch(function(e){ console.warn('shift delete failed',e); })
+    );
+  }
+
+  // For late-early: update the shift start/end time
+  if (r.request_type === 'late-early') {
+    jobs.push(
+      sbGet('/schedule_employees?name=eq.'+encodeURIComponent(r.employee_name)+'&store=in.('+r.store+',both)&select=id')
+        .then(function(emps){
+          if (!Array.isArray(emps) || !emps.length) return;
+          var empId = emps[0].id;
+          var patch = {};
+          if (r.start_time) patch.start_time = r.start_time;
+          if (r.end_time)   patch.end_time   = r.end_time;
+          if (!Object.keys(patch).length) return;
+          return sbPatch('schedule_shifts','emp_id=eq.'+empId+'&shift_date=eq.'+r.start_date+'&store=eq.'+r.store, patch);
+        })
+        .then(function(){ flags.schedule_updated = true; flags.timeoff_updated = true; })
+        .catch(function(e){ console.warn('shift update failed',e); })
+    );
+  }
+
+  // Shift swap: just mark both auto-items done (Cindy handles swap logistics in FranPOS)
+  if (r.request_type === 'shift-swap') {
+    flags.schedule_updated = true;
+    flags.timeoff_updated  = true;
+  }
+
+  return Promise.all(jobs).then(function(){ return flags; });
 }
 
 function toggleReqCheck(id, field, val){
