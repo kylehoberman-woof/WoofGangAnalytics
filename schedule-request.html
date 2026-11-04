@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Schedule Change Request — Woof Gang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:100vh}
+.header{background:linear-gradient(135deg,#C4276E 0%,#6B3520 100%);padding:36px 24px 32px;text-align:center;color:white}
+.header h1{font-size:1.6rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:4px}
+.header p{font-size:0.9rem;opacity:0.85}
+.wrap{max-width:520px;margin:0 auto;padding:28px 20px 60px}
+.card{background:white;border-radius:16px;padding:28px 24px;box-shadow:0 2px 12px rgba(0,0,0,0.07)}
+.fg{margin-bottom:18px}
+label{display:block;font-size:0.82rem;font-weight:700;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em}
+input,select,textarea{width:100%;padding:11px 14px;border:2px solid #e5e5e5;border-radius:10px;font-family:inherit;font-size:0.95rem;color:#1a1a2e;background:white;transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#C4276E;box-shadow:0 0 0 3px rgba(196,39,110,0.1)}
+textarea{resize:vertical;min-height:80px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:0}
+.type-btn{padding:12px 10px;border:2px solid #e5e5e5;border-radius:10px;background:white;font-family:inherit;font-size:0.85rem;font-weight:600;color:#555;cursor:pointer;text-align:center;transition:all 0.15s}
+.type-btn:hover{border-color:#C4276E;color:#C4276E}
+.type-btn.active{border-color:#C4276E;background:#FDF0F5;color:#C4276E}
+.type-icon{display:block;font-size:1.4rem;margin-bottom:4px}
+.section-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#aaa;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #f0f0f0}
+#swap-fields,#time-fields{display:none}
+.submit-btn{width:100%;padding:14px;border:none;border-radius:12px;background:#C4276E;color:white;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin-top:8px;transition:background 0.2s,transform 0.1s}
+.submit-btn:hover{background:#a31f5b;transform:translateY(-1px)}
+.submit-btn:disabled{background:#ccc;cursor:not-allowed;transform:none}
+.success{display:none;text-align:center;padding:32px 20px}
+.success-icon{font-size:3rem;margin-bottom:12px}
+.success h2{font-size:1.3rem;font-weight:800;color:#1a1a2e;margin-bottom:8px}
+.success p{font-size:0.9rem;color:#666;margin-bottom:20px}
+.success .new-btn{display:inline-block;padding:12px 28px;border-radius:10px;background:#C4276E;color:white;font-weight:700;cursor:pointer;border:none;font-family:inherit;font-size:0.9rem}
+.err{color:#C4276E;font-size:0.8rem;margin-top:4px;display:none}
+@media(max-width:420px){.row2{grid-template-columns:1fr}.type-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Schedule Request</h1>
+  <p>Woof Gang Bakery &amp; Grooming</p>
+</div>
+<div class="wrap">
+  <div class="card" id="form-card">
+    <div class="section-label">Your Info</div>
+
+    <div class="fg">
+      <label>Store</label>
+      <select id="store" onchange="loadEmployees()">
+        <option value="">Select your store…</option>
+        <option value="port-washington">Port Washington</option>
+        <option value="hicksville">Hicksville</option>
+        <option value="glen-cove">Glen Cove</option>
+      </select>
+      <div class="err" id="err-store">Please select your store.</div>
+    </div>
+
+    <div class="fg">
+      <label>Your Name</label>
+      <select id="employee" disabled>
+        <option value="">Select store first…</option>
+      </select>
+      <div class="err" id="err-employee">Please select your name.</div>
+    </div>
+
+    <div class="section-label" style="margin-top:8px">Request Type</div>
+    <div class="fg">
+      <div class="type-grid">
+        <button class="type-btn" data-type="time-off" onclick="selectType('time-off')">
+          <span class="type-icon">🌴</span>Time Off
+        </button>
+        <button class="type-btn" data-type="shift-swap" onclick="selectType('shift-swap')">
+          <span class="type-icon">🔄</span>Shift Swap
+        </button>
+        <button class="type-btn" data-type="schedule-change" onclick="selectType('schedule-change')">
+          <span class="type-icon">📅</span>Schedule Change
+        </button>
+        <button class="type-btn" data-type="late-early" onclick="selectType('late-early')">
+          <span class="type-icon">⏰</span>Late / Early
+        </button>
+      </div>
+      <div class="err" id="err-type">Please select a request type.</div>
+    </div>
+
+    <div class="section-label">Dates &amp; Times</div>
+
+    <div class="row2">
+      <div class="fg">
+        <label id="start-label">Date</label>
+        <input type="date" id="start-date">
+        <div class="err" id="err-date">Please enter a date.</div>
+      </div>
+      <div class="fg" id="end-date-wrap">
+        <label>End Date <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+        <input type="date" id="end-date">
+      </div>
+    </div>
+
+    <div class="row2" id="time-fields">
+      <div class="fg">
+        <label>Arrival Time</label>
+        <input type="time" id="start-time">
+      </div>
+      <div class="fg">
+        <label>Leave Time</label>
+        <input type="time" id="end-time">
+      </div>
+    </div>
+
+    <div class="fg" id="swap-fields">
+      <label>Swapping With</label>
+      <input type="text" id="swap-with" placeholder="Coworker's name">
+    </div>
+
+    <div class="section-label">Details</div>
+    <div class="fg">
+      <label>Reason <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <textarea id="reason" placeholder="Any details Cindy should know…"></textarea>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" onclick="submitRequest()">Submit Request</button>
+  </div>
+
+  <div class="card success" id="success-card">
+    <div class="success-icon">✅</div>
+    <h2>Request Submitted!</h2>
+    <p>Cindy will review your request and follow up with you directly.</p>
+    <button class="new-btn" onclick="resetForm()">Submit Another</button>
+  </div>
+</div>
+
+<script>
+var SB  = 'https://bqzinttbjeeaybywhhet.supabase.co/rest/v1';
+var SK  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJxemludHRiamVlYXlieXdoaGV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MDU3NDUsImV4cCI6MjA4OTI4MTc0NX0.B2MqUy_WEWOo8NVpGxHibuh-8xLklsy3Ux4DnXp9zmQ';
+var SHD = {'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=representation'};
+
+var selectedType = '';
+
+function selectType(t) {
+  selectedType = t;
+  document.querySelectorAll('.type-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.type === t); });
+  document.getElementById('time-fields').style.display  = (t === 'late-early')   ? 'grid' : 'none';
+  document.getElementById('swap-fields').style.display  = (t === 'shift-swap')   ? 'block' : 'none';
+  var endWrap = document.getElementById('end-date-wrap');
+  endWrap.style.display = (t === 'late-early') ? 'none' : 'block';
+  document.getElementById('start-label').textContent = (t === 'late-early') ? 'Date' : 'Start Date';
+  document.getElementById('err-type').style.display = 'none';
+}
+
+function loadEmployees() {
+  var store = document.getElementById('store').value;
+  var sel   = document.getElementById('employee');
+  sel.innerHTML = '<option value="">Loading…</option>';
+  sel.disabled  = true;
+  if (!store) { sel.innerHTML = '<option value="">Select store first…</option>'; return; }
+  fetch(SB+'/schedule_employees?store=in.('+store+',both)&is_active=eq.true&order=name', {headers:SHD})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      sel.innerHTML = '<option value="">Select your name…</option>';
+      rows.forEach(function(e){ sel.innerHTML += '<option value="'+e.name+'">'+e.name+'</option>'; });
+      sel.disabled = false;
+    }).catch(function(){ sel.innerHTML = '<option value="">Error loading — try again</option>'; });
+}
+
+function submitRequest() {
+  var ok = true;
+  function err(id, show) { document.getElementById(id).style.display = show ? 'block' : 'none'; if (show) ok = false; }
+
+  var store = document.getElementById('store').value;
+  var emp   = document.getElementById('employee').value;
+  var date  = document.getElementById('start-date').value;
+
+  err('err-store',    !store);
+  err('err-employee', !emp);
+  err('err-type',     !selectedType);
+  err('err-date',     !date);
+  if (!ok) return;
+
+  var body = {
+    store:         store,
+    employee_name: emp,
+    request_type:  selectedType,
+    start_date:    date,
+    end_date:      document.getElementById('end-date').value   || null,
+    start_time:    document.getElementById('start-time').value || null,
+    end_time:      document.getElementById('end-time').value   || null,
+    swap_with:     document.getElementById('swap-with').value  || null,
+    reason:        document.getElementById('reason').value     || null,
+    status:        'pending'
+  };
+
+  var btn = document.getElementById('submit-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Submitting…';
+
+  fetch(SB+'/schedule_change_requests', {method:'POST', headers:SHD, body:JSON.stringify(body)})
+    .then(function(r){
+      if (!r.ok) throw new Error(r.status);
+      document.getElementById('form-card').style.display    = 'none';
+      document.getElementById('success-card').style.display = 'block';
+    })
+    .catch(function(){
+      btn.disabled    = false;
+      btn.textContent = 'Submit Request';
+      alert('Something went wrong. Please try again.');
+    });
+}
+
+function resetForm() {
+  document.getElementById('form-card').style.display    = 'block';
+  document.getElementById('success-card').style.display = 'none';
+  document.getElementById('store').value     = '';
+  document.getElementById('employee').innerHTML = '<option value="">Select store first…</option>';
+  document.getElementById('employee').disabled  = true;
+  document.getElementById('start-date').value = '';
+  document.getElementById('end-date').value   = '';
+  document.getElementById('start-time').value = '';
+  document.getElementById('end-time').value   = '';
+  document.getElementById('swap-with').value  = '';
+  document.getElementById('reason').value     = '';
+  selectedType = '';
+  document.querySelectorAll('.type-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('time-fields').style.display = 'none';
+  document.getElementById('swap-fields').style.display = 'none';
+  document.getElementById('submit-btn').disabled    = false;
+  document.getElementById('submit-btn').textContent = 'Submit Request';
+}
+</script>
+</body>
+</html>
