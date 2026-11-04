@@ -280,6 +280,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
     <button class="tab-btn"        id="tab-roster"    onclick="setTab('roster')">Employees</button>
     <button class="tab-btn"        id="tab-coverage"  onclick="setTab('coverage')">Coverage</button>
     <button class="tab-btn"        id="tab-retail"    onclick="setTab('retail')">Retail Hours</button>
+    <button class="tab-btn"        id="tab-requests"  onclick="setTab('requests')">Requests <span id="requests-badge" style="display:none;background:#C4276E;color:white;border-radius:10px;padding:1px 7px;font-size:0.72rem;margin-left:4px">0</span></button>
   </div>
 </div>
 
@@ -366,6 +367,77 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:#FDF0F5;min-height:10
     </div>
     <div id="cov-summary" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap"></div>
     <div id="cov-grid"></div>
+  </div>
+</div>
+
+<!-- REQUESTS VIEW -->
+<div id="view-requests" class="hidden">
+  <div class="roster-main">
+    <div class="roster-header">
+      <h2>Schedule Change Requests</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <select id="req-filter" onchange="renderRequests()" style="padding:6px 12px;border:2px solid #e5e5e5;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:600">
+          <option value="pending">Pending</option>
+          <option value="all">All Requests</option>
+          <option value="approved">Approved</option>
+          <option value="denied">Denied</option>
+        </select>
+        <button class="btn-emp-action" onclick="renderRequests()" style="padding:6px 14px">Refresh</button>
+        <button class="btn-emp-action" onclick="openNewRequestModal()" style="padding:6px 14px;background:#C4276E;color:white;border-color:#C4276E">+ New Request</button>
+      </div>
+    </div>
+    <div id="req-list" style="margin-top:4px"></div>
+  </div>
+</div>
+
+<!-- NEW REQUEST MODAL -->
+<div class="overlay hidden" id="new-req-overlay">
+  <div class="modal" style="max-width:500px">
+    <h2>New Schedule Request</h2>
+    <div class="form-col">
+      <div class="row2">
+        <div class="fg">
+          <label>Store</label>
+          <select id="nr-store" onchange="loadNrEmployees()">
+            <option value="">Select store…</option>
+            <option value="port-washington">Port Washington</option>
+            <option value="hicksville">Hicksville</option>
+            <option value="glen-cove">Glen Cove</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Employee</label>
+          <select id="nr-employee" disabled><option value="">Select store first…</option></select>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Request Type</label>
+        <select id="nr-type" onchange="onNrTypeChange()">
+          <option value="">Select type…</option>
+          <option value="time-off">🌴 Time Off</option>
+          <option value="shift-swap">🔄 Shift Swap</option>
+          <option value="schedule-change">📅 Schedule Change</option>
+          <option value="late-early">⏰ Late / Early</option>
+        </select>
+      </div>
+      <div class="row2">
+        <div class="fg"><label id="nr-start-label">Start Date</label><input type="date" id="nr-start-date"></div>
+        <div class="fg" id="nr-end-wrap"><label>End Date <span style="font-weight:400">(opt)</span></label><input type="date" id="nr-end-date"></div>
+      </div>
+      <div class="row2 hidden" id="nr-time-row">
+        <div class="fg"><label>Arrival Time</label><input type="time" id="nr-start-time"></div>
+        <div class="fg"><label>Leave Time</label><input type="time" id="nr-end-time"></div>
+      </div>
+      <div class="fg hidden" id="nr-swap-row">
+        <label>Swapping With</label>
+        <input type="text" id="nr-swap-with" placeholder="Coworker's name">
+      </div>
+      <div class="fg"><label>Reason <span style="font-weight:400">(opt)</span></label><textarea id="nr-reason" style="min-height:70px" placeholder="Any details…"></textarea></div>
+    </div>
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="btn-m-cancel" onclick="closeNewRequestModal()">Cancel</button>
+      <button class="btn-m-save" id="nr-save" onclick="saveNewRequest()">Submit Request</button>
+    </div>
   </div>
 </div>
 
@@ -904,7 +976,7 @@ function setStore(key){
 }
 function setTab(tab){
   currentTab=tab;
-  ['week','month','roster','coverage','retail'].forEach(function(t){
+  ['week','month','roster','coverage','retail','requests'].forEach(function(t){
     document.getElementById('view-'+t).classList.toggle('hidden',t!==tab);
     document.getElementById('tab-'+t).classList.toggle('active',t===tab);
   });
@@ -916,6 +988,7 @@ function refreshCurrent(){
   if(currentTab==='roster')   renderRoster();
   if(currentTab==='coverage') renderCoverage();
   if(currentTab==='retail')   renderRetail();
+  if(currentTab==='requests') renderRequests();
 }
 
 /* ════════════════════════════════════════
@@ -1828,6 +1901,177 @@ function openEmpModal(id){
 function closeEmpModal(){document.getElementById('emp-overlay').classList.add('hidden');editEmpId=null;}
 
 /* ════════════════════════════════════════
+   SCHEDULE CHANGE REQUESTS
+════════════════════════════════════════ */
+var REQ_TYPE_LABEL = {'time-off':'🌴 Time Off','shift-swap':'🔄 Shift Swap','schedule-change':'📅 Schedule Change','late-early':'⏰ Late / Early'};
+var REQ_STATUS_COLOR = {'pending':'#E65100','approved':'#2E7D32','denied':'#C62828'};
+
+function renderRequests(){
+  var filter = document.getElementById('req-filter').value;
+  var el = document.getElementById('req-list');
+  el.innerHTML = '<div style="color:#aaa;padding:20px;text-align:center">Loading…</div>';
+  var qs = filter === 'all' ? '' : '&status=eq.'+filter;
+  var storeFilter = storeKey && storeKey !== 'all' ? '&store=eq.'+storeKey : '';
+  sbGet('/schedule_change_requests?order=submitted_at.desc'+qs+storeFilter).then(function(rows){
+    loadRequestsBadge();
+    if (!rows || rows.error) { el.innerHTML = '<div style="color:#C4276E;padding:20px;text-align:center">Could not load requests.</div>'; return; }
+    if (!rows.length) { el.innerHTML = '<div style="color:#aaa;padding:40px;text-align:center;background:white;border-radius:10px;font-size:0.88rem">No '+filter+' requests.</div>'; return; }
+    var html = '<div style="display:flex;flex-direction:column;gap:14px">';
+    rows.forEach(function(r){
+      var sc = REQ_STATUS_COLOR[r.status] || '#888';
+      var typeLabel = REQ_TYPE_LABEL[r.request_type] || r.request_type;
+      var dateStr = r.start_date + (r.end_date && r.end_date !== r.start_date ? ' → '+r.end_date : '');
+      var timeStr = r.start_time ? ' &nbsp;·&nbsp; '+r.start_time+(r.end_time?' – '+r.end_time:'') : '';
+      var submitted = r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      var storeLabel = r.store.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+      var rid = r.id;
+
+      html += '<div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);border-left:4px solid '+sc+'">';
+
+      // Top row: name + status badge
+      html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">';
+      html += '<div>';
+      html += '<div style="font-size:1rem;font-weight:700;color:#1a1a2e">'+r.employee_name+' &mdash; '+typeLabel+'</div>';
+      html += '<div style="font-size:0.82rem;color:#666;margin-top:3px">'+dateStr+timeStr+'</div>';
+      if (r.swap_with) html += '<div style="font-size:0.82rem;color:#555;margin-top:2px">Swap with: <strong>'+r.swap_with+'</strong></div>';
+      if (r.reason)    html += '<div style="font-size:0.82rem;color:#555;margin-top:4px;font-style:italic">"'+r.reason+'"</div>';
+      html += '<div style="font-size:0.72rem;color:#bbb;margin-top:6px">'+storeLabel+'  ·  '+submitted+'</div>';
+      html += '</div>';
+      html += '<span style="font-size:0.75rem;font-weight:800;color:'+sc+';text-transform:uppercase;letter-spacing:0.06em;background:'+sc+'18;padding:3px 10px;border-radius:12px;white-space:nowrap">'+r.status+'</span>';
+      html += '</div>';
+
+      // Decision radio buttons (always shown so Cindy can change)
+      html += '<div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">';
+      ['approved','denied'].forEach(function(s){
+        var checked = r.status === s ? 'checked' : '';
+        var col = s === 'approved' ? '#2E7D32' : '#C62828';
+        var lbl = s === 'approved' ? '✓ Approve' : '✕ Deny';
+        html += '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 14px;border:2px solid '+(r.status===s?col:'#e5e5e5')+';border-radius:8px;font-size:0.85rem;font-weight:700;color:'+(r.status===s?col:'#888')+';transition:all 0.15s">' +
+          '<input type="radio" name="status-'+rid+'" value="'+s+'" '+checked+' onchange="reviewRequest(\''+rid+'\',\''+s+'\')" style="accent-color:'+col+';width:15px;height:15px"> '+lbl+'</label>';
+      });
+      html += '</div>';
+
+      // Follow-up checklist — only shown after approved
+      if (r.status === 'approved') {
+        html += '<div style="background:#f7fdf8;border:1px solid #c8e6c9;border-radius:8px;padding:12px 14px">';
+        html += '<div style="font-size:0.72rem;font-weight:800;color:#2E7D32;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">✅ Follow-up Checklist</div>';
+        var checks = [
+          {key:'franpos_updated',  label:'FranPOS updated'},
+          {key:'timeoff_updated',  label:'Time off tracker updated'},
+          {key:'schedule_updated', label:'Employee schedule updated'},
+        ];
+        checks.forEach(function(c){
+          var chk = r[c.key] ? 'checked' : '';
+          var style = r[c.key]
+            ? 'color:#2E7D32;text-decoration:line-through;font-weight:600'
+            : 'color:#333';
+          html += '<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;cursor:pointer;font-size:0.88rem;'+style+'">' +
+            '<input type="checkbox" '+chk+' onchange="toggleReqCheck(\''+rid+'\',\''+c.key+'\',this.checked)" style="width:16px;height:16px;accent-color:#2E7D32;cursor:pointer"> '+c.label+'</label>';
+        });
+        html += '</div>';
+      }
+
+      html += '</div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  });
+}
+
+function reviewRequest(id, status){
+  sbPatch('schedule_change_requests','id=eq.'+id,{status:status,reviewed_at:new Date().toISOString()}).then(function(){
+    renderRequests();
+  });
+}
+
+function toggleReqCheck(id, field, val){
+  var body = {}; body[field] = val;
+  sbPatch('schedule_change_requests','id=eq.'+id,body).then(function(){
+    renderRequests();
+  });
+}
+
+function loadRequestsBadge(){
+  sbGet('/schedule_change_requests?status=eq.pending&select=id').then(function(rows){
+    var badge = document.getElementById('requests-badge');
+    if (!badge) return;
+    var n = Array.isArray(rows) ? rows.length : 0;
+    badge.textContent = n;
+    badge.style.display = n > 0 ? 'inline' : 'none';
+  });
+}
+
+function openNewRequestModal(){
+  // Pre-fill store if locked
+  if (storeKey && storeKey !== 'all') {
+    document.getElementById('nr-store').value = storeKey;
+    document.getElementById('nr-store').disabled = true;
+    loadNrEmployees();
+  }
+  document.getElementById('new-req-overlay').classList.remove('hidden');
+}
+function closeNewRequestModal(){
+  document.getElementById('new-req-overlay').classList.add('hidden');
+  ['nr-store','nr-employee','nr-type','nr-start-date','nr-end-date','nr-start-time','nr-end-time','nr-swap-with','nr-reason'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) { el.value=''; if(el.tagName==='SELECT' && id==='nr-employee'){el.innerHTML='<option value="">Select store first…</option>';el.disabled=true;} }
+  });
+  document.getElementById('nr-store').disabled = false;
+  document.getElementById('nr-time-row').classList.add('hidden');
+  document.getElementById('nr-swap-row').classList.add('hidden');
+  document.getElementById('nr-end-wrap').classList.remove('hidden');
+  document.getElementById('nr-start-label').textContent = 'Start Date';
+  document.getElementById('nr-save').disabled = false;
+  document.getElementById('nr-save').textContent = 'Submit Request';
+}
+function loadNrEmployees(){
+  var store = document.getElementById('nr-store').value;
+  var sel = document.getElementById('nr-employee');
+  sel.innerHTML = '<option value="">Loading…</option>'; sel.disabled = true;
+  if (!store) { sel.innerHTML = '<option value="">Select store first…</option>'; return; }
+  fetch(SB+'/schedule_employees?store=in.('+store+',both)&is_active=eq.true&order=name',{headers:SHD})
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      sel.innerHTML = '<option value="">Select employee…</option>';
+      rows.forEach(function(e){ sel.innerHTML += '<option>'+e.name+'</option>'; });
+      sel.disabled = false;
+    });
+}
+function onNrTypeChange(){
+  var t = document.getElementById('nr-type').value;
+  document.getElementById('nr-time-row').classList.toggle('hidden', t !== 'late-early');
+  document.getElementById('nr-swap-row').classList.toggle('hidden', t !== 'shift-swap');
+  document.getElementById('nr-end-wrap').classList.toggle('hidden', t === 'late-early');
+  document.getElementById('nr-start-label').textContent = t === 'late-early' ? 'Date' : 'Start Date';
+}
+function saveNewRequest(){
+  var store = document.getElementById('nr-store').value;
+  var emp   = document.getElementById('nr-employee').value;
+  var type  = document.getElementById('nr-type').value;
+  var date  = document.getElementById('nr-start-date').value;
+  if (!store || !emp || !type || !date) { alert('Please fill in store, employee, type, and date.'); return; }
+  var btn = document.getElementById('nr-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  var body = {
+    store: store, employee_name: emp, request_type: type,
+    start_date: date,
+    end_date:   document.getElementById('nr-end-date').value   || null,
+    start_time: document.getElementById('nr-start-time').value || null,
+    end_time:   document.getElementById('nr-end-time').value   || null,
+    swap_with:  document.getElementById('nr-swap-with').value  || null,
+    reason:     document.getElementById('nr-reason').value     || null,
+    status: 'pending'
+  };
+  sbPost('schedule_change_requests', body).then(function(){
+    closeNewRequestModal();
+    renderRequests();
+  }).catch(function(){
+    btn.disabled = false; btn.textContent = 'Submit Request';
+    alert('Error saving. Please try again.');
+  });
+}
+
+/* ════════════════════════════════════════
    SETUP CHECKLIST + STORE PORTAL PIN
 ════════════════════════════════════════ */
 function isMissingTableError(row){
@@ -2330,6 +2574,7 @@ startLoad();
 Promise.all([fetchEmployees(),fetchClosures()]).then(function(){
   endLoad();
   renderWeek();
+  loadRequestsBadge();
 });
 </script>
 </body>
