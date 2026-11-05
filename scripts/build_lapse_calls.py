@@ -962,8 +962,16 @@ function renderDayProgress(rows){
   }
   body.innerHTML = dates.map(function(d){
     var entries = byDate[d];
+    // Deduplicate by owner: one call = one owner, regardless of how many dogs they have
+    var seenOwners = {};
+    var uniqueEntries = entries.filter(function(e){
+      var ownerKey = CID_OWNER[e.pet_cid] || ('cid_' + e.pet_cid);
+      if(seenOwners[ownerKey]) return false;
+      seenOwners[ownerKey] = true;
+      return true;
+    });
     var counts = {booked:0, left_voicemail:0, will_book:0, not_interested:0};
-    entries.forEach(function(e){ if(counts[e.action] !== undefined) counts[e.action]++; });
+    uniqueEntries.forEach(function(e){ if(counts[e.action] !== undefined) counts[e.action]++; });
     var rowId = 'lc-day-' + d.replace(/[^0-9]/g, '');
     var detailHtml = entries.map(function(e){
       var label = ACTION_LABELS[e.action] || e.action;
@@ -984,7 +992,7 @@ function renderDayProgress(rows){
     }).join('');
     return '<tr class="lc-progress-row" id="' + rowId + '-toggle" onclick="toggleDayDetail(\\'' + rowId + '\\')">'
       + '<td class="lc-progress-date"><span class="lc-progress-caret">&#9656;</span>' + lcEsc(d) + '</td>'
-      + '<td class="n">' + entries.length + '</td>'
+      + '<td class="n">' + uniqueEntries.length + '</td>'
       + '<td class="n">' + counts.booked + '</td>'
       + '<td class="n">' + counts.left_voicemail + '</td>'
       + '<td class="n">' + counts.will_book + '</td>'
